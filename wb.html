@@ -5249,35 +5249,51 @@ const P2006T_SE_PERFORMANCE = {
                 if (weight > 0 && cg > 0) {
                     const pointX = cgToX(cg);
                     const pointY = weightToY(weight);
-                    
-                    // Plot point
+
+                    // For C-152, draw the forward-limit reference (marker + drop line + label)
+                    // at the forward CG limit for this weight. The solid dot below stays at the
+                    // ACTUAL CG so you can see the loaded point sits inside the envelope.
+                    if (aircraftType === 'C-152') {
+                        const fwdLimit = calculateCGForwardLimit(weight, aircraftType);
+                        if (fwdLimit) {
+                            const limitX = cgToX(fwdLimit);
+
+                            // Hollow marker on the envelope's forward edge at this weight
+                            ctx.strokeStyle = color;
+                            ctx.lineWidth = 2;
+                            ctx.beginPath();
+                            ctx.arc(limitX, pointY, 4, 0, 2 * Math.PI);
+                            ctx.stroke();
+
+                            // Dashed line dropping from the forward-limit point to the x-axis
+                            ctx.lineWidth = 1;
+                            ctx.setLineDash([3, 3]);
+                            ctx.beginPath();
+                            ctx.moveTo(limitX, pointY);
+                            ctx.lineTo(limitX, rect.height - margin + 10);
+                            ctx.stroke();
+                            ctx.setLineDash([]);
+
+                            // Label above the forward-limit value on the x-axis
+                            ctx.fillStyle = color;
+                            ctx.font = 'bold 10px Arial';
+                            ctx.textAlign = 'center';
+                            ctx.fillText(label, limitX, rect.height - margin + 25);
+                        }
+                    }
+
+                    // Plot the actual CG point
                     ctx.fillStyle = color;
                     ctx.beginPath();
                     ctx.arc(pointX, pointY, 6, 0, 2 * Math.PI);
                     ctx.fill();
-                    
+
                     // Add white border
                     ctx.strokeStyle = '#ffffff';
                     ctx.lineWidth = 2;
                     ctx.stroke();
-                    
-                    // For C-152, add dashed lines from CG points down to CG values
-                    if (aircraftType === 'C-152') {
-                        ctx.strokeStyle = color;
-                        ctx.lineWidth = 1;
-                        ctx.setLineDash([3, 3]); // Small dashed line pattern
-                        ctx.beginPath();
-                        ctx.moveTo(pointX, pointY + 6); // Start from bottom of point
-                        ctx.lineTo(pointX, rect.height - margin + 10); // End just above the x-axis
-                        ctx.stroke();
-                        ctx.setLineDash([]); // Reset to solid line
-                        
-                        // Add label directly above the CG number on x-axis
-                        ctx.fillStyle = color;
-                        ctx.font = 'bold 10px Arial';
-                        ctx.textAlign = 'center';
-                        ctx.fillText(label, pointX, rect.height - margin + 25); // Position above CG axis numbers
-                    } else {
+
+                    if (aircraftType !== 'C-152') {
                         // For other aircraft, keep label near the point
                         ctx.fillStyle = color;
                         ctx.font = '10px Arial';
