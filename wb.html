@@ -5876,22 +5876,18 @@ const P2006T_SE_PERFORMANCE = {
             const annual = document.getElementById('annual').value;
             const regist = document.getElementById('regist').value;
 
-            let timeToNextMx = '';
-            if (hr50) timeToNextMx += `50Hr/${hr50} `;
-            if (hr100) timeToNextMx += `100Hr/${hr100} `;
-            if (ad1) timeToNextMx += `AD/${ad1}`;
-            
-            let daysToNextMx = '';
-            if (ad2) daysToNextMx += `AD/${ad2} `;
-            if (annual) daysToNextMx += `Annual/${annual} `;
-            if (regist) daysToNextMx += `Regist/${regist}`;
-
-            if (timeToNextMx) {
-                document.querySelector('[data-field="timeToNextMx"]').textContent = timeToNextMx.trim();
-            }
-            if (daysToNextMx) {
-                document.querySelector('[data-field="daysToNextMx"]').textContent = daysToNextMx.trim();
-            }
+            // Mirror each maintenance input into its matching cell on the
+            // Maintenance Data panel (right side / chart page).
+            const setMxField = (field, value) => {
+                const el = document.querySelector(`[data-field="${field}"]`);
+                if (el) el.textContent = value || '';
+            };
+            setMxField('mx50Hr', hr50);
+            setMxField('mx100Hr', hr100);
+            setMxField('mxAD', ad1);
+            setMxField('mxAD2', ad2);
+            setMxField('mxAnnual', annual);
+            setMxField('mxRegistration', regist);
             
             // Update CG chart if it's currently visible
             const cgContainer = document.getElementById('cgChartContainer');
