@@ -195,20 +195,28 @@ const tree = {
 const character = {
   // overall
   height:1.78, build:1.0, muscle:1.0,
-  // head & neck
-  headHeight:1.0, headWidth:1.0, headDepth:1.0, jaw:1.0, neckLength:1.0, neckThickness:1.0,
+  // head shape
+  headHeight:1.0, headWidth:1.0, headDepth:1.0, foreheadHeight:1.0, cheekFull:1.0, cheekHeight:1.0,
+  jawWidth:1.0, chinLength:1.0, chinWidth:1.0, neckLength:1.0, neckThickness:1.0,
   // eyes
-  eyeSize:1.0, eyeSpacing:1.0, eyeHeight:1.0, eyeColor:'#5a3e2a',
-  // face
-  browThickness:1.0, browHeight:1.0, noseSize:1.0, mouthWidth:1.0, earSize:1.0,
-  // hair
-  hairStyle:'short', hairColor:'#34241a', hairLength:1.0,
-  // torso
-  torsoLength:1.0, torsoWidth:1.0, torsoDepth:1.0, shoulderWidth:1.0, hipWidth:1.0,
+  eyeSize:1.0, eyeSpacing:1.0, eyeHeight:1.0, eyeTilt:0.0, eyeDepth:0.0, pupilSize:1.0, eyeColor:'#5a3e2a',
+  // brows
+  browThickness:1.0, browHeight:1.0, browAngle:0.0,
+  // nose
+  noseLength:1.0, noseWidth:1.0, bridgeDepth:1.0, tipSize:1.0, noseUpturn:0.0,
+  // mouth
+  mouthWidth:1.0, lipUpper:1.0, lipLower:1.0,
+  // ears
+  earSize:1.0, earHeight:1.0, earAngle:0.0,
+  // hair + facial hair
+  hairStyle:'short', hairColor:'#34241a', hairLength:1.0, beardStyle:'none', beardColor:'#34241a',
+  // torso / body
+  torsoLength:1.0, shoulderWidth:1.0, chestWidth:1.0, chestDepth:1.0, pecSize:0.0,
+  waistWidth:1.0, waistDepth:1.0, bellySize:0.0, hipWidth:1.0, hipDepth:1.0, gluteSize:0.0,
   // arms
-  upperArmLength:1.0, forearmLength:1.0, armThickness:1.0, handSize:1.0,
+  upperArmLength:1.0, forearmLength:1.0, bicepSize:1.0, forearmThickness:1.0, handSize:1.0,
   // legs
-  thighLength:1.0, shinLength:1.0, thighThickness:1.0, calfThickness:1.0, footLength:1.0, footWidth:1.0,
+  thighLength:1.0, shinLength:1.0, thighThickness:1.0, calfSize:1.0, footLength:1.0, footWidth:1.0,
   // outfit
   skinColor:'#e0ac79', shirtColor:'#cc3b3b', pantsColor:'#33455c', shoeColor:'#222222',
   sleeves:'short', shorts:false
@@ -644,90 +652,142 @@ function capsuleDown(parent,len,r,mat,over=0){
   m.position.y=over/2 - len/2; m.castShadow=true; m.receiveShadow=true; parent.add(m);
   const next=new THREE.Group(); next.position.y=-len; parent.add(next); return next;
 }
-function jointBall(parent,r,mat){ const s=new THREE.Mesh(new THREE.SphereGeometry(r,10,8),mat); s.castShadow=true; parent.add(s); return s; }
+function jointBall(parent,r,mat){ const s=new THREE.Mesh(new THREE.SphereGeometry(r,12,10),mat); s.castShadow=true; s.receiveShadow=true; parent.add(s); return s; }
+// lofted tube through a stack of elliptical rings {y,rx,rz} -> real silhouette control
+function loftTube(rings, mat, radial=16){
+  const pos=[], idx=[], n=rings.length, stride=radial+1;
+  for(let i=0;i<n;i++){ const r=rings[i]; for(let s=0;s<=radial;s++){ const a=s/radial*Math.PI*2; pos.push(Math.cos(a)*r.rx, r.y, Math.sin(a)*r.rz); } }
+  for(let i=0;i<n-1;i++) for(let s=0;s<radial;s++){ const a=i*stride+s,b=a+1,c=a+stride,d=c+1; idx.push(a,c,b, b,c,d); }
+  const cb=pos.length/3; pos.push(0,rings[0].y,0); for(let s=0;s<radial;s++) idx.push(cb, s, s+1);
+  const ct=pos.length/3; pos.push(0,rings[n-1].y,0); const base=(n-1)*stride; for(let s=0;s<radial;s++) idx.push(ct, base+s+1, base+s);
+  const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3)); g.setIndex(idx); g.computeVertexNormals();
+  const m=new THREE.Mesh(g,mat); m.castShadow=true; m.receiveShadow=true; return m;
+}
+// tapered, muscled limb segment (top/mid/bulge/bottom radii) hanging from a pivot; returns end pivot
+function limbDown(parent, len, rTop, rMid, rBot, mat, over=0){
+  const m=loftTube([{y:over,rx:rTop,rz:rTop},{y:(over-len)*0.42,rx:rMid,rz:rMid},{y:-len,rx:rBot,rz:rBot}], mat, 12);
+  parent.add(m);
+  const next=new THREE.Group(); next.position.y=-len; parent.add(next); return next;
+}
+// quick scaled/rotated sphere "part" for face features
+function part(parent, mat, sx,sy,sz, px,py,pz, rx=0,ry=0,rz=0){
+  const m=new THREE.Mesh(new THREE.SphereGeometry(0.5,14,12), mat);
+  m.scale.set(sx,sy,sz); m.position.set(px,py,pz); m.rotation.set(rx,ry,rz); m.castShadow=true; parent.add(m); return m;
+}
+function addBeard(parent,cfg,hw,hh,hd,cy,fz){
+  const s=cfg.beardStyle; if(s==='none') return; const mat=matStd(cfg.beardColor,0.9);
+  const jawY=cy-hh*0.26, mthY=cy-hh*0.16;
+  if(s==='stubble'||s==='full') part(parent,mat, hw*1.55,hh*0.78,hd*1.4, 0,jawY,hd*0.12);
+  if(s==='mustache'||s==='full') part(parent,mat, hw*0.66,hh*0.12,hd*0.28, 0,mthY+hh*0.05,fz*1.02);
+  if(s==='goatee'||s==='chin'||s==='full') part(parent,mat, hw*0.5,hh*0.34,hd*0.5, 0,jawY-hh*0.04,fz*0.75);
+}
 function buildCharacter(cfg){
   const grp=new THREE.Group(); const B=cfg.build, M=cfg.muscle;
   const skin=matStd(cfg.skinColor,0.6), shirt=matStd(cfg.shirtColor,0.85),
-        pants=matStd(cfg.pantsColor,0.85), shoe=matStd(cfg.shoeColor,0.5),
-        hair=matStd(cfg.hairColor,0.8);
+        pants=matStd(cfg.pantsColor,0.85), shoe=matStd(cfg.shoeColor,0.5), hair=matStd(cfg.hairColor,0.8);
   const browMat=matStd(new THREE.Color(cfg.hairColor).multiplyScalar(0.9),0.8);
-  const sclera=matStd('#f3f3f3',0.35), iris=matStd(cfg.eyeColor,0.3), pupilM=matStd('#0d0d0d',0.3), mouthMat=matStd('#7d3b3b',0.6);
-  const sleeveMat = cfg.sleeves==='long' ? shirt : skin;   // forearm covered or bare
-  const shinMat   = cfg.shorts ? skin : pants;             // shorts -> bare shins
-  // neutral adult proportions; sliders scale from here
+  const sclera=matStd('#f3f3f3',0.35), iris=matStd(cfg.eyeColor,0.3), pupilM=matStd('#0d0d0d',0.3), lipMat=matStd('#9a5a55',0.55);
+  const sleeveMat = cfg.sleeves==='long' ? shirt : skin;
+  const shinMat   = cfg.shorts ? skin : pants;
+  // legs (tapered/muscled)
   const thighLen=0.44*cfg.thighLength, shinLen=0.42*cfg.shinLength;
-  const thighR=0.088*cfg.thighThickness*B*M, calfR=0.07*cfg.calfThickness*B*M;
+  const thighTopR=0.085*cfg.thighThickness*B, thighMidR=0.095*cfg.thighThickness*B*M, kneeR=0.064*cfg.thighThickness*B;
+  const calfTopR=0.07*cfg.calfSize*B, calfMidR=0.084*cfg.calfSize*B*M, ankleR=0.046*B;
+  // arms
   const upperArm=0.30*cfg.upperArmLength, forearm=0.27*cfg.forearmLength;
-  const upperR=0.058*cfg.armThickness*B*M, foreR=0.05*cfg.armThickness*B*M;
-  const torsoLen=0.56*cfg.torsoLength, chestY=0.06;
-  const torsoR=Math.max(0.17*cfg.torsoWidth*B,0.12);
-  const shoulderX=0.19*cfg.shoulderWidth*B, hipX=0.11*cfg.hipWidth*B;
-  const footH=0.09, footLen=0.27*cfg.footLength*B, footWid=calfR*2.0*cfg.footWidth;
+  const shoulderR=0.058*cfg.bicepSize*B, bicepR=0.062*cfg.bicepSize*B*M, elbowR=0.046*cfg.bicepSize*B;
+  const foreTopR=0.05*cfg.forearmThickness*B*M, wristR=0.038*cfg.forearmThickness*B;
+  // torso
+  const torsoLen=0.56*cfg.torsoLength, chestY=0.02;
+  const shoulderW=0.20*cfg.shoulderWidth*B, chestW=0.175*cfg.chestWidth*B, chestD=0.135*cfg.chestDepth*B;
+  const waistW=0.145*cfg.waistWidth*B, waistD=0.115*cfg.waistDepth*B, hipW=0.16*cfg.hipWidth*B, hipD=0.13*cfg.hipDepth*B;
+  const belly=0.06*cfg.bellySize;
+  // head
   const headH=0.26*cfg.headHeight, headW=0.22*cfg.headWidth*B, headD=0.22*cfg.headDepth;
-  const neckR=headW*0.4*cfg.neckThickness, neckTopY=torsoLen+0.09*cfg.neckLength;
+  const neckR=Math.max(headW*0.42*cfg.neckThickness,0.05), neckTopY=torsoLen+0.10*cfg.neckLength;
+  const footH=0.09, footLen=0.27*cfg.footLength*B, footWid=calfMidR*1.9*cfg.footWidth;
   const hipY=footH+thighLen+shinLen;
 
   const root=new THREE.Group(); root.position.y=hipY; grp.add(root);
-  const pelvis=new THREE.Mesh(new THREE.CapsuleGeometry(Math.max(thighR*1.25,0.05), Math.max(hipX*1.2,0.04),6,14), pants);
-  pelvis.rotation.z=Math.PI/2; pelvis.castShadow=true; root.add(pelvis);
+  const chest=new THREE.Group(); chest.position.y=chestY; root.add(chest);
+
+  // body silhouette: pelvis/hips (pants) + torso (shirt) lofted tubes that overlap at the waist
+  chest.add(loftTube([
+    {y:-0.10, rx:hipW*0.6, rz:hipD*0.6}, {y:-0.03, rx:hipW, rz:hipD}, {y:torsoLen*0.30, rx:waistW*1.03, rz:waistD*1.03}
+  ], pants));
+  chest.add(loftTube([
+    {y:torsoLen*0.26, rx:waistW, rz:waistD}, {y:torsoLen*0.45, rx:waistW+belly*0.3, rz:waistD+belly},
+    {y:torsoLen*0.70, rx:chestW, rz:chestD}, {y:torsoLen*0.90, rx:shoulderW, rz:chestD*0.92},
+    {y:torsoLen, rx:neckR*1.4, rz:neckR*1.4}
+  ], shirt));
+  if(cfg.pecSize>0.05){ const pr=chestD*0.55*cfg.pecSize; part(chest,shirt, chestW*0.5,pr,pr, -chestW*0.42,torsoLen*0.68,chestD*0.5); part(chest,shirt, chestW*0.5,pr,pr, chestW*0.42,torsoLen*0.68,chestD*0.5); }
+  if(cfg.gluteSize>0.05){ const gr=hipD*0.62*cfg.gluteSize; part(chest,pants, hipW*0.55,gr,gr, -hipW*0.4,-0.02,-hipD*0.5); part(chest,pants, hipW*0.55,gr,gr, hipW*0.4,-0.02,-hipD*0.5); }
 
   function leg(side){
-    const hip=new THREE.Group(); hip.position.set(side*hipX,-0.02,0); root.add(hip);
-    jointBall(hip, thighR, pants);
-    const knee=capsuleDown(hip, thighLen, thighR, pants, thighR);
-    jointBall(knee, Math.max(thighR,calfR), shinMat);
-    const ankle=capsuleDown(knee, shinLen, calfR, shinMat, Math.max(thighR,calfR));
-    jointBall(ankle, calfR*0.85, shoe);
+    const hip=new THREE.Group(); hip.position.set(side*hipW*0.5,-0.05,0); root.add(hip);
+    jointBall(hip, thighTopR*1.05, pants);
+    const knee=limbDown(hip, thighLen, thighTopR, thighMidR, kneeR, pants, thighTopR);
+    jointBall(knee, kneeR*1.1, shinMat);
+    const ankle=limbDown(knee, shinLen, calfTopR, calfMidR, ankleR, shinMat, kneeR);
+    jointBall(ankle, ankleR, shoe);
     const foot=new THREE.Mesh(new THREE.BoxGeometry(footWid, footH, footLen), shoe);
     foot.position.set(0,-footH/2, footLen*0.22); foot.castShadow=true; ankle.add(foot);
     return {hip,knee,ankle};
   }
   const L=leg(-1), R=leg(1);
 
-  const chest=new THREE.Group(); chest.position.y=chestY; root.add(chest);
-  const torso=new THREE.Mesh(new THREE.CapsuleGeometry(torsoR, Math.max(torsoLen-2*torsoR,0.05),8,16), shirt);
-  torso.position.y=torsoLen/2; torso.scale.set(1.05,1,0.8*cfg.torsoDepth); torso.castShadow=true; chest.add(torso);
-
   function arm(side){
-    const sh=new THREE.Group(); sh.position.set(side*shoulderX, torsoLen-0.10, 0); chest.add(sh);
-    jointBall(sh, upperR*1.5, shirt);
-    const elbow=capsuleDown(sh, upperArm, upperR, shirt, upperR);
-    jointBall(elbow, Math.max(upperR,foreR), sleeveMat);
-    const wrist=capsuleDown(elbow, forearm, foreR, sleeveMat, Math.max(upperR,foreR));
-    const hand=new THREE.Mesh(new THREE.SphereGeometry(0.5,10,9), skin);
-    hand.scale.setScalar(foreR*1.5*cfg.handSize); hand.scale.y*=1.3; hand.scale.z*=0.8;
-    hand.position.y=-foreR*0.6; hand.castShadow=true; wrist.add(hand);
+    const sh=new THREE.Group(); sh.position.set(side*shoulderW*0.96, torsoLen*0.88, 0); chest.add(sh);
+    jointBall(sh, shoulderR*1.5, shirt);
+    const elbow=limbDown(sh, upperArm, shoulderR, bicepR, elbowR, shirt, shoulderR);
+    jointBall(elbow, elbowR*1.1, sleeveMat);
+    const wrist=limbDown(elbow, forearm, elbowR, foreTopR, wristR, sleeveMat, elbowR);
+    const hand=new THREE.Mesh(new THREE.SphereGeometry(0.5,12,10), skin);
+    hand.scale.set(wristR*1.6*cfg.handSize, wristR*2.1*cfg.handSize, wristR*1.0*cfg.handSize);
+    hand.position.y=-wristR*1.2; hand.castShadow=true; wrist.add(hand);
     return {sh,elbow};
   }
   const AL=arm(-1), AR=arm(1);
 
   const neckBottom=torsoLen-0.05, neckMid=(neckBottom+neckTopY)/2, neckH=Math.max(neckTopY-neckBottom,0.03);
-  const neck=new THREE.Mesh(new THREE.CapsuleGeometry(neckR, neckH, 6, 12), skin);
-  neck.position.y=neckMid; chest.add(neck);
+  const neck=new THREE.Mesh(new THREE.CapsuleGeometry(neckR, neckH, 6, 12), skin); neck.position.y=neckMid; chest.add(neck);
 
   const headP=new THREE.Group(); headP.position.y=neckTopY; chest.add(headP);
-  const headCY=headH*0.5, fz=headD*0.46;
-  const jawM=new THREE.Mesh(new THREE.SphereGeometry(0.5,16,12), skin);
-  jawM.scale.set(headW*0.85*cfg.jaw, headH*0.6, headD*0.9); jawM.position.y=headCY-headH*0.18; jawM.castShadow=true; headP.add(jawM);
-  const head=new THREE.Mesh(new THREE.SphereGeometry(0.5,22,18), skin);
-  head.scale.set(headW,headH,headD); head.position.y=headCY; head.castShadow=true; headP.add(head);
-  // eyes (sclera + iris + pupil) and brows
-  const eyeR=0.03*cfg.eyeSize, eyeY=headCY+headH*0.05*cfg.eyeHeight, eyeX=headW*0.34*cfg.eyeSpacing;
+  const cy=headH*0.52, fz=headD*0.46;
+  const head=new THREE.Mesh(new THREE.SphereGeometry(0.5,24,20), skin);
+  head.scale.set(headW, headH*cfg.foreheadHeight, headD); head.position.y=cy; head.castShadow=true; headP.add(head);
+  // jaw + chin
+  part(headP, skin, headW*0.82*cfg.jawWidth, headH*0.5*cfg.chinLength, headD*0.85, 0, cy-headH*0.24, fz*0.30);
+  part(headP, skin, headW*0.4*cfg.chinWidth, headH*0.28*cfg.chinLength, headD*0.5, 0, cy-headH*0.34*cfg.chinLength, fz*0.55);
+  // cheeks
+  const chY=cy-headH*0.02+headH*0.08*(cfg.cheekHeight-1);
+  part(headP, skin, headW*0.42*cfg.cheekFull, headH*0.34, headD*0.5, -headW*0.46, chY, fz*0.55);
+  part(headP, skin, headW*0.42*cfg.cheekFull, headH*0.34, headD*0.5,  headW*0.46, chY, fz*0.55);
+  // brow ridge
+  part(headP, skin, headW*1.05, headH*0.12, headD*0.4, 0, cy+headH*0.16, fz*0.7);
+  // eyes
+  const eyeR=0.03*cfg.eyeSize, eyeY=cy+headH*0.04*cfg.eyeHeight, eyeX=headW*0.33*cfg.eyeSpacing, eyeZ=fz+eyeR*0.2-0.02*cfg.eyeDepth, tilt=cfg.eyeTilt*0.5;
   function eye(s){
-    const w=new THREE.Mesh(new THREE.SphereGeometry(eyeR,10,10),sclera); w.scale.set(1.2,1,0.7); w.position.set(s*eyeX,eyeY,fz); headP.add(w);
-    const ir=new THREE.Mesh(new THREE.SphereGeometry(eyeR*0.55,10,10),iris); ir.position.set(s*eyeX,eyeY,fz+eyeR*0.5); headP.add(ir);
-    const pu=new THREE.Mesh(new THREE.SphereGeometry(eyeR*0.28,8,8),pupilM); pu.position.set(s*eyeX,eyeY,fz+eyeR*0.7); headP.add(pu);
-    const br=new THREE.Mesh(new THREE.BoxGeometry(eyeR*2.0,eyeR*0.5*cfg.browThickness,eyeR*0.6),browMat);
-    br.position.set(s*eyeX, eyeY+eyeR*1.4*cfg.browHeight, fz+eyeR*0.2); headP.add(br);
+    part(headP, sclera, eyeR*1.2,eyeR,eyeR*0.7, s*eyeX,eyeY,eyeZ, 0,0,-s*tilt);
+    part(headP, iris, eyeR*0.55,eyeR*0.55,eyeR*0.55, s*eyeX,eyeY,eyeZ+eyeR*0.5);
+    part(headP, pupilM, eyeR*0.3*cfg.pupilSize,eyeR*0.3*cfg.pupilSize,eyeR*0.3, s*eyeX,eyeY,eyeZ+eyeR*0.7);
+    const br=new THREE.Mesh(new THREE.BoxGeometry(eyeR*2.2, eyeR*0.5*cfg.browThickness, eyeR*0.6), browMat);
+    br.position.set(s*eyeX, eyeY+eyeR*1.5*cfg.browHeight, fz+eyeR*0.2); br.rotation.z=-s*cfg.browAngle*0.4; br.castShadow=true; headP.add(br);
   }
   eye(-1); eye(1);
-  const nose=new THREE.Mesh(new THREE.SphereGeometry(0.5,8,8),skin);
-  nose.scale.set(0.035*cfg.noseSize,0.035*cfg.noseSize,0.05*cfg.noseSize); nose.position.set(0,eyeY-headH*0.13,fz+0.01); headP.add(nose);
-  const mouth=new THREE.Mesh(new THREE.BoxGeometry(headW*0.4*cfg.mouthWidth,headH*0.04,0.02),mouthMat);
-  mouth.position.set(0,eyeY-headH*0.28,fz); headP.add(mouth);
-  function ear(s){ const e=new THREE.Mesh(new THREE.SphereGeometry(0.5,8,8),skin); e.scale.set(0.02,0.045*cfg.earSize,0.03*cfg.earSize); e.position.set(s*headW*0.52,eyeY,0); headP.add(e); }
-  ear(-1); ear(1);
-  addHair(headP,cfg,hair,headW,headH,headD);
+  // nose: bridge + tip
+  const nb=new THREE.Mesh(new THREE.BoxGeometry(headW*0.14*cfg.noseWidth, headH*0.30*cfg.noseLength, headD*0.16*cfg.bridgeDepth), skin);
+  nb.position.set(0, eyeY-headH*0.06, fz+headD*0.04); nb.castShadow=true; headP.add(nb);
+  part(headP, skin, headW*0.16*cfg.noseWidth, headH*0.1*cfg.tipSize, headD*0.16*cfg.tipSize, 0, eyeY-headH*0.16+headH*0.04*cfg.noseUpturn, fz+headD*0.08);
+  // mouth (upper + lower lip)
+  const mw=headW*0.42*cfg.mouthWidth, my=cy-headH*0.30;
+  part(headP, lipMat, mw, headH*0.035*cfg.lipUpper, 0.03, 0, my+headH*0.015, fz);
+  part(headP, lipMat, mw, headH*0.045*cfg.lipLower, 0.03, 0, my-headH*0.02, fz);
+  // ears
+  part(headP, skin, 0.025, 0.05*cfg.earSize, 0.03*cfg.earSize, -headW*0.5, eyeY+headH*0.02*(cfg.earHeight-1), -headD*0.02, 0,0, -cfg.earAngle*0.5);
+  part(headP, skin, 0.025, 0.05*cfg.earSize, 0.03*cfg.earSize,  headW*0.5, eyeY+headH*0.02*(cfg.earHeight-1), -headD*0.02, 0,0,  cfg.earAngle*0.5);
+  addBeard(headP, cfg, headW, headH, headD, cy, fz);
+  addHair(headP, cfg, hair, headW, headH*cfg.foreheadHeight, headD);
 
   const topY=hipY+chestY+neckTopY+headH;
   charScale=cfg.height/topY; grp.scale.setScalar(charScale);
@@ -873,49 +933,79 @@ function buildWorldPanel(){
 function buildCharacterPanel(){
   const p=$('#p-character'); p.innerHTML='';
   const R=rebuildCharacter;
-  p.appendChild(el('div','note','Deep character creator — everything updates live. Limbs articulate with bending knees & elbows.'));
+  p.appendChild(el('div','note','Deep creator — body from adjustable profile rings, muscled articulated limbs, multi-part face. Live.'));
   let g=group(p,'Overall');
   addRange(g,'Height (m)',character,'height',1.2,2.2,0.01,R);
   addRange(g,'Build (overall)',character,'build',0.6,1.6,0.02,R);
-  addRange(g,'Muscle (limbs)',character,'muscle',0.6,1.7,0.02,R);
-  g=group(p,'Head & neck');
+  addRange(g,'Muscle (limbs)',character,'muscle',0.6,1.8,0.02,R);
+  g=group(p,'Head shape');
   addRange(g,'Head height',character,'headHeight',0.6,1.6,0.02,R);
   addRange(g,'Head width',character,'headWidth',0.6,1.6,0.02,R);
   addRange(g,'Head depth',character,'headDepth',0.6,1.6,0.02,R);
-  addRange(g,'Jaw width',character,'jaw',0.5,1.6,0.02,R);
-  addRange(g,'Neck length',character,'neckLength',0.4,2.0,0.02,R);
-  addRange(g,'Neck thickness',character,'neckThickness',0.5,1.6,0.02,R);
+  addRange(g,'Forehead',character,'foreheadHeight',0.7,1.4,0.02,R);
+  addRange(g,'Cheek fullness',character,'cheekFull',0.5,1.8,0.02,R);
+  addRange(g,'Cheek height',character,'cheekHeight',0.4,1.8,0.02,R);
+  addRange(g,'Jaw width',character,'jawWidth',0.5,1.6,0.02,R);
+  addRange(g,'Chin length',character,'chinLength',0.5,1.7,0.02,R);
+  addRange(g,'Chin width',character,'chinWidth',0.4,1.7,0.02,R);
+  g=group(p,'Neck');
+  addRange(g,'Length',character,'neckLength',0.3,2.2,0.02,R);
+  addRange(g,'Thickness',character,'neckThickness',0.5,1.7,0.02,R);
   g=group(p,'Eyes');
-  addRange(g,'Eye size',character,'eyeSize',0.5,2.0,0.02,R);
-  addRange(g,'Eye spacing',character,'eyeSpacing',0.6,1.5,0.02,R);
-  addRange(g,'Eye height',character,'eyeHeight',-2.0,3.0,0.05,R);
+  addRange(g,'Size',character,'eyeSize',0.4,2.2,0.02,R);
+  addRange(g,'Spacing',character,'eyeSpacing',0.5,1.6,0.02,R);
+  addRange(g,'Height',character,'eyeHeight',-3,4,0.1,R);
+  addRange(g,'Tilt',character,'eyeTilt',-1,1,0.05,R);
+  addRange(g,'Deep-set',character,'eyeDepth',-1,2,0.05,R);
+  addRange(g,'Pupil size',character,'pupilSize',0.4,2,0.05,R);
   addColor(g,'Iris color',character,'eyeColor',R);
-  g=group(p,'Face');
-  addRange(g,'Brow thickness',character,'browThickness',0.3,2.5,0.05,R);
-  addRange(g,'Brow height',character,'browHeight',0.2,2.5,0.05,R);
-  addRange(g,'Nose size',character,'noseSize',0.4,2.2,0.05,R);
-  addRange(g,'Mouth width',character,'mouthWidth',0.5,1.8,0.05,R);
-  addRange(g,'Ear size',character,'earSize',0.4,2.0,0.05,R);
-  g=group(p,'Hair');
-  addSelect(g,'Style',character,'hairStyle',['none','short','long','ponytail','spiky','mohawk','bun','cap','hat'],R);
-  addRange(g,'Length',character,'hairLength',0.4,2.2,0.05,R);
-  addColor(g,'Color',character,'hairColor',R);
-  g=group(p,'Torso');
+  g=group(p,'Brows');
+  addRange(g,'Thickness',character,'browThickness',0.2,3,0.05,R);
+  addRange(g,'Height',character,'browHeight',0,3,0.05,R);
+  addRange(g,'Angle',character,'browAngle',-1.5,1.5,0.05,R);
+  g=group(p,'Nose');
+  addRange(g,'Length',character,'noseLength',0.4,2,0.05,R);
+  addRange(g,'Width',character,'noseWidth',0.4,2,0.05,R);
+  addRange(g,'Bridge depth',character,'bridgeDepth',0.4,2,0.05,R);
+  addRange(g,'Tip size',character,'tipSize',0.4,2.2,0.05,R);
+  addRange(g,'Upturn',character,'noseUpturn',-1.5,2,0.05,R);
+  g=group(p,'Mouth');
+  addRange(g,'Width',character,'mouthWidth',0.4,1.8,0.05,R);
+  addRange(g,'Upper lip',character,'lipUpper',0.3,2.5,0.05,R);
+  addRange(g,'Lower lip',character,'lipLower',0.3,2.5,0.05,R);
+  g=group(p,'Ears');
+  addRange(g,'Size',character,'earSize',0.3,2.2,0.05,R);
+  addRange(g,'Height',character,'earHeight',0,2,0.05,R);
+  addRange(g,'Angle',character,'earAngle',-1.5,1.5,0.05,R);
+  g=group(p,'Hair & facial hair');
+  addSelect(g,'Hair',character,'hairStyle',['none','short','long','ponytail','spiky','mohawk','bun','cap','hat'],R);
+  addRange(g,'Hair length',character,'hairLength',0.4,2.2,0.05,R);
+  addColor(g,'Hair color',character,'hairColor',R);
+  addSelect(g,'Beard',character,'beardStyle',['none','stubble','mustache','goatee','chin','full'],R);
+  addColor(g,'Beard color',character,'beardColor',R);
+  g=group(p,'Torso & body');
   addRange(g,'Torso length',character,'torsoLength',0.6,1.6,0.02,R);
-  addRange(g,'Torso width',character,'torsoWidth',0.6,1.6,0.02,R);
-  addRange(g,'Torso depth',character,'torsoDepth',0.6,1.6,0.02,R);
-  addRange(g,'Shoulders',character,'shoulderWidth',0.6,1.7,0.02,R);
-  addRange(g,'Hips',character,'hipWidth',0.6,1.7,0.02,R);
+  addRange(g,'Shoulders',character,'shoulderWidth',0.5,1.8,0.02,R);
+  addRange(g,'Chest width',character,'chestWidth',0.5,1.8,0.02,R);
+  addRange(g,'Chest depth',character,'chestDepth',0.5,1.8,0.02,R);
+  addRange(g,'Pecs',character,'pecSize',0,1.5,0.05,R);
+  addRange(g,'Waist width',character,'waistWidth',0.4,1.8,0.02,R);
+  addRange(g,'Waist depth',character,'waistDepth',0.4,1.8,0.02,R);
+  addRange(g,'Belly',character,'bellySize',0,2,0.05,R);
+  addRange(g,'Hip width',character,'hipWidth',0.5,1.8,0.02,R);
+  addRange(g,'Hip depth',character,'hipDepth',0.5,1.8,0.02,R);
+  addRange(g,'Glutes',character,'gluteSize',0,1.5,0.05,R);
   g=group(p,'Arms');
   addRange(g,'Upper arm',character,'upperArmLength',0.6,1.7,0.02,R);
   addRange(g,'Forearm',character,'forearmLength',0.6,1.7,0.02,R);
-  addRange(g,'Thickness',character,'armThickness',0.5,1.8,0.02,R);
+  addRange(g,'Bicep',character,'bicepSize',0.5,1.9,0.02,R);
+  addRange(g,'Forearm thick',character,'forearmThickness',0.5,1.9,0.02,R);
   addRange(g,'Hand size',character,'handSize',0.5,1.8,0.05,R);
   g=group(p,'Legs');
   addRange(g,'Thigh length',character,'thighLength',0.6,1.7,0.02,R);
   addRange(g,'Shin length',character,'shinLength',0.6,1.7,0.02,R);
-  addRange(g,'Thigh thickness',character,'thighThickness',0.5,1.8,0.02,R);
-  addRange(g,'Calf thickness',character,'calfThickness',0.5,1.8,0.02,R);
+  addRange(g,'Thigh thick',character,'thighThickness',0.5,1.9,0.02,R);
+  addRange(g,'Calf',character,'calfSize',0.5,1.9,0.02,R);
   addRange(g,'Foot length',character,'footLength',0.6,1.6,0.02,R);
   addRange(g,'Foot width',character,'footWidth',0.6,1.6,0.02,R);
   g=group(p,'Outfit');
