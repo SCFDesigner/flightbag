@@ -183,13 +183,25 @@ const tree = {
   leafShape:'round', leafSize:0.6, leafCount:5, foliageColor:'#3f7d2e', foliageColor2:'#2f5f22'
 };
 const character = {
-  height:1.62, build:1.0,
-  headHeight:1.0, headWidth:1.0,
-  torsoLength:1.0, shoulderWidth:1.0, hipWidth:1.0,
-  upperArmLength:1.0, forearmLength:1.0, armThickness:1.0,
-  thighLength:1.0, shinLength:1.0, legThickness:1.0,
-  skinColor:'#e0ac79', hairStyle:'short', hairColor:'#34241a',
-  shirtColor:'#cc3b3b', pantsColor:'#33455c', shoeColor:'#222222'
+  // overall
+  height:1.78, build:1.0, muscle:1.0,
+  // head & neck
+  headHeight:1.0, headWidth:1.0, headDepth:1.0, jaw:1.0, neckLength:1.0, neckThickness:1.0,
+  // eyes
+  eyeSize:1.0, eyeSpacing:1.0, eyeHeight:1.0, eyeColor:'#5a3e2a',
+  // face
+  browThickness:1.0, browHeight:1.0, noseSize:1.0, mouthWidth:1.0, earSize:1.0,
+  // hair
+  hairStyle:'short', hairColor:'#34241a', hairLength:1.0,
+  // torso
+  torsoLength:1.0, torsoWidth:1.0, torsoDepth:1.0, shoulderWidth:1.0, hipWidth:1.0,
+  // arms
+  upperArmLength:1.0, forearmLength:1.0, armThickness:1.0, handSize:1.0,
+  // legs
+  thighLength:1.0, shinLength:1.0, thighThickness:1.0, calfThickness:1.0, footLength:1.0, footWidth:1.0,
+  // outfit
+  skinColor:'#e0ac79', shirtColor:'#cc3b3b', pantsColor:'#33455c', shoeColor:'#222222',
+  sleeves:'short', shorts:false
 };
 const buildings = [
   { label:"Player's House", x:-13, z:9, rot:0, width:7, depth:6, wallHeight:3.0, foundation:0.4,
@@ -591,13 +603,25 @@ function collide(nx,nz){
 let charGroup=null, charScale=1, player={x:0,y:0,z:22}, targetHeading=Math.PI;
 function addHair(parent,cfg,mat,hw,hh,hd){
   const s=cfg.hairStyle; if(s==='none') return;
-  const cap=new THREE.Mesh(new THREE.SphereGeometry(0.52,16,12,0,Math.PI*2,0,Math.PI*0.62), mat);
-  cap.scale.set(hw*1.04,hh*1.06,hd*1.04); cap.position.y=hh*0.5; cap.castShadow=true; parent.add(cap);
-  if(s==='long'){ const back=new THREE.Mesh(new THREE.CapsuleGeometry(0.12,0.32,4,10),mat);
-    back.scale.set(hw*1.5,1,hd*0.7); back.position.set(0,hh*0.05,-hd*0.55); back.castShadow=true; parent.add(back); }
-  else if(s==='cap'){ const brim=new THREE.Mesh(new THREE.BoxGeometry(hw*0.95,0.045,hd*0.55),mat);
-    brim.position.set(0,hh*0.5,hd*0.78); parent.add(brim); }
-  else if(s==='hat'){ parent.remove(cap);
+  const cap=new THREE.Mesh(new THREE.SphereGeometry(0.52,18,14,0,Math.PI*2,0,Math.PI*0.62), mat);
+  cap.scale.set(hw*1.05,hh*1.08,hd*1.05); cap.position.y=hh*0.5; cap.castShadow=true; parent.add(cap);
+  if(s==='long'||s==='ponytail'){
+    const r=s==='ponytail'?0.07:0.12;
+    const back=new THREE.Mesh(new THREE.CapsuleGeometry(r,0.32*cfg.hairLength,5,10),mat);
+    back.scale.set(hw*(s==='ponytail'?0.8:1.5),1,hd*0.7);
+    back.position.set(0, hh*0.4-0.16*cfg.hairLength, -hd*0.55); back.castShadow=true; parent.add(back);
+  } else if(s==='spiky'){
+    for(let i=0;i<8;i++){ const a=i/8*Math.PI*2; const sp=new THREE.Mesh(new THREE.ConeGeometry(hw*0.18,hh*0.5,6),mat);
+      sp.position.set(Math.cos(a)*hw*0.3, hh*0.65, Math.sin(a)*hd*0.3); sp.rotation.set(Math.sin(a)*0.4,0,-Math.cos(a)*0.4); parent.add(sp); }
+  } else if(s==='mohawk'){
+    cap.scale.set(hw*0.4,hh*1.06,hd*1.04);
+    for(let i=0;i<5;i++){ const sp=new THREE.Mesh(new THREE.ConeGeometry(hw*0.16,hh*0.6,6),mat);
+      sp.position.set(0, hh*0.7, (i/4-0.5)*hd*0.7); parent.add(sp); }
+  } else if(s==='bun'){
+    const bun=new THREE.Mesh(new THREE.SphereGeometry(hw*0.45,12,10),mat); bun.position.set(0,hh*0.85,-hd*0.25); parent.add(bun);
+  } else if(s==='cap'){ const brim=new THREE.Mesh(new THREE.BoxGeometry(hw*0.95,0.045,hd*0.55),mat);
+    brim.position.set(0,hh*0.5,hd*0.78); parent.add(brim);
+  } else if(s==='hat'){ parent.remove(cap);
     const brim=new THREE.Mesh(new THREE.CylinderGeometry(0.46,0.46,0.04,18),mat); brim.scale.set(hw*1.25,1,hd*1.25); brim.position.y=hh*0.55; parent.add(brim);
     const top=new THREE.Mesh(new THREE.CylinderGeometry(0.30,0.32,0.32,18),mat); top.scale.set(hw,1,hd); top.position.y=hh*0.85; parent.add(top); }
 }
@@ -612,63 +636,90 @@ function capsuleDown(parent,len,r,mat,over=0){
 }
 function jointBall(parent,r,mat){ const s=new THREE.Mesh(new THREE.SphereGeometry(r,10,8),mat); s.castShadow=true; parent.add(s); return s; }
 function buildCharacter(cfg){
-  const grp=new THREE.Group(); const B=cfg.build;
+  const grp=new THREE.Group(); const B=cfg.build, M=cfg.muscle;
   const skin=matStd(cfg.skinColor,0.6), shirt=matStd(cfg.shirtColor,0.85),
         pants=matStd(cfg.pantsColor,0.85), shoe=matStd(cfg.shoeColor,0.5),
-        hair=matStd(cfg.hairColor,0.8), dark=matStd('#181818',0.4);
-  // stocky cartoon proportions: thick limbs, big head, short torso.
-  const thighLen=0.40*cfg.thighLength, shinLen=0.38*cfg.shinLength, legR=0.105*cfg.legThickness*B;
-  const upperArm=0.24*cfg.upperArmLength, forearm=0.22*cfg.forearmLength, armR=0.072*cfg.armThickness*B;
-  const torsoLen=0.50*cfg.torsoLength, chestY=0.06;
-  const shoulderX=0.19*cfg.shoulderWidth*B, hipX=0.105*cfg.hipWidth*B;
-  const footH=0.10, footLen=0.30*B;
-  const headH=0.30*cfg.headHeight, headW=0.27*cfg.headWidth*B, headD=0.27*cfg.headWidth;
-  const torsoR=Math.max(shoulderX*1.02,0.16);
+        hair=matStd(cfg.hairColor,0.8);
+  const browMat=matStd(new THREE.Color(cfg.hairColor).multiplyScalar(0.9),0.8);
+  const sclera=matStd('#f3f3f3',0.35), iris=matStd(cfg.eyeColor,0.3), pupilM=matStd('#0d0d0d',0.3), mouthMat=matStd('#7d3b3b',0.6);
+  const sleeveMat = cfg.sleeves==='long' ? shirt : skin;   // forearm covered or bare
+  const shinMat   = cfg.shorts ? skin : pants;             // shorts -> bare shins
+  // neutral adult proportions; sliders scale from here
+  const thighLen=0.44*cfg.thighLength, shinLen=0.42*cfg.shinLength;
+  const thighR=0.088*cfg.thighThickness*B*M, calfR=0.07*cfg.calfThickness*B*M;
+  const upperArm=0.30*cfg.upperArmLength, forearm=0.27*cfg.forearmLength;
+  const upperR=0.058*cfg.armThickness*B*M, foreR=0.05*cfg.armThickness*B*M;
+  const torsoLen=0.56*cfg.torsoLength, chestY=0.06;
+  const torsoR=Math.max(0.17*cfg.torsoWidth*B,0.12);
+  const shoulderX=0.19*cfg.shoulderWidth*B, hipX=0.11*cfg.hipWidth*B;
+  const footH=0.09, footLen=0.27*cfg.footLength*B, footWid=calfR*2.0*cfg.footWidth;
+  const headH=0.26*cfg.headHeight, headW=0.22*cfg.headWidth*B, headD=0.22*cfg.headDepth;
+  const neckR=headW*0.4*cfg.neckThickness, neckTopY=torsoLen+0.09*cfg.neckLength;
   const hipY=footH+thighLen+shinLen;
-  // every limb overlaps its joint by ~a radius so seams blend away
+
   const root=new THREE.Group(); root.position.y=hipY; grp.add(root);
-  const pelvis=new THREE.Mesh(new THREE.CapsuleGeometry(legR*1.3, Math.max(hipX*1.3,0.04), 6, 14), pants);
+  const pelvis=new THREE.Mesh(new THREE.CapsuleGeometry(Math.max(thighR*1.25,0.05), Math.max(hipX*1.2,0.04),6,14), pants);
   pelvis.rotation.z=Math.PI/2; pelvis.castShadow=true; root.add(pelvis);
 
   function leg(side){
     const hip=new THREE.Group(); hip.position.set(side*hipX,-0.02,0); root.add(hip);
-    jointBall(hip, legR*1.05, pants);
-    const knee=capsuleDown(hip, thighLen, legR, pants, legR);          // overlaps hip
-    jointBall(knee, legR, pants);                                       // knee fills thigh<->shin
-    const ankle=capsuleDown(knee, shinLen, legR*0.92, pants, legR);     // overlaps knee
-    jointBall(ankle, legR*0.8, shoe);
-    const foot=new THREE.Mesh(new THREE.BoxGeometry(legR*2.0, footH, footLen), shoe);
+    jointBall(hip, thighR, pants);
+    const knee=capsuleDown(hip, thighLen, thighR, pants, thighR);
+    jointBall(knee, Math.max(thighR,calfR), shinMat);
+    const ankle=capsuleDown(knee, shinLen, calfR, shinMat, Math.max(thighR,calfR));
+    jointBall(ankle, calfR*0.85, shoe);
+    const foot=new THREE.Mesh(new THREE.BoxGeometry(footWid, footH, footLen), shoe);
     foot.position.set(0,-footH/2, footLen*0.22); foot.castShadow=true; ankle.add(foot);
     return {hip,knee,ankle};
   }
   const L=leg(-1), R=leg(1);
 
   const chest=new THREE.Group(); chest.position.y=chestY; root.add(chest);
-  const torso=new THREE.Mesh(new THREE.CapsuleGeometry(torsoR, Math.max(torsoLen-0.02,0.06), 8, 16), shirt);
-  torso.position.y=torsoLen/2; torso.scale.set(1.05,1,0.8); torso.castShadow=true; chest.add(torso);
+  const torso=new THREE.Mesh(new THREE.CapsuleGeometry(torsoR, Math.max(torsoLen-2*torsoR,0.05),8,16), shirt);
+  torso.position.y=torsoLen/2; torso.scale.set(1.05,1,0.8*cfg.torsoDepth); torso.castShadow=true; chest.add(torso);
 
   function arm(side){
     const sh=new THREE.Group(); sh.position.set(side*shoulderX, torsoLen-0.10, 0); chest.add(sh);
-    jointBall(sh, armR*1.5, shirt);                                     // deltoid blends torso<->arm
-    const elbow=capsuleDown(sh, upperArm, armR, shirt, armR);
-    jointBall(elbow, armR, skin);
-    const wrist=capsuleDown(elbow, forearm, armR*0.92, skin, armR);
-    const hand=new THREE.Mesh(new THREE.SphereGeometry(armR*1.35,10,9), skin);
-    hand.position.y=-armR*0.6; hand.scale.set(1,1.3,0.85); hand.castShadow=true; wrist.add(hand);
+    jointBall(sh, upperR*1.5, shirt);
+    const elbow=capsuleDown(sh, upperArm, upperR, shirt, upperR);
+    jointBall(elbow, Math.max(upperR,foreR), sleeveMat);
+    const wrist=capsuleDown(elbow, forearm, foreR, sleeveMat, Math.max(upperR,foreR));
+    const hand=new THREE.Mesh(new THREE.SphereGeometry(0.5,10,9), skin);
+    hand.scale.setScalar(foreR*1.5*cfg.handSize); hand.scale.y*=1.3; hand.scale.z*=0.8;
+    hand.position.y=-foreR*0.6; hand.castShadow=true; wrist.add(hand);
     return {sh,elbow};
   }
   const AL=arm(-1), AR=arm(1);
 
-  const neck=new THREE.Mesh(new THREE.CapsuleGeometry(headW*0.52,0.04,6,10), skin); neck.position.y=torsoLen; chest.add(neck);
-  const headP=new THREE.Group(); headP.position.y=torsoLen+0.05; chest.add(headP);
-  const head=new THREE.Mesh(new THREE.SphereGeometry(0.5,20,18), skin);
-  head.scale.set(headW,headH,headD); head.position.y=headH*0.5; head.castShadow=true; headP.add(head);
-  const eye=(s)=>{ const e=new THREE.Mesh(new THREE.SphereGeometry(0.03,10,10),dark);
-    e.position.set(s*headW*0.34, headH*0.52, headD*0.62); headP.add(e); };
+  const neckBottom=torsoLen-0.05, neckMid=(neckBottom+neckTopY)/2, neckH=Math.max(neckTopY-neckBottom,0.03);
+  const neck=new THREE.Mesh(new THREE.CapsuleGeometry(neckR, neckH, 6, 12), skin);
+  neck.position.y=neckMid; chest.add(neck);
+
+  const headP=new THREE.Group(); headP.position.y=neckTopY; chest.add(headP);
+  const headCY=headH*0.5, fz=headD*0.46;
+  const jawM=new THREE.Mesh(new THREE.SphereGeometry(0.5,16,12), skin);
+  jawM.scale.set(headW*0.85*cfg.jaw, headH*0.6, headD*0.9); jawM.position.y=headCY-headH*0.18; jawM.castShadow=true; headP.add(jawM);
+  const head=new THREE.Mesh(new THREE.SphereGeometry(0.5,22,18), skin);
+  head.scale.set(headW,headH,headD); head.position.y=headCY; head.castShadow=true; headP.add(head);
+  // eyes (sclera + iris + pupil) and brows
+  const eyeR=0.03*cfg.eyeSize, eyeY=headCY+headH*0.05*cfg.eyeHeight, eyeX=headW*0.34*cfg.eyeSpacing;
+  function eye(s){
+    const w=new THREE.Mesh(new THREE.SphereGeometry(eyeR,10,10),sclera); w.scale.set(1.2,1,0.7); w.position.set(s*eyeX,eyeY,fz); headP.add(w);
+    const ir=new THREE.Mesh(new THREE.SphereGeometry(eyeR*0.55,10,10),iris); ir.position.set(s*eyeX,eyeY,fz+eyeR*0.5); headP.add(ir);
+    const pu=new THREE.Mesh(new THREE.SphereGeometry(eyeR*0.28,8,8),pupilM); pu.position.set(s*eyeX,eyeY,fz+eyeR*0.7); headP.add(pu);
+    const br=new THREE.Mesh(new THREE.BoxGeometry(eyeR*2.0,eyeR*0.5*cfg.browThickness,eyeR*0.6),browMat);
+    br.position.set(s*eyeX, eyeY+eyeR*1.4*cfg.browHeight, fz+eyeR*0.2); headP.add(br);
+  }
   eye(-1); eye(1);
+  const nose=new THREE.Mesh(new THREE.SphereGeometry(0.5,8,8),skin);
+  nose.scale.set(0.035*cfg.noseSize,0.035*cfg.noseSize,0.05*cfg.noseSize); nose.position.set(0,eyeY-headH*0.13,fz+0.01); headP.add(nose);
+  const mouth=new THREE.Mesh(new THREE.BoxGeometry(headW*0.4*cfg.mouthWidth,headH*0.04,0.02),mouthMat);
+  mouth.position.set(0,eyeY-headH*0.28,fz); headP.add(mouth);
+  function ear(s){ const e=new THREE.Mesh(new THREE.SphereGeometry(0.5,8,8),skin); e.scale.set(0.02,0.045*cfg.earSize,0.03*cfg.earSize); e.position.set(s*headW*0.52,eyeY,0); headP.add(e); }
+  ear(-1); ear(1);
   addHair(headP,cfg,hair,headW,headH,headD);
 
-  const topY=hipY+chestY+torsoLen+0.05+headH;
+  const topY=hipY+chestY+neckTopY+headH;
   charScale=cfg.height/topY; grp.scale.setScalar(charScale);
   grp.traverse(o=>{ if(o.isMesh){ o.castShadow=true; o.receiveShadow=true; } });
   grp.userData={ L,R,AL,AR, root, chest, headP, hipY0:hipY, phase:0 };
@@ -811,32 +862,59 @@ function buildWorldPanel(){
 }
 function buildCharacterPanel(){
   const p=$('#p-character'); p.innerHTML='';
-  p.appendChild(el('div','note','Proportional rig with bending knees & elbows — every dimension is adjustable and updates live.'));
+  const R=rebuildCharacter;
+  p.appendChild(el('div','note','Deep character creator — everything updates live. Limbs articulate with bending knees & elbows.'));
   let g=group(p,'Overall');
-  addRange(g,'Height (m)',character,'height',1.3,2.1,0.01,rebuildCharacter);
-  addRange(g,'Build (width)',character,'build',0.7,1.5,0.01,rebuildCharacter);
-  g=group(p,'Head');
-  addRange(g,'Head height',character,'headHeight',0.7,1.5,0.02,rebuildCharacter);
-  addRange(g,'Head width',character,'headWidth',0.7,1.5,0.02,rebuildCharacter);
+  addRange(g,'Height (m)',character,'height',1.2,2.2,0.01,R);
+  addRange(g,'Build (overall)',character,'build',0.6,1.6,0.02,R);
+  addRange(g,'Muscle (limbs)',character,'muscle',0.6,1.7,0.02,R);
+  g=group(p,'Head & neck');
+  addRange(g,'Head height',character,'headHeight',0.6,1.6,0.02,R);
+  addRange(g,'Head width',character,'headWidth',0.6,1.6,0.02,R);
+  addRange(g,'Head depth',character,'headDepth',0.6,1.6,0.02,R);
+  addRange(g,'Jaw width',character,'jaw',0.5,1.6,0.02,R);
+  addRange(g,'Neck length',character,'neckLength',0.4,2.0,0.02,R);
+  addRange(g,'Neck thickness',character,'neckThickness',0.5,1.6,0.02,R);
+  g=group(p,'Eyes');
+  addRange(g,'Eye size',character,'eyeSize',0.5,2.0,0.02,R);
+  addRange(g,'Eye spacing',character,'eyeSpacing',0.6,1.5,0.02,R);
+  addRange(g,'Eye height',character,'eyeHeight',-2.0,3.0,0.05,R);
+  addColor(g,'Iris color',character,'eyeColor',R);
+  g=group(p,'Face');
+  addRange(g,'Brow thickness',character,'browThickness',0.3,2.5,0.05,R);
+  addRange(g,'Brow height',character,'browHeight',0.2,2.5,0.05,R);
+  addRange(g,'Nose size',character,'noseSize',0.4,2.2,0.05,R);
+  addRange(g,'Mouth width',character,'mouthWidth',0.5,1.8,0.05,R);
+  addRange(g,'Ear size',character,'earSize',0.4,2.0,0.05,R);
+  g=group(p,'Hair');
+  addSelect(g,'Style',character,'hairStyle',['none','short','long','ponytail','spiky','mohawk','bun','cap','hat'],R);
+  addRange(g,'Length',character,'hairLength',0.4,2.2,0.05,R);
+  addColor(g,'Color',character,'hairColor',R);
   g=group(p,'Torso');
-  addRange(g,'Torso length',character,'torsoLength',0.7,1.5,0.02,rebuildCharacter);
-  addRange(g,'Shoulders',character,'shoulderWidth',0.6,1.6,0.02,rebuildCharacter);
-  addRange(g,'Hips',character,'hipWidth',0.6,1.6,0.02,rebuildCharacter);
+  addRange(g,'Torso length',character,'torsoLength',0.6,1.6,0.02,R);
+  addRange(g,'Torso width',character,'torsoWidth',0.6,1.6,0.02,R);
+  addRange(g,'Torso depth',character,'torsoDepth',0.6,1.6,0.02,R);
+  addRange(g,'Shoulders',character,'shoulderWidth',0.6,1.7,0.02,R);
+  addRange(g,'Hips',character,'hipWidth',0.6,1.7,0.02,R);
   g=group(p,'Arms');
-  addRange(g,'Upper arm',character,'upperArmLength',0.6,1.7,0.02,rebuildCharacter);
-  addRange(g,'Forearm',character,'forearmLength',0.6,1.7,0.02,rebuildCharacter);
-  addRange(g,'Thickness',character,'armThickness',0.6,1.6,0.02,rebuildCharacter);
+  addRange(g,'Upper arm',character,'upperArmLength',0.6,1.7,0.02,R);
+  addRange(g,'Forearm',character,'forearmLength',0.6,1.7,0.02,R);
+  addRange(g,'Thickness',character,'armThickness',0.5,1.8,0.02,R);
+  addRange(g,'Hand size',character,'handSize',0.5,1.8,0.05,R);
   g=group(p,'Legs');
-  addRange(g,'Thigh',character,'thighLength',0.6,1.7,0.02,rebuildCharacter);
-  addRange(g,'Shin',character,'shinLength',0.6,1.7,0.02,rebuildCharacter);
-  addRange(g,'Thickness',character,'legThickness',0.6,1.6,0.02,rebuildCharacter);
-  g=group(p,'Appearance');
-  addSelect(g,'Hair',character,'hairStyle',['none','short','long','cap','hat'],rebuildCharacter);
-  addColor(g,'Hair color',character,'hairColor',rebuildCharacter);
-  addColor(g,'Skin',character,'skinColor',rebuildCharacter);
-  addColor(g,'Shirt',character,'shirtColor',rebuildCharacter);
-  addColor(g,'Pants',character,'pantsColor',rebuildCharacter);
-  addColor(g,'Shoes',character,'shoeColor',rebuildCharacter);
+  addRange(g,'Thigh length',character,'thighLength',0.6,1.7,0.02,R);
+  addRange(g,'Shin length',character,'shinLength',0.6,1.7,0.02,R);
+  addRange(g,'Thigh thickness',character,'thighThickness',0.5,1.8,0.02,R);
+  addRange(g,'Calf thickness',character,'calfThickness',0.5,1.8,0.02,R);
+  addRange(g,'Foot length',character,'footLength',0.6,1.6,0.02,R);
+  addRange(g,'Foot width',character,'footWidth',0.6,1.6,0.02,R);
+  g=group(p,'Outfit');
+  addColor(g,'Skin',character,'skinColor',R);
+  addColor(g,'Shirt',character,'shirtColor',R);
+  addColor(g,'Pants',character,'pantsColor',R);
+  addColor(g,'Shoes',character,'shoeColor',R);
+  addSelect(g,'Sleeves',character,'sleeves',['short','long'],R);
+  addToggle(g,'Shorts',character,'shorts',R);
 }
 let curBuilding=0;
 function buildBuildingsPanel(){
