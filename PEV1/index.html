@@ -172,8 +172,15 @@ const world = {
   fog:96, timeOfDay:0.5, shadows:true
 };
 const tree = {
-  count:64, ringRadius:50, ringWidth:20, height:6.0, trunkRadius:0.4, trunkColor:'#6b4a2b',
-  canopyRadius:2.6, canopyHeight:3.0, blobs:5, foliageColor:'#3f7d2e', foliageColor2:'#2f5f22', lean:0.12
+  // placement
+  seed:7, count:48, ringRadius:50, ringWidth:20,
+  // recursive branching
+  depth:4, splits:2, branchLength:3.4, lengthFalloff:0.78,
+  branchAngle:0.6, upBias:0.18, gnarl:0.55,
+  // trunk / bark
+  trunkRadius:0.42, radiusFalloff:0.72, trunkColor:'#6b4a2b',
+  // leaves
+  leafShape:'round', leafSize:0.6, leafCount:5, foliageColor:'#3f7d2e', foliageColor2:'#2f5f22'
 };
 const character = {
   height:1.7, build:1.0, skinColor:'#e0ac79', hairStyle:'short', hairColor:'#34241a',
@@ -376,45 +383,71 @@ function rebuildGrass(){
 
 /* ---------------- forest (procedural trees, merged for few draw calls) ---------------- */
 let forestTrunk=null, forestLeaf=null;
+// recursive tree: trunk -> branches -> sub-branches -> leaf clusters at tips.
+// Driven entirely by `rng`, so a given seed always grows the same tree.
+const UP=new THREE.Vector3(0,1,0);
+function rotGeo(g,q){ return g.applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(q)); }
+function perpAxis(d){ const a=Math.abs(d.y)<0.95?UP:new THREE.Vector3(1,0,0); return new THREE.Vector3().crossVectors(d,a).normalize(); }
 function buildTree(cfg,rng){
-  const trunkGeos=[], leafGeos=[];
-  const h=cfg.height*(0.8+0.4*rng());
-  const tr=cfg.trunkRadius*(0.85+0.3*rng());
-  const lean=(rng()*2-1)*cfg.lean;
-  const leanM=new THREE.Matrix4().makeRotationZ(lean);
+  const branchGeos=[], leafGeos=[];
 
-  const trunk=nonIndexed(new THREE.CylinderGeometry(tr*0.6, tr, h, 6));
-  trunk.translate(0,h/2,0); trunk.applyMatrix4(leanM);
-  paintGeo(trunk, varyColor(cfg.trunkColor,rng,0.12));
-  trunkGeos.push(trunk);
-
-  const cr=cfg.canopyRadius*(0.85+0.3*rng());
-  for(let b=0;b<cfg.blobs;b++){
-    const br=cr*(0.5+0.6*rng());
-    const blob=nonIndexed(new THREE.IcosahedronGeometry(br,0));     // low-poly, faceted
-    const ang=rng()*Math.PI*2, rad=cr*0.5*rng();
-    blob.applyMatrix4(new THREE.Matrix4().makeTranslation(Math.cos(ang)*rad, h + cfg.canopyHeight*(0.2+0.7*rng()), Math.sin(ang)*rad));
-    blob.applyMatrix4(leanM);
-    paintGeo(blob, varyColor(rng()<0.5?cfg.foliageColor:cfg.foliageColor2, rng, 0.1));
-    leafGeos.push(blob);
+  function leafCluster(pos, scale){
+    for(let i=0;i<cfg.leafCount;i++){
+      const s=cfg.leafSize*(0.6+0.7*rng())*scale;
+      let g;
+      if(cfg.leafShape==='spiky') g=nonIndexed(new THREE.ConeGeometry(s*0.5, s*1.9, 5));
+      else g=nonIndexed(new THREE.IcosahedronGeometry(s,0));
+      if(cfg.leafShape==='flat') g.scale(1.35,0.45,1.35);     // broad, flattened
+      else if(cfg.leafShape==='oval') g.scale(0.7,1.4,0.7);   // tall, egg-shaped
+      rotGeo(g, new THREE.Quaternion().setFromEuler(new THREE.Euler(rng()*6.28,rng()*6.28,rng()*6.28)));
+      const j=cfg.leafSize*0.8*scale;
+      g.translate(pos.x+(rng()*2-1)*j, pos.y+(rng()*2-1)*j, pos.z+(rng()*2-1)*j);
+      paintGeo(g, varyColor(rng()<0.5?cfg.foliageColor:cfg.foliageColor2, rng, 0.12));
+      leafGeos.push(g);
+    }
   }
-  return { trunkGeos, leafGeos };
+  function grow(start, dir, length, radius, level){
+    const end=start.clone().addScaledVector(dir, length);
+    const rTop=radius*cfg.radiusFalloff;
+    const seg=nonIndexed(new THREE.CylinderGeometry(Math.max(rTop,0.012), Math.max(radius,0.012), length, level<2?6:4, 1, true));
+    seg.translate(0,length/2,0);
+    rotGeo(seg, new THREE.Quaternion().setFromUnitVectors(UP, dir));
+    seg.translate(start.x,start.y,start.z);
+    paintGeo(seg, varyColor(cfg.trunkColor,rng,0.1));
+    branchGeos.push(seg);
+
+    if(level>=cfg.depth || length<0.22){ leafCluster(end, clamp(1.25-level*0.14,0.4,1.25)); return; }
+    const n=Math.max(2, Math.round(cfg.splits));
+    const baseAz=rng()*6.28;
+    for(let i=0;i<n;i++){
+      const az=baseAz + i*(6.28/n) + (rng()*2-1)*cfg.gnarl;
+      const ang=cfg.branchAngle*(0.65+0.7*rng());
+      const nd=dir.clone().applyAxisAngle(perpAxis(dir), ang).applyAxisAngle(dir, az);
+      nd.lerp(UP, cfg.upBias).normalize();                       // gravitropism: reach upward
+      grow(end, nd, length*cfg.lengthFalloff*(0.85+0.3*rng()), rTop, level+1);
+    }
+  }
+  const startDir=new THREE.Vector3((rng()*2-1)*0.06, 1, (rng()*2-1)*0.06).normalize();
+  grow(new THREE.Vector3(0,0,0), startDir, cfg.branchLength, cfg.trunkRadius, 0);
+  return { trunkGeos:branchGeos, leafGeos };
 }
 function rebuildForest(){
   if(forestTrunk) disposeObj(forestTrunk);
   if(forestLeaf) disposeObj(forestLeaf);
-  const rng=mulberry32((world.seed^0x9e37)>>>0);
+  const place=mulberry32((tree.seed^0x9e3779b9)>>>0);   // forest layout
   const trunkAll=[], leafAll=[];
   for(let i=0;i<tree.count;i++){
-    const ang=rng()*Math.PI*2, rad=tree.ringRadius + rng()*tree.ringWidth;
-    const x=Math.cos(ang)*rad, z=Math.sin(ang)*rad, s=0.8+rng()*0.5;
-    const place=new THREE.Matrix4().compose(
+    const ang=place()*Math.PI*2, rad=tree.ringRadius + place()*tree.ringWidth;
+    const x=Math.cos(ang)*rad, z=Math.sin(ang)*rad, s=0.85+place()*0.3;
+    const m=new THREE.Matrix4().compose(
       new THREE.Vector3(x, groundHeight(x,z), z),
-      new THREE.Quaternion().setFromEuler(new THREE.Euler(0, rng()*Math.PI*2, 0)),
+      new THREE.Quaternion().setFromEuler(new THREE.Euler(0, place()*Math.PI*2, 0)),
       new THREE.Vector3(s,s,s));
-    const { trunkGeos, leafGeos }=buildTree(tree,rng);
-    trunkGeos.forEach(g=>{ g.applyMatrix4(place); trunkAll.push(g); });
-    leafGeos.forEach(g=>{ g.applyMatrix4(place); leafAll.push(g); });
+    // each tree gets its own seed -> unique but deterministic shape
+    const trng=mulberry32((Math.imul(tree.seed,1013904223) + Math.imul(i+1,2654435761))>>>0);
+    const { trunkGeos, leafGeos }=buildTree(tree,trng);
+    trunkGeos.forEach(g=>{ g.applyMatrix4(m); trunkAll.push(g); });
+    leafGeos.forEach(g=>{ g.applyMatrix4(m); leafAll.push(g); });
   }
   const tg=mergeGeos(trunkAll), lg=mergeGeos(leafAll);
   trunkAll.forEach(g=>g.dispose()); leafAll.forEach(g=>g.dispose());
@@ -758,20 +791,28 @@ function renderBuildingControls(){
 }
 function buildTreesPanel(){
   const p=$('#p-trees'); p.innerHTML='';
-  p.appendChild(el('div','note','One style drives the whole forest; each tree gets randomized variation.'));
-  let g=group(p,'Placement');
-  addRange(g,'Count',tree,'count',0,120,1,rebuildForest,true);
+  p.appendChild(el('div','note','Recursive branching trees — branches split into branches into leaf clusters. Each tree is unique, grown from the forest seed. Heavy sliders apply when released.'));
+  let g=group(p,'Placement & seed');
+  addRange(g,'Forest seed',tree,'seed',1,9999,1,rebuildForest,true);
+  addRange(g,'Count',tree,'count',0,90,1,rebuildForest,true);
   addRange(g,'Ring radius',tree,'ringRadius',40,75,1,rebuildForest,true);
   addRange(g,'Ring width',tree,'ringWidth',4,30,1,rebuildForest,true);
-  g=group(p,'Trunk');
-  addRange(g,'Height',tree,'height',2,12,0.2,rebuildForest,true);
-  addRange(g,'Thickness',tree,'trunkRadius',0.15,1.0,0.02,rebuildForest,true);
+  g=group(p,'Branching');
+  addRange(g,'Depth (levels)',tree,'depth',2,5,1,rebuildForest,true);
+  addRange(g,'Splits / node',tree,'splits',2,4,1,rebuildForest,true);
+  addRange(g,'Branch length',tree,'branchLength',1.5,6,0.1,rebuildForest,true);
+  addRange(g,'Length falloff',tree,'lengthFalloff',0.55,0.92,0.01,rebuildForest,true);
+  addRange(g,'Branch angle',tree,'branchAngle',0.1,1.4,0.05,rebuildForest,true);
+  addRange(g,'Upward bias',tree,'upBias',0,0.6,0.02,rebuildForest,true);
+  addRange(g,'Gnarl',tree,'gnarl',0,1.2,0.05,rebuildForest,true);
+  g=group(p,'Trunk / bark');
+  addRange(g,'Base thickness',tree,'trunkRadius',0.12,1.0,0.02,rebuildForest,true);
+  addRange(g,'Taper',tree,'radiusFalloff',0.5,0.9,0.02,rebuildForest,true);
   addColor(g,'Bark',tree,'trunkColor',rebuildForest);
-  addRange(g,'Lean',tree,'lean',0,0.5,0.02,rebuildForest,true);
-  g=group(p,'Canopy');
-  addRange(g,'Spread',tree,'canopyRadius',1,5,0.1,rebuildForest,true);
-  addRange(g,'Height',tree,'canopyHeight',1,6,0.2,rebuildForest,true);
-  addRange(g,'Blobs',tree,'blobs',1,10,1,rebuildForest,true);
+  g=group(p,'Leaves');
+  addSelect(g,'Leaf shape',tree,'leafShape',['round','flat','oval','spiky'],rebuildForest);
+  addRange(g,'Leaf size',tree,'leafSize',0.2,1.4,0.05,rebuildForest,true);
+  addRange(g,'Cluster count',tree,'leafCount',1,10,1,rebuildForest,true);
   addColor(g,'Leaves',tree,'foliageColor',rebuildForest);
   addColor(g,'Leaves 2',tree,'foliageColor2',rebuildForest);
 }
