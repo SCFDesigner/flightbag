@@ -683,8 +683,8 @@ function updateCharacter(dt,speed){
   // legs: thigh swing + knee bend (knee only flexes one way, during the swing)
   const thigh=Math.sin(p)*0.72*m;
   u.L.hip.rotation.x=thigh;  u.R.hip.rotation.x=-thigh;
-  u.L.knee.rotation.x=-Math.max(0,Math.sin(p+1.2))*1.35*m - 0.06;
-  u.R.knee.rotation.x=-Math.max(0,Math.sin(p+1.2+Math.PI))*1.35*m - 0.06;
+  u.L.knee.rotation.x=Math.max(0,Math.sin(p+1.2))*1.35*m + 0.06;
+  u.R.knee.rotation.x=Math.max(0,Math.sin(p+1.2+Math.PI))*1.35*m + 0.06;
   // keep feet roughly level
   u.L.ankle.rotation.x=-(u.L.hip.rotation.x+u.L.knee.rotation.x)*0.45;
   u.R.ankle.rotation.x=-(u.R.hip.rotation.x+u.R.knee.rotation.x)*0.45;
