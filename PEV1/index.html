@@ -78,6 +78,15 @@
     bottom:calc(env(safe-area-inset-bottom) + 200px); background:#0e151ed8; border:1px solid #ffffff1c;
     border-radius:12px; padding:10px 14px; font-size:12px; color:#dce7f2; max-width:80vw; text-align:center;
     transition:opacity .5s; pointer-events:none;}
+
+  #exportbar{ padding:8px 10px; border-bottom:1px solid #ffffff14; }
+  #exportbar .btn{ width:100%; text-align:center; }
+  .modal{ position:fixed; inset:0; z-index:60; background:#000a; display:flex; align-items:center; justify-content:center; padding:18px; }
+  .modal .box{ background:var(--panel2); border:1px solid #ffffff22; border-radius:14px; padding:14px;
+    width:100%; max-width:520px; max-height:84vh; display:flex; flex-direction:column; gap:10px; }
+  .modal textarea{ width:100%; height:46vh; background:#0e151e; color:#cfe0f0; border:1px solid #ffffff22;
+    border-radius:8px; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:11px; padding:8px; resize:none; }
+  .modal .rowx{ display:flex; gap:8px; } .modal .rowx .btn{ flex:1; text-align:center; }
 </style>
 </head>
 <body>
@@ -113,6 +122,7 @@
     <div class="tab" data-t="buildings">Buildings</div>
     <div class="tab" data-t="trees">Trees</div>
   </div>
+  <div id="exportbar"><div class="btn" id="btnExport">⤓ Export settings</div></div>
   <div id="panels">
     <div class="panel on" id="p-world"></div>
     <div class="panel" id="p-character"></div>
@@ -983,6 +993,25 @@ document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
   document.querySelectorAll('.panel').forEach(x=>x.classList.remove('on'));
   $('#p-'+t.dataset.t).classList.add('on');
 }));
+
+// export the full snapshot so it can be pasted back and hard-coded as defaults
+function exportSettings(){
+  const json=JSON.stringify({ world, tree, character, buildings }, null, 2);
+  if(navigator.clipboard) navigator.clipboard.writeText(json).catch(()=>{});
+  const ov=el('div','modal');
+  const box=el('div','box');
+  box.appendChild(el('div','note','Copied to clipboard. Paste this back in chat to set it as the new defaults. (If copy didn’t work, tap the box, Select All, Copy.)'));
+  const ta=el('textarea'); ta.value=json; ta.readOnly=true; box.appendChild(ta);
+  const row=el('div','rowx');
+  const copy=el('div','btn','Copy');
+  copy.onclick=()=>{ ta.focus(); ta.select(); try{document.execCommand('copy');}catch(e){} if(navigator.clipboard)navigator.clipboard.writeText(json).catch(()=>{});
+    copy.textContent='Copied!'; setTimeout(()=>copy.textContent='Copy',1200); };
+  const close=el('div','btn','Close'); close.onclick=()=>ov.remove();
+  row.appendChild(copy); row.appendChild(close); box.appendChild(row);
+  ov.appendChild(box); ov.addEventListener('click',e=>{ if(e.target===ov) ov.remove(); });
+  document.body.appendChild(ov); ta.focus(); ta.select();
+}
+$('#btnExport').addEventListener('click', exportSettings);
 
 /* ---------------- build world + loop ---------------- */
 function bootFail(msg){ boot.querySelector('.spin').style.display='none'; boot.querySelector('h1').textContent='Could not start';
