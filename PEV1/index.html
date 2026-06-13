@@ -177,16 +177,16 @@ function makeNoise(seed){
 
 /* ---------------- configs (everything parametric) ---------------- */
 const world = {
-  seed:1337, hilliness:2.2, grassEnable:true, grassDensity:9000, grassHeight:0.55,
+  seed:1337, hilliness:6, grassEnable:true, grassDensity:18000, grassHeight:0.2,
   grassColor:'#4e7d34', groundColor:'#5d8a3e', groundColor2:'#3f6b2a',
   fog:96, timeOfDay:0.5, shadows:true
 };
 const tree = {
   // placement
-  seed:7, count:48, ringRadius:50, ringWidth:20,
+  seed:2572, count:81, ringRadius:42, ringWidth:27,
   // recursive branching
-  depth:4, splits:2, branchLength:3.4, lengthFalloff:0.78,
-  branchAngle:0.6, upBias:0.18, gnarl:0.55,
+  depth:4, splits:3, branchLength:2.5, lengthFalloff:0.78,
+  branchAngle:0.6, upBias:0.02, gnarl:0.7,
   // trunk / bark
   trunkRadius:0.42, radiusFalloff:0.72, trunkColor:'#6b4a2b',
   // leaves
@@ -214,9 +214,9 @@ const character = {
   sleeves:'short', shorts:false
 };
 const buildings = [
-  { label:"Player's House", x:-13, z:9, rot:0, width:7, depth:6, wallHeight:3.0, foundation:0.4,
-    roofType:'gable', roofPitch:2.4, roofColor:'#b13b32', roofTiles:'on', wallColor:'#e8ddc7',
-    trimColor:'#cfc3a8', doorColor:'#5a3a22', windowColor:'#8fd0e8', windowCols:2, windowRows:1, foundationColor:'#9a8e80' },
+  { label:"Player's House", x:-13, z:9, rot:0, width:7.4, depth:6.2, wallHeight:2.9, foundation:0.15,
+    roofType:'gable', roofPitch:2.9, roofColor:'#b13b32', roofTiles:'on', wallColor:'#e8ddc7',
+    trimColor:'#cfc3a8', doorColor:'#5a3a22', windowColor:'#8fd0e8', windowCols:5, windowRows:1, foundationColor:'#9a8e80' },
   { label:"Rival's House", x:13, z:9, rot:0, width:7, depth:6, wallHeight:3.0, foundation:0.4,
     roofType:'gable', roofPitch:2.4, roofColor:'#3f6fb1', roofTiles:'on', wallColor:'#e6e0d2',
     trimColor:'#c7bfa9', doorColor:'#42301f', windowColor:'#8fd0e8', windowCols:2, windowRows:1, foundationColor:'#9a8e80' },
