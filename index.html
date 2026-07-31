@@ -42,10 +42,10 @@ header p {
 /* ── GRID ── */
 #tool-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 20px;
   width: 100%;
-  max-width: 960px;
+  max-width: 1240px;
 }
 
 /* ── SECTION CARD ── */
@@ -123,6 +123,10 @@ header p {
 .tool-card.wb     .ac-btn:hover   { border-color: #fa0; background: #1a1000; }
 .tool-card.wb     .ac-btn:hover .ac-arrow { color: #fa0; }
 
+.tool-card.written .tool-card-icon { color: #b58cff; }
+.tool-card.written .ac-btn:hover   { border-color: #b58cff; background: #120a1e; }
+.tool-card.written .ac-btn:hover .ac-arrow { color: #b58cff; }
+
 .tool-card.chairfly .tool-card-icon { color: #8f6; }
 .tool-card.chairfly .ac-btn:hover   { border-color: #8f6; background: #0a1508; }
 .tool-card.chairfly .ac-btn:hover .ac-arrow { color: #8f6; }
@@ -136,14 +140,7 @@ header p {
   header { margin-bottom: 32px; }
   body { justify-content: flex-start; padding-top: 48px; }
 }
-@media (min-width: 701px) and (max-width: 960px) {
-  #tool-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .tool-card.study {
-    grid-column: 1 / -1;
-  }
-}
+
 </style>
 </head>
 <body>
@@ -192,6 +189,31 @@ header p {
         <span class="ac-btn-name">Cessna 152</span>
         <span class="ac-btn-sub">SINGLE</span>
         <span class="ac-arrow">›</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- WRITTEN EXAMS -->
+  <div class="tool-card written">
+    <div class="tool-card-header">
+      <div class="tool-card-icon">✎</div>
+      <div class="tool-card-title">WRITTEN EXAMS</div>
+      <div class="tool-card-desc">FAA knowledge test prep &mdash; full question banks, figures &amp; timed tests</div>
+    </div>
+    <div class="ac-list">
+      <a class="ac-btn" href="written-exams.html?course=fia">
+        <span class="ac-btn-name">FIA</span>
+        <span class="ac-btn-sub">FLIGHT INSTR &middot; 713 Q</span>
+        <span class="ac-arrow">&rsaquo;</span>
+      </a>
+      <a class="ac-btn" href="written-exams.html?course=foi">
+        <span class="ac-btn-name">FOI</span>
+        <span class="ac-btn-sub">INSTRUCTING &middot; 400 Q</span>
+        <span class="ac-arrow">&rsaquo;</span>
+      </a>
+      <a class="ac-btn" href="written-exams.html">
+        <span class="ac-btn-name">Choose course&hellip;</span>
+        <span class="ac-arrow">&rsaquo;</span>
       </a>
     </div>
   </div>

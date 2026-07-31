@@ -15,6 +15,15 @@ An interactive weight and balance tool for the P2006T. Enter passenger weights, 
 ### Airspeed / V-Speed Study (`airspeeds quiz.html`)
 A flashcard-style study tool for memorizing P2006T V-speeds. All values are taken directly from the POH/AFM.
 
+### FAA Written Exam Prep (`written-exams.html`)
+Full knowledge-test question banks with a course picker on load:
+- **FIA** — Flight Instructor Airplane, 713 questions across 7 categories, 145 of them with figures
+- **FOI** — Fundamentals of Instructing, 400 questions across 6 categories
+
+Modes: guided **Study** (Sheppard 5-step plan, read-through → matching game → self-test), free **Scroll**, a **Matching** game, and timed **Test** with instant feedback. Extras: figure plates shown beside their paired question (tap to enlarge), a "Figure questions" category, missed-question drilling (4 correct in a row per question to clear), weakest-first test lengths (All / 80% / 50% / 25%), read-aloud, and progress saved per course in the browser.
+
+Deep links: `written-exams.html?course=fia` / `?course=foi`.
+
 ### Chairfly Trainer (`p2006t_chairfly.html`)
 A simulated G1000 cockpit environment for chair-flying maneuvers. Walk through procedures step-by-step with:
 - Animated PFD and MFD representations
