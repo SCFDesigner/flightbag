@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #1a1a1a;
+            background-color: #101013;
             color: #ffffff;
             min-height: 100vh;
             display: flex;
@@ -21,63 +21,6 @@
             padding: 0;
             position: relative;
             overflow: hidden;
-        }
-
-        /* Hyperspace Canvas Background */
-        #hyperspace-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        /* Normal Space Canvas Background (Floating Stars) */
-        #normalspace-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        /* Lightspeed Mode Control */
-        body.lightspeed-off #hyperspace-canvas {
-            display: none;
-        }
-
-        body.lightspeed-off #normalspace-canvas {
-            display: block;
-        }
-
-        body.lightspeed-on #hyperspace-canvas {
-            display: block;
-        }
-
-        body.lightspeed-on #normalspace-canvas {
-            display: none;
-        }
-
-        /* Mobile lightspeed-off background fix */
-        @media (max-width: 768px) {
-            body.lightspeed-off html,
-            body.lightspeed-off {
-                background-color: transparent !important;
-            }
-        }
-
-        /* Lightspeed Mode Indicator */
-        body.lightspeed-on #lightspeed-toggle {
-            color: #00ff88 !important;
-            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
-        }
-
-        body.lightspeed-off #lightspeed-toggle {
-            color: #666 !important;
         }
 
         /* Ensure panels are above background */
@@ -104,6 +47,7 @@
             padding: 20px;
             margin-bottom: 20px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            overflow: hidden; /* keep inputs inside the panel when columns are resized */
         }
 
         /* Time panel styling */
@@ -152,6 +96,8 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 12px;
+            gap: 8px;
+            min-width: 0;
         }
 
         .input-group:last-child {
@@ -172,7 +118,8 @@
             padding: 8px 12px;
             color: #ffffff;
             font-size: 14px;
-            min-width: 110px;
+            flex: 0 1 110px;   /* nominal 110px, shrinks with the column instead of overflowing */
+            min-width: 60px;
             max-width: 110px;
             width: 110px;
             -webkit-appearance: textfield;
@@ -506,18 +453,6 @@
             min-width: 400px;
         }
 
-        /* Risk Assessment Column (Third Column) */
-        .risk-column {
-            width: 650px;
-            min-width: 650px;
-            padding: 20px;
-            display: none; /* Hidden by default on web version */
-            background-color: transparent;
-            overflow-y: auto;
-            height: 100vh;
-            flex-shrink: 0;
-        }
-
         /* CG Chart container with 16:10 aspect ratio */
         .cg-chart-container {
             position: relative;
@@ -654,171 +589,6 @@
             transform: scale(1.1);
         }
 
-        /* Risk Assessment Styles */
-        .risk-panel {
-            background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-        }
-
-        .risk-panel-title {
-            color: #4CAF50;
-            font-size: 18px;
-            font-weight: bold;
-            font-family: 'Courier New', monospace;
-            text-align: center;
-            margin-bottom: 15px;
-        }
-
-        .risk-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            padding: 0 10px;
-        }
-
-        .risk-numbers {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-            gap: 4px;
-            flex: 1;
-            font-weight: bold;
-            color: #ccc;
-        }
-
-        .risk-numbers span {
-            text-align: center;
-            font-size: 14px;
-        }
-
-        .risk-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            padding: 8px 0;
-        }
-
-        .risk-row.stacked {
-            flex-direction: column;
-            align-items: stretch;
-        }
-
-        .risk-row.stacked .risk-label {
-            margin-bottom: 8px;
-            min-width: auto;
-            text-align: left;
-        }
-
-        .risk-row.stacked .risk-content {
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            gap: 0;
-        }
-
-        .risk-row.stacked .risk-buttons {
-            margin-left: 160px; /* Same as risk-label min-width to maintain alignment */
-            margin-right: auto;
-        }
-
-        .risk-row.stacked .risk-total {
-            margin-left: auto;
-        }
-
-        .risk-label {
-            font-size: 14px;
-            color: #e0e0e0;
-            min-width: 160px;
-            flex-shrink: 0;
-        }
-
-        .risk-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-            gap: 4px;
-            flex: 1;
-            align-items: center;
-        }
-
-        .risk-btn {
-            min-width: 60px;
-            height: 34px;
-            border: 1px solid #555;
-            border-radius: 6px;
-            background: linear-gradient(135deg, #404040 0%, #2a2a2a 100%);
-            color: #ccc;
-            font-size: 11px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 4px 6px;
-            text-align: center;
-            white-space: nowrap;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-
-        .risk-btn:disabled {
-            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
-            color: #555;
-            cursor: not-allowed;
-            border-color: #333;
-        }
-
-        .risk-btn:hover {
-            border-color: #007acc;
-            transform: scale(1.05);
-        }
-
-        .risk-btn.selected-1 {
-            background: linear-gradient(135deg, rgba(76, 175, 80, 0.3) 0%, rgba(76, 175, 80, 0.1) 100%);
-            color: white;
-            border: 2px solid #4CAF50;
-            box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
-        }
-
-        .risk-btn.selected-2 {
-            background: linear-gradient(135deg, rgba(139, 195, 74, 0.3) 0%, rgba(139, 195, 74, 0.1) 100%);
-            color: white;
-            border: 2px solid #8BC34A;
-            box-shadow: 0 4px 8px rgba(139, 195, 74, 0.3);
-        }
-
-        .risk-btn.selected-3 {
-            background: linear-gradient(135deg, rgba(255, 193, 7, 0.3) 0%, rgba(255, 193, 7, 0.1) 100%);
-            color: white;
-            border: 2px solid #FFC107;
-            box-shadow: 0 4px 8px rgba(255, 193, 7, 0.3);
-        }
-
-        .risk-btn.selected-4 {
-            background: linear-gradient(135deg, rgba(255, 152, 0, 0.3) 0%, rgba(255, 152, 0, 0.1) 100%);
-            color: white;
-            border: 2px solid #FF9800;
-            box-shadow: 0 4px 8px rgba(255, 152, 0, 0.3);
-        }
-
-        .risk-btn.selected-5 {
-            background: linear-gradient(135deg, rgba(255, 87, 34, 0.3) 0%, rgba(255, 87, 34, 0.1) 100%);
-            color: white;
-            border: 2px solid #FF5722;
-            box-shadow: 0 4px 8px rgba(255, 87, 34, 0.3);
-        }
-
-        .risk-total {
-            font-weight: bold;
-            color: #4CAF50;
-            min-width: 50px;
-            text-align: center;
-            flex-shrink: 0;
-        }
-
         .grand-total {
             font-size: 24px;
             font-weight: bold;
@@ -857,11 +627,6 @@
             }
 
             /* Override desktop column widths on mobile */
-            .risk-column {
-                width: calc(100% - 40px) !important;
-                min-width: calc(100% - 40px) !important;
-                max-width: 95% !important;
-            }
 
             /* Desktop layout becomes mobile column container */
             .desktop-layout {
@@ -1097,7 +862,6 @@
             }
 
             .desktop-layout.mobile-show-left .right-column,
-            .desktop-layout.mobile-show-left .risk-column,
             .desktop-layout.mobile-show-left .settings-panel {
                 display: none !important;
             }
@@ -1120,33 +884,11 @@
             }
 
             .desktop-layout.mobile-show-right .left-panel,
-            .desktop-layout.mobile-show-right .risk-column,
             .desktop-layout.mobile-show-right .settings-panel {
                 display: none !important;
             }
 
-            .desktop-layout.mobile-show-risk .risk-column {
-                display: block !important;
-                position: absolute;
-                top: 0;
-                left: 50%; /* Center horizontally */
-                transform: translateX(-50%); /* Center the panel */
-                z-index: 10;
-                width: calc(100% - 40px); /* Responsive width with margins */
-                height: 100%;
-                overflow-y: auto;
-                overflow-x: hidden;
-                padding: 10px;
-                box-sizing: border-box;
-                border-radius: 12px;
-                max-width: 95%; /* Ensure it doesn't exceed screen */
-            }
 
-            .desktop-layout.mobile-show-risk .left-panel,
-            .desktop-layout.mobile-show-risk .right-column,
-            .desktop-layout.mobile-show-risk .settings-panel {
-                display: none !important;
-            }
 
             .desktop-layout.mobile-show-settings .settings-panel {
                 display: block !important;
@@ -1166,8 +908,7 @@
             }
 
             .desktop-layout.mobile-show-settings .left-panel,
-            .desktop-layout.mobile-show-settings .right-column,
-            .desktop-layout.mobile-show-settings .risk-column {
+            .desktop-layout.mobile-show-settings .right-column {
                 display: none !important;
             }
 
@@ -1190,74 +931,8 @@
 
             .desktop-layout.mobile-show-brain .left-panel,
             .desktop-layout.mobile-show-brain .right-column,
-            .desktop-layout.mobile-show-brain .risk-column,
             .desktop-layout.mobile-show-brain .settings-panel {
                 display: none !important;
-            }
-
-            /* Mobile Risk Assessment Panel Adjustments */
-            @media (max-width: 768px) {
-                .risk-panel {
-                    margin-bottom: 15px;
-                    padding: 8px;
-                }
-                
-                .risk-panel-title {
-                    font-size: 16px;
-                    margin-bottom: 8px;
-                    text-align: center;
-                }
-                
-                .risk-label {
-                    font-size: 12px;
-                    min-width: 100px;
-                    flex-shrink: 0;
-                }
-                
-                .risk-btn {
-                    min-width: 40px;
-                    height: 28px;
-                    font-size: 9px;
-                    padding: 2px 3px;
-                    margin: 0 1px;
-                }
-                
-                .risk-total {
-                    min-width: 30px;
-                    font-size: 12px;
-                    flex-shrink: 0;
-                }
-                
-                .risk-numbers {
-                    gap: 2px;
-                }
-                
-                .risk-numbers span {
-                    font-size: 11px;
-                    text-align: center;
-                }
-                
-                .risk-row {
-                    margin-bottom: 8px;
-                    padding: 4px 0;
-                }
-                
-                .risk-buttons {
-                    gap: 2px;
-                }
-                
-                .risk-row.stacked .risk-label {
-                    margin-bottom: 6px;
-                    text-align: left;
-                }
-                
-                .risk-row.stacked .risk-buttons {
-                    margin-left: 100px; /* Adjusted for mobile label width */
-                }
-                
-                .risk-row.stacked .risk-content {
-                    gap: 0;
-                }
             }
 
             /* Mobile Layout Adjustments */
@@ -1295,12 +970,9 @@
                 padding: 8px;
             }
 
-            /* Hide settings, brain, and risk toggle on mobile */
+            /* Hide settings and brain toggles on mobile */
             .settings-toggle,
-            .brain-toggle,
-            .risk-toggle,
-            .emergency-toggle,
-            .chairfly-toggle {
+            .brain-toggle {
                 display: none !important;
             }
 
@@ -1368,10 +1040,7 @@
 
             /* Show floating toggle buttons on desktop */
             .settings-toggle,
-            .brain-toggle,
-            .risk-toggle,
-            .emergency-toggle,
-            .chairfly-toggle {
+            .brain-toggle {
                 display: flex !important;
             }
 
@@ -1385,7 +1054,7 @@
                 z-index: 10;
             }
             
-            /* Show all columns on desktop except risk column (hidden by default) */
+            /* Show all columns on desktop */
             .left-panel,
             .right-column,
             .settings-panel,
@@ -1423,18 +1092,6 @@
                 box-sizing: border-box;
             }
 
-            .risk-column {
-                flex: 0 0 auto;
-                min-width: 650px;
-                max-width: 750px;
-                padding: 20px;
-                background-color: transparent;
-                overflow-y: auto;
-                overflow-x: hidden;
-                height: 100vh;
-                box-sizing: border-box;
-                width: auto;
-            }
 
             .settings-panel {
                 flex: 0 0 auto;
@@ -1486,18 +1143,8 @@
                 display: block !important;
             }
 
-            /* When risk is hidden, hide risk panel */
-            .desktop-layout.risk-collapsed .risk-column {
-                display: none !important;
-            }
 
-            .risk-column.risk-hidden {
-                display: none !important;
-            }
 
-            .risk-column.risk-visible {
-                display: block !important;
-            }
 
             /* Reset mobile classes for desktop */
             .desktop-layout.mobile-show-left .left-panel,
@@ -1592,12 +1239,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
 </head>
 <body>
-    <!-- Hyperspace Canvas Background -->
-    <canvas id="hyperspace-canvas"></canvas>
-    
-    <!-- Normal Space Canvas Background (Floating Stars) -->
-    <canvas id="normalspace-canvas"></canvas>
-    
     <!-- Desktop Layout -->
     <div class="desktop-layout" style="display: flex; width: 100%; height: 100vh;">
         <div class="left-panel">
@@ -2185,479 +1826,12 @@
 
     </div>
 
-    <!-- Column Resizer between Right Column and Risk Column -->
-    <div class="column-resizer" data-resize="right-risk"></div>
-
-    <!-- Risk Assessment Column (Column C) -->
-    <div class="risk-column">
-        <!-- Pilot Panel -->
-        <div class="risk-panel">
-            <div class="risk-panel-title">Pilot</div>
-            <div class="risk-header">
-                <div class="risk-label"></div>
-                <div class="risk-numbers">
-                    <span>1</span>
-                    <span>2</span>
-                    <span>3</span>
-                    <span>4</span>
-                    <span>5</span>
-                </div>
-                <div class="risk-total">Total</div>
-            </div>
-            
-            <div class="risk-row stacked">
-                <div class="risk-label">Illness</div>
-                <div class="risk-content">
-                    <div class="risk-buttons">
-                        <button class="risk-btn" onclick="selectRisk('pilot-illness', 1)" data-value="1">no</button>
-                        <button class="risk-btn" disabled data-value="2"></button>
-                        <button class="risk-btn" onclick="selectRisk('pilot-illness', 3)" data-value="3">minor</button>
-                        <button class="risk-btn" disabled data-value="4"></button>
-                        <button class="risk-btn" onclick="selectRisk('pilot-illness', 5)" data-value="5">major</button>
-                    </div>
-                    <div class="risk-total" id="pilot-illness-total">0</div>
-                </div>
-            </div>
-            
-            <div class="risk-row stacked">
-                <div class="risk-label">Medication</div>
-                <div class="risk-content">
-                    <div class="risk-buttons">
-                        <button class="risk-btn" onclick="selectRisk('pilot-medication', 1)" data-value="1">no</button>
-                        <button class="risk-btn" disabled data-value="2"></button>
-                        <button class="risk-btn" onclick="selectRisk('pilot-medication', 3)" data-value="3">yes</button>
-                        <button class="risk-btn" disabled data-value="4"></button>
-                        <button class="risk-btn" disabled data-value="5"></button>
-                    </div>
-                    <div class="risk-total" id="pilot-medication-total">0</div>
-                </div>
-            </div>
-            
-            <div class="risk-row stacked">
-                <div class="risk-label">Stress</div>
-                <div class="risk-content">
-                    <div class="risk-buttons">
-                        <button class="risk-btn" onclick="selectRisk('pilot-stress', 1)" data-value="1">no</button>
-                        <button class="risk-btn" onclick="selectRisk('pilot-stress', 2)" data-value="2">low</button>
-                        <button class="risk-btn" onclick="selectRisk('pilot-stress', 3)" data-value="3">med</button>
-                        <button class="risk-btn" onclick="selectRisk('pilot-stress', 4)" data-value="4">high</button>
-                        <button class="risk-btn" onclick="selectRisk('pilot-stress', 5)" data-value="5">severe</button>
-                    </div>
-                    <div class="risk-total" id="pilot-stress-total">0</div>
-                </div>
-            </div>
-            
-            <div class="risk-row stacked">
-                <div class="risk-label">Alcohol (last 24 hrs)</div>
-                <div class="risk-content">
-                    <div class="risk-buttons">
-                        <button class="risk-btn" onclick="selectRisk('pilot-alcohol', 1)" data-value="1">no</button>
-                        <button class="risk-btn" onclick="selectRisk('pilot-alcohol', 2)" data-value="2">>20hr</button>
-                        <button class="risk-btn" onclick="selectRisk('pilot-alcohol', 3)" data-value="3">>18hr</button>
-                        <button class="risk-btn" onclick="selectRisk('pilot-alcohol', 4)" data-value="4">>12hr</button>
-                        <button class="risk-btn" onclick="selectRisk('pilot-alcohol', 5)" data-value="5">≥12hr</button>
-                    </div>
-                    <div class="risk-total" id="pilot-alcohol-total">0</div>
-                </div>
-            </div>
-            
-            <div class="risk-row stacked">
-                <div class="risk-label">Fatigue (hrs of sleep)</div>
-                <div class="risk-content">
-                    <div class="risk-buttons">
-                        <button class="risk-btn" onclick="selectRisk('pilot-fatigue', 1)" data-value="1">>8</button>
-                        <button class="risk-btn" onclick="selectRisk('pilot-fatigue', 2)" data-value="2">6-8</button>
-                        <button class="risk-btn" onclick="selectRisk('pilot-fatigue', 3)" data-value="3">5-6</button>
-                        <button class="risk-btn" onclick="selectRisk('pilot-fatigue', 4)" data-value="4">4-5</button>
-                        <button class="risk-btn" onclick="selectRisk('pilot-fatigue', 5)" data-value="5"><6</button>
-                    </div>
-                    <div class="risk-total" id="pilot-fatigue-total">0</div>
-                </div>
-            </div>
-            
-            <div class="risk-row stacked">
-                <div class="risk-label">Eating (hrs since last)</div>
-                <div class="risk-content">
-                    <div class="risk-buttons">
-                        <button class="risk-btn" onclick="selectRisk('pilot-eating', 1)" data-value="1"><2</button>
-                        <button class="risk-btn" onclick="selectRisk('pilot-eating', 2)" data-value="2">2-4</button>
-                        <button class="risk-btn" onclick="selectRisk('pilot-eating', 3)" data-value="3">4-5</button>
-                        <button class="risk-btn" onclick="selectRisk('pilot-eating', 4)" data-value="4">5-6</button>
-                        <button class="risk-btn" onclick="selectRisk('pilot-eating', 5)" data-value="5">>6</button>
-                    </div>
-                    <div class="risk-total" id="pilot-eating-total">0</div>
-                </div>
-            </div>
-            
-            <div class="risk-row stacked">
-                <div class="risk-label">Emotion</div>
-                <div class="risk-content">
-                    <div class="risk-buttons">
-                        <button class="risk-btn" onclick="selectRisk('pilot-emotion', 1)" data-value="1">low</button>
-                        <button class="risk-btn" disabled data-value="2"></button>
-                        <button class="risk-btn" onclick="selectRisk('pilot-emotion', 3)" data-value="3">med</button>
-                        <button class="risk-btn" disabled data-value="4"></button>
-                        <button class="risk-btn" onclick="selectRisk('pilot-emotion', 5)" data-value="5">high</button>
-                    </div>
-                    <div class="risk-total" id="pilot-emotion-total">0</div>
-                </div>
-            </div>
-            
-            <div class="risk-row stacked">
-                <div class="risk-label">Days in a row at Academy</div>
-                <div class="risk-content">
-                    <div class="risk-buttons">
-                        <button class="risk-btn" onclick="selectRisk('pilot-academy', 1)" data-value="1">≤2</button>
-                        <button class="risk-btn" onclick="selectRisk('pilot-academy', 2)" data-value="2">3</button>
-                        <button class="risk-btn" onclick="selectRisk('pilot-academy', 3)" data-value="3">4</button>
-                        <button class="risk-btn" onclick="selectRisk('pilot-academy', 4)" data-value="4">5</button>
-                        <button class="risk-btn" onclick="selectRisk('pilot-academy', 5)" data-value="5">≥6</button>
-                    </div>
-                    <div class="risk-total" id="pilot-academy-total">0</div>
-                </div>
-            </div>
-            
-            <div class="risk-row stacked">
-                <div class="risk-label">Currency for Flt (days)</div>
-                <div class="risk-content">
-                    <div class="risk-buttons">
-                        <button class="risk-btn" onclick="selectRisk('pilot-currency', 1)" data-value="1"><1</button>
-                        <button class="risk-btn" onclick="selectRisk('pilot-currency', 2)" data-value="2"><15</button>
-                        <button class="risk-btn" onclick="selectRisk('pilot-currency', 3)" data-value="3"><30</button>
-                        <button class="risk-btn" onclick="selectRisk('pilot-currency', 4)" data-value="4"><45</button>
-                        <button class="risk-btn" onclick="selectRisk('pilot-currency', 5)" data-value="5"><60</button>
-                    </div>
-                    <div class="risk-total" id="pilot-currency-total">0</div>
-                </div>
-            </div>
-            
-            <div class="risk-row" style="border-top: 1px solid #555; padding-top: 15px; margin-top: 15px;">
-                <div class="risk-label" style="font-weight: bold;">Pilot Total:</div>
-                <div></div>
-                <div class="risk-total" style="font-size: 18px;" id="pilot-section-total">0</div>
-            </div>
-        </div>
-
-        <!-- Aircraft Panel -->
-        <div class="risk-panel">
-            <div class="risk-panel-title">Aircraft</div>
-            <div class="risk-header">
-                <div class="risk-label"></div>
-                <div class="risk-numbers">
-                    <span>1</span>
-                    <span>2</span>
-                    <span>3</span>
-                    <span>4</span>
-                    <span>5</span>
-                </div>
-                <div class="risk-total">Total</div>
-            </div>
-            
-            <div class="risk-row stacked">
-                <div class="risk-label">Single eng. Aircraft (fpm)</div>
-                <div class="risk-content">
-                    <div class="risk-buttons">
-                        <button class="risk-btn" onclick="selectRisk('aircraft-single', 1)" data-value="1">≥550</button>
-                        <button class="risk-btn" onclick="selectRisk('aircraft-single', 2)" data-value="2">≥450</button>
-                        <button class="risk-btn" onclick="selectRisk('aircraft-single', 3)" data-value="3">≥350</button>
-                        <button class="risk-btn" onclick="selectRisk('aircraft-single', 4)" data-value="4">≥250</button>
-                        <button class="risk-btn" onclick="selectRisk('aircraft-single', 5)" data-value="5"><250</button>
-                    </div>
-                    <div class="risk-total" id="aircraft-single-total">0</div>
-                </div>
-            </div>
-            
-            <div class="risk-row stacked">
-                <div class="risk-label">Multi Eng. W/ OEI (fpm)</div>
-                <div class="risk-content">
-                    <div class="risk-buttons">
-                        <button class="risk-btn" onclick="selectRisk('aircraft-multi', 1)" data-value="1">≥200</button>
-                        <button class="risk-btn" onclick="selectRisk('aircraft-multi', 2)" data-value="2">≥150</button>
-                        <button class="risk-btn" onclick="selectRisk('aircraft-multi', 3)" data-value="3">≥100</button>
-                        <button class="risk-btn" onclick="selectRisk('aircraft-multi', 4)" data-value="4">≥50</button>
-                        <button class="risk-btn" onclick="selectRisk('aircraft-multi', 5)" data-value="5"><50</button>
-                    </div>
-                    <div class="risk-total" id="aircraft-multi-total">0</div>
-                </div>
-            </div>
-            
-            <div class="risk-row stacked">
-                <div class="risk-label">T/O or LDG Over 50' Obstacle</div>
-                <div class="risk-content">
-                    <div class="risk-buttons">
-                        <button class="risk-btn" onclick="selectRisk('aircraft-obstacle', 1)" data-value="1">No</button>
-                        <button class="risk-btn" disabled data-value="2"></button>
-                        <button class="risk-btn" disabled data-value="3"></button>
-                        <button class="risk-btn" onclick="selectRisk('aircraft-obstacle', 4)" data-value="4">Yes</button>
-                        <button class="risk-btn" disabled data-value="5"></button>
-                    </div>
-                    <div class="risk-total" id="aircraft-obstacle-total">0</div>
-                </div>
-            </div>
-            
-            <div class="risk-row stacked">
-                <div class="risk-label">Time to Next MX (hrs)</div>
-                <div class="risk-content">
-                    <div class="risk-buttons">
-                        <button class="risk-btn" onclick="selectRisk('aircraft-mx', 1)" data-value="1">>10</button>
-                        <button class="risk-btn" onclick="selectRisk('aircraft-mx', 2)" data-value="2">10-8</button>
-                        <button class="risk-btn" onclick="selectRisk('aircraft-mx', 3)" data-value="3">8-5</button>
-                        <button class="risk-btn" onclick="selectRisk('aircraft-mx', 4)" data-value="4">5-1.5</button>
-                        <button class="risk-btn" onclick="selectRisk('aircraft-mx', 5)" data-value="5"><1.5</button>
-                    </div>
-                    <div class="risk-total" id="aircraft-mx-total">0</div>
-                </div>
-            </div>
-            
-            <div class="risk-row" style="border-top: 1px solid #555; padding-top: 15px; margin-top: 15px;">
-                <div class="risk-label" style="font-weight: bold;">Aircraft Total:</div>
-                <div></div>
-                <div class="risk-total" style="font-size: 18px;" id="aircraft-section-total">0</div>
-            </div>
-        </div>
-
-        <!-- Environment Panel -->
-        <div class="risk-panel">
-            <div class="risk-panel-title">enVironment</div>
-            <div class="risk-header">
-                <div class="risk-label"></div>
-                <div class="risk-numbers">
-                    <span>1</span>
-                    <span>2</span>
-                    <span>3</span>
-                    <span>4</span>
-                    <span>5</span>
-                </div>
-                <div class="risk-total">Total</div>
-            </div>
-            
-            <div class="risk-row stacked">
-                <div class="risk-label">Mission Duration >3hrs</div>
-                <div class="risk-content">
-                    <div class="risk-buttons">
-                        <button class="risk-btn" onclick="selectRisk('env-duration', 1)" data-value="1">no</button>
-                        <button class="risk-btn" disabled data-value="2"></button>
-                        <button class="risk-btn" onclick="selectRisk('env-duration', 3)" data-value="3">yes</button>
-                        <button class="risk-btn" disabled data-value="4"></button>
-                        <button class="risk-btn" disabled data-value="5"></button>
-                    </div>
-                    <div class="risk-total" id="env-duration-total">0</div>
-                </div>
-            </div>
-            
-            <div class="risk-row stacked">
-                <div class="risk-label">Back to Back Flights</div>
-                <div class="risk-content">
-                    <div class="risk-buttons">
-                        <button class="risk-btn" onclick="selectRisk('env-backtoback', 1)" data-value="1">no</button>
-                        <button class="risk-btn" disabled data-value="2"></button>
-                        <button class="risk-btn" onclick="selectRisk('env-backtoback', 3)" data-value="3">yes</button>
-                        <button class="risk-btn" disabled data-value="4"></button>
-                        <button class="risk-btn" disabled data-value="5"></button>
-                    </div>
-                    <div class="risk-total" id="env-backtoback-total">0</div>
-                </div>
-            </div>
-            
-            <div class="risk-row stacked">
-                <div class="risk-label">Going to new airport</div>
-                <div class="risk-content">
-                    <div class="risk-buttons">
-                        <button class="risk-btn" onclick="selectRisk('env-newairport', 1)" data-value="1">no</button>
-                        <button class="risk-btn" disabled data-value="2"></button>
-                        <button class="risk-btn" onclick="selectRisk('env-newairport', 3)" data-value="3">yes</button>
-                        <button class="risk-btn" disabled data-value="4"></button>
-                        <button class="risk-btn" disabled data-value="5"></button>
-                    </div>
-                    <div class="risk-total" id="env-newairport-total">0</div>
-                </div>
-            </div>
-            
-            <div class="risk-row stacked">
-                <div class="risk-label">Departure visibility (sm)</div>
-                <div class="risk-content">
-                    <div class="risk-buttons">
-                        <button class="risk-btn" onclick="selectRisk('env-depvis', 1)" data-value="1">≥6 sm</button>
-                        <button class="risk-btn" onclick="selectRisk('env-depvis', 2)" data-value="2">5 sm</button>
-                        <button class="risk-btn" onclick="selectRisk('env-depvis', 3)" data-value="3">4 sm</button>
-                        <button class="risk-btn" onclick="selectRisk('env-depvis', 4)" data-value="4">3 sm</button>
-                        <button class="risk-btn" onclick="selectRisk('env-depvis', 5)" data-value="5"><3 sm</button>
-                    </div>
-                    <div class="risk-total" id="env-depvis-total">0</div>
-                </div>
-            </div>
-            
-            <div class="risk-row stacked">
-                <div class="risk-label">Departure Ceiling (ft)</div>
-                <div class="risk-content">
-                    <div class="risk-buttons">
-                        <button class="risk-btn" onclick="selectRisk('env-depceil', 1)" data-value="1">≥5000</button>
-                        <button class="risk-btn" onclick="selectRisk('env-depceil', 2)" data-value="2">≥3000</button>
-                        <button class="risk-btn" onclick="selectRisk('env-depceil', 3)" data-value="3">≥1500</button>
-                        <button class="risk-btn" onclick="selectRisk('env-depceil', 4)" data-value="4">≥800</button>
-                        <button class="risk-btn" onclick="selectRisk('env-depceil', 5)" data-value="5"><800</button>
-                    </div>
-                    <div class="risk-total" id="env-depceil-total">0</div>
-                </div>
-            </div>
-            
-            <div class="risk-row stacked">
-                <div class="risk-label">Destination Visibility (sm)</div>
-                <div class="risk-content">
-                    <div class="risk-buttons">
-                        <button class="risk-btn" onclick="selectRisk('env-destvis', 1)" data-value="1">≥6 sm</button>
-                        <button class="risk-btn" onclick="selectRisk('env-destvis', 2)" data-value="2">5 sm</button>
-                        <button class="risk-btn" onclick="selectRisk('env-destvis', 3)" data-value="3">4 sm</button>
-                        <button class="risk-btn" onclick="selectRisk('env-destvis', 4)" data-value="4">3 sm</button>
-                        <button class="risk-btn" onclick="selectRisk('env-destvis', 5)" data-value="5"><3 sm</button>
-                    </div>
-                    <div class="risk-total" id="env-destvis-total">0</div>
-                </div>
-            </div>
-            
-            <div class="risk-row stacked">
-                <div class="risk-label">Destination Ceiling (ft)</div>
-                <div class="risk-content">
-                    <div class="risk-buttons">
-                        <button class="risk-btn" onclick="selectRisk('env-destceil', 1)" data-value="1">≥5000</button>
-                        <button class="risk-btn" onclick="selectRisk('env-destceil', 2)" data-value="2">≥3000</button>
-                        <button class="risk-btn" onclick="selectRisk('env-destceil', 3)" data-value="3">≥1500</button>
-                        <button class="risk-btn" onclick="selectRisk('env-destceil', 4)" data-value="4">≥800</button>
-                        <button class="risk-btn" onclick="selectRisk('env-destceil', 5)" data-value="5"><800</button>
-                    </div>
-                    <div class="risk-total" id="env-destceil-total">0</div>
-                </div>
-            </div>
-            
-            <div class="risk-row stacked">
-                <div class="risk-label">X-wind as % of max</div>
-                <div class="risk-content">
-                    <div class="risk-buttons">
-                        <button class="risk-btn" onclick="selectRisk('env-xwind', 1)" data-value="1"><20%</button>
-                        <button class="risk-btn" onclick="selectRisk('env-xwind', 2)" data-value="2">20-49%</button>
-                        <button class="risk-btn" onclick="selectRisk('env-xwind', 3)" data-value="3">50-79%</button>
-                        <button class="risk-btn" onclick="selectRisk('env-xwind', 4)" data-value="4">80-99%</button>
-                        <button class="risk-btn" onclick="selectRisk('env-xwind', 5)" data-value="5">≥100%</button>
-                    </div>
-                    <div class="risk-total" id="env-xwind-total">0</div>
-                </div>
-            </div>
-            
-            <div class="risk-row" style="border-top: 1px solid #555; padding-top: 15px; margin-top: 15px;">
-                <div class="risk-label" style="font-weight: bold;">Environment Total:</div>
-                <div></div>
-                <div class="risk-total" style="font-size: 18px;" id="environment-section-total">0</div>
-            </div>
-        </div>
-
-        <!-- External Pressures Panel -->
-        <div class="risk-panel">
-            <div class="risk-panel-title">External Pressures</div>
-            <div class="risk-header">
-                <div class="risk-label"></div>
-                <div class="risk-numbers">
-                    <span>1</span>
-                    <span>2</span>
-                    <span>3</span>
-                    <span>4</span>
-                    <span>5</span>
-                </div>
-                <div class="risk-total">Total</div>
-            </div>
-            
-            <div class="risk-row stacked">
-                <div class="risk-label">Recent death of friend/family</div>
-                <div class="risk-content">
-                    <div class="risk-buttons">
-                        <button class="risk-btn" onclick="selectRisk('ext-death', 1)" data-value="1">no</button>
-                        <button class="risk-btn" disabled data-value="2"></button>
-                        <button class="risk-btn" disabled data-value="3"></button>
-                        <button class="risk-btn" disabled data-value="4"></button>
-                        <button class="risk-btn" onclick="selectRisk('ext-death', 5)" data-value="5">yes</button>
-                    </div>
-                    <div class="risk-total" id="ext-death-total">0</div>
-                </div>
-            </div>
-            
-            <div class="risk-row stacked">
-                <div class="risk-label">Pressure to complete mission</div>
-                <div class="risk-content">
-                    <div class="risk-buttons">
-                        <button class="risk-btn" onclick="selectRisk('ext-pressure', 1)" data-value="1">no</button>
-                        <button class="risk-btn" disabled data-value="2"></button>
-                        <button class="risk-btn" onclick="selectRisk('ext-pressure', 3)" data-value="3">yes</button>
-                        <button class="risk-btn" disabled data-value="4"></button>
-                        <button class="risk-btn" disabled data-value="5"></button>
-                    </div>
-                    <div class="risk-total" id="ext-pressure-total">0</div>
-                </div>
-            </div>
-            
-            <div class="risk-row stacked">
-                <div class="risk-label">Illness/Emergency w/ friend/family</div>
-                <div class="risk-content">
-                    <div class="risk-buttons">
-                        <button class="risk-btn" onclick="selectRisk('ext-emergency', 1)" data-value="1">no</button>
-                        <button class="risk-btn" disabled data-value="2"></button>
-                        <button class="risk-btn" disabled data-value="3"></button>
-                        <button class="risk-btn" onclick="selectRisk('ext-emergency', 4)" data-value="4">yes</button>
-                        <button class="risk-btn" disabled data-value="5"></button>
-                    </div>
-                    <div class="risk-total" id="ext-emergency-total">0</div>
-                </div>
-            </div>
-            
-            <div class="risk-row stacked">
-                <div class="risk-label">Mission # for the day</div>
-                <div class="risk-content">
-                    <div class="risk-buttons">
-                        <button class="risk-btn" onclick="selectRisk('ext-mission', 1)" data-value="1">1st</button>
-                        <button class="risk-btn" onclick="selectRisk('ext-mission', 2)" data-value="2">2nd</button>
-                        <button class="risk-btn" onclick="selectRisk('ext-mission', 3)" data-value="3">3rd</button>
-                        <button class="risk-btn" onclick="selectRisk('ext-mission', 4)" data-value="4">4th</button>
-                        <button class="risk-btn" onclick="selectRisk('ext-mission', 5)" data-value="5">5th</button>
-                    </div>
-                    <div class="risk-total" id="ext-mission-total">0</div>
-                </div>
-            </div>
-            
-            <div class="risk-row stacked">
-                <div class="risk-label">Mission type</div>
-                <div class="risk-content">
-                    <div class="risk-buttons">
-                        <button class="risk-btn" onclick="selectRisk('ext-type', 1)" data-value="1">Dual</button>
-                        <button class="risk-btn" onclick="selectRisk('ext-type', 2)" data-value="2">Solo</button>
-                        <button class="risk-btn" onclick="selectRisk('ext-type', 3)" data-value="3">Night</button>
-                        <button class="risk-btn" onclick="selectRisk('ext-type', 4)" data-value="4">IMC</button>
-                        <button class="risk-btn" onclick="selectRisk('ext-type', 5)" data-value="5">LIFR</button>
-                    </div>
-                    <div class="risk-total" id="ext-type-total">0</div>
-                </div>
-            </div>
-            
-            <div class="risk-row" style="border-top: 1px solid #555; padding-top: 15px; margin-top: 15px;">
-                <div class="risk-label" style="font-weight: bold;">External Pressures Total:</div>
-                <div></div>
-                <div class="risk-total" style="font-size: 18px;" id="external-section-total">0</div>
-            </div>
-        </div>
-
-        <!-- Grand Total Panel -->
-        <div class="risk-panel">
-            <div class="risk-panel-title">GRAND TOTAL</div>
-            <div class="grand-total green" id="grand-total-display">0</div>
-            <div id="risk-message" style="text-align: center; margin-top: 15px; font-weight: bold; color: #ccc;">
-                SP solos require IP sign off
-            </div>
-        </div>
-    </div>
-
-    <!-- Column Resizer between Risk Column and Settings Panel -->
-    <div class="column-resizer" data-resize="risk-settings"></div>
+    <!-- Column Resizer between Right Column and Settings Panel -->
+    <div class="column-resizer" data-resize="right-settings"></div>
 
     <!-- Settings Panel (Column D) -->
     <div class="settings-panel" style="padding: 20px; overflow-y: auto; height: 100vh;">
-        <h2 id="lightspeed-toggle" style="color: #4CAF50; margin-bottom: 20px; font-size: 18px; cursor: pointer; user-select: none; transition: color 0.3s ease;" title="Secret lightspeed mode toggle">Settings</h2>
+        <h2 style="color: #4CAF50; margin-bottom: 20px; font-size: 18px;">Settings</h2>
         
         <!-- User Profile Section -->
         <div class="input-section">
@@ -3054,92 +2228,50 @@
 
     </div> <!-- Close desktop-layout div -->
 
-    <!-- Floating Risk Toggle (Desktop Only) -->
-    <div class="risk-toggle" onclick="toggleRiskPanel()" style="
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        width: 50px;
-        height: 50px;
-        background: linear-gradient(135deg, rgba(255, 152, 0, 0.3) 0%, rgba(255, 152, 0, 0.1) 100%);
-        border: 1px solid #FF9800;
-        border-radius: 50%;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 24px;
-        z-index: 1000;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-        transition: all 0.3s ease;
-    " onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-        ⚠️
-    </div>
-
-    <!-- Floating Settings Toggle (Desktop Only) -->
-    <div class="settings-toggle" onclick="toggleSettingsPanel()" style="
+    <!-- Floating Home Link (Desktop Only) -->
+    <a class="home-chip" href="index.html" title="Back to Pilot Study Tools" style="
         position: fixed;
         top: 20px;
         right: 80px;
-        width: 50px;
-        height: 50px;
-        background: linear-gradient(135deg, rgba(76, 175, 80, 0.3) 0%, rgba(76, 175, 80, 0.1) 100%);
-        border: 1px solid #4CAF50;
-        border-radius: 50%;
+        height: 36px;
+        padding: 0 14px;
+        background: rgba(13, 13, 16, 0.9);
+        border: 1px solid #2a2a30;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        z-index: 1000;
+        color: #999;
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        letter-spacing: 2px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    " onmouseover="this.style.borderColor='#4af'; this.style.color='#fff';" onmouseout="this.style.borderColor='#2a2a30'; this.style.color='#999';">
+        ⌂ HOME
+    </a>
+
+    <!-- Floating Settings Toggle (Desktop Only) -->
+    <div class="settings-toggle" onclick="toggleSettingsPanel()" title="Toggle settings panel" style="
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        width: 36px;
+        height: 36px;
+        background: rgba(13, 13, 16, 0.9);
+        border: 1px solid #2a2a30;
+        border-radius: 8px;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 24px;
+        font-size: 16px;
         z-index: 1000;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-        transition: all 0.3s ease;
-    " onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+        transition: all 0.2s ease;
+    " onmouseover="this.style.borderColor='#4CAF50';" onmouseout="this.style.borderColor='#2a2a30';">
         ⚙️
-    </div>
-
-    <!-- Floating Chairfly Toggle (Desktop Only) -->
-    <div class="chairfly-toggle" onclick="window.location.href='p2006t_chairfly.html'" style="
-        position: fixed;
-        top: 20px;
-        right: 140px;
-        width: 50px;
-        height: 50px;
-        background: linear-gradient(135deg, rgba(100, 160, 255, 0.3) 0%, rgba(100, 160, 255, 0.1) 100%);
-        border: 2px solid #64a0ff;
-        border-radius: 50%;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 22px;
-        z-index: 1000;
-        box-shadow: 0 4px 12px rgba(100, 160, 255, 0.4);
-        transition: all 0.3s ease;
-    " onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 6px 20px rgba(100, 160, 255, 0.6)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 12px rgba(100, 160, 255, 0.4)'" title="Chairfly Trainer">
-        🪑
-    </div>
-
-    <!-- Floating Emergency Toggle (Desktop Only) -->
-    <div class="emergency-toggle" onclick="window.location.href='study.html'" style="
-        position: fixed;
-        top: 20px;
-        right: 200px;
-        width: 50px;
-        height: 50px;
-        background: linear-gradient(135deg, rgba(244, 67, 54, 0.4) 0%, rgba(244, 67, 54, 0.15) 100%);
-        border: 2px solid #f44336;
-        border-radius: 50%;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 22px;
-        z-index: 1000;
-        box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
-        transition: all 0.3s ease;
-    " onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 6px 20px rgba(244, 67, 54, 0.6)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 12px rgba(244, 67, 54, 0.4)'" title="Multi-Engine Study">
-        🚨
     </div>
 
     <!-- Mobile Navigation (Mobile Only) -->
@@ -3167,21 +2299,13 @@
             <div class="nav-icon">📈</div>
             <div>Charts</div>
         </button>
-        <button class="mobile-nav-btn" onclick="showMobileColumn('risk')">
-            <div class="nav-icon">⚠️</div>
-            <div>Risk</div>
-        </button>
         <button class="mobile-nav-btn" onclick="showMobileColumn('settings')">
             <div class="nav-icon">⚙️</div>
             <div>Settings</div>
         </button>
-        <button class="mobile-nav-btn" onclick="window.location.href='study.html'" style="border-color: #f44336;">
-            <div class="nav-icon">🚨</div>
-            <div>Study</div>
-        </button>
-        <button class="mobile-nav-btn" onclick="window.location.href='p2006t_chairfly.html'" style="border-color: #64a0ff;">
-            <div class="nav-icon">🪑</div>
-            <div>Chairfly</div>
+        <button class="mobile-nav-btn" onclick="window.location.href='index.html'">
+            <div class="nav-icon">⌂</div>
+            <div>Home</div>
         </button>
     </div>
 
@@ -3209,8 +2333,8 @@
             }
             
             // Remove all mobile column classes
-            desktopLayout.classList.remove('mobile-show-left', 'mobile-show-right', 'mobile-show-risk', 'mobile-show-settings');
-            
+            desktopLayout.classList.remove('mobile-show-left', 'mobile-show-right', 'mobile-show-settings');
+
             // Add appropriate mobile column class
             switch(column) {
                 case 'left':
@@ -3227,41 +2351,9 @@
                         drawCGChart();
                     }, 100);
                     break;
-                case 'risk':
-                    desktopLayout.classList.add('mobile-show-risk');
-                    // Redraw risk assessment after a short delay
-                    setTimeout(() => {
-                        updateGrandTotal();
-                    }, 100);
-                    break;
                 case 'settings':
                     desktopLayout.classList.add('mobile-show-settings');
                     break;
-            }
-        }
-
-
-        // Toggle risk panel visibility (desktop only)
-        function toggleRiskPanel() {
-            const riskPanel = document.querySelector('.risk-column');
-            const desktopLayout = document.querySelector('.desktop-layout');
-            
-            if (!riskPanel || !desktopLayout) return;
-            
-            // Check if risk panel is currently visible
-            const isVisible = riskPanel.classList.contains('risk-visible') || 
-                             (window.getComputedStyle(riskPanel).display !== 'none');
-            
-            if (isVisible) {
-                // Hide the risk panel
-                riskPanel.classList.add('risk-hidden');
-                riskPanel.classList.remove('risk-visible');
-                desktopLayout.classList.add('risk-collapsed');
-            } else {
-                // Show the risk panel
-                riskPanel.classList.remove('risk-hidden');
-                riskPanel.classList.add('risk-visible');
-                desktopLayout.classList.remove('risk-collapsed');
             }
         }
 
@@ -3340,89 +2432,6 @@
             }
         }
 
-        // Risk Assessment Functions
-        let riskScores = {};
-
-        function selectRisk(riskId, value) {
-            // Remove selection from all buttons in this row
-            const row = document.querySelector(`#${riskId}-total`).closest('.risk-row');
-            const buttons = row.querySelectorAll('.risk-btn');
-            buttons.forEach(btn => {
-                btn.classList.remove('selected-1', 'selected-2', 'selected-3', 'selected-4', 'selected-5');
-            });
-
-            // Add selection to clicked button
-            const clickedButton = row.querySelector(`[data-value="${value}"]`);
-            if (clickedButton) {
-                clickedButton.classList.add(`selected-${value}`);
-            }
-
-            // Store the score
-            riskScores[riskId] = value;
-
-            // Update row total
-            document.getElementById(`${riskId}-total`).textContent = value;
-
-            // Update section totals
-            updateSectionTotals();
-            updateGrandTotal();
-        }
-
-        function updateSectionTotals() {
-            // Pilot section
-            const pilotItems = ['pilot-illness', 'pilot-medication', 'pilot-stress', 'pilot-alcohol', 
-                              'pilot-fatigue', 'pilot-eating', 'pilot-emotion', 'pilot-academy', 'pilot-currency'];
-            let pilotTotal = pilotItems.reduce((sum, item) => sum + (riskScores[item] || 0), 0);
-            document.getElementById('pilot-section-total').textContent = pilotTotal;
-
-            // Aircraft section
-            const aircraftItems = ['aircraft-single', 'aircraft-multi', 'aircraft-obstacle', 'aircraft-mx'];
-            let aircraftTotal = aircraftItems.reduce((sum, item) => sum + (riskScores[item] || 0), 0);
-            document.getElementById('aircraft-section-total').textContent = aircraftTotal;
-
-            // Environment section
-            const envItems = ['env-duration', 'env-backtoback', 'env-newairport', 'env-depvis', 
-                            'env-depceil', 'env-destvis', 'env-destceil', 'env-xwind'];
-            let envTotal = envItems.reduce((sum, item) => sum + (riskScores[item] || 0), 0);
-            document.getElementById('environment-section-total').textContent = envTotal;
-
-            // External Pressures section
-            const extItems = ['ext-death', 'ext-pressure', 'ext-emergency', 'ext-mission', 'ext-type'];
-            let extTotal = extItems.reduce((sum, item) => sum + (riskScores[item] || 0), 0);
-            document.getElementById('external-section-total').textContent = extTotal;
-        }
-
-        function updateGrandTotal() {
-            const pilotTotal = parseInt(document.getElementById('pilot-section-total').textContent) || 0;
-            const aircraftTotal = parseInt(document.getElementById('aircraft-section-total').textContent) || 0;
-            const envTotal = parseInt(document.getElementById('environment-section-total').textContent) || 0;
-            const extTotal = parseInt(document.getElementById('external-section-total').textContent) || 0;
-
-            const grandTotal = pilotTotal + aircraftTotal + envTotal + extTotal;
-            
-            const grandTotalDisplay = document.getElementById('grand-total-display');
-            const riskMessage = document.getElementById('risk-message');
-            
-            grandTotalDisplay.textContent = grandTotal;
-            
-            // Update color and message based on total
-            grandTotalDisplay.classList.remove('green', 'yellow', 'red');
-            
-            if (grandTotal <= 29) {
-                grandTotalDisplay.classList.add('green');
-                riskMessage.textContent = 'SP solos require IP sign off';
-                riskMessage.style.color = '#4CAF50';
-            } else if (grandTotal <= 39) {
-                grandTotalDisplay.classList.add('yellow');
-                riskMessage.textContent = 'All Solos require IP sign off';
-                riskMessage.style.color = '#FFC107';
-            } else {
-                grandTotalDisplay.classList.add('red');
-                riskMessage.textContent = 'Requires Manager Approval';
-                riskMessage.style.color = '#f44336';
-            }
-        }
-
         // Column Resizing Functionality
         function initializeColumnResizers() {
             const resizers = document.querySelectorAll('.column-resizer');
@@ -3446,11 +2455,8 @@
                     if (resizeType === 'left-right') {
                         leftColumn = document.querySelector('.left-panel');
                         rightColumn = document.querySelector('.right-column');
-                    } else if (resizeType === 'right-risk') {
+                    } else if (resizeType === 'right-settings') {
                         leftColumn = document.querySelector('.right-column');
-                        rightColumn = document.querySelector('.risk-column');
-                    } else if (resizeType === 'risk-settings') {
-                        leftColumn = document.querySelector('.risk-column');
                         rightColumn = document.querySelector('.settings-panel');
                     }
                     
@@ -3475,15 +2481,12 @@
                     // Set minimum widths based on column type
                     let minWidthLeft = 200;
                     let minWidthRight = 200;
-                    
-                    // Risk Assessment column needs more space
-                    if (rightColumn && rightColumn.classList.contains('risk-column')) {
-                        minWidthRight = 480;
+
+                    // Data-entry panel needs room for label + input rows
+                    if (leftColumn && leftColumn.classList.contains('left-panel')) {
+                        minWidthLeft = 280;
                     }
-                    if (leftColumn && leftColumn.classList.contains('risk-column')) {
-                        minWidthLeft = 480;
-                    }
-                    
+
                     // Settings panel minimum width
                     if (rightColumn && rightColumn.classList.contains('settings-panel')) {
                         minWidthRight = 250;
@@ -3521,7 +2524,6 @@
             const panels = [
                 { id: 'width-a', element: document.querySelector('.left-panel') },
                 { id: 'width-b', element: document.querySelector('.right-column') },
-                { id: 'width-c', element: document.querySelector('.risk-column') },
                 { id: 'width-d', element: document.querySelector('.settings-panel') }
             ];
             
@@ -3543,7 +2545,6 @@
             const panels = [
                 { name: 'Panel A (Data)', element: document.querySelector('.left-panel') },
                 { name: 'Panel B (Charts)', element: document.querySelector('.right-column') },
-                { name: 'Panel C (Risk Assessment)', element: document.querySelector('.risk-column') },
                 { name: 'Panel D (Settings)', element: document.querySelector('.settings-panel') }
             ];
             
@@ -5972,7 +4973,19 @@ const P2006T_SE_PERFORMANCE = {
             
             // Load saved data and trigger initial calculations
             loadPersistedData();
-            
+
+            // Honor ?defaultAircraft=C-152 style links from the home page.
+            // Applied after persisted data so an explicit link wins.
+            const urlAircraft = new URLSearchParams(window.location.search).get('defaultAircraft');
+            if (urlAircraft) {
+                const typeSelect = document.getElementById('aircraftType');
+                if (typeSelect && [...typeSelect.options].some(o => o.value === urlAircraft)) {
+                    typeSelect.value = urlAircraft;
+                    typeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                    populateAircraftSpecificValues(urlAircraft);
+                }
+            }
+
             // Initialize charts for both desktop and mobile
             setTimeout(() => {
                 updateCGLimitsDisplay();
@@ -6135,7 +5148,7 @@ const P2006T_SE_PERFORMANCE = {
                 const desktopLayout = document.querySelector('.desktop-layout');
                 if (desktopLayout) {
                     // Remove any existing mobile classes
-                    desktopLayout.classList.remove('mobile-show-left', 'mobile-show-right', 'mobile-show-risk', 'mobile-show-settings');
+                    desktopLayout.classList.remove('mobile-show-left', 'mobile-show-right', 'mobile-show-settings');
                     // Set to show Data column (left panel) by default
                     desktopLayout.classList.add('mobile-show-left');
                     console.log('Set mobile to show Data column by default');
@@ -8358,418 +7371,6 @@ function updateFormFieldsFromWeather(weatherData) {
     }
 }
 
-// Hyperspace Canvas Effect - Donut Origin + Longer Streaks
-(() => {
-    const canvas = document.getElementById("hyperspace-canvas");
-    const ctx = canvas.getContext("2d", { alpha: false });
-
-    const TAU = Math.PI * 2;
-    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-    const lerp = (a, b, t) => a + (b - a) * t;
-    const rand = (a, b) => a + Math.random() * (b - a);
-
-    let W = 0, H = 0, CX = 0, CY = 0, R = 0, dpr = 1;
-    let beams = [];
-
-    // PERFORMANCE
-    const MAX_BEAMS = 160;       // Reduced for mobile performance
-    const SOFT_CLEAR = 0.10;     // LOWER = longer persistence
-    const USE_GLOW = false;      // Keep off for performance
-    const MAX_DPR = 1.5;
-
-    // LOOK: push origins away from center (donut), and make streaks last longer
-    const BIRTH_MIN = 0.07;      // Minimum spawn radius (fraction of R)
-    const BIRTH_MAX = 0.28;      // Maximum spawn radius (fraction of R)
-    const ANGLE_JITTER_DEG = 1.8;
-
-    // Longer streaks:
-    const TAIL_MIN = 0.14;       // Fraction of R
-    const TAIL_MAX = 0.40;       // Fraction of R
-    const DEATH_FADE_MIN = 0.25; // Seconds
-    const DEATH_FADE_MAX = 0.55; // Seconds
-
-    function resize() {
-        dpr = Math.max(1, Math.min(MAX_DPR, window.devicePixelRatio || 1));
-        W = Math.floor(innerWidth * dpr);
-        H = Math.floor(innerHeight * dpr);
-        canvas.width = W;
-        canvas.height = H;
-        canvas.style.width = innerWidth + "px";
-        canvas.style.height = innerHeight + "px";
-
-        CX = W / 2;
-        CY = H / 2;
-        R = Math.hypot(CX, CY);
-
-        for (const b of beams) b.target = R * rand(1.02, 1.18);
-
-        // Adjust beam count for mobile
-        const targetBeams = window.innerWidth < 768 ? 100 : MAX_BEAMS;
-        while (beams.length < targetBeams) beams.push(newBeam());
-        if (beams.length > targetBeams) beams.length = targetBeams;
-    }
-    window.addEventListener("resize", resize);
-
-    function randomStartBlue() {
-        return {
-            r: Math.round(rand(70, 150)),
-            g: Math.round(rand(130, 205)),
-            b: Math.round(rand(220, 255))
-        };
-    }
-
-    function birthRadius() {
-        // Uniform in area for a donut (prevents "too many near center")
-        // Area-uniform: sqrt(lerp(rmin^2, rmax^2, u))
-        const rmin = BIRTH_MIN * R;
-        const rmax = BIRTH_MAX * R;
-        const u = Math.random();
-        return Math.sqrt(lerp(rmin * rmin, rmax * rmax, u));
-    }
-
-    function newBeam() {
-        const jitter = (ANGLE_JITTER_DEG * Math.PI / 180) * rand(-1, 1);
-        const ang = rand(0, TAU) + jitter;
-
-        const depth = Math.pow(Math.random(), 1.7); // Far dominates
-
-        const edgeW = lerp(2, 20, 1 - depth) * (Math.random() < 0.10 ? rand(1.4, 2.1) : 1);
-        const startW = Math.max(0.35, edgeW * rand(0.02, 0.07));
-
-        const target = R * rand(1.02, 1.18);
-
-        // Slightly slower overall => rays persist longer before edge
-        const speed = lerp(520, 1650, 1 - depth) * rand(0.85, 1.10); // Reduced for performance
-
-        const tailPx = lerp(R * TAIL_MIN, R * TAIL_MAX, 1 - depth) * rand(0.85, 1.15);
-        const deathFade = rand(DEATH_FADE_MIN, DEATH_FADE_MAX);
-
-        const startCol = randomStartBlue();
-        const alpha = lerp(0.08, 0.20, 1 - depth); // Reduced for performance
-        const glow = lerp(4, 12, 1 - depth); // Reduced for performance
-
-        const birth = birthRadius();
-
-        return {
-            ang, depth,
-            startW, edgeW,
-            startCol,
-            alpha, glow,
-
-            birth,
-            head: birth,
-            speed,
-            tailPx,
-            target,
-
-            dead: false,
-            deathT: 0,
-            deathFade
-        };
-    }
-
-    function softClear() {
-        ctx.globalCompositeOperation = "source-over";
-        ctx.fillStyle = `rgba(0,0,0,${SOFT_CLEAR})`;
-        ctx.fillRect(0, 0, W, H);
-    }
-
-    function centerBloom() {
-        // Keep subtle so it doesn't read as "everything starts at center"
-        const g = ctx.createRadialGradient(CX, CY, 0, CX, CY, R * 0.18);
-        g.addColorStop(0, "rgba(20,40,90,0.05)");
-        g.addColorStop(1, "rgba(0,0,0,0)");
-        ctx.globalCompositeOperation = "source-over";
-        ctx.fillStyle = g;
-        ctx.fillRect(0, 0, W, H);
-    }
-
-    function drawBeam(b, dt, t) {
-        const ca = Math.cos(b.ang), sa = Math.sin(b.ang);
-        const px = -sa, py = ca;
-
-        if (!b.dead) {
-            b.head += b.speed * dt;
-            if (b.head >= b.target) {
-                b.dead = true;
-                b.deathT = 0;
-            }
-        } else {
-            b.deathT += dt;
-        }
-
-        const head = Math.min(b.head, b.target);
-
-        let deathK = 1;
-        if (b.dead) {
-            const u = clamp(b.deathT / b.deathFade, 0, 1);
-            deathK = 1 - u;
-        }
-
-        const tailLen = b.tailPx * deathK;
-        let tail = head - tailLen;
-
-        // Critical: never draw behind the birth radius -> prevents hard convergence to center
-        tail = Math.max(b.birth, tail);
-
-        if (b.dead && deathK <= 0.001) {
-            Object.assign(b, newBeam());
-            return;
-        }
-
-        if (head - tail < 1) return;
-
-        const x0 = CX + ca * tail, y0 = CY + sa * tail;
-        const x1 = CX + ca * head, y1 = CY + sa * head;
-
-        const r0 = tail / b.target;
-        const r1 = head / b.target;
-        const w0 = lerp(b.startW, b.edgeW, clamp(r0, 0, 1));
-        const w1 = lerp(b.startW, b.edgeW, clamp(r1, 0, 1));
-
-        // Color to white at edge
-        const { r, g, b: bb } = b.startCol;
-        const whiten = clamp(r1 * 1.25, 0, 1);
-        const er = Math.round(lerp(r, 255, whiten));
-        const eg = Math.round(lerp(g, 255, whiten));
-        const eb = Math.round(lerp(bb, 255, whiten));
-
-        const pulse = 0.90 + 0.10 * Math.sin(t * 5.5 + b.ang * 2.4);
-        const a = b.alpha * pulse * deathK;
-
-        const grad = ctx.createLinearGradient(x0, y0, x1, y1);
-        grad.addColorStop(0.0, `rgba(${r},${g},${bb},0)`);
-        grad.addColorStop(0.18, `rgba(${r},${g},${bb},${a * 0.55})`);
-        grad.addColorStop(0.80, `rgba(${er},${eg},${eb},${a * 0.92})`);
-        grad.addColorStop(1.0, `rgba(${er},${eg},${eb},${a})`);
-
-        ctx.save();
-        ctx.globalCompositeOperation = "lighter";
-        if (USE_GLOW) {
-            ctx.shadowBlur = b.glow;
-            ctx.shadowColor = `rgba(${er},${eg},${eb},${Math.min(1, a * 1.4)})`;
-        } else {
-            ctx.shadowBlur = 0;
-        }
-
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.moveTo(x0 + px * w0, y0 + py * w0);
-        ctx.lineTo(x1 + px * w1, y1 + py * w1);
-        ctx.lineTo(x1 - px * w1, y1 - py * w1);
-        ctx.lineTo(x0 - px * w0, y0 - py * w0);
-        ctx.closePath();
-        ctx.fill();
-        ctx.restore();
-    }
-
-    let last = 0;
-    function frame(ms) {
-        const t = ms * 0.001;
-        const dt = last ? Math.min(0.033, (ms - last) * 0.001) : 0.016;
-        last = ms;
-
-        softClear();
-        centerBloom();
-
-        // Cheap shuffle to break bands
-        for (let i = 0; i < 3; i++) { // Reduced for performance
-            const a = (Math.random() * beams.length) | 0;
-            const b = (Math.random() * beams.length) | 0;
-            const tmp = beams[a]; beams[a] = beams[b]; beams[b] = tmp;
-        }
-
-        for (const beam of beams) drawBeam(beam, dt, t);
-        requestAnimationFrame(frame);
-    }
-
-    // Initialize
-    resize();
-    ctx.fillStyle = "#000";
-    ctx.fillRect(0, 0, W, H);
-    while (beams.length < MAX_BEAMS) beams.push(newBeam());
-    requestAnimationFrame(frame);
-})();
-
-// Lightspeed Mode Toggle
-(() => {
-    // Default state: lightspeed mode OFF
-    let lightspeedMode = false;
-    
-    // Set initial state
-    document.body.classList.add('lightspeed-off');
-    
-    // Get the toggle element
-    const toggle = document.getElementById('lightspeed-toggle');
-    if (!toggle) return;
-    
-    // Get both canvases
-    const hyperspaceCanvas = document.getElementById('hyperspace-canvas');
-    const normalspaceCanvas = document.getElementById('normalspace-canvas');
-    
-    // Toggle function
-    function toggleLightspeed() {
-        lightspeedMode = !lightspeedMode;
-        
-        if (lightspeedMode) {
-            // Turn ON lightspeed mode
-            document.body.classList.remove('lightspeed-off');
-            document.body.classList.add('lightspeed-on');
-        } else {
-            // Turn OFF lightspeed mode
-            document.body.classList.remove('lightspeed-on');
-            document.body.classList.add('lightspeed-off');
-        }
-    }
-    
-    // Add click event listener
-    toggle.addEventListener('click', toggleLightspeed);
-    
-    // Add subtle hover effect
-    toggle.addEventListener('mouseenter', () => {
-        toggle.style.transform = 'scale(1.05)';
-    });
-    
-    toggle.addEventListener('mouseleave', () => {
-        toggle.style.transform = 'scale(1)';
-    });
-})();
-
-// Normal Space Effect - Lightweight Stars
-(() => {
-    const canvas = document.getElementById("normalspace-canvas");
-    const ctx = canvas.getContext("2d", { alpha: false });
-
-    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-    const lerp = (a, b, t) => a + (b - a) * t;
-    const rand = (a, b) => a + Math.random() * (b - a);
-
-    let W = 0, H = 0, dpr = 1;
-    let stars = [];
-
-    // PERFORMANCE KNOBS (tune these first)
-    const MAX_DPR = 1.25;       // cap retina cost hard (big perf win)
-    const STAR_COUNT = 260;     // fewer stars
-    const USE_GLOW = false;     // glow is expensive; keep off
-    const TWINKLE = true;       // can turn off if needed
-    const DRIFT = 10;           // px/sec (device px)
-
-    function resize() {
-        dpr = Math.max(1, Math.min(MAX_DPR, window.devicePixelRatio || 1));
-        W = Math.floor(innerWidth * dpr);
-        H = Math.floor(innerHeight * dpr);
-        canvas.width = W;
-        canvas.height = H;
-        canvas.style.width = innerWidth + "px";
-        canvas.style.height = innerHeight + "px";
-        initStars();
-    }
-    window.addEventListener("resize", resize);
-
-    function randomBlueWhite() {
-        // mostly white, sometimes blue-ish
-        if (Math.random() < 0.65) return { r: 255, g: 255, b: 255 };
-        return {
-            r: Math.round(rand(140, 210)),
-            g: Math.round(rand(170, 235)),
-            b: 255
-        };
-    }
-
-    function initStars() {
-        stars = new Array(STAR_COUNT).fill(0).map(() => {
-            const depth = Math.pow(Math.random(), 2.2); // far dominates
-            const sizeNorm = 1 - depth;
-
-            const r = lerp(0.6, 2.4, Math.pow(sizeNorm, 1.1)) * (Math.random() < 0.03 ? rand(1.8, 2.8) : 1);
-            const a = lerp(0.18, 0.95, Math.pow(sizeNorm, 0.9));
-
-            // simple parallax drift
-            const sp = DRIFT * lerp(0.35, 1.4, sizeNorm) * rand(0.8, 1.2);
-            const ang = rand(0, Math.PI * 2);
-            const vx = Math.cos(ang) * sp;
-            const vy = Math.sin(ang) * sp;
-
-            return {
-                x: rand(0, W),
-                y: rand(0, H),
-                vx, vy,
-                r,
-                a,
-                col: randomBlueWhite(),
-                twSpeed: rand(0.5, 1.3),
-                twPhase: rand(0, Math.PI * 2)
-            };
-        });
-    }
-
-    function wrap(s) {
-        const pad = s.r * 4;
-        if (s.x < -pad) s.x = W + pad;
-        else if (s.x > W + pad) s.x = -pad;
-
-        if (s.y < -pad) s.y = H + pad;
-        else if (s.y > H + pad) s.y = -pad;
-    }
-
-    // Precompute a single background gradient per resize (cheaper than remaking every frame)
-    let bg = null;
-    function rebuildBg() {
-        bg = ctx.createRadialGradient(W * 0.5, H * 0.45, 0, W * 0.5, H * 0.45, Math.hypot(W, H) * 0.6);
-        // keep it simple/cheap
-        bg.addColorStop(0, "rgb(2,4,10)");
-        bg.addColorStop(1, "rgb(0,0,0)");
-    }
-
-    let last = 0;
-    function frame(ms) {
-        const t = ms * 0.001;
-        const dt = last ? Math.min(0.05, (ms - last) * 0.001) : 0.016;
-        last = ms;
-
-        // background
-        ctx.globalCompositeOperation = "source-over";
-        ctx.fillStyle = bg;
-        ctx.fillRect(0, 0, W, H);
-
-        // stars
-        ctx.globalCompositeOperation = "lighter";
-        ctx.shadowBlur = 0;
-
-        for (const s of stars) {
-            s.x += s.vx * dt;
-            s.y += s.vy * dt;
-            wrap(s);
-
-            const tw = TWINKLE ? (0.85 + 0.15 * Math.sin(s.twPhase + t * s.twSpeed)) : 1;
-            const a = clamp(s.a * tw, 0, 1);
-
-            const { r, g, b } = s.col;
-
-            if (USE_GLOW) {
-                ctx.shadowBlur = Math.min(8, s.r * 5);
-                ctx.shadowColor = `rgba(${r},${g},${b},${a})`;
-            }
-
-            ctx.fillStyle = `rgba(${r},${g},${b},${a})`;
-            ctx.beginPath();
-            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-            ctx.fill();
-        }
-
-        ctx.globalCompositeOperation = "source-over";
-        requestAnimationFrame(frame);
-    }
-
-    resize();
-    rebuildBg();
-    requestAnimationFrame(frame);
-
-    // rebuild gradient after resize
-    window.addEventListener("resize", () => {
-        rebuildBg();
-    });
-})();
 </script>
 <!-- Cross-device flight sync (Recent Flights) -->
 <script src="wbsync.js"></script>

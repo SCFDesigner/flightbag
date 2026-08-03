@@ -1,14 +1,11 @@
-# CLAUDE.md — Student Pilot One-Stop Shop (P2006T / G1000)
+# CLAUDE.md — Pilot Study Tools (flight training site)
 
 ## Project Overview
-A web-based student pilot training tool for the Tecnam P2006T with Garmin G1000. Single-page app covering:
-- **Weight & Balance Calculator** (`index.html`) — interactive CG envelope calculator
-- **V-Speed Study** (`airspeeds quiz.html`) — flashcard-style airspeed quiz
-- **Chairfly Trainer** (`p2006t_chairfly.html`) — simulated G1000 cockpit for chair-flying procedures
+A static multi-page site of flight-training tools, hosted on GitHub Pages. `index.html` is the home page; every other page links back to it (⌂ Home).
 
 ## Data Accuracy Rule (non-negotiable)
 All values — airspeeds, weight limits, CG envelopes, checklists, procedures — must come from:
-- Tecnam P2006T POH / AFM
+- Aircraft POH / AFM (P2006T, C-152, C-172)
 - School-specific maneuvers guide
 - School-specific normal and emergency checklists
 
@@ -17,19 +14,23 @@ Never estimate, approximate, or invent values. If a number is in this tool, it h
 ## Stack
 - Plain HTML / CSS / JavaScript — no frameworks, no build step
 - Each page is a self-contained `.html` file
+- Cross-device flight sync via Firebase Realtime Database (`wbsync.js`, project `weight-and-balance-d5044`, no login)
 
 ## Git
-- Remote: `git@github.com:SCFDesigner/weight-balance-calculator.git`
+- Remote: `git@github.com:SCFDesigner/weight-balance-calculator.git` (SSH key not authorized on this machine — push over HTTPS with `-c credential.helper='!gh auth git-credential'`)
 - Branch: `main`
+- Note: the repo also hosts the unrelated `PEV1/` project on the same branch
 - Push after every implementation using `/usr/bin/git`
 
 ## File Map
 | File | Purpose |
 |------|---------|
-| `index.html` | Weight & balance calculator (main page) |
-| `airspeeds quiz.html` | V-speed study / quiz |
+| `index.html` | Home — Pilot Study Tools launcher |
+| `wb.html` | Weight & Balance calculator (C-152 / C-172 / P2006T / custom). Layout order matches the flight school's paper form — do not reorder. |
+| `wbsync.js` | Firebase cross-device sync for wb.html (Recent Flights) |
+| `study.html` | Study hub |
+| `p2006t_study.html` | P2006T multi-engine study |
+| `mnemonics.html` | Mnemonics reference |
+| `general_knowledge.html` | Regs / airspace knowledge |
+| `written-exams.html` | FOI + FIA written exam prep |
 | `p2006t_chairfly.html` | Chairfly trainer with G1000 simulation |
-| `p2006t-weight-balance.html` | Legacy W&B page |
-| `p2006t-wb-new.html` | W&B iteration |
-| `debug.html` | Debug/scratch page |
-| `airspeeds_quiz.py` | Legacy Python terminal quiz |

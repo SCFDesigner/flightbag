@@ -6,14 +6,15 @@ A web-based training tool for student pilots flying the **Tecnam P2006T** with a
 
 ## What's Inside
 
-### Weight & Balance Calculator (`index.html`)
-An interactive weight and balance tool for the P2006T. Enter passenger weights, baggage, and fuel to instantly calculate:
+### Home (`index.html`)
+Launcher for every tool — study, weight & balance, written exams, chairfly.
+
+### Weight & Balance Calculator (`wb.html`)
+An interactive weight and balance tool for the C-152, C-172, P2006T, and custom aircraft. Enter passenger weights, baggage, and fuel to instantly calculate:
 - Total weight and CG location
 - Whether the loading is within the aircraft's approved envelope
-- Visual envelope plot
-
-### Airspeed / V-Speed Study (`airspeeds quiz.html`)
-A flashcard-style study tool for memorizing P2006T V-speeds. All values are taken directly from the POH/AFM.
+- Visual envelope plot, performance numbers, and live METAR weather
+- Recent Flights sync across devices (Firebase, `wbsync.js`)
 
 ### FAA Written Exam Prep (`written-exams.html`)
 Full knowledge-test question banks with a course picker on load:
@@ -47,12 +48,3 @@ Nothing is estimated or approximated. If a value is in this tool, it has a sourc
 
 Built for personal use during primary flight training. The goal is a single tab that covers everything needed for ground study and pre-flight preparation — numbers, procedures, and chair-flying — without switching between multiple documents.
 
----
-
-## Python Quiz (Legacy)
-
-`airspeeds_quiz.py` is an earlier terminal-based V-speed quiz. Requires Python 3.6+.
-
-```bash
-python3 airspeeds_quiz.py
-```
