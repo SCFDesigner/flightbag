@@ -1587,6 +1587,9 @@
             }
         }
     </style>
+    <!-- Firebase (Realtime Database) for cross-device flight sync -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
 </head>
 <body>
     <!-- Hyperspace Canvas Background -->
@@ -2683,6 +2686,35 @@
                 <button onclick="clearUserProfile()" style="background: rgba(244, 67, 54, 0.2); color: white; border: 2px solid #f44336; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-size: 14px; width: 100%; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(244, 67, 54, 0.2);" onmouseover="this.style.background='rgba(244, 67, 54, 0.3)'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(244, 67, 54, 0.3)';" onmouseout="this.style.background='rgba(244, 67, 54, 0.2)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(244, 67, 54, 0.2)';">🗑️ Clear Data</button>
             </div>
             <div id="settingsStatus" style="margin-top: 10px; padding: 8px; border-radius: 4px; font-size: 12px; display: none;"></div>
+        </div>
+
+        <!-- Recent Flights Section (cross-device sync) -->
+        <div class="input-section">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                <h3 style="color: #e0e0e0; margin: 0; font-size: 16px;">Recent Flights</h3>
+                <span id="wbSyncStatus" title="Cloud sync status" style="font-size: 11px; color: #888; display: inline-flex; align-items: center; gap: 5px;">
+                    <span id="wbSyncDot" style="width: 8px; height: 8px; border-radius: 50%; background: #888; display: inline-block;"></span>
+                    <span id="wbSyncText">Connecting…</span>
+                </span>
+            </div>
+            <p style="color: #999; font-size: 11px; margin: 0 0 12px 0; line-height: 1.4;">
+                Save a flight here and it syncs to your other devices automatically. Open the same site on your phone to pick up where you left off.
+            </p>
+
+            <!-- Resume banner: appears when a newer in-progress flight exists on another device -->
+            <div id="wbResumeBanner" style="display: none; background: rgba(33, 150, 243, 0.12); border: 1px solid #2196F3; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px;">
+                <div style="color: #cfe8ff; font-size: 12px; margin-bottom: 8px;" id="wbResumeText">You have an unsaved flight from another device.</div>
+                <div style="display: flex; gap: 8px;">
+                    <button onclick="wbResumeLastFlight()" style="flex: 1; background: rgba(33, 150, 243, 0.25); color: #fff; border: 1px solid #2196F3; padding: 7px 10px; border-radius: 6px; cursor: pointer; font-size: 12px;">Resume it</button>
+                    <button onclick="wbDismissResume()" style="background: none; color: #9bb; border: 1px solid #456; padding: 7px 10px; border-radius: 6px; cursor: pointer; font-size: 12px;">Dismiss</button>
+                </div>
+            </div>
+
+            <button onclick="wbSaveCurrentFlight()" style="background: rgba(33, 150, 243, 0.2); color: white; border: 2px solid #2196F3; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-size: 14px; width: 100%; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2); margin-bottom: 12px;" onmouseover="this.style.background='rgba(33, 150, 243, 0.3)'; this.style.transform='translateY(-1px)';" onmouseout="this.style.background='rgba(33, 150, 243, 0.2)'; this.style.transform='translateY(0)';">💾 Save This Flight</button>
+
+            <div id="recentFlightsList" style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="color: #777; font-size: 12px; text-align: center; padding: 8px;">No saved flights yet.</div>
+            </div>
         </div>
 
         <!-- Aircraft Management Section -->
@@ -8739,5 +8771,7 @@ function updateFormFieldsFromWeather(weatherData) {
     });
 })();
 </script>
+<!-- Cross-device flight sync (Recent Flights) -->
+<script src="wbsync.js"></script>
 </body>
 </html>
