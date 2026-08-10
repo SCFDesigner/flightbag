@@ -382,8 +382,53 @@ function getSel() {
 }
 function lessonScript() {
   const sc = window.CFI_SCRIPTS && cur && window.CFI_SCRIPTS[cur.lesson.id];
-  if (sc && !sc._marked) { markScriptTopics(sc.nodes); sc._marked = true; }
+  if (sc && !sc._marked) {
+    markScriptTopics(sc.nodes);
+    mapScriptImages(sc, cur.lesson.con);
+    sc._marked = true;
+  }
   return sc;
+}
+
+/* Anchor lesson-plan images into the authored script at the matching spot,
+   preserving lesson-plan order. Each image's anchor text is its own line (or
+   the nearest bold heading above it); that text is fuzzy-matched against the
+   script lines. Unmatchable images fall through to a gallery at the end. */
+function simTokens(s) {
+  return new Set(s.toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').split(/\s+/)
+    .filter(w => w.length > 2 && !/^(the|and|for|are|that|this|with|from|when|your|will)$/.test(w)));
+}
+function dice(a, b) {
+  if (!a.size || !b.size) return 0;
+  let hit = 0;
+  a.forEach(w => { if (b.has(w)) hit++; });
+  return (2 * hit) / (a.size + b.size);
+}
+function mapScriptImages(sc, con) {
+  sc._leftoverImgs = [];
+  if (!con) return;
+  const scTok = sc.nodes.map(n => simTokens(n.t));
+  // front-matter images (rare) belong at the very top — first section line
+  (con.front || []).forEach(cell => cell.forEach(ln => {
+    if (ln.img) { (sc.nodes[0].img = sc.nodes[0].img || []).push(ln.img); }
+  }));
+  let lastAnchor = 0;
+  con.nodes.forEach((n, i) => {
+    if (!n.img) return;
+    // anchor text: this line if it's a heading-ish line, else nearest bold line above
+    let at = (n.b || n.l <= 1) && n.t ? n.t : '';
+    if (!at) for (let j = i; j >= 0 && !at; j--) if (con.nodes[j].b && con.nodes[j].t) at = con.nodes[j].t;
+    const tok = simTokens(at || n.t || '');
+    let best = -1, score = 0;
+    scTok.forEach((st, k) => { const s = dice(tok, st); if (s > score) { score = s; best = k; } });
+    if (best >= 0 && score >= 0.3) {
+      const k = Math.max(best, lastAnchor);          // never place earlier than the previous figure
+      (sc.nodes[k].img = sc.nodes[k].img || []).push(...n.img);
+      lastAnchor = k;
+    } else {
+      sc._leftoverImgs.push(...n.img);
+    }
+  });
 }
 function toggleSel(src, idx) {
   const sel = getSel();
@@ -722,18 +767,14 @@ function renderMine() {
   addBtn.onclick = () => addNote('end', 0);
   mb.appendChild(addBtn);
 
-  // figures from the lesson plan (scripted lessons have no images of their own)
-  if (lessonScript() && cur.lesson.con) {
-    const figs = [];
-    (cur.lesson.con.front || []).forEach(cell => cell.forEach(ln => { if (ln.img) figs.push(ln.img); }));
-    cur.lesson.con.nodes.forEach(n => { if (n.img) figs.push(...n.img); });
-    if (figs.length) {
-      const h = document.createElement('div'); h.className = 'ms-src'; h.textContent = 'Lesson plan figures';
-      mb.appendChild(h);
-      const wrap = document.createElement('div'); wrap.className = 'ms-figs';
-      figs.forEach(p => { const im = document.createElement('img'); im.src = p; im.loading = 'lazy'; wrap.appendChild(im); });
-      mb.appendChild(wrap);
-    }
+  // any lesson-plan figures that couldn't be anchored inline go at the end
+  const sc = lessonScript();
+  if (sc && sc._leftoverImgs && sc._leftoverImgs.length) {
+    const h = document.createElement('div'); h.className = 'ms-src'; h.textContent = 'Lesson plan figures';
+    mb.appendChild(h);
+    const wrap = document.createElement('div'); wrap.className = 'ms-figs';
+    sc._leftoverImgs.forEach(p => { const im = document.createElement('img'); im.src = p; im.loading = 'lazy'; wrap.appendChild(im); });
+    mb.appendChild(wrap);
   }
 
   // playlist for read-aloud: every visible line, in order
