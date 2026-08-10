@@ -420,19 +420,28 @@ function mapScriptImages(sc, con) {
   (con.front || []).forEach(cell => cell.forEach(ln => {
     if (ln.img) { (sc.nodes[0].img = sc.nodes[0].img || []).push(ln.img); }
   }));
+  // Walk the figures in lesson-plan order and, for each, pick the best-matching
+  // script line AT OR AFTER the previous figure's line. Searching a shrinking
+  // window keeps figures in source order without shoving mismatches onto one
+  // line (which is what a plain "clamp forward" did).
   let lastAnchor = 0;
+  const load = {};   // how many figures already sit on a line
   con.nodes.forEach((n, i) => {
     if (!n.img) return;
-    // anchor text: this line if it's a heading-ish line, else nearest bold line above
     let at = (n.b || n.l <= 1) && n.t ? n.t : '';
     if (!at) for (let j = i; j >= 0 && !at; j--) if (con.nodes[j].b && con.nodes[j].t) at = con.nodes[j].t;
     const tok = simTokens(at || n.t || '');
     let best = -1, score = 0;
-    scTok.forEach((st, k) => { const s = dice(tok, st); if (s > score) { score = s; best = k; } });
+    for (let k = lastAnchor; k < scTok.length; k++) {
+      let s = dice(tok, scTok[k]);
+      if (sc.nodes[k].b) s *= 1.15;            // headings are the natural home for a figure
+      if ((load[k] || 0) >= 2) s *= 0.5;       // stop piling figures on one line
+      if (s > score) { score = s; best = k; }
+    }
     if (best >= 0 && score >= 0.3) {
-      const k = Math.max(best, lastAnchor);          // never place earlier than the previous figure
-      (sc.nodes[k].img = sc.nodes[k].img || []).push(...n.img);
-      lastAnchor = k;
+      (sc.nodes[best].img = sc.nodes[best].img || []).push(...n.img);
+      load[best] = (load[best] || 0) + n.img.length;
+      lastAnchor = best;
     } else {
       sc._leftoverImgs.push(...n.img);
     }
