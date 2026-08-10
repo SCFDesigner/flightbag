@@ -1193,4 +1193,1902 @@
     P('One habit covers most of it: never cross a hold line without saying the clearance out loud.'),
   ]};
 
+/* ============================================================
+   II.D — Principles of Flight (ACS Info)
+   Spine: 4 Forces -> Airfoil/AOA/Stalls -> Load Factor & Vg -> Stability -> Turning Tendencies -> Wingtip Vortices/Ground Effect -> RM
+   ============================================================ */
+window.CFI_SCRIPTS['ii-d-principles-of-flight-acs-info-'] = { nodes: [
+  S('Introduction'),
+  H('Attention'),
+  P('An airplane flies because of a fairly simple balance of forces, which is why we as pilots learn the underlying aerodynamics well enough to predict what the airplane will do before it does it.'),
+  H('Overview'),
+  P('Four forces of flight — lift, weight, thrust, drag'),
+  P('Airfoil design & how lift is generated'),
+  P('Angle of attack, critical AOA & stalls'),
+  P('Load factor, aircraft categories & the Vg diagram'),
+  P('Stability & controllability about all three axes'),
+  P('Left-turning tendencies at high power/low airspeed'),
+  P('Wingtip vortices, wake avoidance & ground effect'),
+  H('What'),
+  P('The aerodynamic principles that explain why the airplane behaves the way it does in every phase of flight.'),
+  H('Why'),
+  P('Every maneuver, every stall, every wake encounter, and every structural limit traces back to these principles — a pilot who understands them anticipates problems instead of reacting to them.'),
+
+  S('How:'),
+
+  H('Forces of Flight — AI.II.D.K4'),
+  A('Lift'),
+  P('Produced by airflow acting on the airfoil, perpendicular to the relative wind and the lateral axis — explained by Bernoulli\'s pressure differential and Newton\'s downwash reaction acting together, not one or the other.'),
+  P('Lift = ½ρCLV²S — "½ Pint, Chug a Liter, Vomit Twice, Sleep it off." The pilot controls lift through AOA, airspeed, and wing shape (flaps).', 3),
+  P('Doubling airspeed produces 4x the lift (V²) — to hold altitude as speed increases, AOA must decrease, and vice versa, until critical AOA is reached.', 3),
+  A('Weight'),
+  P('Gravity acting through the center of gravity toward the center of the earth. Lift = weight holds altitude; weight greater than lift descends, lift greater than weight climbs.'),
+  A('Thrust'),
+  P('Forward force opposing drag (Newton\'s 2nd and 3rd laws — mass of air accelerated rearward, equal/opposite reaction pushes the airplane forward). Thrust > drag accelerates, thrust < drag decelerates.'),
+  A('Drag'),
+  P('Rearward force opposing thrust. Parasite drag (form, interference, skin friction) grows with the square of airspeed; induced drag (a byproduct of lift) grows as AOA increases and airspeed decreases.'),
+  P('Total drag is lowest at L/DMAX. Below that speed you\'re in the region of reversed command — slower requires MORE power, not less.', 3),
+
+  H('Airfoil Design — AI.II.D.K1'),
+  A('Chord Line, Camber, Leading/Trailing Edge'),
+  P('Chord line: straight line from leading edge to trailing edge. Camber: curvature above/below it — upper camber usually exceeds lower. Mean camber line defines the airfoil\'s actual shape.'),
+  A('How the Airfoil Generates Lift'),
+  P('Above the wing: accelerated flow (Bernoulli) plus downwash reaction (Newton). Below the wing: slower flow plus air deflected downward, pushing the wing up.'),
+  P('Center of pressure moves forward as AOA increases and aft as AOA decreases — that shift feeds directly into longitudinal stability.', 3),
+  A('Wing Planform'),
+  P('Taper (root-to-tip chord ratio) cuts drag and weight. Aspect ratio (span ÷ chord) — high cuts drag, low buys maneuverability/strength. Sweep helps near the speed of sound and lateral stability, but tends to stall the tips first.'),
+
+  H('Angle of Attack & Stalls'),
+  A('Angle of Attack'),
+  P('The angle between the chord line and the relative wind — NOT the same as pitch attitude. Nose up increases AOA, nose down decreases it, and increasing AOA increases lift, up to a point.'),
+  A('Critical AOA'),
+  B('Every airfoil has one fixed critical AOA where airflow separates and lift collapses — it does not change with airspeed, attitude, or power setting.'),
+  A('What a Stall Is'),
+  B('A stall is caused ONLY by exceeding critical AOA — it can happen at any airspeed, any attitude, any power setting.'),
+  P('Buffet, stall horn, and AOA indicators all warn of approaching critical AOA before it\'s reached.', 3),
+  A('Stall Characteristics by Wing Design'),
+  P('Rectangular wings stall root-first — buffet and warning arrive before aileron effectiveness is lost, the most forgiving shape for trainers. Swept/tapered wings stall tip-first and lose ailerons before full warning; washout (reduced tip AOA) is designed in to force the root to stall first.'),
+
+  S('Load Factors & the Vg Diagram'),
+  H('Load Factor Basics — AI.II.D.K5'),
+  P('Ratio of total air load to gross weight, measured in Gs. 1G = normal level flight; Gs can be positive (pull-up) or negative (pushover). Higher load factor raises stall speed and risks structural overload.'),
+  A('Aircraft Design Categories'),
+  P('Normal: -1.52 to 3.8 Gs · Utility: -1.76 to 4.4 Gs (mild acrobatics, spins) · Acrobatic: -3.0 to 6.0 Gs.'),
+  A('Load Factor in Turns'),
+  P('30° bank ≈ 1.15G / 7% stall speed increase · 45° ≈ 1.41G / 19% · 60° ≈ 2.0G / 41% · 75° ≈ 3.86G / 96%, near the normal category limit load factor.'),
+  B('Steep turn briefing: stall speed climbs fast with bank — the wing must produce lift equal to the load factor just to hold altitude.'),
+  H('Maneuvering Speed (VA) & the Vg Diagram'),
+  P('VA: max speed for full, abrupt single-control deflection without overstressing the airframe. At or below VA the wing stalls before the limit load is exceeded. VA decreases as weight decreases.'),
+  P('The Vg diagram plots airspeed against load factor: the curved lift-limit lines (stall first), the horizontal limit-load lines, and VNE define the safe operating envelope — everything inside is available, everything outside costs you the airplane.', 3),
+
+  S('Stability & Controllability — AI.II.D.K2'),
+  H('Static vs. Dynamic Stability'),
+  P('Static stability is the INITIAL tendency after a disturbance (positive = returns, negative = diverges, neutral = stays). Dynamic stability is that same tendency traced over TIME — an aircraft can be positive static / negative or neutral dynamic (Dutch roll is the classic example).'),
+  H('Longitudinal Stability (Pitch)'),
+  P('CG normally sits ahead of the center of pressure, creating a nose-down moment the horizontal tail balances with a down-force, like a lever.'),
+  P('Forward CG: more nose-heavy, more stable, harder to raise the nose. Aft CG: less stable — if CG moves behind the CP, a nose-up pitch can diverge and become unrecoverable.', 3),
+  H('Lateral Stability (Bank)'),
+  P('Dihedral: a low wing gains AOA/lift and rolls the airplane back level. Sweepback acts like added dihedral (10° sweep ≈ 1° dihedral). Keel effect: fuselage area above/behind the CG acts like a keel rolling the plane upright. Weight distribution: uneven loading banks toward the heavy side.'),
+  H('Directional Stability (Yaw)'),
+  P('The vertical fin and fuselage area aft of the CG act like the feathers on an arrow — any yaw deflects airflow against the fin and weathervanes the nose back into the relative wind.'),
+
+  S('Turning Tendencies — AI.II.D.K3'),
+  P('Four engine/propeller effects that all yaw or roll the airplane LEFT, strongest at high power and low airspeed.'),
+  A('Torque Reaction'),
+  P('Newton\'s 3rd law: the prop rotates right, an equal force rolls/turns the airplane left. Corrected with rudder/aileron and by rigging (engine offset, trim tabs).'),
+  A('Spiraling Slipstream (Corkscrew Effect)'),
+  P('Corkscrewing prop wash strikes the left side of the vertical stabilizer, pushing the nose left — strongest at high prop speed/low forward speed, and weakens as forward speed builds.'),
+  A('Gyroscopic Precession'),
+  P('A force applied to a spinning gyro is felt 90° later in the direction of rotation. Worst case: raising a tailwheel on the takeoff roll — a forward push on the top of the disc yaws the nose left. Correct with rudder/elevator.'),
+  A('Asymmetric Loading (P-Factor)'),
+  P('At high AOA the descending propeller blade takes a bigger bite than the rising blade, moving the center of thrust right of the disc and yawing the nose left. Correct with right rudder.'),
+  B('All four effects stack together at the same moment — full power, low airspeed, high AOA (takeoff, go-around) — anticipate right rudder before it\'s needed, not after.'),
+
+  S('Wingtip Vortices & Ground Effect — AI.II.D.K6'),
+  H('Wingtip Vortices — How They Form'),
+  P('At positive AOA, higher pressure below the wing spills to lower pressure above at the tips, curling upward and combining with downwash into a pair of vortices — pure induced drag, energy spent making them.'),
+  A('Vortex Strength'),
+  B('Heavy, clean, and slow — exactly the configuration right after rotation and right before touchdown — produces the strongest vortices, and puts following traffic most at risk.'),
+  P('Vortices sink several hundred fpm, drift with the wind once near the ground, and typically dissipate within about 2 minutes.', 3),
+  A('Avoidance'),
+  P('Takeoff: rotate before, and climb above, the preceding aircraft\'s path. Enroute: never track within 1,000\' below another aircraft\'s flight path. Landing: stay at or above a preceding aircraft\'s path and land beyond their touchdown point.'),
+  H('Ground Effect'),
+  P('Within about one wingspan of the ground, vortex formation is disrupted — downwash drops, induced drag decreases, lift increases at the same AOA.'),
+  P('Takeoff hazard: the airplane can fly off the ground below the speed that sustains flight out of ground effect — climbing out too early sinks it back down, worse at high density altitude or heavy weight.', 3),
+  P('Landing effect: reduced drag makes the airplane float — excess flare speed extends the landing roll unless power is reduced as it settles into ground effect.', 3),
+
+  S('RM: Basic Aerodynamic Principles — AI.II.D.R1'),
+  B('Action: brief load factor and rising stall speed before every steep turn — make sure the student understands WHY stall speed climbs with bank.'),
+  B('Action: connect all four turning tendencies to the same moment — full power, low airspeed — before every takeoff and go-around.'),
+  P('First solo and solo cross-country prep: reinforce wake avoidance procedures — don\'t let the student rely on ATC separation alone.'),
+  P('Any high-performance or loaded operation: brief that VA drops with weight — know the structural limits before maneuvering or flying in turbulence.'),
+
+  S('Conclusion'),
+  P('Review: 4 forces · airfoil & AOA · critical AOA and stalls · load factor & the Vg envelope · stability on 3 axes · 4 turning tendencies · wingtip vortices & ground effect.'),
+  P('One idea underlies all of it: the airplane only ever does what its angle of attack and load factor tell it to — read those, and you read the airplane.'),
+]};
+
+/* ============================================================
+   II.F — Performance and Limitations
+   Spine: POH performance-chapter flow (atmosphere/DA, loading, aerodynamics
+   of climb, range/endurance, charts, weight & balance, limitations) — no
+   forced mnemonic; the source has none, so structure follows the POH itself.
+   ============================================================ */
+window.CFI_SCRIPTS['ii-f-performance-limitations'] = { nodes: [
+  S('Introduction'),
+  H('Attention'),
+  P('An airplane\'s performance changes with the day\'s air and how it\'s loaded, which is why we as pilots calculate performance before every flight instead of trusting the number we remember from checkout.'),
+  H('Overview'),
+  P('Atmospheric conditions & density altitude'),
+  P('Pilot technique, airport environment'),
+  P('Loading, weight & balance effects'),
+  P('Aerodynamics of climb, range & endurance'),
+  P('Performance charts, PA & DA'),
+  P('Weight & balance terms and math'),
+  P('RM — exceeding limitations'),
+  H('What'),
+  P('How atmospheric conditions, loading, and technique change what the airplane can actually do — and how to pull real numbers out of the POH.'),
+  H('Why'),
+  B('Performance planning is the difference between clearing the trees at the departure end and not.'),
+
+  S('How:'),
+
+  H('Atmospheric Conditions & Density Altitude — AI.II.F.K2a'),
+  P('Standard sea-level pressure is about 14.7 psi; air is a gas, so it compresses and expands, and as density increases, performance increases.'),
+  A('What changes density altitude'),
+  P('Barometric pressure, altitude, temperature, and humidity.'),
+  B('Density varies directly with pressure, and inversely with altitude, temperature, and humidity.'),
+  P('Humid air has less mass per volume than dry air (water vapor is lighter than the nitrogen/oxygen it displaces) — that\'s why humidity lowers density.', 3),
+  P('Less dense air means less power (the engine breathes less air), less thrust (the prop is less efficient), and less lift.'),
+
+  H('RM: Pilot Technique & Airplane Configuration — AI.II.F.K2b,K2c,R3'),
+  P('Performance numbers assume a specific configuration, procedure, and airspeed — any technique or configuration that differs from the POH will change, usually reduce, actual performance.'),
+  B('Action: I have learners fly the exact POH technique for a performance takeoff at least once, then show them what a sloppy rotation or wrong flap setting costs in ground roll.'),
+
+  H('Airport Environment — AI.II.F.K2d'),
+  A('Runway'),
+  P('Surface (paved, grass, dirt, gravel) — anything not hard and smooth increases ground roll and can change braking effectiveness. Soft surfaces slow you fast; wet runways reduce braking and risk hydroplaning.'),
+  P('Runway gradient (height change over length) and which runway the wind actually leaves available.', 3),
+  A('Terrain & obstacles'),
+  P('Can you clear the obstacle on today\'s numbers? Do you need max angle (Vx) or max rate (Vy)? Are there noise-abatement or climb-gradient procedures in play?'),
+
+  H('Loading and Weight & Balance — AI.II.F.K2e'),
+  A('Effects of increased weight'),
+  P('Higher takeoff speed and longer takeoff run · reduced rate/angle of climb and lower ceiling · slower cruise, less range, more fuel burn · reduced maneuverability · higher stall speed · higher approach speed, longer landing roll · more nose/tail-wheel loading.'),
+  B('RM: overloading degrades climb, may prevent takeoff outright, overheats the engine in the climb, and overstresses the airframe. — AI.II.F.R4'),
+  A('Weight and structure'),
+  P('Structural failures from overloading are progressive and hard to detect. Certification requires the airframe withstand 3.8 G (normal category) — any overload is amplified at those G limits.'),
+  P('Example: a 200 lb. overload becomes a potential 760 lb. structural overload at the G limit.', 3),
+  A('Forward Loading — higher stall speed'),
+  P('Harder to raise the nose at low airspeed (takeoff and landing), "heavier" and slower than the same airplane loaded aft, higher stall speed — but more controllable in the stall.'),
+  A('Aft Loading — lower stall speed'),
+  P('Very light control forces (easy to overstress), "lighter" and faster than the same airplane loaded forward, lower stall speed — but less controllable in a stall or spin, with a real hit to longitudinal stability.'),
+  B('RM: operating outside CG limits can leave you without enough control authority, nose- or tail-heavy. — AI.II.F.R5'),
+
+  S('Aerodynamics of Climb, Range & Endurance — AI.II.F.K5'),
+  H('Straight-and-Level'),
+  P('Lift must equal weight and thrust must equal drag. Parasite drag dominates at high speed, induced drag at low speed.'),
+  P('Max level speed occurs where power required equals max power available; min level speed isn\'t set by power at all — stall happens first.'),
+  H('Climb Performance'),
+  P('Positive climb means gaining potential energy (altitude) — either by using excess power beyond what level flight needs, or by trading airspeed (kinetic energy) for altitude.'),
+  A('Angle of Climb (Vx) — most altitude per distance'),
+  P('Max AOC occurs at the airspeed/AOA combination giving max excess thrust — for a propeller airplane, that\'s below L/DMAX and just above stall speed.'),
+  A('Rate of Climb (Vy) — most altitude per time'),
+  P('Max ROC occurs at the airspeed/AOA combination giving max excess power — for a propeller airplane, close to L/DMAX.'),
+  A('Climb Performance Factors — weight, altitude, configuration'),
+  P('Added weight forces a higher AOA to hold altitude and speed, which adds drag and eats into reserve thrust. Climb performance drops with altitude as power required rises and power available falls, until Vx, Vy, and min/max level speed all converge at the absolute ceiling — one speed, no excess power left.'),
+  H('Range & Endurance'),
+  P('Endurance is about flying time; range is about flying distance.'),
+  A('Maximum Endurance'),
+  P('Max endurance wants minimum fuel flow. Below that speed you\'re still climbing out; past it, going faster always costs more fuel per hour.', 3),
+  A('Specific range'),
+  P('Max range occurs at L/DMAX, which happens at a fixed AOA regardless of weight — but the specific airspeed and power to hold that AOA change as weight burns off.'),
+  P('Example: a specific range of 1.89 means 1.89 miles per pound of fuel burned.', 3),
+  P('No catch-all rule on headwind/tailwind speed adjustments — the theory exists, but there are too many variables to treat it as gospel.'),
+
+  S('Performance Charts, PA & DA — AI.II.F.K1'),
+  H('Using the Charts'),
+  P('POH Section 5 gives cruise performance, stall speeds by configuration, wind components, takeoff/landing distance, climb performance (cruise, takeoff, and balked landing), true airspeed, and maximum duration.'),
+  H('Pressure Altitude & Density Altitude'),
+  P('PA = 1,000 × (29.92 − current altimeter setting) + field elevation.'),
+  P('Example: altimeter 30.42, elevation 808\', gives PA of 308\'.', 3),
+  P('DA (estimate only) = 120 × (current temp − ISA temp) + PA.'),
+  P('Example: 23°C at PA 308\' gives a DA of about 1,268\'.', 3),
+  B('RM: the charts assume perfect technique and a mechanically sound airplane — they don\'t allow for pilot proficiency or engine wear. Recalculate the moment conditions change. — AI.II.F.R1'),
+  B('RM: many charts are imprecise and require walking several small lines through multiple pages — be as accurate as you can and sanity-check the answer against reality.'),
+  P('Calculated performance is only as good as its assumptions — be conservative in the numbers and precise in how you actually fly the procedure. — AI.II.F.R3', 3),
+
+  S('Weight & Balance'),
+  H('Key Terms — AI.II.F.K3'),
+  P('Reference Datum: the imaginary line all arms are measured from. CG: the point the airplane would balance at. Arm: distance from datum to an item\'s CG.'),
+  P('Basic Empty Weight, Max Landing/Ramp/Takeoff/Zero Fuel Weight, and CG Limits — the forward/aft points the CG must stay within.', 3),
+  P('Moment = weight × arm; Moment Index divides that by a constant (100/1,000/10,000) to keep numbers manageable. Payload is occupants, cargo, and baggage. Useful Load = max gross weight − basic empty weight.', 3),
+  H('Weight & Balance Control'),
+  P('The pilot is responsible. 14 CFR 23.2100 requires the manufacturer publish safe weight/CG ranges in the POH; Part 91.9 requires the PIC comply with them.'),
+  H('Determining Weight and Balance — AI.II.F.K4'),
+  P('CG = total moment ÷ total weight — start from empty weight, list everything loaded, compute each item\'s moment, then sum.'),
+  P('Shifting, adding, or removing weight is the same algebra: if you know three of the four values (weight, arm, moment, CG shift), solve for the fourth. — AI.II.F.R6', 3),
+
+  S('RM: Exceeding Limitations — AI.II.F.R2'),
+  P('Operating limitations live in POH Chapter 2 — they define the boundary of safe operation, not a suggestion.'),
+  B('Action: walk the learner through what actually happens when each limit is broken, not just that it\'s illegal.'),
+  P('Not enough runway for takeoff or landing · can\'t clear an obstacle the performance won\'t support · not enough fuel for the intended landing · wrong fuel type · exceeding structural or CG limits · exceeding max demonstrated crosswind.'),
+
+  S('Conclusion'),
+  P('Review: density altitude and what changes it · pilot technique & airport environment · loading and CG effects · Vx/Vy and range/endurance · PA/DA math · charts and their blind spots · weight & balance terms and math · exceeding limitations.'),
+  P('The habit: run the actual numbers for today\'s conditions, every flight, and treat the POH chart as the floor, not the target.'),
+]};
+
+/* ============================================================
+   II.G — National Airspace System
+   Spine: alphabetical airspace classes A–G, each condensed to one
+   entry/equipment/pilot/weather/speed line, then national rules,
+   special use airspace, and Special VFR.
+   ============================================================ */
+window.CFI_SCRIPTS['ii-g-national-airspace-system'] = { nodes: [
+  S('Introduction'),
+  H('Attention'),
+  P('Every piece of sky has different rules for who can be there and how, which is why we as pilots know the class of airspace we\'re about to enter before we get there.'),
+  H('Overview'),
+  P('Class A through E — controlled airspace'),
+  P('Class G — uncontrolled airspace'),
+  P('National rules — transponder, ADS-B, speed'),
+  P('Special VFR'),
+  P('Special use & other airspace areas'),
+  P('VFR charts & currency'),
+  H('What'),
+  P('The entry requirements, equipment, pilot qualifications, weather minimums, and speed limits tied to each class of airspace.'),
+  H('Why'),
+  B('Busting airspace is one of the most common, most avoidable violations in general aviation — knowing the boundary before you fly beats explaining yourself to the FAA after.'),
+
+  S('How:'),
+
+  H('Class A Airspace — AI.II.G.K1'),
+  P('18,000\' MSL up to and including FL600, extending 12 NM off the coast of the 48 states and Alaska.'),
+  B('Entry: ATC clearance, IFR only. Equipment: transponder w/ altitude reporting, ADS-B, IFR nav equipment. Pilot: instrument rating. Weather: not applicable — no VFR. Speed: none published (above 10,000\' MSL).'),
+
+  H('Class B Airspace — AI.II.G.K1'),
+  P('Surface to 10,000\' MSL around the busiest airports — an "upside-down wedding cake" sized and tailored to contain all of that airport\'s instrument procedures.'),
+  B('Entry: explicit ATC clearance. Equipment: two-way radio, Mode C transponder, ADS-B (IFR adds VOR/TACAN and altitude-reporting transponder). Pilot: private, or student/recreational/sport with an endorsement — but solo learners can\'t fly at the busiest Class B fields (ATL, ORD, DFW, LAX, MIA, JFK, LGA, SFO, etc. — AIM 3-2-3b).'),
+  P('Weather: 3 SM visibility, clear of clouds. Speed: 250 KIAS below 10,000\' MSL; 200 KIAS underlying Class B or in a VFR corridor through it.'),
+
+  H('Class C Airspace — AI.II.G.K1'),
+  P('Surface to 4,000\' AFE around a field with an operating tower and radar approach control — a 5 NM core surface-to-4,000\', plus a 10 NM shelf from 1,200\'-4,000\' AFE.'),
+  B('Entry: two-way radio contact established before entering. Equipment: Mode C transponder, ADS-B. Pilot: no specific certificate. Weather: 3 SM, 500\' below/1,000\' above/2,000\' horizontal. Speed: 250 KIAS below 10,000\'; 200 KIAS below 2,500\' AGL within 4 NM of the Class C airport.'),
+
+  H('Class D Airspace — AI.II.G.K1'),
+  P('Normally surface to 2,500\' AGL, 4 NM radius, around a part-time tower — reverts to Class E when the tower closes.'),
+  B('Entry: two-way radio contact established. Equipment: two-way radio only. Pilot: no specific certificate. Weather: same as Class C — 3 SM, 500\'/1,000\'/2,000\'. Speed: 250 KIAS below 10,000\'; 200 KIAS below 2,500\' AGL within 4 NM of the Class D airport.'),
+
+  H('Class E Airspace — AI.II.G.K1'),
+  P('Controlled airspace not designated A, B, C, or D — anywhere ATC separates IFR traffic outside those classes.'),
+  B('Entry: none for VFR. Equipment: none specific. Pilot: no specific certificate, student pilot OK. Weather below 10,000\' MSL: 3 SM, 500\'/1,000\'/2,000\'. At/above 10,000\': 5 SM, 1,000\' below/1,000\' above/1 SM horizontal. Speed: 250 KIAS below 10,000\'.'),
+  A('Vertical limits & segments'),
+  P('Floors of 700\' or 1,200\' AGL around airports; 1,200\' AGL along the Victor airways (normally 8 NM wide) up to but not including 18,000\'; and 14,500\'-17,999\' MSL over the 48 states, D.C., and Alaska unless designated lower.'),
+
+  H('Class G Airspace — AI.II.G.K1'),
+  P('Uncontrolled — everything that isn\'t A through E — from the surface to the base of the overlying Class E.'),
+  B('Entry: none. Equipment: none specific. Pilot: no specific certificate. Weather at/below 1,200\' AGL: day 1 SM clear of clouds, night 3 SM / 500\'/1,000\'/2,000\'. Above 1,200\' AGL, below 10,000\' MSL: same day/night split. At/above 10,000\' MSL: 5 SM, 1,000\'/1,000\'/1 SM. Speed: 250 KIAS below 10,000\' MSL.'),
+
+  H('National Rules Across Airspace Classes'),
+  A('Transponder — 91.215'),
+  P('Required at/above 10,000\' MSL (except below 2,500\' AGL) · within the 30 NM Mode C veil of a Class B primary airport below 10,000\' · within/above Class C up to 10,000\' · within 10 miles of certain designated airports (excluding below the Class D surface area or 1,200\' AGL) · flying into, within, or across the ADIZ.'),
+  A('ADS-B — 91.225(d)'),
+  P('Required at/above 10,000\' MSL (excluding at/below 2,500\' AGL) and at/above 3,000\' MSL over the Gulf of Mexico within 12 NM of the coast.'),
+
+  H('Special VFR — AI.II.G.K5'),
+  P('A clearance to fly VFR below VFR weather minimums, in Class B, C, D, or E surface areas below 10,000\' MSL, based on weather at the airport of intended landing or departure — and only if IFR traffic isn\'t delayed.'),
+  B('Requires an ATC clearance, clear of clouds, at least 1 SM flight visibility · at night, an instrument-rated pilot and an IFR-equipped aircraft · ground visibility of at least 1 SM to take off or land · not authorized at most large Class B airports (Part 91 Appendix D).'),
+
+  S('Special Use & Other Airspace — AI.II.G.K3'),
+  H('Special Use Airspace'),
+  A('Prohibited & Restricted'),
+  P('Prohibited: flight is not allowed at all, for security or national welfare. Restricted: not wholly prohibited, but hazardous to nonparticipating aircraft.'),
+  A('Warning, MOA, Alert, Controlled Firing'),
+  P('Warning Areas: extend 3 NM off the coast, potentially hazardous activity. MOAs: separate military training from IFR traffic — no restriction on VFR. Alert Areas: high volume of training or unusual aerial activity. Controlled Firing Areas: not charted, activity suspends the moment an aircraft approaches.'),
+
+  H('Other Airspace Areas'),
+  A('Temporary Flight Restrictions'),
+  P('Issued by FDC NOTAM under 91.137-91.145 / AIM 3-5-3 for disaster relief, special events, security, or space operations — check tfr.faa.gov and comply fully; violations can mean certificate action or a military intercept.'),
+  A('MTRs & Local Airport Advisory'),
+  P('Military Training Routes: IR/VR routes flown for tactical proficiency. Local Airport Advisory: within 10 SM of a tower-less field that still has an FSS providing advisories.'),
+  A('Special Flight Rules Areas & Special Air Traffic Rules — Part 93'),
+  P('Defined geographic areas where normal rules don\'t necessarily apply — DC National Security, the LA VFR Corridor, Grand Canyon National Park — each with its own specific procedures; review the applicable Part 93 subpart before you fly one.'),
+  A('TRSA & National Security Areas'),
+  P('TRSA: voluntary radar sequencing/separation, shown with a solid black line. National Security Areas: voluntary avoidance requested, can be made temporarily mandatory.'),
+  H('Air Defense Identification Zone (ADIZ) — 14 CFR Part 99'),
+  P('Airspace along the U.S. and Alaskan coasts and the Mexican/Canadian borders (magenta dashed line) where positive identification of civil aircraft is required for national security.'),
+  B('Requires a DVFR or IFR flight plan filed before crossing, a transponder with altitude reporting, and two-way radio with position reports as required.'),
+  P('Parachute Jump Areas are published in the Chart Supplement and depicted on sectionals.', 3),
+
+  S('VFR Charts'),
+  H('Chart Symbology & Currency — AI.II.G.K2,K4'),
+  P('Airspace, special use, and other-airspace symbology are covered on pages 17-19 of the Aeronautical Chart User\'s Guide.'),
+  P('Sectional and terminal area charts update every 56 days — check the next edition date on the cover, and re-check NOTAMs as a chart nears expiration.'),
+
+  S('RM: Various Classes & Types of Airspace — AI.II.G.R1'),
+  B('Action: I brief the airspace along the entire route before every cross-country, not just glance at it — every class here has its own way to get you violated.'),
+  P('Airspace incursions: mitigate with planning, situational awareness, GPS, and current charts.'),
+  P('TFR/SUA awareness: mitigate by checking TFRs, getting an FSS brief, using flight following, and reviewing NOTAMs.'),
+  P('Weather margins: mitigate with current weather reports and honest personal minimums.'),
+  P('Equipment failures: know each airspace\'s equipment requirements, and how to request authorization if something quits.'),
+
+  S('Conclusion'),
+  P('Review: Class A-E entry/equipment/pilot/weather/speed · Class G · transponder & ADS-B rules · Special VFR · special use and other airspace · ADIZ · chart currency · RM by airspace type.'),
+  P('The habit: know what class of airspace you\'re about to enter before you get there, not after ATC asks you about it.'),
+]};
+
+/* ============================================================
+   II.H — Navigation Systems & Radar Services
+   Spine: TIM (Tune, Identify, Monitor) · "Mary Had (MH) + Roast Beef (RB)
+   = Mary Barfed (MB)" · Aviate-Navigate-Communicate
+   ============================================================ */
+window.CFI_SCRIPTS['ii-h-nav-systems-radar-svcs'] = { nodes: [
+  S('Introduction'),
+  H('Attention'),
+  P('A GPS outage in the middle of a flight is not the time to discover you never really learned the VOR, which is why we as pilots keep a working backup for every primary means of navigation.'),
+  H('Overview'),
+  P('VOR/VORTAC and DME'),
+  P('ADF and NDB'),
+  P('Satellite navigation — GPS, WAAS, LAAS'),
+  P('ATC radar services'),
+  P('ADS-B and transponder modes'),
+  P('RM — automation, distraction, loss of SA'),
+  H('What'),
+  P('The ground- and satellite-based systems that tell you where you are, and how ATC sees and separates you.'),
+  H('Why'),
+  B('Every system here has a failure mode — knowing the backup is what keeps you navigating instead of guessing.'),
+
+  S('How:'),
+
+  H('VOR/VORTAC — AI.II.H.K1'),
+  P('VHF omnidirectional range: projects magnetic radials in every direction, 108.0-117.95 MHz, in three service volumes — Terminal (25 NM, 12,000\' and below), Low (40 NM, below 18,000\'), and High (40-130 NM depending on altitude, up to 60,000\').'),
+  A('Three variations of VORs'),
+  P('VOR alone (magnetic courses) · VOR/DME (DME co-located) · VORTAC (TACAN/DME co-located).'),
+  A('Components'),
+  P('Ground: the VOR station. Aircraft: antenna, receiver, and the instrument — OBS to select a radial, CDI needle (full-scale deflection = 12° off course, 2° per dot), a TO/FROM indicator, and an OFF flag for an unusable signal.'),
+  B('RM: TIM — Tune, Identify, Monitor. If the Morse identifier drops out, stop using it for navigation. — AI.II.H.R4'),
+  A('Orientation & tracking'),
+  P('Center the CDI to read your course and TO/FROM; crossing a second VOR radial gives an exact fix. To track: tune and identify, center the CDI on a TO indication, fly that heading, correct for wind — the indication flips to FROM at station passage.'),
+  P('Reverse sensing: flying toward the station with a FROM indication (or away from it with TO) makes the CDI indicate backwards — not an issue with an HSI.', 3),
+  A('VOR checks — FAR 91.171 / AIM 1-1-4'),
+  P('Not required for VFR. Checkpoints live in the Chart Supplement — ground or airborne checkpoints, a VOT, or a dual VOR check.'),
+  B('Tolerance: ±4° for ground checks, ±6° airborne. At a VOT, the OBS should read 0° FROM or 180° TO.'),
+  A('VOR MON — the Minimum Operating Network'),
+  P('The network is shrinking (896 down to 590 stations by 2030) as the NAS shifts to Performance-Based Navigation, but MON guarantees station-to-station navigation to a MON airport within 100 NM if GPS is lost.'),
+
+  H('Distance Measuring Equipment (DME) — AI.II.H.K1'),
+  P('Slant-range distance from a station, paired with a VOR/VORTAC, ILS/DME, or LOC/DME on 962-1213 MHz UHF — an RF pulse round-trip gives distance, and some sets add groundspeed.'),
+  A('New DME Service Volumes for VOR MON'),
+  B('RM: slant-range error is largest close to and above the station, negligible once you\'re a mile or more away for every 1,000\' above field elevation. Signals are line-of-sight, and TIM applies here too. — AI.II.H.R3/R4'),
+
+  H('ADF & NDB — AI.II.H.K1'),
+  P('An NDB transmits in every direction on 190-535 kHz; the ADF needle points at it, giving relative bearing.'),
+  B('Magnetic Heading + Relative Bearing = Magnetic Bearing — "Mary Had (MH) + Roast Beef (RB) = Mary Barfed (MB)."'),
+  A('ADF Components — indicators, three kinds'),
+  P('Fixed-card (RBI): always reads 0° at the top, and the pilot does the MH+RB math by hand. Movable-card: rotates with heading, so the head of the needle already reads magnetic bearing to the station. RMI: rotates automatically and can carry both ADF and VOR needles at once.'),
+  B('RM: no flag warns you of bad bearing data — precipitation static, night skywave interference, and a noisy or missing identifier are the tells. TIM the 3-letter ident constantly. — AI.II.H.R3/R4'),
+
+  S('Satellite Navigation — AI.II.H.K2'),
+  H('GPS'),
+  P('Three segments: Space (31 satellites, 4 needed for a fix, typically 5 in view), Control (a master station, monitor stations, and ground antennas uplinking corrections), and User (the receivers).'),
+  P('A position fix needs at least 4 satellites for latitude, longitude, and altitude; VFR GPS navigation is direct-to and linear — CDI sensitivity doesn\'t increase approaching a waypoint the way a VOR\'s does.'),
+  A('RAIM — Receiver Autonomous Integrity Monitoring'),
+  P('Needs 5 satellites (or 4 plus a baro altimeter) to check the integrity of the signals; some receivers use a 6th to isolate and drop a corrupt satellite. Two message types: not enough satellites for RAIM, or a detected error beyond the limit for the phase of flight.'),
+  A('RM: GPS for VFR'),
+  P('Installations range from full IFR boxes to handhelds with no RAIM capability and an antenna placed for convenience, not performance — know your specific unit\'s limits. No currency requirement for VFR, but an out-of-date database can still be used against you if it contributed to an incident.', 3),
+  H('WAAS & LAAS'),
+  P('WAAS augments GPS to under 3 meters of accuracy — good enough for precision GPS approaches — and removes cold-temperature and local-altimeter errors. LAAS/GBAS does the same job with ground stations local to one airport.'),
+
+  S('ATC Radar Services & Surveillance'),
+  H('ATC Radar Services — AIM 4-1-17/18 — AI.II.H.K3'),
+  P('Available to VFR aircraft that can talk to ATC, are in radar coverage, and get radar identified.'),
+  B('RM: it\'s advisory, controller discretion, workload permitting — you still fly the airplane, and ATC can\'t guarantee their instructions keep you clear of IMC.'),
+  P('Basic radar service (safety alerts, traffic advisories, limited vectoring) · TRSA sequencing/separation · Class C IFR/VFR separation and VFR sequencing · Class B separation and sequencing for everyone.'),
+
+  H('ADS-B — AI.II.H.K4'),
+  P('Automatic Dependent Surveillance-Broadcast: automatic, GPS/FMS-derived position, full 3D surveillance, broadcast once a second — versus a radar sweep every 5-12 seconds.'),
+  A('Out and In'),
+  P('ADS-B Out broadcasts your GPS position, altitude, and ground speed to ATC and other aircraft. ADS-B In gives you FIS-B weather (978 MHz UAT) and TIS-B traffic — In is voluntary, Out is not.'),
+  B('Out is required (91.225) in Class A, B, and C airspace (and up to 10,000\' MSL above B/C) · Class E at/above 10,000\' MSL excluding at/below 2,500\' AGL · at/above 3,000\' MSL over the Gulf of Mexico within 12 NM of the coast.'),
+
+  H('Transponder Modes — AI.II.H.K4'),
+  P('Mode A: 4-digit code identifying the aircraft and its position. Mode C: adds altitude. Mode S: adds a unique ICAO address, heading, and speed, and feeds TCAS and ADS-B.'),
+  P('See lesson II.G. National Airspace System for exactly where each is required.', 3),
+
+  S('RM: Automation, Distraction & Loss of SA'),
+  H('EFBs & Automation — AI.II.H.R1,R5'),
+  B('You\'re responsible for correct use of your EFB and installed avionics even though neither is required to be current — know their limits before you rely on them.'),
+  H('Distractions & Task Prioritization — AI.II.H.R2'),
+  B('Aviate, Navigate, Communicate — a moving-map GPS is the easiest thing in the cockpit to disappear into.'),
+  P('Don\'t get overdependent on any single system — if the GPS or the VOR quits, already know what you\'re switching to.'),
+  P('Lost SA: admit it immediately and work the problem to get it back, the same as being lost on the ground.'),
+  P('Divide attention deliberately between flying, navigating, and communicating, and catch the moment you start falling behind before it compounds.'),
+
+  S('Conclusion'),
+  P('Review: VOR/VORTAC and DME · ADF/NDB and Mary Had Roast Beef · GPS, RAIM, WAAS/LAAS · ATC radar services · ADS-B In/Out · transponder modes · TIM · Aviate-Navigate-Communicate.'),
+  P('The habit: know which system you\'re relying on right now, and what you switch to the instant it fails.'),
+]};
+
+/* ============================================================
+   II.I — Navigation & Flight Planning
+   Spine: True to Magnetic to Compass correction chain, East is Least/West is Best,
+   ANDS, Five C's, PAVE go/no-go
+   ============================================================ */
+window.CFI_SCRIPTS['ii-i-navigation-flight-planning'] = { nodes: [
+  S('Introduction'),
+  H('Attention'),
+  P('A sectional chart and a nav log are only as good as the pilot\'s ability to notice when reality stops matching the plan, which is why we as pilots build the plan carefully and then watch it like a hawk once airborne.'),
+  H('Overview'),
+  P('Navigation & atmospheric terminology'),
+  P('Aeronautical charts & the Chart Supplement'),
+  P('Navigation types & magnetic compass errors'),
+  P('Building the nav log — course, altitude, fuel'),
+  P('Filing, opening & closing a VFR flight plan'),
+  P('Weather briefing & the go/no-go decision'),
+  P('Diversions, lost procedures & flight following'),
+  H('What'),
+  P('How to plan a cross-country from a blank chart to a working nav log, then adjust it in real time.'),
+  H('Why'),
+  B('Good planning is what keeps a deviation from becoming an emergency.'),
+
+  S('How:'),
+
+  H('Navigation & Atmospheric Terminology'),
+  A('Course & heading chain'),
+  P('True course, corrected for variation, becomes magnetic course. Magnetic course, corrected for wind, becomes magnetic heading. Magnetic heading, corrected for deviation, becomes compass heading.'),
+  A('Airspeeds'),
+  P('Indicated (IAS) off the gauge · Calibrated (CAS) corrects for installation/instrument error · Equivalent (EAS) adds compressibility · True (TAS) corrects CAS for density altitude · Groundspeed corrects TAS for wind.'),
+  A('Altitudes'),
+  P('Indicated (off the altimeter) · Pressure (referenced to 29.92") · Density (pressure altitude corrected for nonstandard temperature) · True (actual height above sea level) · Absolute (height AGL).'),
+  P('Standard atmosphere: 29.92" Hg and 15°C/59°F at sea level.', 3),
+
+  H('Aeronautical Charts & Chart Supplement — AI.II.I.K15'),
+  A('Sectional charts'),
+  P('The pilot\'s VFR roadmap — 1:500,000 scale, revised every 56 days.'),
+  A('VFR Terminal Area Charts'),
+  P('1:250,000, more detail for busy airspace near Class B, also on a 56-day cycle.'),
+  P('The WAC (1:3,100,000) is being discontinued — always fly current editions and check the Chart Bulletin and NOTAMs between publication cycles.', 3),
+  A('Chart Supplement'),
+  P('The comprehensive airport reference — runway data, procedures, frequencies, hours, lighting, services, VFR waypoints, LAHSO operations. Check it for departure, arrival, AND every alternate.'),
+
+  H('Navigation Types — AI.II.I.K10'),
+  A('Pilotage'),
+  P('Flying by reference to landmarks — pick prominent, well-spaced checkpoints, never rely on just one, and turn on time if a checkpoint doesn\'t show up.'),
+  A('Dead reckoning'),
+  P('Computed from time, airspeed, distance, and direction.'),
+  A('Radio navigation'),
+  P('VOR, NDB, and GPS. Best practice: use all three navigation types together, not in isolation.'),
+
+  H('Magnetic Compass Errors — AI.II.I.K9'),
+  A('Variation vs. deviation'),
+  P('Variation is the Earth\'s doing — the angle between true and magnetic north, read off isogonic lines. Deviation is the airplane\'s doing — local magnetic interference, read off the compass correction card.'),
+  B('East is Least, West is Best: subtract variation on an easterly course, add it on a westerly one.'),
+  A('Turning errors — the compass pulls toward the nearer pole'),
+  P('Undershoot North, Overshoot South: about 30° near the N/S headings, tapering to 10° near east and west.', 3),
+  B('ANDS — Accelerate North, Decelerate South (applies only on east/west headings).'),
+  A('Dip & oscillation errors'),
+  P('Dip comes from magnetic flux lines tilting the card near the poles. Oscillation is every error combined, swinging the card back and forth — use the average indication.'),
+
+  S('Building the Flight Plan'),
+  H('Plotting the Course & Choosing Altitude — AI.II.I.K1,K2'),
+  P('Draw the route first, weighing terrain, airspace, weather, and navaids.'),
+  B('FAR 91.159 hemispheric rule: odd thousands + 500\' on magnetic courses 0-179°, even thousands + 500\' on 180-359°, applying above 3,000\' AGL up to 17,500\' MSL.'),
+  H('Checkpoints & Fuel — AI.II.I.K3,K5a,K5c'),
+  P('Mark top of climb, top of descent, and enough checkpoints in between to bridge the gap, then record them on the nav log.'),
+  B('FAR 91.151 fuel reserves: 30 minutes during the day, 45 minutes at night, beyond what\'s needed to reach the first point of intended landing.'),
+  H('Completing the Nav Log — AI.II.I.K4,K5a,K5b'),
+  P('Pick a power setting from the POH performance charts, then work the chain: TAS, leg distance, true course corrected for wind to heading and groundspeed, magnetic then compass heading, then time and fuel burn per leg.'),
+  B('Action: compare expected fuel burn to actual burn enroute and adjust — planned numbers are never perfect.'),
+  H('Electronic Flight Bag — AI.II.I.K14'),
+  P('Apps like ForeFlight are excellent planning tools — but know the app cold before leaning on it in flight.'),
+
+  S('Filing & Flying the Plan'),
+  H('VFR Flight Plan — AI.II.I.K6,K8,K14'),
+  P('Not required, but good practice — it\'s the search-and-rescue safety net.'),
+  A('Filing, opening & closing'),
+  P('File through FSS or an app; once filed, it\'s held for an hour past the proposed departure time. Open it by radio or app with your takeoff time. Close it by phone to keep the frequency clear.'),
+
+  H('Weather Briefing & Go/No-Go — AI.II.I.K7'),
+  B('FAR 91.103 requires familiarity with all available information for the flight.'),
+  P('Apply PAVE — Pilot, Aircraft, enVironment, External pressures — to the go/no-go call, and keep applying it throughout the flight, not just before it.', 3),
+
+  H('Planned vs. Actual Results — AI.II.I.K11'),
+  P('The better you know the route, the faster a deviation stands out. If timing is off, adjust power, or accept the speed and re-time the next waypoint — never just ignore it.'),
+
+  H('Diversion to an Alternate — AI.II.I.K12'),
+  A('Cockpit shortcuts'),
+  P('A thumb-width on the sectional for a quick 10 NM measure; a compass rose or airway line for a quick heading.'),
+  B('Procedure: fix your position, turn toward the alternate on the rule-of-thumb heading, note the time once established, pick an altitude, apply the winds aloft, then compute a new ETA and fuel burn.'),
+
+  H('Lost Procedures — AI.II.I.K12'),
+  B('The Five C\'s: Climb, Communicate, Confess, Comply, Conserve.'),
+  P('Cross-check the heading indicator against the magnetic compass, then use VOR/ADF or GPS to fix your position.'),
+
+  H('Flight Following & Intercept Procedures — AI.II.I.K13'),
+  P('Flight following is workload-permitting and advisory only — staying clear of IMC and traffic is always the pilot\'s responsibility, and ATC can only talk to participating aircraft.'),
+  B('RM: Limitations — AI.II.I.R5 — flight following is a service, not a guarantee.'),
+  P('AIM 5-6-13: an intercepting aircraft can be tasked to identify, track, inspect, divert, or establish communications in the interest of national security.', 3),
+
+  S('Conclusion'),
+  P('Review: terminology & charts · pilotage/DR/radio nav together · East is Least, ANDS · cruise altitude & fuel reserves (91.159, 91.151) · the nav log chain · filing/opening/closing a flight plan · PAVE go/no-go · diversions & the Five C\'s · flight following limits.'),
+  P('The habit that saves you: notice the deviation early and adjust the plan before the plan adjusts you.'),
+]};
+
+/* ============================================================
+   II.J — 14 CFR & Publications
+   Spine: The seven core FAR parts, then AC/InFO/SAFO, ACS/PTS, POH, AIM
+   ============================================================ */
+window.CFI_SCRIPTS['ii-j-14-cfr-publications'] = { nodes: [
+  S('Introduction'),
+  H('Attention'),
+  P('Every certificate we hold rests on a stack of regulations almost nobody reads cover to cover, which is why we as pilots learn exactly which document has the answer before we go looking for it.'),
+  H('Overview'),
+  P('The core FAR parts — 1, 61, 91, 21, 39, 43, 67'),
+  P('NTSB Part 830 — accident & incident reporting'),
+  P('Advisory Circulars, InFOs & SAFOs'),
+  P('ACS vs. PTS'),
+  P('POH & AIM'),
+  P('Currency of publications'),
+  H('What'),
+  P('How the regulatory library fits together — what\'s binding, what\'s guidance, and what\'s airplane-specific.'),
+  H('Why'),
+  B('Knowing which document answers which question is what separates a professional from someone guessing on a checkride.'),
+
+  S('How:'),
+
+  H('The Core FAR Parts — AI.II.J.K1'),
+  A('Part 1 — Definitions & Abbreviations'),
+  P('General definitions, abbreviations, symbols, and rules of construction.'),
+  A('Part 61 — Certification: Pilots, Flight Instructors, Ground Instructors'),
+  P('Requirements, privileges, and limitations for every certificate and rating.'),
+  A('Part 91 — General Operating & Flight Rules'),
+  P('The rules for operating an aircraft in the US, including the waters within 3 NM of the coast.'),
+  A('Part 21 — Certification Procedures'),
+  P('Requirements for airworthiness certificates and approvals.'),
+  A('Part 39 — Airworthiness Directives'),
+  P('The legal framework for the FAA\'s AD system.'),
+  A('Part 43 — Maintenance'),
+  P('Rules for maintenance, preventive maintenance, and rebuilding.'),
+  A('Part 67 — Medical Standards & Certification'),
+  P('Standards for issuing medical certificates.'),
+
+  H('NTSB Part 830 — AI.II.J.K2'),
+  B('Notify the nearest NTSB office immediately for an accident, a serious incident under 830.5(a), or an aircraft overdue and believed involved in an accident.'),
+  P('830.6 spells out what must be reported; wreckage, mail, cargo, and records must be preserved after an accident.', 3),
+
+  H('Advisory Circulars, InFOs & SAFOs — AI.II.J.K3'),
+  A('Advisory Circular (AC)'),
+  P('Informational, not regulatory — an acceptable way to comply, a response to a government request, or an expansion on a safety standard.'),
+  A('InFO — Information for Operators'),
+  P('Low-urgency information, e.g. Cold Temperature Airports Program updates.'),
+  A('SAFO — Safety Alert for Operators'),
+  P('Urgent, broadly shared safety information with recommended actions — e.g. recognizing and mitigating GPS/GNSS disruptions.'),
+
+  H('ACS & PTS — AI.II.J.K4'),
+  P('Part 61 sets the required areas of operation; the ACS — or the surviving PTS for Sport, Recreational, and CFI Instrument — is where the FAA publishes the specific tasks and standards.'),
+  P('The ACS integrates Knowledge, Risk Management, and Skill elements into every task; the PTS did not.', 3),
+
+  H('Pilot\'s Operating Handbook — AI.II.J.K5'),
+  P('Manufacturer-published and airplane-specific — the authority on that airplane\'s operation.'),
+
+  H('Aeronautical Information Manual — AI.II.J.K6'),
+  P('The official guide to basic flight information and ATC procedures — health and medical facts, flight safety, the pilot/controller glossary, and hazard reporting.'),
+
+  H('RM: Expired Publications — AI.II.J.R1'),
+  B('FAR 91.103 requires familiarity with all available information for the flight — an expired chart doesn\'t excuse missing something current.'),
+  P('Carrying an expired publication isn\'t itself an enforcement trigger, but if it contributed to something under investigation, it can be used in the action.'),
+  P('Check the cover for the next edition date, or the FAA\'s Dates of Latest Editions, and watch NOTAMs and Safety Alerts as expiration approaches.', 3),
+
+  S('Conclusion'),
+  P('Review: the seven core FAR parts · NTSB 830 reporting · AC / InFO / SAFO · ACS vs. PTS · POH · AIM · publication currency.'),
+  P('One habit: when a question comes up, know immediately which of these documents actually has the answer.'),
+]};
+
+/* ============================================================
+   II.K — Endorsements & Logbook Entries
+   Spine: Required logbook elements, the AC 61-65 endorsement chain
+   (worked through the Single-Engine Private Pilot example), 60-day vs.
+   2-calendar-month limits, and the instructor's own CFI currency
+   ============================================================ */
+window.CFI_SCRIPTS['ii-k-endorsements-logbooks'] = { nodes: [
+  S('Introduction'),
+  H('Attention'),
+  P('A missing endorsement can stop a checkride cold or become a real problem for the instructor who signed off on it, which is why we as pilots and instructors know exactly what belongs in the logbook and when.'),
+  H('Overview'),
+  P('Required logbook entry elements'),
+  P('Student pilot solo, cross-country & Class B endorsements'),
+  P('Practical test endorsements & the AC 61-65 numbering system'),
+  P('Additional ratings under FAR 61.63'),
+  P('Time limits after a discontinued or failed test'),
+  P('Flight review & IPC endorsements'),
+  P('Instructor recordkeeping & the instructor\'s own CFI currency'),
+  H('What'),
+  P('What has to be written, where, and when — for the learner\'s logbook and for the instructor\'s own certificate.'),
+  H('Why'),
+  B('Failure to issue the right endorsement is a serious deficiency in performance, and it\'s on the instructor, not the learner, to get it right.'),
+
+  S('How:'),
+
+  H('Logbook Entries — FAR 61.189/61.51 — AI.II.K.K1'),
+  P('An instructor signs the logbook of every person given flight or ground training.'),
+  P('Required elements: date, aircraft ID, make and model, type of experience (solo, PIC, etc.), total flight time, flight conditions (day/night/instrument), departure and arrival locations, and the safety pilot\'s name if one was used.'),
+
+  H('Student Pilot Endorsements — AI.II.K.K2,K3'),
+  A('Solo endorsements'),
+  P('Pre-solo aeronautical knowledge (61.87(b)) and pre-solo flight training (61.87(c)) — good for the first 90 days under 61.87(n), extendable another 90 under 61.87(p).'),
+  A('Cross-country endorsements'),
+  P('Solo XC training (61.93(c)(1)&(2)) and solo XC planning (61.93(c)(3)); repeated solo XCs within 50 NM of the home field fall under the separate 61.93(b)(2) endorsement.'),
+  A('Class B endorsements'),
+  P('Solo takeoffs and landings within 25 NM (61.93(b)(1)), solo flight in Class B (61.95(a)), and to/from/at a Class B airport (61.95(b) & 91.131(b)(1)) — plus the TSA citizenship endorsement (49 CFR 1552.15(c)).'),
+
+  H('Special Federal Aviation Regulation (SFAR)'),
+  P('A temporary, targeted regulation with its own expiration date, amendable or rescindable as needed — e.g. the 2020 SFAR giving schools regulatory relief during COVID.'),
+
+  H('Practical Test Endorsements — AI.II.K.K4'),
+  P('AC 61-65 catalogs every endorsement by number — learn the pattern, not a single memorized list.'),
+  A('Worked example: Single-Engine Private Pilot'),
+  P('A.1 — prerequisites for a practical test (61.39(a)(6)(i)&(ii)) · A.2 — review of knowledge test deficiencies (61.39(a)(6)(iii)) · A.36 — the aeronautical knowledge test (61.35(a)(1), 61.103(d), 61.105) · A.37 — flight proficiency / practical test (61.103(f), 61.107(b), 61.109).', 3),
+  P('Every certificate and rating — Sport, Recreational, Instrument, Commercial, ATP — has its own version of this chain in AC 61-65.'),
+  P('Applications run through IACRA (iacra.faa.gov), or rarely a signed Form 8710-1; a 3rd-class medical is required except in specific carve-outs (61.23(a)(3)(iii)).'),
+
+  H('Additional Ratings — FAR 61.63 — AI.II.K.K4b,K4c'),
+  P('Additional category (61.63(b)) or class (61.63(c)) rating: complete the required training, get the competency endorsement (AC 61-65 A.78) plus the practical test endorsement (A.1), then pass the practical test — no separate knowledge test if a rating is already held at that certificate level.'),
+  P('Example: a single-engine private pilot adding multiengine needs A.1, A.78 (61.63(c)), and A.72 to act as PIC of a complex aircraft (61.31(e)).', 3),
+  P('Solo in a category or class not yet held: 61.31(d)(2), endorsement A.76.', 3),
+
+  H('Reapplying for a Practical Test'),
+  A('After a Notice of Disapproval'),
+  P('Needs a new instructor endorsement (61.43(f) & 61.49(a)(2), AC 61-65 A.77) plus a fresh instructor recommendation through 8710/IACRA — credit for areas already passed is good for 60 calendar days.'),
+  A('After a Letter of Discontinuance'),
+  P('No new endorsement required — same 60-day credit window applies.'),
+  B('60 calendar days (61.43(f)(1)) is the credit window after a discontinued or failed test. 2 calendar months (61.39(g)/(h)) is the separate limit for a test being conducted in planned increments — after that, the entire test starts over.'),
+
+  H('Flight Review & IPC Endorsements — AI.II.K.K5'),
+  P('Flight review: AC 61-65 A.69 (61.56(a)&(c)). IPC, CFII required: AC 61-65 A.71 (61.57(d)). Neither gets a logbook entry for an unsatisfactory attempt — no endorsement, no entry.'),
+
+  H('Instructor Responsibilities — FAR 61.189 — AI.II.K.K6'),
+  B('Keep a record of every solo endorsement and every knowledge or practical test endorsement — name, date, kind of test, and result — retained for at least 3 years.'),
+
+  H('RM: Limitations & Expiration Dates — AI.II.K.R1'),
+  B('Failure to issue a proper endorsement is a serious deficiency, and the FAA can hold the instructor accountable — make sure the learner understands the limitation, not just that it exists.'),
+
+  H('Becoming a New Flight Instructor — effective Dec. 1, 2024'),
+  P('Ground training route: 24+ months holding the certificate and 40+ hours given, or 100+ hours in an FAA-approved course.'),
+  P('Flight training route: 24+ months and 200+ hours given, or an 80% first-attempt pass rate across 5+ applicants in the last 24 months, or 200 hours plus a Part 141 FIEQTP (61.95(h)(3), AC 61-145).', 3),
+
+  H('Maintaining Your CFI Certificate — AI.II.K.K7'),
+  B('Certificates issued before Dec. 1, 2024 still expire 24 calendar months from issue, renewal, or reinstatement (61.19(d)); certificates issued on or after that date carry no expiration date at all.'),
+  A('Recent experience — FAR 61.197, every 24 calendar months'),
+  P('Pass a practical test for a rating already held or an additional one, OR document one of: 5+ endorsed applicants at ≥80% first-attempt pass rate (Gold Seal-eligible), duty as a check airman, chief instructor, or Part 121/135 instructor, a refresher course in the last 3 months (AC 61-83), a military proficiency check, or a WINGS phase with 15 evaluated activities across 5+ pilots.'),
+  A('Reinstatement — FAR 61.199'),
+  P('Within 3 months of expiration, an approved refresher course reinstates the certificate, but no instructing during that window. Past 3 months, a full instructor practical test — or an equivalent military credential — is required.'),
+  P('Document everything on an 8710-1 or 8710-11.', 3),
+
+  S('Conclusion'),
+  P('Review: required logbook elements · student pilot solo/XC/Class B endorsements · the AC 61-65 endorsement chain · 61.63 additional ratings · 60-day vs. 2-calendar-month limits · flight review/IPC · 3-year recordkeeping · the instructor\'s own CFI currency and reinstatement.'),
+  P('The habit: before signing anything, know the exact FAR and AC 61-65 number behind that signature.'),
+]};
+
+/* ============================================================
+   II.M — Night Operations
+   Spine: Rods/cones & off-center viewing, FLAPS night equipment,
+   3-in-90 currency, ABCD engine failure, Aviate-Navigate-Communicate,
+   "attack the closest alligator"
+   ============================================================ */
+window.CFI_SCRIPTS['ii-m-night-operations'] = { nodes: [
+  S('Introduction'),
+  H('Attention'),
+  P('Night flying trades away most of the outside visual references we rely on all day, which is why we as pilots lean harder on the instruments and treat every strange visual cue as an illusion until proven otherwise.'),
+  H('Overview'),
+  P('Eyes at night — rods, cones, off-center viewing'),
+  P('Airport & obstruction lighting'),
+  P('Night illusions & disorientation'),
+  P('Preflight, taxi, takeoff & in-flight orientation at night'),
+  P('Traffic pattern, approach, landing & go-around'),
+  P('Night emergencies — electrical & engine failure'),
+  P('Distractions, SA, task prioritization & collision hazards'),
+  H('What'),
+  P('How to fly safely, currently, and confidently once the sun is down.'),
+  H('Why'),
+  B('Night strips away most of the visual cues used all day — the instructor\'s job is to get the learner trusting the instruments before they actually need them.'),
+
+  S('How:'),
+
+  H('Eyes at Night — AI.II.M.K1'),
+  A('Rods and cones'),
+  P('Cones, in the center of the retina, give color, detail, and daylight vision. Rods, surrounding the cones, make night vision possible but need off-center viewing — look 10-15° to the side of what needs to be seen.'),
+  P('Rods are slow to adapt to darkness but lose that adaptation the instant they see bright light.', 3),
+  H('RM: Collision Avoidance & Night Vision — AI.II.M.R3'),
+  B('Action: keep flight deck lighting to a minimum and use red or green light — bright white light kills night adaptation for minutes at a time.'),
+
+  H('Airport Lighting — AI.II.M.K2'),
+  A('Taxiway lighting'),
+  P('Blue edge lights, green centerline lights, yellow in-pavement clearance bars at holding positions, and elevated flashing-yellow runway guard lights at taxiway/runway intersections.'),
+  P('Stop bars: red in-pavement lights across the taxiway, off only after ATC clearance.'),
+  A('Taxiway Centerline Lead-Off & Lead-On Lights'),
+  P('Alternating green and yellow lights from the runway centerline out to one light beyond the holding position — lead-off lights guide off the runway, lead-on lights guide onto it, working with the stop bar in low visibility.', 3),
+  A('Runway lighting'),
+  P('White edge lights, amber for the last 2,000\' on an instrument runway; red toward the runway and green outward at the far end. REIL flashes at the threshold; RCLS runs white, then red-and-white, then solid red for the last 1,000\'; TDZL are steady white bars past the threshold.'),
+  A('Approach lighting & glideslope indicators'),
+  P('The approach light system carries a pilot from instrument to visual conditions. 2-bar VASI: white over red, on a 3° path, visible 3-5 miles by day and 20+ at night. PAPI: same idea, single row of lights, usually on the left side.'),
+  P('Tri-color: amber high, green on-path, red low. Pulsating VASI: pulsating white high, steady white on-path, steady red slightly low, pulsating red low — the pulse rate speeds up the further off path an aircraft gets.', 3),
+  A('Airport beacons'),
+  P('White-green: land airport. White-white-green: military. White-yellow: water. Green-yellow-white: heliport. A beacon running during the day usually means visibility under 3 miles or a ceiling under 1,000\', though there\'s no regulation requiring it.'),
+  A('Pilot-controlled lighting'),
+  P('Key the mic on CTAF: 3 clicks for low intensity, 5 for medium, 7 for high — all within 5 seconds, and the lights stay on 15 minutes.'),
+  A('Obstruction lighting'),
+  P('Red flashing beacons and steady red lights, or medium/high-intensity flashing white; dual lighting combines red and white, and catenary lighting marks high-voltage wire spans across rivers and canyons.'),
+
+  H('RM: Disorientation & Night Illusions — AI.II.M.K7,R4,R5'),
+  B('The fix for every illusion on this list is the same one: verify attitude on the instruments, and go around if unsure.'),
+  A('Autokinesis'),
+  P('A single point of light on a dark background appears to move on its own — prevented by scanning, not fixating.'),
+  A('Reversible perspective & size-distance illusions'),
+  P('A dimming light can look like it\'s moving away when it\'s actually approaching, and vice versa — don\'t trust apparent motion from one light source alone.'),
+  A('Flicker vertigo'),
+  P('A light flickering 4-20 times per second can cause nausea, vomiting, or vertigo — proper scanning prevents it.'),
+  A('False horizon & featureless terrain'),
+  P('A sloping cloud deck or ground light pattern can fake a horizon; featureless dark terrain below makes an aircraft feel higher than it is and invites a lower-than-normal approach.'),
+  A('Ground lighting confusion'),
+  P('Roads, parking lots, and stray lights can be mistaken for a runway — know what to expect to see, and where, before arriving.'),
+
+  S('Night Operations'),
+  H('Currency & Proficiency — FAR 61.57(b) — AI.II.M.K3'),
+  B('3 full-stop takeoffs and landings in the preceding 90 days, sole manipulator, same category/class/type, between 1 hour after sunset and 1 hour before sunrise — required to carry passengers at night.'),
+  P('Current is not the same as proficient — check the learner\'s actual comfort level, not just the logbook.', 3),
+  H('Equipment & Preflight — FAR 91.205 — AI.II.M.K4'),
+  P('A red-and-white flashlight — white for the walkaround, red in the flight deck (watch for washout: red charts under red light go illegible).'),
+  B('Night VFR required equipment adds FLAPS to the day list: Fuses, Landing light, Anti-collision lights, Position lights, Source of power.'),
+  P('Inoperative equipment at night gets the same MEL/type-certificate/AD/91.205 treatment as during the day, plus the FLAPS items — and personal minimums on top of that.', 3),
+
+  H('Engine Start & Taxi — AI.II.M.K8'),
+  P('Beacon on, call "clear prop," and scan carefully before starting — leave nonessential electrical equipment off until after start to protect the battery.'),
+  P('Taxi slowly with the taxi or landing light on (without blinding anyone), keep the airport diagram out, and stop for clarification the moment SA is in doubt.'),
+
+  H('Takeoff & Climb — AI.II.M.K6'),
+  P('Line up slightly off centerline so the airplane doesn\'t blend into the runway lights, and verify the correct runway before rolling.'),
+  P('Lean on the instruments through takeoff and climb — darkness hides whether the airplane is actually climbing away from the ground, so cross-check airspeed, VSI, and altitude.'),
+
+  H('In-Flight Orientation — AI.II.M.K5'),
+  A('Clouds & water crossings'),
+  P('Clouds are hard to see at night — stay conservative and don\'t count on popping out the other side. Crossing large water removes the horizon entirely; if the engine quits, ditching may be the only option.'),
+  A('Navigation lights — AI.II.M.K9'),
+  B('Red on the left wing, green on the right, white on the tail — memory aid: Green and Right have the same number of letters.'),
+  P('Use city lights, highways, and beacons as night landmarks, backed up by NAVAIDs and GPS.', 3),
+
+  H('Traffic Pattern, Approach & Landing'),
+  P('Identify the beacon first, then the runway lights; compare against the heading indicator and use the localizer or GPS OBS to extend the centerline if the airport is hard to pick out of city lighting.'),
+  P('Fly a stabilized approach exactly as by day, aligning between the edge lights if there\'s no centerline, leaning on the altimeter and airspeed indicator.'),
+  B('Technique: start the roundout when the landing light reflects on the runway\'s tire marks, or when the far-end runway lights appear to rise above the nose if there\'s no landing light.'),
+  P('Go-around: same procedure as day, with a heavier instrument crosscheck and a faster decision given the reduced visibility.'),
+
+  S('RM: Hazards & Emergencies'),
+  H('Weather Considerations — AI.II.M.R2'),
+  P('A narrow temperature/dewpoint spread means fog forms fast — and fog and clouds are both harder to see at night; wind effects are harder to detect too.'),
+  H('Electrical Failure'),
+  P('Work the POH checklist, cut the electrical load, and if total failure looks likely, land at the nearest suitable airport and transition to backup instruments.'),
+  H('Engine Failure'),
+  B('ABCD — Airspeed, Best landing area, Checklist (attempt a restart), Distress call — while maintaining positive control throughout.'),
+  P('Stay on the frequency already in use unless told otherwise, run the before-landing checklist, touch down at the slowest safe airspeed, then shut off all switches and evacuate.', 3),
+
+  H('Distractions, SA & Task Prioritization — AI.II.M.R4'),
+  B('Aviate, Navigate, Communicate — fly the airplane first, always.'),
+  P('Sterile flight deck for taxi, takeoff, descent, and landing; remove distractions rather than tolerate them.'),
+  P('On the ground, taxiing takes priority — save heads-down work for when stopped. Airborne, divide attention and don\'t let one task hold full focus too long.'),
+  P('Falling behind? Attack the closest alligator — handle the most pressing problem first.', 3),
+
+  H('Collision Hazards — AI.II.M.R3'),
+  P('Off-center scanning, gentle banks while climbing to clear blind spots, and generous spacing at uncontrolled fields where traffic is harder to see.'),
+  P('Landing lights on for takeoff and any time below 10,000\' — day or night.'),
+  A('Terrain & obstacles'),
+  P('Terrain is nearly invisible at night until it\'s too late — fly the FAR 91.119 minimum safe altitudes and know what\'s nearby from NOTAMs and the Terminal Procedures.'),
+  B('Antenna towers can run 1,000-2,000\' AGL with guy wires extending 1,500\' horizontally and are very hard to see — give them 2,000\' or more.'),
+  A('Vehicles, persons & wildlife'),
+  P('Reject or delay the takeoff, go around on landing, or stop while taxiing — whatever it takes to avoid what suddenly shows up in the lights.'),
+
+  S('Conclusion'),
+  P('Review: rods/cones & off-center viewing · airport & obstruction lighting · night illusions · currency (3 in 90) & FLAPS equipment · taxi/takeoff/climb technique · nav lights & in-flight orientation · approach/landing/go-around · electrical & engine failure (ABCD) · SA, task prioritization & collision hazards.'),
+  P('The habit above the rest: the instant a light or a shape stops matching the instruments, believe the instruments.'),
+]};
+
+/* ============================================================
+   II.N — Supplemental Oxygen
+   Spine: FAR 91.211 altitude/time thresholds, hypoxia & TUC, the four
+   oxygen system types, storage/fire risk
+   ============================================================ */
+window.CFI_SCRIPTS['ii-n-supplemental-oxygen'] = { nodes: [
+  S('Introduction'),
+  H('Attention'),
+  P('The air above 12,000 feet is already thinning out long before it feels like it, which is why we as pilots put the oxygen requirements ahead of how we happen to feel in the moment.'),
+  H('Overview'),
+  P('The high-altitude environment & FAR 91.211 requirements'),
+  P('Hypoxia & Time of Useful Consciousness'),
+  P('Types of oxygen delivery systems'),
+  P('Aviator\'s breathing oxygen'),
+  P('Storage & fire risk'),
+  H('What'),
+  P('When oxygen is legally required, and how each delivery system actually works.'),
+  H('Why'),
+  B('Hypoxia is silent and often pleasant right up until it isn\'t — supplemental oxygen is the fix, but only if the numbers are known cold.'),
+
+  S('How:'),
+
+  H('The High-Altitude Environment'),
+  P('FAR 61.31(g) calls anything above 25,000\' MSL "high altitude," but the physiological effects show up well before that.'),
+
+  H('Regulatory Requirements — FAR 91.211 — AI.II.N.K1'),
+  B('Minimum flight crew: oxygen required from 12,500\' up to and including 14,000\' MSL for more than 30 minutes, and at all times above 14,000\'. All occupants need it above 15,000\' cabin pressure altitude.'),
+  P('Pressurized cabins can\'t operate above FL250 without 10 minutes of emergency oxygen on top of the above, for a loss of pressure.', 3),
+  P('Above FL350, the pilot at the controls wears an oxygen mask, unless at or below FL410 with two pilots at the controls both wearing quick-don masks; if one pilot leaves the controls above FL350, the other puts the mask on.', 3),
+
+  H('RM: Physiological Hazards — AI.II.N.K2,R1'),
+  P('The body functions normally from sea level to 12,000\' — above that, oxygen saturation and performance both start dropping.'),
+  A('Hypoxia'),
+  P('Oxygen deficiency in the blood, tissue, or cells — the brain is the most vulnerable organ, so impaired judgment shows up first, often without the pilot noticing.'),
+  B('Time of Useful Consciousness shrinks fast: 30+ minutes at 20,000\', 3-5 minutes at 25,000\', 1-2 minutes at 30,000\', 15-20 seconds at 40,000\', 9-15 seconds at 45,000\'.'),
+  P('Symptoms: cyanosis, headache, delayed reactions, impaired judgment, euphoria, visual impairment, drowsiness, lightheadedness, tingling or numb fingers and toes.', 3),
+  P('Treatment: descend immediately and get on supplemental oxygen — there\'s no substitute for either.'),
+
+  H('Types of Oxygen Systems — AI.II.N.K3a'),
+  A('Continuous flow'),
+  P('Mixes oxygen with ambient air, usually for passengers — a reservoir bag collects oxygen between breaths.'),
+  A('Diluter demand'),
+  P('Delivers oxygen only on inhalation, usable to 40,000\' — the user can select 100% oxygen or a diluted mix.'),
+  A('Pressure demand'),
+  P('Oxygen is delivered under pressure above 34,000\' so it can pressurize the lungs directly — some regulators are rated above 40,000\'.'),
+  A('Electric pulse-demand'),
+  P('Senses inhalation and delivers oxygen only at the start of the breath, cutting consumption 50-85% versus continuous flow, often with a barometer that adjusts automatically with altitude.'),
+
+  H('Aviator\'s Breathing Oxygen — AI.II.N.K3b'),
+  P('Minimum 99.5% purity, no more than 0.005 mg of water vapor per liter — industrial or medical oxygen is not a substitute.'),
+
+  H('RM: Storage & Fire Risk — AI.II.N.K3c,R3,R4'),
+  B('High-pressure bottles run 1,800-2,200 psi and must be marked with their pressure tolerance before filling — treat oxygen equipment as a fire hazard, and inspect and service it on schedule.'),
+  P('Portable oxygen, when required, must stay accessible in flight.', 3),
+
+  H('RM: Use of Supplemental Oxygen — AI.II.N.R2'),
+  P('Every piece of this lesson — the requirements, the hypoxia numbers, the system choice, the storage rules — is itself the risk management: know the personal oxygen altitude before the altitude makes the decision instead.'),
+
+  S('Conclusion'),
+  P('Review: FAR 91.211 thresholds (12,500\'/14,000\'/15,000\') · hypoxia & TUC · continuous flow, diluter demand, pressure demand & pulse-demand systems · 99.5% purity · bottle storage & fire risk.'),
+  P('The habit: know the personal oxygen altitude before noticing a strange, pleasant euphoria for no reason.'),
+]};
+
+/* ============================================================
+   II.O — Pressurization
+   Spine: Hypoxia/TUC recap, trapped gas & DCS, how the pressurization
+   system holds a lower cabin altitude, explosive vs. rapid decompression
+   ============================================================ */
+window.CFI_SCRIPTS['ii-o-pressurization'] = { nodes: [
+  S('Introduction'),
+  H('Attention'),
+  P('A pressurized cabin lets an airplane cruise at altitudes the human body was never built for, which is why we as pilots understand exactly what happens the moment that pressure goes away.'),
+  H('Overview'),
+  P('High-altitude physiology — hypoxia & TUC'),
+  P('Trapped gas & decompression sickness'),
+  P('How cabin pressurization works'),
+  P('Cabin pressurization instruments'),
+  P('Rapid vs. explosive decompression & the response'),
+  H('What'),
+  P('How the airplane manufactures a lower cabin altitude than the flight altitude, and how to react when that system fails.'),
+  H('Why'),
+  B('A pressurization failure at altitude gives seconds, not minutes, to get oxygen on and start down.'),
+
+  S('How:'),
+
+  H('RM: Physiological Hazards — AI.II.O.K2,R1'),
+  P('The body functions normally to 12,000\' MSL; above that, oxygen saturation and performance both decline.'),
+  A('Hypoxia & Time of Useful Consciousness'),
+  B('TUC: 30+ minutes at 20,000\', 3-5 minutes at 25,000\', 1-2 minutes at 30,000\', 15-20 seconds at 40,000\', 9-15 seconds at 45,000\' — treatment is an emergency descent plus supplemental oxygen.'),
+  A('Vision'),
+  P('Vision deteriorates with altitude first — reduced oxygen to the rods cuts their sensitivity, which is exactly the vision needed at night.'),
+  A('Trapped gas'),
+  P('Gas expands on climb and compresses on descent. The middle ear, sinuses, teeth, and GI tract can trap it — usually just uncomfortable, but genuinely painful if it can\'t equalize.'),
+  A('Decompression sickness — nitrogen absorption'),
+  B('If cabin pressure drops enough, dissolved nitrogen comes out of solution as bubbles — impairment or severe pain, and in extreme cases, death.'),
+
+  H('How Pressurization Works — AI.II.O.K1'),
+  P('Compression of air to maintain a cabin altitude lower than the flight altitude.'),
+  P('The cabin, flight deck, and baggage compartment form one sealed pressure vessel.'),
+  P('Turbine aircraft pressurize with engine bleed air, piston aircraft with turbocharger air; an outflow valve bleeds air out at a controlled rate to hold the pressure differential constant.'),
+  A('Cabin pressure control system'),
+  P('Handles pressure regulation, pressure relief, and vacuum relief; the safety valve backstops both over- and under-pressure.'),
+  A('Cabin instruments'),
+  P('Cabin differential pressure (inside vs. outside), cabin altimeter (the altitude the cabin thinks it\'s at), and cabin rate of climb/descent.'),
+  B('RM: Malfunctions — run the POH checklist and be ready for reduced pressurization or a full decompression: oxygen and an emergency descent.'),
+
+  H('Rapid & Explosive Decompression — AI.II.O.K2d'),
+  A('The difference'),
+  P('Explosive decompression happens faster than the lungs can decompress — under half a second. Rapid decompression is slower; the lungs can keep pace with the aircraft.'),
+  A('What it looks like'),
+  P('Noise, a dazed feeling, fog filling the cabin from condensation, dust and debris flying, and air rushing out of the mouth and nose as the lungs equalize.'),
+  B('The primary danger is hypoxia — mask on immediately, then start the emergency descent; watch for decompression sickness as a secondary risk.'),
+
+  S('Conclusion'),
+  P('Review: hypoxia & TUC · trapped gas & decompression sickness · how the pressurization system holds a lower cabin altitude · cabin instruments · explosive vs. rapid decompression and the oxygen-then-descend response.'),
+  P('The habit: mask on before anything else — hypoxia takes away the ability to notice it\'s needed.'),
+]};
+
+/* ============================================================
+   III.A — Pilot Qualifications
+   Spine: ARROW (documents) is covered in III.B; this lesson is the
+   certificate/medical/currency spine — FAR 61.23, 61.57, 61.56
+   ============================================================ */
+window.CFI_SCRIPTS['iii-a-pilot-qualifications'] = { nodes: [
+  S('Introduction'),
+  H('Attention'),
+  P('Every privilege you exercise as a pilot rests on paperwork that expires without warning, which is why we as pilots track our certificates, medicals, and currency like part of the checklist, not an afterthought.'),
+  H('Overview'),
+  P('Medical certificates & BasicMed (FAR 61.23)'),
+  P('Certification & training requirements by certificate level'),
+  P('Logbook entries & instructor records'),
+  P('Privileges & limitations, including the MOSAIC changes'),
+  P('Pilot currency (FAR 61.57) & flight review (FAR 61.56)'),
+  P('Required documents'),
+  H('What'),
+  P('What the FARs require you to hold, carry, and log in order to legally exercise pilot privileges — and how long each piece stays valid.'),
+  H('Why'),
+  B('The certification and currency system is what lets a stranger get in your airplane and trust you are legally, and actually, qualified to be there.'),
+
+  S('How:'),
+
+  H('Medical Certificates — FAR 61.23 — AI.III.A.K3'),
+  A('What it is'),
+  P('A routine exam from an FAA-authorized Aviation Medical Examiner; 3 classes — 1st, 2nd, 3rd.'),
+  A('Who needs which class'),
+  P('1st: PIC privileges of an ATP. 2nd: SIC at an airline, or exercising commercial privileges. 3rd: private, recreational, or student privileges; CFI acting as PIC or required crewmember; taking a practical test; or performing duties as an examiner.'),
+  A('When no medical is required — FAR 61.23(b)'),
+  P('CFI privileges when not acting as PIC or required crewmember · ground instructor privileges · a military pilot showing an up-to-date military medical exam (3rd-class-equivalent flights, US airspace only).'),
+  A('Duration — FAR 61.23(d)'),
+  P('Under 40: 1st class covers 1st/2nd-class activities for 12 months, 3rd-class activities for 60 months. 40 or older: 1st class covers 1st-class activities for 6 months, 2nd-class activities for 12 months, 3rd-class activities for 24 months. 2nd and 3rd class follow the same 40-year break on their own activities.'),
+  P('Find an AME through the FAA.gov AME Locator, or a directory kept at any FSDO or FSS.', 3),
+  B('Once issued, a medical is self-regulating — FAR 61.53 grounds you the moment you know of a disqualifying condition or medication, whether or not the certificate itself has expired.'),
+  P('15 disqualifying conditions still allow issuance through Special Issuance (FAR 67.401) in nearly every case.', 3),
+
+  H('BasicMed — FAR 61.23(c)'),
+  P('A way to fly without holding a medical certificate, under FAR 61.113(i): student, recreational, or private privileges, or CFI acting as PIC or a required crewmember.'),
+  P('Requirements: held a medical after July 14, 2006 · completed the medical education course in the last 24 months · exam in the last 48 months using the directed checklist · no revoked, suspended, or withdrawn medical · under a physician\'s care if a condition could affect flying.'),
+  P('Aircraft/flight limits (post Nov 2024): 7 or fewer seats, 12,500 lbs max takeoff weight, US airspace, below 18,000 ft and 250 knots, not for compensation or hire, 6 passengers.', 3),
+
+  H('Certification & Training Requirements — AI.III.A.K1'),
+  P('Every certificate level follows the same 4-part shape in the FARs: Eligibility, Aeronautical Knowledge, Flight Proficiency, Aeronautical Experience.'),
+  A('Sport (61.305-.313) · Recreational (61.96-.99) · Student (61.83-.93) · Private (61.103-.109) · Commercial (61.123-.129) · Flight Instructor (61.183-.187, proficiency-based, no fixed hour requirement)'),
+  B('Action: know the FAR number, not just the requirement — the ACS and the DPE both expect it.'),
+
+  H('Logbook Entries & Records — AI.III.A.K1'),
+  P('61.189: as a CFI, I sign the logbook of everyone I give flight or ground training to. 61.51: the logbook documents training and experience toward a certificate, rating, or review.'),
+  P('Every entry needs: date, total time, departure/arrival location (or simulator location), aircraft/simulator/device type and ID, safety pilot name if used · type of experience — solo, PIC, SIC, training · conditions — day/night, actual or simulated instrument.'),
+  A('Instructor records — FAR 61.189'),
+  P('Keep for 3 years: every solo endorsement with its date, and every knowledge or practical test endorsement with the kind of test, date, and result.'),
+
+  H('Privileges & Limitations — AI.III.A.K2'),
+  P('Each certificate\'s privileges and limits live in its own FAR: Sport 61.89(c)/61.315 · Recreational 61.101 · Student 61.89 · Private 61.113 · Commercial 61.133 · CFI privileges 61.193, limitations 61.195.'),
+  A('MOSAIC — effective October 22, 2025'),
+  P('Sport Pilots gain: up to 4 seats (still 2 occupants) · no max takeoff weight · 59 KCAS max stall speed clean · no max airspeed (light-sport aircraft capped at 250 KCAS) · retractable gear and controllable-pitch props with training · night operations with training and a medical or BasicMed · driver\'s license medical for day VFR only.'),
+  P('Private pilots and above may exercise Sport privileges under their existing certificate starting day one — no extra paperwork or checkride.', 3),
+  A('Light-Sport Category — effective July 24, 2026'),
+  P('The weight-based LSA definition disappears; the category is defined by performance instead — up to 61 KCAS landing stall speed, 250 KCAS airspeed, any gear or prop, electric or hybrid propulsion, and new eligible types: helicopters, power-lift, gyroplanes, eVTOLs.'),
+
+  H('Pilot Currency — FAR 61.57 — AI.III.A.K1'),
+  P('Passengers, day: 3 takeoffs and landings in the last 90 days, sole manipulator, same category/class/type; tailwheel landings must be to a full stop.'),
+  P('Passengers, night (1 hour after sunset to 1 hour before sunrise): same 3 in 90 days, but each to a full stop.'),
+  P('IFR currency — 61.57(c)/(d): 6 approaches, holding, and course intercepting/tracking in the last 6 months; miss it by more than 6 months and only an Instrument Proficiency Check can reset it.'),
+  A('Flight Review — FAR 61.56'),
+  P('An endorsement is required every 24 months to act as PIC. Waived by a practical test or proficiency check in the last 24 months, by completing a phase of a pilot proficiency award program, or by an active student solo endorsement.'),
+
+  H('RM: Proficiency vs. Currency — AI.III.A.R1/R2'),
+  B('Currency is the legal minimum to fly. Proficiency is the actual ability to fly the airplane safely. They are not the same thing, and being current does not mean you are safe.'),
+  P('Flying an unfamiliar aircraft: being current in category and class does not make you proficient in that specific airplane — get a real checkout.', 3),
+
+  H('Required Documents — FAR 61.3 / 61.51(i) — AI.III.A.K4'),
+  A('On your person or in the aircraft'),
+  P('Pilot certificate (and CFI certificate, if exercising those privileges) · government photo ID · medical certificate — present on request per 61.51(i), along with the logbook or any other Part 61 record.'),
+  A('Special cases'),
+  P('Student on a solo cross-country: logbook with endorsements, student certificate, any other required Part 61 certificate. Sport pilot: logbook or other evidence of endorsements, every flight. Recreational pilot flying solo beyond 50 nm, in ATC-communication airspace, at night, or outside their category/class rating: logbook with endorsements.'),
+
+  S('Conclusion'),
+  P('Review: medicals & BasicMed · certification requirements by level · logbook entries & instructor records · privileges & MOSAIC · currency (61.57) & flight review (61.56) · proficiency vs. currency · required documents.'),
+  P('The habit: before every flight, you and the airplane both need current paper — check both, every time.'),
+]};
+
+/* ============================================================
+   III.B — Airworthiness Requirements: General Overview
+   Spine: ARROW (documents) · AV1ATE (inspections) ·
+   A TOMATO FFLAMES + FLAPS (equipment) · MEL vs. the Four-Step Test
+   ============================================================ */
+window.CFI_SCRIPTS['iii-b-airworthiness-acs-info'] = { nodes: [
+  S('Introduction'),
+  H('Attention'),
+  P('An airplane can look perfect and still be illegal to fly, which is why we as pilots verify airworthiness with documents and inspections instead of a glance.'),
+  H('Overview'),
+  P('Key conditions for airworthiness'),
+  P('Required documents (ARROW)'),
+  P('Required inspections (AV1ATE)'),
+  P('Required instruments & equipment — day and night VFR'),
+  P('Handling inoperative equipment — MEL vs. FAR 91.213(d)'),
+  P('Airworthiness Directives, special flight permits & recordkeeping'),
+  H('What'),
+  P('What actually makes an aircraft airworthy — the paperwork, the inspections, and the equipment that all have to check out before takeoff.'),
+  H('Why'),
+  B('The words on the airworthiness certificate are the FAA\'s promise this airplane is safe — and it is on you, as PIC, to verify that promise is still true today.'),
+
+  S('How:'),
+
+  H('Airworthiness — AI.III.B.K1'),
+  P('Two conditions, both required: the aircraft conforms to its type certificate (matches FAA-approved design) · it is in a condition for safe flight, no defects that compromise safety · maintenance and alterations were performed per the FARs.'),
+  P('Both conditions are spelled out on the Airworthiness Certificate itself — Authority & Basis for Issuance, and Terms & Conditions.', 3),
+
+  H('Required Airworthiness Documents — ARROW — AI.III.B.K1a'),
+  A('A — Airworthiness Certificate'),
+  A('R — Registration Certificate (renews every 7 years)'),
+  A('R — Radio station license (international flights only)'),
+  A('O — Operating limitations (POH)'),
+  A('W — Weight and balance, specific to the tail number'),
+  B('Any one missing or expired and the aircraft is not airworthy.'),
+  B('Action: show the student exactly where each document lives in the airplane.'),
+
+  H('Airworthiness Certificates — AI.III.B.K4'),
+  P('Issued by the FAA once an aircraft meets Part 21 and is safe for operation; must be displayed in the aircraft; stays in effect as long as the aircraft matches its type design, receives required maintenance, and stays US-registered.'),
+  A('Standard (white)'),
+  P('Normal, utility, acrobatic, commuter, or transport category.'),
+  A('Special (pink)'),
+  P('Primary, Experimental, Restricted, Limited, Provisional, and Light-Sport — often barred from operating for hire and may restrict passengers or require sparse/over-water areas (FAR 91.325, .319, .313, .315, .317, .327).'),
+
+  H('Required Airworthiness Inspections — AV1ATE — AI.III.B.K1b'),
+  A('A — Annual'),
+  P('Every reciprocating or single-engine turbine aircraft under 12,500 lbs flown for business or pleasure, not for hire — by an A&P holding an Inspection Authorization; a Special Flight Permit can move an overdue aircraft to the inspection only. An annual can substitute for a required 100-hour.'),
+  A('V — VOR check'),
+  P('Every 30 days for IFR use, and a record must be kept.'),
+  A('1 — 100-hour'),
+  P('Aircraft under 12,500 lbs (non-turbo) used for hire or flight instruction for hire, done by an A&P at a certified repair station or the manufacturer. Can run up to 10 hours over if en route to the inspection — that excess time counts toward the next 100.'),
+  P('Applies only when the same person or operation provides both the instruction and the aircraft — if the student owns or genuinely leases the airplane, only the annual applies (Colvin Letter, 2011). Solo training flights still count toward the 100-hour (Fly By Knight, 2015). Club membership is not aircraft ownership (Pipitone, 2016).', 3),
+  A('A — Altimeter/pitot-static'),
+  P('Every 24 calendar months, IFR only.'),
+  A('T — Transponder'),
+  P('Every 24 calendar months.'),
+  A('E — ELT'),
+  P('Every 12 calendar months; batteries replaced after 1 cumulative hour of use or half their useful life.'),
+  B('Action: pull the logs and show the student exactly where each inspection\'s currency is recorded.'),
+
+  H('Required Instruments & Equipment — FAR 91.205'),
+  A('Day VFR — A TOMATO FFLAMES'),
+  P('Airspeed indicator · Tachometer · Oil pressure gauge · Manifold pressure gauge (altitude engines) · Altimeter · Temperature gauge (liquid-cooled) or oil temperature (air-cooled) · Fuel gauge, each tank · Flotation gear (for-hire, over water beyond glide distance) · Landing gear position indicator (retractable) · Anti-collision lights (certified after March 11, 1996) · Magnetic compass · ELT · Seat belts and shoulder harnesses.'),
+  A('Night VFR adds — FLAPS'),
+  P('Fuses (if required) · Landing light (for hire) · Anti-collision lights · Position lights · Source of electrical power.'),
+
+  H('RM: Handling Inoperative Equipment — MEL vs. 91.213(d) — AI.III.B.K3,R1'),
+  A('Minimum Equipment List (MEL)'),
+  P('A precise, FAA-approved list, requested from the FAA, of what can be inoperative for a given flight — it functions as a supplemental type certificate. Uncommon in GA. If broken equipment is not deferrable on the MEL, it must be fixed first (a special flight permit can cover the ferry to repair it).'),
+  A('The Four-Step Test — FAR 91.213(d) — when there is no MEL'),
+  P('Is it required by the POH/AFM? Is it required by the Type Certificate? Is it required by an Airworthiness Directive? Is it required by the regulations — A TOMATO FFLAMES or FLAPS?'),
+  B('All four "no" — placard it INOPERATIVE, deactivate or remove it, and log the maintenance. Any "yes" — the aircraft is not airworthy until it is repaired.'),
+  P('The POH/AFM equipment list usually lives with the weight-and-balance data. Type Certificate details — engine, prop, seats, limits — live on the FAA TCDS and cannot change without a supplemental type certificate.', 3),
+  B('Action: run a student through an inoperative-equipment scenario and walk the four steps out loud.'),
+
+  H('Airworthiness Directives & SAIBs — AI.III.B.K1c'),
+  P('ADs are the aircraft recall — regulatory, with an emergency category (comply before further flight) and a routine category (comply by a deadline). The owner/operator is responsible for compliance; FAR 91.417 requires a record of AD status.'),
+  P('Miss the deadline and the aircraft is no longer airworthy, period.', 3),
+  P('SAIBs are non-regulatory guidance for safety issues that do not rise to AD criteria, tracked in the FAA Dynamic Regulatory System.', 3),
+
+  H('Special Flight Permits — FAR 21.197 — AI.III.B.K1d'),
+  P('Authorizes flying an otherwise-unairworthy aircraft when it is still safe for one specific purpose — repositioning for repairs, or delivery.'),
+  P('Requested through the local FSDO or a Designated Airworthiness Representative; FAR 21.199 requires a statement of purpose, itinerary, crew, the specific issue, and any restrictions.', 3),
+
+  H('Recordkeeping & Preventive Maintenance — AI.III.B.K1a,K2'),
+  P('100-hour/annual results and instrument/equipment inspections live in the aircraft and engine logbooks (FAR 91.417). Equipment added or removed requires a revised weight-and-balance record and equipment list.'),
+  P('Major alterations return to service on FAA Form 337, by a repair station, an A&P holding Inspection Authorization, or an FAA representative; minor alterations only need a proper logbook entry by an A&P or repair station.'),
+  A('Who can perform preventive maintenance'),
+  P('Any Part 61 pilot certificate holder (FAR 43.3(g)) — Part 43 Appendix A(c)(30) narrows the list itself to at least a private pilot who owns the aircraft. FAR 43.13 still demands quality work; run a real self-check on whether you can do the job safely.'),
+  P('An entry needs the work description, completion date, signature, certificate number, and certificate type; that same private-pilot owner can approve the return to service under FAR 43.7(f).', 3),
+
+  H('Inoperative Equipment In Flight — AI.III.B.K3a'),
+  P('Maintenance deferrals are a preflight tool, not an inflight one — once airborne, follow the POH procedure for the failure, then layer PAVE and your personal minimums on top of it to decide what happens next.'),
+
+  H('Pilot Responsibility'),
+  B('The owner/operator keeps the maintenance current, but the PIC always has the final call on whether to fly. Legal is not the same as safe — set personal minimums and hold them.'),
+  P('Review the documents, the maintenance logs, and do a real preflight inspection — every time, not just when something looks off.', 3),
+
+  S('Conclusion'),
+  P('Review: airworthiness = type design + safe condition · documents (ARROW) · inspections (AV1ATE) · equipment (A TOMATO FFLAMES + FLAPS) · MEL vs. the Four-Step Test · Airworthiness Directives · special flight permits · recordkeeping.'),
+  P('One line covers it: legal on paper is the floor, not the ceiling — the PIC decides if it actually flies today.'),
+]};
+
+/* ============================================================
+   III.B — Airworthiness Requirements: The FARs
+   Spine: regulation-by-regulation citation walkthrough — 91.3, 91.7,
+   91.9, 91.203, 91.205, 91.213(d), Subpart E (91.401-.413), 91.207
+   ============================================================ */
+window.CFI_SCRIPTS['iii-b-airworthiness-fars'] = { nodes: [
+  S('Introduction'),
+  H('Attention'),
+  P('Every "is this legal" question on a checkride traces back to a specific FAR number, which is why we as pilots learn the actual regulations instead of just the mnemonics built on top of them.'),
+  H('Overview'),
+  P('91.3 — PIC responsibility & authority'),
+  P('91.7 — Civil aircraft airworthiness'),
+  P('91.9 — Flight manual, marking & placard requirements'),
+  P('91.203 — Certifications required'),
+  P('91.205 & 91.213(d) — instrument/equipment requirements and inoperative equipment'),
+  P('Subpart E (91.401-.413) & 91.207 — maintenance and ELT inspections'),
+  H('What'),
+  P('The specific FAR numbers behind airworthiness — what each one actually requires, in the examiner\'s own citation.'),
+  H('Why'),
+  P('Knowing the mnemonic gets you through a lesson; knowing the FAR number gets you through the oral.'),
+
+  S('How:'),
+
+  H('FAR 91.3 — Responsibility & Authority of the PIC'),
+  B('The PIC is directly responsible for, and is the final authority as to, the operation of the aircraft.'),
+  P('In an in-flight emergency, the PIC may deviate from any rule in Part 91 to the extent required by that emergency — and must send the Administrator a written report of the deviation if asked.'),
+
+  H('FAR 91.7 — Civil Aircraft Airworthiness'),
+  P('No person may operate a civil aircraft unless it is airworthy — and the Airworthiness Certificate itself is the best definition of what that means.'),
+  A('Authority & Basis for Issuance'),
+  P('The aircraft must conform to its type certificate — it stays in the condition it left the factory in; only a supplemental type certificate can change that.'),
+  A('Terms & Conditions'),
+  P('The aircraft must be maintained in accordance with the FARs.'),
+  B('The PIC is responsible for determining condition for safe flight and must discontinue the flight when an unairworthy mechanical, electrical, or structural condition occurs — this is the only FAR that references a visual inspection.'),
+
+  H('FAR 91.9 — Flight Manual, Marking & Placard Requirements'),
+  P('If FAR 21.5 requires an AFM (generally, aircraft registered after 1979), a current approved copy must be in the aircraft — weight and balance is part of the type certificate and travels with it.'),
+  P('If no AFM is required, the aircraft still needs current markings, placards, or approved manual material covering the same information.'),
+
+  H('FAR 91.203 — Certifications Required'),
+  P('No civil aircraft may operate without an appropriate, current airworthiness certificate — displayed at the cabin or flight deck entrance, legible to passengers and crew — and an effective US registration certificate.'),
+
+  H('FAR 91.205 — Instrument & Equipment Requirements'),
+  P('The regulatory floor for required equipment: VFR day/night is A TOMATO FFLAMES plus FLAPS; IFR adds the GRABCARD items.'),
+
+  H('FAR 91.213(d) — Inoperative Instruments & Equipment'),
+  P('With an MEL: it is an FAA-approved list of what can be inoperative and the aircraft still airworthy.'),
+  P('Without one, follow the old AC 91-67 flow — cancelled, but still the standard logic: required by the equipment list or kinds-of-equipment list? By the VFR type certificate requirements? By an AD? By 91.205, 91.207, or similar?'),
+  B('All "no" — remove or deactivate the item and placard it inoperative; FAR 91.405 requires it be repaired, replaced, or removed by the next required inspection. Either way, the PIC makes the final call on whether it creates a hazard for this flight.'),
+
+  H('FAR 91.400s — Maintenance, Preventive Maintenance & Alterations (Subpart E)'),
+  A('91.401 — Applicability'),
+  P('Governs maintenance, preventive maintenance, and alterations of US-registered civil aircraft.'),
+  A('91.405 — Maintenance Required'),
+  P('The owner/operator must keep the aircraft inspected, have discrepancies repaired between inspections per Part 43, ensure return-to-service entries are made, get deferred 91.213(d)(2) items handled by the next required inspection, and placard any listed inoperative item per FAR 43.11.'),
+  A('91.409 — Inspections'),
+  P('The annual, plus a 100-hour if the aircraft is rented or used for hire.'),
+  A('91.411 — Altimeter & Altitude Reporting'),
+  P('Static system and altimeter tested every 24 calendar months for IFR.'),
+  A('91.413 — ATC Transponder'),
+  P('Tested and inspected every 24 calendar months.'),
+
+  H('FAR 91.207 — Emergency Locator Transmitters'),
+  P('Inspected every 12 calendar months; batteries replaced or recharged after 1 cumulative hour of use, or when 50% of their useful life has expired.'),
+
+  S('Conclusion'),
+  P('Review: 91.3 (PIC authority) · 91.7 (airworthiness) · 91.9 (flight manual) · 91.203 (certifications) · 91.205 (equipment) · 91.213(d) (inoperative equipment) · Subpart E maintenance (91.401/.405/.409/.411/.413) · 91.207 (ELT).'),
+  P('If an examiner asks what FAR says that, this is the list that answers it.'),
+]};
+
+/* ============================================================
+   III.C — Weather Information
+   Spine: atmosphere, wind/temp/moisture, weather systems & clouds,
+   hazards (turbulence, TS, icing, fog/vis), briefings & products
+   (METAR/TAF/GFA/MOS, charts, AIRMET/SIGMET/CWA/PIREP), Go/No-Go (PAVE)
+   Condensed from a 576-node source via headings-first pass.
+   ============================================================ */
+window.CFI_SCRIPTS['iii-c-weather-information'] = { nodes: [
+  S('Introduction'),
+  H('Attention'),
+  P('Weather kills pilots who had the information and did not use it, which is why we as pilots build a real go/no-go decision out of the reports, not just a glance at the sky.'),
+  H('Overview'),
+  P('Atmosphere & wind'),
+  P('Temperature, moisture & precipitation'),
+  P('Weather system formation — air masses & fronts'),
+  P('Clouds & vertical motion'),
+  P('Turbulence, thunderstorms & icing'),
+  P('Fog & obstructions to visibility'),
+  P('Weather briefings, reports & charts'),
+  P('In-flight advisories, PIREPs & the go/no-go decision'),
+  H('What'),
+  P('How to read the atmosphere from first principles, then translate that into the reports, charts, and advisories that build today\'s go/no-go decision.'),
+  H('Why'),
+  B('Weather is the one hazard that gives you the most warning of all — if you actually go looking for it before you need it.'),
+
+  S('How:'),
+
+  H('Atmospheric Composition & Stability — AI.III.C.K3a'),
+  P('4 gases make up 99.998% of the atmosphere: nitrogen, oxygen, argon, carbon dioxide.'),
+  A('5 layers'),
+  P('Troposphere, where weather happens · Stratosphere · Mesosphere · Thermosphere · Exosphere.'),
+  A('Standard atmosphere'),
+  P('59°F / 15°C and 29.92 in Hg — the average of conditions across all latitudes, seasons, and altitudes; every performance chart assumes this as the baseline.'),
+
+  H('Wind — AI.III.C.K3b'),
+  P('Air in motion relative to the surface — the thing that forms, moves, and dissipates weather.'),
+  A('Forces'),
+  P('Pressure Gradient Force — the engine, air moves high to low pressure. Coriolis Force — deflects it, right in the northern hemisphere. Friction — slows and backs it near the surface; above the friction layer only PGF and Coriolis act.'),
+  A('Adverse winds'),
+  P('Wind shear: a sudden change in direction or speed over a short distance, in any plane. Mountain waves (AIM 7-6-7j): the atmosphere behaving like a fluid over an obstacle, visible in cap clouds and lenticular clouds downwind.'),
+
+  H('Temperature — AI.III.C.K3c'),
+  P('The average kinetic energy of the molecules in matter — heat transfers into and through the atmosphere by radiation, conduction, and convection, sourced from the sun.'),
+  P('Water resists temperature change more than land does — that thermal lag drives sea breezes and coastal weather. Temperature generally drops with altitude through the troposphere.', 3),
+
+  H('Moisture & Precipitation — AI.III.C.K3d'),
+  P('3 ingredients: water vapor, sufficient lifting to condense it into clouds, and a growth process that lets droplets get heavy enough to fall.'),
+  A('Precipitation types — driven by the temperature profile'),
+  P('Rain: above-freezing air the whole way down. Snow: below freezing the whole way down. Ice pellets: shallow above-freezing layer aloft over a deep below-freezing layer at the surface. Freezing rain: deep above-freezing layer aloft over a shallow below-freezing layer at the surface.'),
+
+  H('Weather System Formation — Air Masses & Fronts — AI.III.C.K3e'),
+  A('Air masses'),
+  P('A large body of air with uniform temperature and humidity, classified by its source region\'s temperature and moisture — it acquires new attributes as it moves.'),
+  A('Fronts'),
+  P('The transition zone between two air masses — detectable at the surface and structured vertically: Cold, Warm, Stationary, Occluded — each with its own slope, weather band, and passage signs.'),
+
+  H('Clouds & Vertical Motion — AI.III.C.K3f'),
+  P('Air cools as it rises; above the Lifted Condensation Level it saturates, condenses, forms cloud, and releases heat — the reverse happens on the way down.'),
+  A('Sources of vertical motion'),
+  P('Orographic lift (terrain) · frictional convergence · frontal lift · buoyancy (convection).'),
+  A('Cloud forms'),
+  P('Cirriform — high, icy, streaks pointing with the wind. Cumuliform — heaped, convective. Stratiform — layered. Cumulonimbus — the vertical-development giant.'),
+  A('Cloud families by level'),
+  P('High: cirrus, cirrocumulus, cirrostratus. Middle: altocumulus, altocumulus lenticularis, altostratus, nimbostratus. Low: cumulus, towering cumulus, stratocumulus, stratus. Vertical development: cumulonimbus.'),
+
+  H('Turbulence — AI.III.C.K3g'),
+  P('Caused by convective currents, obstructions to wind flow, and wind shear.'),
+  A('Convective'),
+  P('Rising and sinking air from surface heating — billowy cumuliform clouds are the visual tell.'),
+  A('Mechanical'),
+  P('Obstructions like trees, buildings, mountains; mountain-wave turbulence shows up as cap clouds, standing lenticulars, and rotor clouds.'),
+  A('Wind-shear turbulence'),
+  P('Sharp changes in wind direction or speed over a short distance; Clear Air Turbulence is the shear you get with no cloud to warn you.'),
+
+  H('Thunderstorms — AI.III.C.K3h'),
+  P('3 ingredients: sufficient water vapor, unstable air, a lifting mechanism.'),
+  A('Life cycle'),
+  P('Towering cumulus — strong updraft. Mature — precipitation reaches the surface, the most dangerous stage. Dissipating — downdraft dominates, embedded in the rain.'),
+  A('Types'),
+  P('Single cell · Multicell · Supercell — the most organized and dangerous, a sustained rotating updraft.'),
+  A('Hazards'),
+  P('Lightning, damaging wind and microbursts, severe turbulence, icing, hail, rapid altimeter error, static electricity, tornadoes.'),
+  A('Microbursts'),
+  P('The most severe wind shear — downdrafts up to 6,000 fpm. Watch for a rain shaft, a curling dust ring, or a sudden airspeed swing on final; avoid the cell rather than flying under it.'),
+
+  H('Frost & Icing — AI.III.C.K3i,K3k'),
+  P('Frost forms on cool, clear nights when the ground cools the surrounding air below the dew point — it adds no meaningful weight, but it disrupts airflow enough to steal lift; the aircraft must be completely clean before flight.'),
+  A('Icing types'),
+  P('Rime — small supercooled droplets, freeze fast, milky and rough. Clear — large drops, spread before freezing, smooth and dense, hardest to remove. Mixed — both at once.'),
+  B('Ice does not hurt you by weight — it hurts you by destroying smooth airflow over the wing, killing lift and adding drag.'),
+  P('Watch for icing anytime temperature is near 0°C with visible moisture present; water carried above the freezing level becomes supercooled and freezes on impact.', 3),
+
+  H('Fog & Mist — AI.III.C.K3j'),
+  P('Fog: surface water droplets cutting visibility below 5/8 SM. Radiation, Advection, Upslope, Frontal, Steam, Freezing, and Mountain/Valley fog are each named for how the air got saturated.'),
+  P('Mist: the same droplets, but visibility stays between 5/8 and 7 SM — a thin, grayish veil between fog and haze.', 3),
+
+  H('Obstructions to Visibility — AI.III.C.K3l'),
+  P('Haze: tiny particles giving an opalescent look, worse looking into the sun. Smoke: fire or industrial particles, can go to zero visibility and carries toxic CO. Volcanic ash: glass particles, can be invisible at night or in IMC and is very hazardous to airframes and engines.'),
+  P('Blowing snow (whiteout above 50 ft in strong wind) · dust storms · sandstorms (heavier particles, lower AGL) · haboobs (thunderstorm outflow lifting a dust wall) — all can take visibility to near zero fast.', 3),
+
+  S('Weather Briefings, Reports & Charts'),
+  H('Weather Briefings — AI.III.C.K1'),
+  P('General awareness — apps, TV, internet — carries you through the days before a flight; a detailed briefing is required specifically for this flight.'),
+  B('FAR 91.103 requires you, as PIC, to become familiar with all available weather information for the flight — it drives the go/no-go and flags changing conditions en route.'),
+  A('Sources'),
+  P('FSS (1-800-WX-BRIEF, 1800wxbrief.com) · NWS / aviationweather.gov · ForeFlight, which timestamps and stores the briefing as a record — AIM 7-1-2 confirms a self-briefing without calling Flight Service can satisfy 91.103.'),
+  A('In-flight sources'),
+  P('FSS on published frequencies or 122.2 · ForeFlight or other apps with data · satellite weather · FIS-B over ADS-B.'),
+
+  H('METAR, TAF & GFA — AI.III.C.K2a,K2c,K2d'),
+  A('METAR'),
+  P('A current-surface-conditions observation in standard international format.'),
+  A('TAF'),
+  P('A terminal forecast for the 5 SM radius around an airport, valid 24 hours, issued 4 times a day at 0000Z, 0600Z, 1200Z, and 1800Z.'),
+  A('GFA — replaced the old Area Forecast (FA)'),
+  P('The full US/Gulf/Caribbean picture at aviationweather.gov/gfa — observations, forecasts, warnings, thunderstorms, clouds, precipitation, icing, turbulence, and wind in one tool.'),
+  A('MOS — not ACS-required, but the examiner may ask'),
+  P('A fully automated statistical forecast (temperature, precip type/chance, cloud cover/height, wind) at specific points; not a legal weather source, and cannot forecast multiple cloud layers, showers or fog in the vicinity, precip intensity, non-convective low-level wind shear, or variable winds.'),
+
+  H('Charts — AI.III.C.K2b,K2e,K2f'),
+  A('Surface Analysis Chart'),
+  P('The contiguous-48 surface picture — pressure, fronts, temps, dewpoints, wind, weather, obstructions — updated every 3 hours; Prog Charts are the same picture projected forward in time.'),
+  A('Ceiling & Visibility (CVA)'),
+  P('Satellite plus surface observations combined into a big-picture ceiling/visibility overview for avoiding marginal conditions.'),
+  A('Winds & Temperatures Aloft (FB)'),
+  P('4-times-daily wind and temperature forecasts by station; wind direction is true, speed in knots, no forecast within 1,500 ft of station elevation; temperature is in Celsius, none within 2,500 ft, and always negative above 24,000 ft MSL.'),
+  A('Convective Outlook Chart'),
+  P('An 8-day severe/general convection outlook across 4 charts — Day 1, Day 2, Day 3, Days 4-8.'),
+  P('5 risk levels on Days 1-3: General (TSTM), Marginal, Slight, Enhanced, Moderate, High — Days 1-2 break out tornado, wind, and hail probability individually, Day 3 combines them. Days 4-8 use just 2 thresholds, 15% and 30%.', 3),
+
+  S('RM: In-Flight Weather Advisories — AI.III.C.K2g,R1c'),
+  H('AIRMET (WA)'),
+  P('Weather dangerous specifically to light aircraft; issued every 6 hours with updates as needed.'),
+  P('SIERRA — IFR and mountain obscuration. TANGO — turbulence, strong surface wind, low-level wind shear. ZULU — icing and freezing levels.', 3),
+  H('SIGMET (WS)'),
+  P('A non-convective hazard to ALL aircraft — severe icing, extreme turbulence, clear air turbulence, dust/sandstorms, volcanic ash. Unscheduled, valid 4 hours; a hurricane SIGMET runs 6 hours.'),
+  H('Convective SIGMET (WST)'),
+  P('Hazardous convective weather affecting every flight: embedded or line thunderstorms, severe thunderstorms with surface wind over 50 knots or 3/4-inch-plus hail or tornadoes, or heavy-or-greater precipitation covering 40% of a 3,000-square-mile area.'),
+  H('Center Weather Advisory (CWA)'),
+  P('Unscheduled, for weather starting within 2 hours — supplements an existing advisory, covers a gap before one is issued, or flags conditions from pilot reports that do not yet meet SIGMET/AIRMET criteria.'),
+  P('ARTCCs broadcast Convective SIGMETs, SIGMETs, and CWAs once on all frequencies when any part of the affected area is within 150 miles of their airspace.', 3),
+  H('PIREPs'),
+  P('A pilot-generated report of what you actually encountered — needs type, location, time, altitude, aircraft type, and at least one descriptive element.'),
+  P('Urgent (UUA): tornado, severe or extreme turbulence, severe icing, hail, low-level wind shear within 2,000 ft, volcanic ash, or anything else hazardous. Routine (UA): everything else.', 3),
+
+  H('RM: Onboard Weather Equipment — AI.III.C.K4,R2a'),
+  P('ADS-B/FIS-B: free government weather over the ADS-B network, national and regional products. Satellite (SiriusXM Aviation Weather): a subscription service adding enhanced radar, lightning, storm-cell tracking, and turbulence/icing forecasts.'),
+  B('Neither is real-time — the radar picture can be 5 to 20 minutes old by the time you see it. Use it for strategic avoidance, not close-in maneuvering, and cross-check it against PIREPs and ATC.'),
+
+  S('RM: Go/No-Go Decision — AI.III.C.R1'),
+  H('The Framework'),
+  P('Run PAVE against the weather: Pilot, Aircraft, enVironment (the weather and equipment), External pressures.'),
+  B('Set personal weather minimums before the flight and do not bend them once you are in the airplane.'),
+  A('Recent experience'),
+  P('Currency AND proficiency — do not fly beyond your own ability or the airplane\'s.'),
+  A('Recognizing hazards'),
+  P('Preflight: read the charts and reports for what they actually say. Enroute: PIREPs, SIGMETs, updated METARs, LLWAS, ATC advice, onboard weather tools. Visual: cloud formations, vertical development, sudden wind changes.'),
+  A('Continual decision-making — AI.III.C.R1a'),
+  B('Never be afraid to discontinue or divert. Falling visibility, a closing temperature/dewpoint spread, hazardous PIREPs, or minimums getting close are all valid reasons to turn around before you are forced to.'),
+
+  S('Conclusion'),
+  P('Review: atmosphere & wind · temperature, moisture & precipitation · air masses & fronts · clouds & vertical motion · turbulence, thunderstorms & icing · fog & visibility obstructions · briefings, METAR/TAF/GFA/MOS, charts · AIRMET/SIGMET/Convective SIGMET/CWA/PIREPs · onboard equipment limits · go/no-go (PAVE + minimums).'),
+  P('The habit: get the full picture before you start the engine, and keep updating it until you shut it down.'),
+]};
+
+/* ============================================================
+   IV.A — Maneuver Lesson
+   Spine: lesson-plan skeleton (Objective-Elements-Schedule-Equipment-Actions-Standards)
+   + Telling-and-Doing technique + Fitts & Posner skill stages
+   NOTE: source is empty (both con and ext have zero nodes) — written from
+   established CFI/FOI teaching method, since the evaluator assigns the
+   maneuver on the day and no maneuver-specific content exists to condense.
+   ============================================================ */
+window.CFI_SCRIPTS['iv-a-maneuver-lesson'] = { nodes: [
+  S('Introduction'),
+  H('Attention'),
+  P('Every checkride task from here forward asks you to teach a maneuver cold, on the evaluator\'s pick, which is why we as pilots build one repeatable teaching structure that works for any maneuver in the book.'),
+  H('Overview'),
+  P('The lesson-plan skeleton — Objective, Elements, Schedule, Equipment, Instructor\'s Actions, Student\'s Actions, Completion Standards'),
+  P('The Telling-and-Doing technique'),
+  P('Integrated flight instruction & the four fundamentals'),
+  P('Positive exchange of flight controls'),
+  P('Stages of skill learning'),
+  P('Common errors, risk management & evaluating to standard'),
+  H('What'),
+  P('A repeatable way to brief, demonstrate, and evaluate any maneuver the evaluator hands you — not a script written for one specific maneuver.'),
+  H('Why'),
+  B('On the checkride you will not know which maneuver you are teaching until you are asked — the structure has to be automatic, not memorized per maneuver.'),
+
+  S('How:'),
+
+  H('Components of a Maneuver Lesson Plan'),
+  A('Objective'),
+  P('What the learner will be able to do by the end, stated in ACS-standard terms — the tolerances you are actually teaching to.'),
+  A('Elements (Content)'),
+  P('Break the maneuver into its teachable pieces: setup, entry, during, recovery — the same shape used across every maneuver lesson in this app.'),
+  A('Schedule'),
+  P('How much of the lesson is ground briefing versus airborne practice — most of a maneuver lesson is airborne.'),
+  A('Equipment'),
+  P('Aircraft, checklist, and any training aid — whiteboard, model airplane — needed to brief it clearly.'),
+  A('Instructor\'s Actions'),
+  P('What you demonstrate, what you watch for, and when you take the controls back.'),
+  A('Student\'s Actions'),
+  P('What the learner does and says at each stage, including checklist items and clearing turns.'),
+  A('Completion Standards'),
+  P('The ACS tolerances for that maneuver — this defines "done," not a feeling.'),
+
+  H('The Telling-and-Doing Technique'),
+  A('Step 1 — Instructor tells, instructor does'),
+  P('Explain the maneuver while demonstrating it — narrate what you\'re doing and why as you fly it.'),
+  A('Step 2 — Student tells, instructor does'),
+  P('The learner talks you through it while you fly — this checks understanding before their hands are on the controls.'),
+  A('Step 3 — Student tells, student does'),
+  P('The learner talks themselves through the maneuver while flying it — verbalizing builds the habit pattern.'),
+  A('Step 4 — Student does, instructor evaluates'),
+  P('The learner flies it solo, with you as safety pilot, while you evaluate against the ACS standard.'),
+
+  H('Integrated Flight Instruction'),
+  P('Teach every maneuver on both instruments and visual references from the start — the learner should be comfortable cross-checking the panel at any point, not only when told to look inside.'),
+  A('The Four Fundamentals'),
+  P('Every maneuver is built from straight-and-level, turns, climbs, and descents — if a complex maneuver is falling apart, isolate which fundamental is actually breaking down.'),
+
+  H('Positive Exchange of Flight Controls'),
+  B('"I have the flight controls" · "You have the flight controls" — a visible physical check, a touch on the yoke, accompanies every handoff, spoken and confirmed both ways.'),
+
+  S('Stages of Skill Learning — Fitts & Posner'),
+  H('Cognitive, Associative & Autonomous'),
+  A('Cognitive'),
+  P('The learner intellectualizes every step — expect halting, over-controlled inputs, and talk them through each one.'),
+  A('Associative'),
+  P('The routine starts to smooth out — inputs get more efficient and errors get smaller and less frequent.'),
+  A('Autonomous'),
+  P('The maneuver becomes close to automatic — this is where you start layering distractions and integrated instrument work back in.'),
+  P('Send the learner home with a chair-flying routine between lessons — rehearsing the callouts and control inputs builds the habit pattern without burning gas.', 3),
+
+  S('Briefing, Demonstrating & Evaluating'),
+  H('The Ground Brief'),
+  P('State the objective, walk the elements in order, give the actual numbers the ACS requires — speeds, altitudes, bank angles — and set the limit of error you\'ll allow before intervening.'),
+  H('The Demonstration'),
+  B('Action: fly it once, clean, narrating each control input and the reasoning behind it, so the learner sees the standard before attempting it.'),
+  H('Common Errors — Teach Them Before They Happen'),
+  P('Every maneuver has a short list of predictable errors — cover them in the brief so the learner recognizes a mistake as it starts, not after it\'s already happened.'),
+  P('Compress each to one line: what it looks like, why it happens, how to correct it.', 3),
+  H('Risk Management Inside the Maneuver'),
+  P('Clearing turns before any maneuver, a hard altitude floor, and a standing plan for what "abort and go around" looks like for this specific maneuver.'),
+  H('Evaluating to Standard'),
+  B('Evaluate against the ACS tolerances stated for that Task — not against your own gut feeling of "close enough."'),
+  P('Give feedback in the same language as the standard: what the number was, what it needed to be, and why the gap matters.'),
+
+  S('Conclusion'),
+  P('Review: lesson-plan skeleton (Objective, Elements, Schedule, Equipment, Actions, Standards) · Telling-and-Doing · integrated instruction & the four fundamentals · positive exchange · Fitts & Posner stages · common errors · evaluate to ACS.'),
+  P('One structure, any maneuver: brief it, show it, talk them through it, then step back and grade it to standard.'),
+]};
+
+/* ============================================================
+   VII.A — Normal Takeoff & Climb
+   Spine: takeoff roll to  lift-off to  initial climb, VX/VY, common errors,
+          crosswind variant, then RM/hazards (rejected TO, engine failure,
+          wind shear, wake turbulence, low-altitude, collision, incursion)
+   ============================================================ */
+window.CFI_SCRIPTS['vii-a-normal-takeoff-climb'] = { nodes: [
+  S('Introduction'),
+  H('Attention'),
+  P('Most of what goes wrong on a takeoff happens in the first few seconds after the wheels leave the ground, which is why we as pilots brief the whole takeoff before we ever release the brakes.'),
+  H('Overview'),
+  P('When conditions call for a normal takeoff'),
+  P('Runway selection — limitations, wind, performance, pilot capability'),
+  P('VX vs VY, and the takeoff roll / lift-off / initial climb'),
+  P('Crosswind takeoff technique'),
+  P('Common errors'),
+  P('RM: rejected takeoff, engine failure, wind shear, wake turbulence, low-altitude and collision hazards'),
+  H('What'),
+  P('Rolling an airplane down the centerline and climbing away cleanly, with a plan already set for the moment something interrupts it.'),
+  H('Why'),
+  B('Everything downstream of the runway depends on getting this part boring and repeatable — that is what leaves margin for the day it is not.'),
+
+  S('How:'),
+
+  H('Normal Takeoff Conditions — AI.VII.A.K2'),
+  P('Airplane headed into the wind or wind very light · surface firm and long enough to gradually accelerate to normal lift-off/climb speed · no obstructions on the takeoff path.'),
+
+  H('RM: Runway Selection — AI.VII.A.R1'),
+  A('Limitations'),
+  P('POH Chapter 2 — max weights, CG, crosswind/tailwind limits, runway length/width.'),
+  A('Wind'),
+  P('A headwind gives airspeed at rest, less wheel speed needed to fly, shorter roll, less gear stress, better climb performance.'),
+  P('Tailwind increases required ground roll — check the POH max tailwind limit — AI.VII.A.R2c.', 3),
+  A('Aircraft performance — density altitude'),
+  P('DA rises with higher temperature, higher altitude, or higher humidity, and falls with higher pressure. As density drops, power, thrust, and lift all drop.'),
+  A('Runway characteristics — AI.VII.A.R2e'),
+  P('Surface (soft = more friction, longer roll), gradient (upslope lengthens roll), condition (wet/snow/ice), and available distance.'),
+  A('Performance charts and pilot capability'),
+  P('Verify required distance and climb gradient against the runway, then check it against your own personal minimums, not just the airplane\'s limits.'),
+  A('Runway selection'),
+  P('It all comes down to Limitations + Performance + Personal Minimums.'),
+
+  H('Configuration — AI.VII.A.K4'),
+  P('Reference the POH and Before Takeoff checklist for flap and trim setting.'),
+
+  H('Best Angle vs Best Rate of Climb — AI.VII.A.K3'),
+  A('VY — Best Rate of Climb'),
+  P('Most altitude gain per minute — the airspeed with the most excess power over what level flight requires. Used for normal takeoff and climb.'),
+  A('VX — Best Angle of Climb'),
+  P('Most altitude gain per distance covered — most excess thrust over level-flight requirement. Steeper path, slower to reach altitude than VY.'),
+  P('VX is the one you use to clear an obstacle.', 3),
+  A('Normal (cruise) climb'),
+  P('Manufacturer-recommended, faster than VY, better engine cooling, control, and visibility over the nose.'),
+
+  S('Normal Takeoff — AI.VII.A.K1'),
+  H('Takeoff Roll'),
+  A('Taxi onto the runway'),
+  P('Complete the Before Takeoff checklist first. Controlled field: never taxi onto the runway without a specific clearance, clear the area before crossing the hold line. Uncontrolled: announce on CTAF, build the picture from other calls, check runway and final are clear.'),
+  P('Confirm the runway you are entering matches the one assigned. Align, straighten the nosewheel, and pick two ground points ahead in line with the runway to help hold centerline in the climb.', 3),
+  A('Release brakes, advance power'),
+  P('Smoothly and continuously to takeoff power, both feet on the rudder pedals and off the brakes. Expect left yaw — hold centerline with right rudder.'),
+  A('Gaining speed'),
+  B('Check engine instruments and airspeed alive — call "gauges green, airspeed alive." Abort straight ahead on any bad indication.'),
+  P('Rudder keeps the nose on the centerline; don\'t steer with the brakes. Rudder pressure needed decreases as speed and control effectiveness increase.'),
+  H('Lift-Off'),
+  A('Rotation (VR)'),
+  P('Gently pull back to establish the VY climb attitude. Pitch varies with weight and density altitude. Wings level with aileron, rudder for coordination.'),
+  P('90% outside, 10% inside — outside references for centerline, pitch, and bank; quick glances in to verify.', 3),
+  H('Initial Climb'),
+  B('Pitch for VY — VY plus takeoff power gives the most altitude in the least time, which is exactly what you want available if the engine quits.'),
+  P('Adjust pitch and bank against the natural horizon, verify with instruments. Hold the extended runway centerline using two points ahead and in line with it. Scan vigilantly — don\'t narrow your scan straight ahead.'),
+  A('Climb checklist'),
+  P('Run it at a safe altitude under control — 500\' AGL or as required. Fly the airplane first; the checklist can wait.'),
+
+  H('Common Errors — AI.VII.A.K5'),
+  P('Skipping the POH/performance-chart review · inadequate area clearance before taxiing into position · abrupt throttle · not checking engine instruments after power-up · failing to anticipate (or overcorrecting for) left-turning tendency · fixating on the airspeed indicator instead of visual references · improper lift-off attitude · uncorrected sideslip from torque/P-factor · over-controlling and under-trimming in the climb · narrow scan causing a wing drop after lift-off · losing VY · chasing the airspeed instead of flying attitude.'),
+
+  S('Crosswind Takeoff & Climb — AI.VII.A.K1, AI.VII.A.R2a'),
+  H('Basics'),
+  P('Same steps as a normal takeoff, with aileron into the wind for wing control and rudder for centerline — a sideslip on the roll, transitioning to a crab once established in the climb.'),
+  P('Right rudder for left-turning tendency still applies, but a left crosswind needs more right rudder, a right crosswind needs less.', 3),
+  B('Improper corrections cause skipping, sideways movement, and side loads on the gear.'),
+  H('Takeoff Roll'),
+  P('Hold FULL aileron into the wind as the roll starts — it keeps the upwind wing down. Advance power smoothly, counter left-turning tendency and weathervaning with rudder.'),
+  P('As speed builds, ailerons become more effective and the crosswind acts more like a relative headwind — gradually reduce aileron pressure into the wind while adjusting rudder for centerline.', 3),
+  H('Lift-Off'),
+  P('In a strong crosswind, stay on the ground slightly longer for a clean, definite liftoff. Maintain crosswind correction through liftoff to prevent drifting or skipping — letting the downwind wing and mainwheel rise first is preferred over side-skipping.'),
+  H('Initial Climb'),
+  P('Hold the sideslip until established in the climb, then crab into the wind — wings level, turn coordinator centered, nose offset into the wind.'),
+  P('Same 90/10 outside/inside scan, same extended-centerline reference points, same climb checklist at 500\' AGL.'),
+  H('Common Errors — AI.VII.A.K5'),
+  P('Less than full aileron into the wind at the start of the roll · mechanical (not visual) aileron use · side-skipping · inadequate rudder to stay parallel with the centerline · excessive late-roll aileron causing a steep bank at liftoff · inadequate drift correction after liftoff.'),
+
+  S('RM: Hazards & Emergencies'),
+  H('Rejected Takeoff — AI.VII.A.R3a'),
+  P('Engine trouble, poor acceleration, a runway incursion, an ATC conflict, or any other emergency can force a reject on the runway — make sure you have enough runway left to accelerate to VR and still stop.'),
+  A('Before every takeoff'),
+  P('Pick the point by which you should be airborne — if you\'re not, act immediately.'),
+  B('Reject procedure: power idle, maximum braking, maintain directional control — follow the POH. If a fire forces an engine shutdown, mixture to idle cutoff, magnetos off.'),
+
+  H('Engine Failure — AI.VII.A.R3b'),
+  B('Time is short — without a plan already briefed, the odds favor a poor decision or no decision at all. Practice, plan, then brief the plan.'),
+  A('During the takeoff roll'),
+  P('Reject and stop straight ahead.'),
+  A('Immediately after liftoff'),
+  P('If enough runway remains, land on what\'s left — know your descent-plus-landing distance.'),
+  A('During the takeoff climb'),
+  P('Lower the nose to best glide and release the right rudder you were holding for climb power. Once under control, glide toward a landing spot and start emergency procedures — time and altitude permitting, notify ATC, run the checklist, attempt a restart.'),
+
+  H('Wind Shear — AI.VII.A.R2b'),
+  A('What it is'),
+  P('A sudden, drastic change in wind speed and/or direction over a small area — most hazardous at low level, though it can occur at any altitude.'),
+  A('Why it\'s dangerous'),
+  P('Updrafts/downdrafts up to 6,000 fpm and abrupt shifts between tailwind and headwind can gut your performance in seconds.'),
+  A('Microbursts — the most severe form'),
+  P('1–2 miles across, 5–15 minute lifespan, strong downdrafts and turbulence, headwind gains or losses of 30–90 knots.'),
+  P('Visual cues: intense rain shaft at the surface with virga at cloud base, a ring of blowing dust. Alerting systems (LLWAS-NE, TDWR, ASR-9 WSP) exist at major fields — most small airports have none.', 3),
+  A('Handling it'),
+  P('Avoid it — never pattern near an active thunderstorm, use LLWAS and PIREPs. If flying into it, add half the gust factor to approach speed, stay as high as feasible, and go around at the first unexpected pitch or airspeed change.'),
+  B('If descending unexpectedly toward the ground in shear, apply full power and pitch up as far as possible without stalling — keep flying and hope to exit it. See FAA-H-8083-28 Ch. 22.'),
+
+  H('Wake Turbulence — AI.VII.A.R2d (AC 90-23)'),
+  P('Counter-rotating vortices roll off the wingtips of every aircraft — stronger with a bigger, heavier, cleaner, slower airplane. Rolling moments can exceed control authority or damage the airframe; strongest right at departure.'),
+  A('Vortex behavior'),
+  P('Generated from liftoff to touchdown, drift with the wind roughly a wingspan apart, sink at several hundred fpm and weaken with time. Near the ground (100–200\') they move laterally 2–3 knots; a crosswind slows the upwind vortex and speeds the downwind one, and a light quartering tailwind can hold vortices right on the approach centerline.'),
+  A('Avoiding it behind a large aircraft'),
+  P('Same runway: rotate before their rotation point and climb above their climb path until clear. Behind a low approach/missed/touch-and-go: wait at least 2 minutes. Intersection takeoff: rotate before their rotation point and stay alert to upwind large-aircraft operations.'),
+
+  H('Distractions, Task Prioritization, SA — AI.VII.A.R6'),
+  P('Distractions are a major accident factor — fly the airplane first. Watch for loss of situational awareness and disorientation. Prioritize tasks so the flying always wins.'),
+
+  H('Low Altitude Maneuvering — AI.VII.A.R5'),
+  B('A small problem at altitude becomes a big problem down low — there is little room and less time to recover.'),
+  P('Low-altitude stall/spin and CFIT (AC 61-134) are the two outcomes that kill in this regime — margin and discipline are the only defenses.'),
+
+  H('Collision Hazards — AI.VII.A.R4'),
+  P('Collision avoidance scan, terrain awareness, obstacles and wire strikes, and airport-surface hazards all demand the same thing: eyes up and outside during takeoff and climb.'),
+
+  H('Runway Incursion — AI.VII.A.R7'),
+  P('Know your position and everyone else\'s. Read back every runway crossing and hold-short instruction. Review the airport diagram and signage, check NOTAMs, use proper phraseology, check for traffic before crossing any hold line, and run lights/beacon while taxiing.'),
+
+  S('Conclusion'),
+  P('Review: normal-takeoff conditions · runway selection · VX vs VY · takeoff roll, lift-off, initial climb · crosswind technique · common errors · rejected takeoff and engine failure · wind shear, wake turbulence · low-altitude, collision, and incursion hazards.'),
+  P('One habit covers most of it: pick your abort point before you release the brakes, every time.'),
+]};
+
+/* ============================================================
+   VII.B — Normal Approach & Landing
+   Spine: downwind to  base to  final (stabilized approach, aim point) to 
+          roundout to  touchdown to  after-landing roll, crosswind method,
+          common errors, then RM/hazards (go-around, LAHSO, wind shear,
+          wake turbulence, low-altitude, collision)
+   ============================================================ */
+window.CFI_SCRIPTS['vii-b-normal-approach-landing'] = { nodes: [
+  S('Introduction'),
+  H('Attention'),
+  P('A landing is really a series of small, correctable decisions all the way to the runway, which is why we as pilots fly a stabilized approach instead of trying to save a bad one at the last second.'),
+  H('Overview'),
+  P('Runway selection — limitations, wind, performance'),
+  P('The pattern: downwind, base, final'),
+  P('Stable approach — pitch for airspeed, power for altitude, aim point'),
+  P('Roundout, touchdown, after-landing roll'),
+  P('Crosswind approach — crab vs sideslip'),
+  P('RM: go-around, LAHSO, wind shear, wake turbulence, low-altitude and collision hazards'),
+  H('What'),
+  P('Flying a constant, stabilized glidepath to a chosen point and setting the airplane down gently, under control, at minimum controllable airspeed.'),
+  H('Why'),
+  B('An unstable approach carried to the runway is one of the most common paths to a bent airplane — stability is the whole safety margin.'),
+
+  S('How:'),
+
+  H('RM: Runway Selection — AI.VII.B.K3, AI.VII.B.R1'),
+  A('Limitations'),
+  P('POH Chapter 2 — max weights, CG, crosswind/tailwind limits, runway length/width, flap and gear speeds, stall speeds.'),
+  A('Wind'),
+  P('Headwind lowers groundspeed and landing distance; tailwind increases both — AI.VII.B.R2c.'),
+  A('Aircraft performance — density altitude'),
+  P('Same DA relationships as takeoff: pressure, temperature, altitude, humidity all move performance.'),
+  A('Runway characteristics — AI.VII.B.R2e'),
+  P('Surface, gradient (downslope lengthens landing roll), condition, and available distance.'),
+  A('Performance charts, pilot capability, runway selection'),
+  P('Check landing distance, climb/balked-landing charts, and your personal minimums — it all comes down to Limitations + Performance + Personal Minimums.'),
+
+  S('Downwind Leg'),
+  P('Parallel to the landing runway, normally 1,000\' AGL (pattern altitude varies). Run the Before Landing checklist at the downwind midpoint.'),
+  A('Abeam the threshold'),
+  P('Reduce power, extend flaps as appropriate, establish descent airspeed while holding pattern altitude through the slowdown.'),
+  A('Turn to base'),
+  P('Start at a 45° angle from the runway threshold with a shallow-to-medium bank, compensating for wind as in the rectangular course. By the 45° point you\'ve descended roughly 200\' (800\' AGL, varies by aircraft).'),
+
+  S('Base Leg'),
+  P('Perpendicular to the runway, the leg before turning final — one of the most important judgment calls in the whole approach: distance from the runway depends on altitude, wind, and flaps used.'),
+  P('Establish approach airspeed and configuration; crab as needed to hold a ground track perpendicular to the runway against drift.'),
+  A('Turn to final'),
+  B('No more than 30° of bank — stall speed rises fast above that, and if a steep bank is needed to make the turn, go around.'),
+  P('Descend about another 200\' on base (600\' AGL to start the turn) — on a 3° glidepath (300\'/nm) that\'s roughly a two-mile final.'),
+
+  S('Final Approach'),
+  P('Longitudinal axis aligned with the centerline, final descent established. Configure with landing flaps and POH approach speed, run the Landing checklist, and add half the gust factor to approach speed in strong or gusty wind.'),
+  H('Stable Approach — AI.VII.B.K2'),
+  B('A stable approach — a constant glidepath to a chosen point — is a safe approach; unstable raises the risk of an excessive descent rate or slow airspeed close to the ground.'),
+  P('Pitch for airspeed, power for altitude — too fast, pitch up; too slow, pitch down; too low, add power; too high, reduce power. A change in one always needs a coordinated change in the other.'),
+  A('Aim point'),
+  P('The spot the airplane would strike with no flare — keep it stationary in the windscreen. If it climbs in the windscreen you\'re getting low (add power, raise the nose); if it sinks you\'re getting high (reduce power, lower the nose).'),
+  A('Runway picture'),
+  P('A normal glidepath is 3° (300\'/nm). Too high: the runway elongates and narrows. Too low: it shortens and widens. On path: the trapezoid shape holds steady and simply grows.'),
+  A('Visual glidepath aids — VASI / PAPI'),
+  P('Two-bar VASI: all red below glidepath, red-over-white on path, all white above. PAPI (4 lights): 2 red/2 white on path, 3-4 red below, 3-4 white above — both exist to cut CFIT and runway over/undershoots.'),
+  P('Greater headwind gives a lower descent rate (more time to cover the distance); less headwind or more tailwind raises it — the 3° glidepath concept doesn\'t change.', 3),
+  A('Landing clearance'),
+  P('Confirm it was given, understood, and read back.'),
+
+  H('Roundout'),
+  P('The smooth transition from approach attitude to a landing attitude parallel to, and inches above, the runway.'),
+  A('Estimating height and movement'),
+  P('Divide attention between a point over the nose and the touchdown zone. Focus too close and reactions get abrupt or late (a high roundout or a stalled-in landing); focus too far and you lose the ability to judge closeness to the ground (a late or absent flare, nose-first). Bring your focus in closer as speed decreases.'),
+  A('Starting the roundout'),
+  P('Begin about 10–20\' above the ground (varies by aircraft and descent rate). Power to idle, back elevator gradually increases pitch as the AOA rises.'),
+  P('As airspeed bleeds off, lift keeps decreasing — control it by continuing to raise the nose so the airplane settles gently, right down to touchdown speed.', 3),
+  A('Rate of the roundout'),
+  P('A high roundout is executed slower to let the plane descend; a low roundout faster to reach landing attitude before the runway does. High descent rate needs a faster pitch change, low descent rate a slower one; high pitch attitude (full flap) is done more slowly, low pitch (no flap) more quickly.'),
+  B('Once the roundout has started, never push the elevator forward — relax back pressure or hold it steady instead. Keep one hand on the throttle, ready for a go-around.'),
+
+  H('Touchdown'),
+  P('A gentle settling onto the surface at minimum controllable airspeed, longitudinal axis parallel to the direction of travel.'),
+  P('Hold the wheels inches off as long as possible, then increase back pressure to let the mains touch first, followed by the nose. Very little rudder is needed with the engine at idle — it\'s mainly for crosswind correction.'),
+  A('After touchdown'),
+  P('Hold back-elevator pressure to keep the nosewheel up and aid aerodynamic braking; relax it as speed decreases to let the nosewheel settle gently.'),
+
+  S('After-Landing Roll'),
+  P('Deceleration to taxi speed, or a full stop clear of the landing area.'),
+  A('Directional control'),
+  P('Rudder steers with the nosewheel down (effectiveness depends on airflow, so on speed). Aileron counters crosswind and keeps the wings level — apply more as speed drops and the ailerons lose authority.'),
+  B('Stay alert through the whole rollout — losing directional control can become a ground loop and can collapse the gear from side load.'),
+  A('Braking'),
+  P('Toe brakes, feet slid up from the rudder pedals, rudder pressure maintained. Put maximum weight on the mains first, lower the nosewheel, then brake firmly, smoothly, evenly — max effectiveness is just short of a skid, and pumping the brakes doesn\'t help.'),
+  P('Have a plan to exit the runway and avoid a runway incursion; run the After Landing checklist once clear.'),
+
+  H('Common Errors — Normal Approach & Landing — AI.VII.B.K5'),
+  P('Late landing checklist · poor wind-drift correction on base · overshooting/undershooting or too steep/shallow a turn to final · a skidding turn from an overshoot · poor base-to-final coordination · unstable approach · under-compensating for flap extension · poor trim technique · trying to stretch the approach with elevator alone · focusing too close (high roundout) or too far (low roundout) · touching down before proper attitude · not holding back-elevator after touchdown · excessive braking · loss of control on touchdown/rollout.'),
+
+  S('RM: Crosswind Approach — AI.VII.B.K1, AI.VII.B.K4, AI.VII.B.R2a'),
+  P('Same basic principles as a normal approach and landing, with the wind crossing rather than aligned with the runway.'),
+  A('Crab method — not recommended'),
+  P('Easier to hold on final, but demands precise timing to remove the crab right before touchdown to avoid landing sideways.'),
+  A('Sideslip (wing-low) method — recommended'),
+  P('Align heading with the centerline, lower the upwind wing to correct for drift, and use opposite rudder to keep the longitudinal axis on the runway — flight path and ground track both aligned with it.'),
+  B('If full rudder can\'t hold the heading against a steepening bank, the crosswind exceeds your limit — go find another runway.'),
+  P('Same stabilized approach otherwise, with more drag and more power needed to hold the descent rate; still pitch for airspeed, power for altitude.', 3),
+  A('Roundout and touchdown'),
+  P('Keep the upwind wing down through the roundout — leveling it causes drift and side-loads the gear. Touch down upwind main wheel first; as speed bleeds, the downwind main then the nosewheel settle in, relaxing rudder as the nose comes down.'),
+  A('After landing roll'),
+  P('Keep rudder for direction and aileron for crosswind, increasing aileron into the wind as you slow — full aileron into the wind at a stop.'),
+  H('Common Errors — AI.VII.B.K5'),
+  P('Landing beyond the max demonstrated crosswind component · over/undershooting base-to-final · inadequate wind-drift correction · unstable approach · excessive sink rate or too-slow airspeed from sideslip drag · touching down out of alignment or while drifting · excessive touchdown speed · wrong control inputs or lost directional control on rollout · excessive braking · loss of control.'),
+
+  S('RM: Hazards & Emergencies'),
+  H('Rejected Landing & Go-Around — AI.VII.B.R3a'),
+  P('Go around any time continuing is hazardous or you are in doubt — cardinal principles: power, attitude, configuration.'),
+  B('A go-around is not inherently dangerous; delaying it or flying it improperly is. Delay usually comes from landing expectancy (believing it isn\'t as bad as it is) or pride (treating a go-around as failure).'),
+  A('Decision making'),
+  P('Fly a stabilized approach — momentary deviations from speed, glidepath, or centerline are fine, but set altitude gates: if you don\'t meet the criteria (stable and configured by 500\', for example), go around, no questions asked.'),
+  P('In an emergency you may have to weigh going around against continuing to land — a landing-gear problem may be better solved airborne; a fire or flight-control emergency may be better solved on the ground.', 3),
+
+  H('Land and Hold Short Operations (LAHSO) — AI.VII.B.R3b'),
+  P('Landing and holding short of an intersecting runway, taxiway, or other point.'),
+  A('Pilot responsibilities'),
+  P('Know the LAHSO information and landing performance at your destination before you go — PIC has final authority to accept or decline. Once accepted, the clearance must be followed (it doesn\'t prevent a rejected landing), and a full readback is required.'),
+  A('Situational awareness'),
+  P('Current airport diagram and LAHSO procedures, landing distance available, why ATC is running LAHSO, ability to advise if you can\'t accept it, and the relevant signs/markings/lights. Not authorized for solo students, generally not at night, and not on wet runways.'),
+  P('LAHSO minimums: basic VFR, 1,000\' ceiling and 3 SM visibility.', 3),
+
+  H('Wind Shear — AI.VII.B.R2b'),
+  P('A sudden, drastic wind change over a small area, most hazardous at low level. Violent up/downdrafts and abrupt headwind/tailwind swings can gut your performance fast.'),
+  A('Microbursts'),
+  P('1–2 miles across, 5–15 minutes, strong downdrafts and turbulence, 30–90 knot headwind swings — watch for an intense rain shaft with virga aloft, or a ring of blowing dust.'),
+  A('Handling it'),
+  P('Avoid an approach near an active thunderstorm; if caught in it, add half the gust factor to approach speed, stay high as long as feasible, and go around at the first unexpected pitch or airspeed shift — full power, maximum safe pitch, keep flying until you\'re through it.'),
+
+  H('Wake Turbulence — AI.VII.B.R2d'),
+  P('Counter-rotating wingtip vortices, strongest behind a heavy, clean, slow aircraft — can be encountered in any phase but strongest at departure.'),
+  A('Vortex behavior'),
+  P('Sink and drift with the wind near a wingspan apart; a crosswind slows the upwind vortex and speeds the downwind one, and a light quartering tailwind can leave vortices sitting right on the approach centerline.'),
+  A('Landing behind a large aircraft'),
+  P('Stay at or above their approach path and land beyond their touchdown point.'),
+
+  H('Distractions, Task Prioritization, SA — AI.VII.B.R6'),
+  P('Same discipline as on departure: fly the airplane first, guard against lost SA and disorientation, and sequence tasks so nothing outranks flying the approach.'),
+
+  H('Low Altitude Maneuvering — AI.VII.B.R5'),
+  B('A small problem at altitude becomes a big one close to the ground — low-altitude stall/spin and CFIT (AC 61-134) are the outcomes to guard against on every approach.'),
+
+  H('Collision Hazards — AI.VII.B.R4'),
+  P('Collision avoidance scan, terrain, obstacles and wire strikes, and airport-surface hazards all demand eyes outside through the pattern and the rollout.'),
+
+  S('Conclusion'),
+  P('Review: runway selection · downwind/base/final · stable approach (pitch for airspeed, power for altitude, aim point) · roundout, touchdown, after-landing roll · crosswind crab vs sideslip · common errors · go-around and LAHSO · wind shear, wake turbulence, low-altitude and collision hazards.'),
+  P('One habit covers most of it: if it isn\'t stable by your gate altitude, go around — no questions asked.'),
+]};
+
+/* ============================================================
+   VII.C — Soft-Field Takeoff & Climb
+   Spine: differences from normal · ground effect · taxi/roll/liftoff/climb
+          with weight kept off the wheels, common errors, then the same
+          RM/hazards spine as VII.A (shared boilerplate, kept brief)
+   ============================================================ */
+window.CFI_SCRIPTS['vii-c-soft-field-takeoff-climb'] = { nodes: [
+  S('Introduction'),
+  H('Attention'),
+  P('A soft surface will grab a nosewheel and stop an airplane cold, which is why we as pilots keep the weight on the wings, not the wheels, from the first foot of the taxi.'),
+  H('Overview'),
+  P('Hazards unique to a soft field, and ground effect'),
+  P('Taxi and takeoff roll technique — never stop, keep the nose light'),
+  P('Lift-off and accelerating in ground effect to VX or VY'),
+  P('Common errors'),
+  P('RM: same hazard set as a normal takeoff — rejected takeoff, engine failure, wind shear, wake turbulence, low-altitude, collision'),
+  H('What'),
+  P('Getting the airplane airborne and accelerating in ground effect before the wheels ever get a chance to bog down.'),
+  H('Why'),
+  B('On a soft surface, the airplane wants to get stuck or nose over — technique, not power, is what keeps it flying instead.'),
+
+  S('How:'),
+
+  H('Overview — AI.VII.C.K1'),
+  H('Differences from a Normal Takeoff — AI.VII.C.K6'),
+  A('Hazards'),
+  P('Reduced acceleration in sand, grass, snow, dirt, or mud · gear and flap damage from uneven terrain or debris (flaps especially on low-wing airplanes) · cartwheeling or flipping if the nosewheel catches a hole.'),
+  B('The goal is to minimize those hazards by getting airborne as soon as possible and accelerating while still in ground effect.'),
+
+  H('Ground Effect — AI.VII.C.K5'),
+  P('Close to the ground, the wing\'s vertical airflow is restricted, reducing induced drag.'),
+  A('Effect on flight'),
+  P('Less thrust is needed to produce lift, so the airplane can fly at a lower-than-normal speed. Climbing out of ground effect, required thrust rises sharply — climb too soon and the airplane can sink back to the surface.'),
+
+  H('Basics'),
+  P('Maintain back pressure through the taxi and roll, keep the aircraft moving (stopping can bog it down or take real power to get moving again), and do a "wheelie" down the runway to keep weight on the wings, not the nosewheel.'),
+  P('Accelerate in ground effect until reaching climb speed — do not attempt to climb out before reaching a safe VX or VY.', 3),
+
+  H('RM: Runway Selection — AI.VII.C.K2, AI.VII.C.R1'),
+  P('Same factors as a normal takeoff: POH limitations, wind (tailwind — AI.VII.C.R2c — and crosswind limits), density altitude effects on power/thrust/lift, runway characteristics (AI.VII.C.R2e), performance charts, and personal minimums — Limitations + Performance + Personal Minimums.'),
+
+  H('Best Angle vs Best Rate of Climb — AI.VII.C.K3'),
+  P('Same VX/VY definitions as a normal takeoff — VY for max altitude per minute, VX for max altitude per distance (obstacle clearance).'),
+
+  H('Configuration — AI.VII.C.K4'),
+  P('Reference the POH and Before Takeoff checklist.'),
+
+  S('Soft-Field Takeoff & Climb'),
+  H('Taxiing'),
+  P('Keep the elevator fully aft for the entire taxi to keep weight off the nosewheel. More power is needed for the added ground friction. Keep turns shallow and never stop — either can bog the airplane down.'),
+  P('Make normal traffic calls and build the picture from others\' calls; visually clear the runway and approach before taxiing into position.', 3),
+
+  H('Takeoff Roll'),
+  P('Keep the airplane moving and hold back elevator pressure. Establish takeoff power smoothly and rapidly, add right rudder for left-turning tendency, and layer in crosswind correction (aileron into the wind, rudder for centerline) if needed — AI.VII.C.R2a.'),
+  P('Expect slower acceleration from the added drag. Check "gauges green, airspeed alive." Back pressure starts full aft, then relaxes as the nose lifts and speed builds — holding full aft too long risks a tail strike. The airplane will fly off below the normal rotation speed.'),
+
+  H('Lift-Off'),
+  P('Once off the ground, gently lower the nose and accelerate to VX or VY while remaining within about half a wingspan of the ground, where ground effect is strongest.'),
+  P('Increase forward pressure as airspeed builds to stay in ground effect — in some airplanes the nose will point noticeably down toward the runway, which can feel uncomfortable at first. Climbing out too early can mean settling back onto the runway, an inability to climb, or a stall.', 3),
+
+  H('Initial Climb'),
+  P('Climb out normally once accelerated to VX or VY, retracting gear and flaps as usual. Soft-field runways are often short too, so VX is common — hold it until clearing the obstacle, then set VY and normal climb power.'),
+  P('Off a wet strip, delay gear retraction to let it air-dry (cycle it if cold, to avoid freezing); if an obstacle is also in play, retract once a positive rate is established and cycle/lower again after clearing it if needed, per the manufacturer.', 3),
+  A('Climb checklist'),
+  P('Run it at a safe altitude, under control.'),
+
+  H('Common Errors — AI.VII.C.K8'),
+  P('Skipping the POH/performance-chart review · inadequate area clearance · insufficient back-elevator pressure on the roll (inadequate AOA) · not cross-checking engine instruments after power-up · poor directional control · climbing too high after liftoff instead of leveling to hold ground effect · abrupt or excessive elevator when leveling off to accelerate · letting the airplane mush or settle back onto the surface · climbing out of ground effect before reaching safe climb speed · not anticipating the pitch-up as the airplane leaves ground effect.'),
+
+  S('RM: Hazards & Emergencies'),
+  P('Same hazard set as a normal takeoff (VII.A) — the numbers and procedures below are unchanged by the soft surface.'),
+  H('Rejected Takeoff — AI.VII.C.R3a'),
+  P('Engine trouble, poor acceleration, an incursion, an ATC conflict, or another emergency can force a reject — pick your must-be-airborne point before the roll, and know your stopping distance. Reject: power idle, maximum braking, directional control, per the POH. Fire: mixture idle cutoff, magnetos off.'),
+  H('Engine Failure — AI.VII.C.R3b'),
+  B('Time is short without a briefed plan — practice, plan, then brief it.'),
+  P('On the roll: reject, stop straight ahead. Right after liftoff: land on remaining runway if there\'s enough. During the climb: lower the nose to best glide, release right rudder, glide to a landing area, and run emergency procedures as time and altitude allow.'),
+  H('Wind Shear — AI.VII.C.R2b'),
+  P('A sudden, drastic wind change over a small area — worst as a microburst (1–2 miles across, 5–15 minutes, downdrafts and headwind swings of 30–90 knots). Avoid it near thunderstorms; if caught in it, add power, keep pitching for climb, and go around at the first unexpected pitch or airspeed change.'),
+  H('Wake Turbulence — AI.VII.C.R2d (AC 90-23)'),
+  P('Counter-rotating vortices off the wingtips, strongest behind a heavy, clean, slow airplane. Rotate before and climb above a preceding aircraft\'s path on the same runway; wait 2 minutes behind a touch-and-go/low approach; watch for vortices drifting onto the centerline in a quartering tailwind.'),
+  H('Distractions, Task Prioritization, SA — AI.VII.C.R6'),
+  P('Fly the airplane first, guard against lost SA, and sequence tasks so nothing outranks flying the departure.'),
+  H('Low Altitude Maneuvering — AI.VII.C.R5'),
+  P('A small problem at altitude becomes a big one down low — low-altitude stall/spin and CFIT are the outcomes to guard against.'),
+  H('Collision Hazards — AI.VII.C.R4'),
+  P('Collision scan, terrain, obstacles/wire strikes, and airport-surface hazards all still apply on a soft-field departure.'),
+
+  S('Conclusion'),
+  P('Review: soft-field hazards · ground effect · keep it moving, elevator aft · accelerate in ground effect to VX/VY · common errors · rejected takeoff and engine failure · wind shear, wake turbulence · low-altitude and collision hazards.'),
+  P('One habit covers most of it: never stop moving, and never climb out of ground effect before you have real climb speed.'),
+]};
+
+/* ============================================================
+   VII.D — Soft-Field Approach & Landing
+   Spine: objective, approach configuration/aim point, landing on the
+          wings not the wheels, after-landing roll, common errors, then
+          the same RM/hazards spine as VII.B (shared boilerplate, kept brief)
+   ============================================================ */
+window.CFI_SCRIPTS['vii-d-soft-field-approach-landing'] = { nodes: [
+  S('Introduction'),
+  H('Attention'),
+  P('A soft surface punishes a heavy touchdown far more than pavement does, which is why we as pilots fly the whole landing trying to keep the weight on the wings, not the wheels.'),
+  H('Overview'),
+  P('Objective and runway selection'),
+  P('Approach — stabilized, aim point adjusted for the extra float'),
+  P('Landing — held in ground effect, cushioned touchdown, wheelie rollout'),
+  P('Crosswind considerations'),
+  P('Common errors'),
+  P('RM: same hazard set as a normal approach — go-around, LAHSO, wind shear, wake turbulence, low-altitude, collision'),
+  H('What'),
+  P('Touching down as smoothly and as slowly as possible with the wings still doing the work, minimizing drag and gear stress from the surface.'),
+  H('Why'),
+  B('Control the airplane so the wings carry its weight as long as practical — that\'s what keeps a soft or rough surface from grabbing the gear.'),
+
+  S('How:'),
+
+  H('Objective'),
+  P('Touch down as smoothly as possible at the slowest possible landing speed, keeping the wings supporting the airplane\'s weight as long as practical to minimize drag and gear stress.'),
+
+  H('Runway Selection — AI.VII.D.K3, AI.VII.D.R1'),
+  P('Same factors as a normal landing: POH limitations, wind (tailwind — AI.VII.D.R2c — and crosswind limits), density altitude effects on performance, runway characteristics (AI.VII.D.R2e), landing/climb performance charts, and personal minimums — Limitations + Performance + Personal Minimums.'),
+
+  S('Soft-Field Approach & Landing'),
+  H('Approach'),
+  A('Procedures'),
+  P('Run the Before Landing checklist and configure on downwind, same as a normal approach. Select a touchdown and aim point — aim further ahead of the touchdown point than normal, since the flare and float will be extended.'),
+  P('Configure with landing flaps per the POH — they help touch down at minimum speed, though on low-wing airplanes they can pick up mud, stones, or slush.', 3),
+  H('Maintain a Stabilized Approach — AI.VII.D.K2'),
+  P('Establish the final approach speed (short-field speed if it\'s also short), set a glidepath to the aim point, trim for it, and use coordinated pitch-and-power changes to hold it — one hand on the throttle throughout.'),
+  A('Coordination and ground track'),
+  P('All turns coordinated, no more than 30° of bank. Crab as needed through downwind, base, and final, then sideslip into the wind to hold the extended centerline — AI.VII.D.K4, AI.VII.D.R2a.'),
+
+  H('Landing'),
+  A('Big-picture differences from a normal landing'),
+  P('Hold the airplane 1–2\' above the ground in ground effect as long as possible, flying it onto the ground with weight fully supported by the wings. Add a small amount of power right at touchdown to cushion it, and after the mains touch, hold enough back pressure to keep the nose off the surface.'),
+  A('Touchdown'),
+  P('Keep one hand on the throttle — ready to go around at any point. Just before touchdown, add a touch of power to cushion the transfer of weight from wings to wheels; how much depends on the surface (more for tall thick grass, less for packed dirt).'),
+  P('Touch down at the lowest possible airspeed in a nose-high attitude — increase back pressure as you slow so the touchdown is as gentle as power allows. A firm touchdown is not the goal and can be hazardous.', 3),
+  B('After the main wheels touch, hold back pressure to keep the nosewheel off the surface (the "wheelie") — it keeps the nosewheel from digging in, getting stuck, or cartwheeling.'),
+  P('Maintain directional control with rudder and crosswind correction with aileron; avoid braking, since it can drive the nose gear into the surface.'),
+  H('RM: Landing in a Crosswind — AI.VII.D.K4, AI.VII.D.R2a'),
+  P('Touch down in a sideslip, upwind wheel first, airplane aligned with the centerline.'),
+  B('Be extra cautious landing one wheel at a time on a soft surface — go around if control is ever in doubt.'),
+
+  S('After Landing Roll/Taxi'),
+  P('Continue holding full aft elevator and wind correction, maintain directional control with the rudders, and expect braking to come mainly from surface friction (power may be needed to keep moving).'),
+  P('Maintain enough speed to avoid getting bogged down. Retract flaps only after the airplane is under control and the roll is complete — retracting puts more weight on the wheels, so keep focus on keeping that weight off them until then. Run the After Landing checklist once parked.'),
+
+  H('Common Errors — AI.VII.D.K5'),
+  P('Excessive descent rate or airspeed on final · unstable approach · rounding out too high · poor power management through roundout and touchdown · a hard touchdown · poor control of the weight transfer from wings to wheels · letting the nosewheel "fall" to the runway instead of controlling its descent.'),
+
+  S('RM: Hazards & Emergencies'),
+  P('Same hazard set as a normal approach and landing (VII.B) — the numbers and procedures below are unchanged by the soft surface.'),
+  H('Rejected Landing & Go-Around — AI.VII.D.R3a'),
+  B('Not inherently dangerous — delaying it or flying it poorly is. Cardinal principles: power, attitude, configuration.'),
+  P('Set altitude gates (stable and configured by 500\', for example) and go around with no questions asked if you don\'t meet them; weigh going around against continuing to land only when an emergency forces the choice.'),
+  H('Land and Hold Short Operations (LAHSO) — AI.VII.D.R3b'),
+  P('Know the LAHSO data and landing performance at your destination beforehand; PIC has final authority to accept or decline, and once accepted it must be followed. Full readback required. Not authorized for solo students, generally not at night, not on wet runways. Minimums: basic VFR, 1,000\' ceiling and 3 SM visibility.'),
+  H('Wind Shear — AI.VII.D.R2b'),
+  P('A sudden, drastic wind change over a small area, worst as a microburst (1–2 miles across, 5–15 minutes, 30–90 knot headwind swings). Avoid it near thunderstorms; if caught, add half the gust factor to approach speed, stay high as long as feasible, and go around at the first unexpected pitch or airspeed change.'),
+  H('Wake Turbulence — AI.VII.D.R2d'),
+  P('Counter-rotating wingtip vortices, strongest behind a heavy, clean, slow aircraft. Landing behind one: stay at or above their approach path and land beyond their touchdown point.'),
+  H('Distractions, Task Prioritization, SA — AI.VII.D.R6'),
+  P('Fly the airplane first, guard against lost SA, and sequence tasks so nothing outranks flying the approach.'),
+  H('Low Altitude Maneuvering — AI.VII.D.R5'),
+  P('A small problem at altitude becomes a big one close to the ground — low-altitude stall/spin and CFIT are the outcomes to guard against on every approach.'),
+  H('Collision Hazards — AI.VII.D.R4'),
+  P('Collision scan, terrain, obstacles/wire strikes, and airport-surface hazards all still apply on a soft-field approach.'),
+
+  S('Conclusion'),
+  P('Review: objective and runway selection · stabilized approach with an aim point set for extra float · landing on the wings, cushioned touchdown, wheelie rollout · crosswind considerations · common errors · go-around and LAHSO · wind shear, wake turbulence, low-altitude and collision hazards.'),
+  P('One habit covers most of it: fly it onto the ground on the wings, and keep the nosewheel off the surface until you\'re sure it\'s under control.'),
+]};
 })();
