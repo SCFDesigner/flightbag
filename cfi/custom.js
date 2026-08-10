@@ -3482,6 +3482,7 @@ window.CFI_SCRIPTS['x-a-slow-flight'] = { nodes: [
   P('Flight at any speed below cruise — but for the maneuver, flight at the speed where any further increase in AOA or load factor, or any power reduction, triggers the stall warning.'),
   H('Why'),
   B('Give the tools to recognize and recover from inadvertent slow flight before it becomes a stall — most stall/spin accidents start as slow flight nobody meant to be in.'),
+    P('And demonstrate the flight characteristics and controllability of the airplane at its minimum flying speed.'),
 
   S('How:'),
   H('Slow Flight Aerodynamics — AI.X.A.K2'),
@@ -3514,7 +3515,13 @@ window.CFI_SCRIPTS['x-a-slow-flight'] = { nodes: [
   P('Sight: nose high, more sky than usual, few ground references. Sound: less engine and airflow noise, then the horn. Feel: controls going soft, more right rudder needed, buffet.'),
   P('Buffet usually comes before the horn — but not always (a cross-controlled stall can skip both). By 23.207 the horn must sound at least 5 knots above stall speed and hold until the stall breaks; reference the POH, since uncoordinated flight can mask the indicator.'),
 
-  S('How: Performing Slow Flight — AI.X.A.K1'),
+    H('Critical Flight Situations — RM: Inadvertent Slow Flight — AI.X.A.R1'),
+    P('Where this matters for real: takeoffs, climbs, landings, and go-arounds — the region of reversed command, close to the ground.'),
+    P('A distraction, disorientation, or a microburst can put you in slow flight without asking — recognizing it and controlling the airplane properly is what prevents a loss of control.'),
+    P('A high sink rate on a short-field landing, or climbing out of ground effect too early on a soft-field takeoff.', 3),
+    P('Operational ranges and limitations vary between aircraft — the POH numbers rule.'),
+
+  S('Performing Slow Flight — AI.X.A.K1'),
   H('Pre-Maneuver'),
   P('Pre-maneuver checklist, clear the area, and pick an altitude no lower than 1,500\' AGL. Configuration is flexible — the "dirtier" the setup, the slower you can go.'),
   H('Establishing Slow Flight'),
@@ -3537,6 +3544,7 @@ window.CFI_SCRIPTS['x-a-slow-flight'] = { nodes: [
   P('High density altitude thins the air and quietly steals power, thrust, and lift all at once.'),
   H('Collision Hazards — AI.X.A.R5'),
   P('Clearing turns before the maneuver and before every turn; short, 10° scan movements; lights on; know FAR 91.113 right-of-way cold.'),
+    P('Low and slow is wire-strike territory: antenna towers reach 1,000-2,000 ft AGL with guy wires extending 1,500 ft out, and unlit wires span the roads, rivers, and railroads pilots like to follow.'),
   H('Distractions, SA & Task Management — AI.X.A.R6'),
   B('Action: if a distraction pulls attention away mid-maneuver, have the learner say so out loud, fix it, and get back ahead of the airplane — Aviate, Navigate, Communicate.'),
   P('An upset from disorientation gets the same answer every time: push to unload, roll to the nearest horizon, adjust thrust, stabilize.'),
@@ -3642,7 +3650,7 @@ window.CFI_SCRIPTS['x-b-demo-of-flight-characteristics'] = { nodes: [
   P('Decreasing noise, sluggish controls, buffet before the horn. The longer a warning goes unacknowledged — unfamiliarity, distraction, fear — the deeper the stall and the more altitude it costs to recover.'),
   B('Action: recover at the first indication — push, roll, thrust, stabilize. This is not the moment to figure out what happened.'),
 
-  S('How: Demonstrating Flight Characteristics — AI.X.B.K1,K2'),
+  S('Demonstrating Flight Characteristics — AI.X.B.K1,K2'),
   H('Pre-Maneuver'),
   P('Pre-maneuver checklist, clear the area, altitude no lower than 1,500\' AGL.'),
   H('Clean Configuration Demo'),
@@ -3750,7 +3758,7 @@ window.CFI_SCRIPTS['x-c-power-off-stalls'] = { nodes: [
   H('RM: Stall Warning Range & Limitations — AI.X.C.R2'),
   P('Buffet usually comes first, then the horn — a cross-controlled stall can skip both. Per 23.207 the horn must sound at least 5 knots above stall speed and hold until the stall breaks; reference the POH, since uncoordinated flight can mask the indicator.'),
 
-  S('How: Power-Off Stalls — AI.X.C.K1'),
+  S('Power-Off Stalls — AI.X.C.K1'),
   H('Entry'),
   P('Pre-maneuver checklist, clear the area, pick an altitude that guarantees recovery no lower than 1,500\' AGL, landing configuration, bug the heading.'),
   H('Straight-Ahead Stall'),
@@ -3880,7 +3888,7 @@ window.CFI_SCRIPTS['x-d-power-on-stalls'] = { nodes: [
   H('RM: Stall Warning Range & Limitations — AI.X.D.R2'),
   P('Buffet before the horn, both designed to give time to react — reference the POH for the specific range, since uncoordinated flight can mask the indicator, and any aircraft-specific limitations.'),
 
-  S('How: Power-On Stalls — AI.X.D.K1'),
+  S('Power-On Stalls — AI.X.D.K1'),
   H('Difference from Power-Off'),
   P('Considerably louder and steeper.'),
   H('Entry'),
@@ -4005,7 +4013,7 @@ window.CFI_SCRIPTS['x-e-accelerated-stalls'] = { nodes: [
   H('RM: Stall Warning Range & Limitations'),
   P('Buffet tends to come before the horn but may not always show up — a cross-controlled stall can occur with little to no warning. Per 23.207 the horn must give a clear, distinct warning with flaps and gear in any normal position, starting at least 5 knots above stall speed and holding until the stall occurs.'),
 
-  S('How: Performing Accelerated Stalls — AI.X.E.K1'),
+  S('Performing Accelerated Stalls — AI.X.E.K1'),
   H('Pre-Maneuver'),
   P('Pre-maneuver checklist, clear the area, pick an altitude that guarantees recovery no lower than 3,000\' AGL, and configure clean.'),
   B('Never practice with flaps extended — the G-load limit is lower with them out.'),
@@ -7021,7 +7029,7 @@ window.CFI_SCRIPTS['ix-a-steep-turns'] = { nodes: [
   P('VA increases with weight, but a heavier airplane needs more AOA for level flight and is already closer to critical AOA — it takes less back pressure, or G load, before a stall, so the margin doesn\'t actually grow.', 3),
   B('Fly every maneuver, steep turns included, at or below VA.'),
 
-  S('How: Performing the Steep Turn — AI.IX.A.K1, K2'),
+  S('Performing the Steep Turn — AI.IX.A.K1, K2'),
   H('Before Starting'),
   P('Select an altitude no lower than 1,500\' AGL · run the pre-maneuver checklist.'),
   B('RM: clearing turns — especially important given the rapid rate of turn — AI.IX.A.R2.'),
@@ -7235,7 +7243,7 @@ window.CFI_SCRIPTS['ix-c-chandelles'] = { nodes: [
   H('Energy Management — AI.IX.C.R6'),
   P('Pitch too little or too slowly and climb performance is wasted; pitch too much or too quickly and the airplane stalls before the maneuver is done — energy has to be balanced to get maximum performance.'),
 
-  S('How: Performing the Chandelle — AI.IX.C.K1, K3, K4'),
+  S('Performing the Chandelle — AI.IX.C.K1, K3, K4'),
   H('Before Starting'),
   P('Select an altitude no lower than 1,500\' AGL · pre-maneuver checklist, clear the area · straight-and-level at VA, flaps/gear up.'),
   P('Note/bug the entry heading (rollout will be on the reciprocal) · pick a visual reference 90° off the wing in the turn direction.'),
@@ -7465,7 +7473,7 @@ window.CFI_SCRIPTS['ix-e-rectangular-course'] = { nodes: [
   H('RM: Division of Attention — AI.IX.E.R1'),
   P('Divide attention between leg distance, turns, altitude, airspeed, coordination, and scanning — over-focusing inside or outside leaves the other neglected and the corners sloppy.'),
 
-  S('How: Performing the Rectangular Course — AI.IX.E.K1'),
+  S('Performing the Rectangular Course — AI.IX.E.K1'),
   H('Selecting Altitude & Reference'),
   P('Entry altitude 600\'–1,000\' AGL per the ACS, ± 100\' — 800\' AGL is a good balance.'),
   P('Pick a square or rectangular field, sides roughly 5,000\'–10,000\' (one to two miles), clear of populated areas and suitable for an emergency landing.', 3),
@@ -7555,7 +7563,7 @@ window.CFI_SCRIPTS['ix-e-s-turns'] = { nodes: [
   A('Wind Correction Angle'),
   P('Crab into any crosswind to hold the radius — the angle builds from the start of the turn to the 90° (max crosswind) point, then decreases to rollout. First turn: crab into the turn. Second turn: crab out of it. A stronger crosswind means a bigger correction angle.', 3),
 
-  S('How: Performing S-Turns — AI.IX.E.K1'),
+  S('Performing S-Turns — AI.IX.E.K1'),
   H('Selecting Altitude & Reference'),
   P('Entry altitude 600\'–1,000\' AGL per the ACS, ± 100\' — 800\' AGL is a good balance.'),
   P('Estimate wind direction (METAR, smoke, water, trees, fields, or a 360° turn noting ground track), then pick a straight-line reference perpendicular to it — road, tracks, fence line — clear of populated areas and obstructions and suitable for an emergency landing.', 3),
@@ -7670,7 +7678,7 @@ window.CFI_SCRIPTS['ix-e-turns-around-a-point'] = { nodes: [
   H('RM: Division of Attention — AI.IX.E.R1'),
   P('90% outside, 10% inside — always keep an eye out for other traffic or threats; divide attention between the reference point, the aircraft, what\'s coming next, and the surroundings.'),
 
-  S('How: Performing Turns Around a Point — AI.IX.E.K1'),
+  S('Performing Turns Around a Point — AI.IX.E.K1'),
   H('Prior to Entry'),
   P('Select an altitude 600\'–1,000\' AGL per the ACS, ± 100\' — 800\' AGL is a good balance.'),
   P('Pick a prominent but small, precise reference (a crossroads works well), clear of populated areas and obstructions and suitable for an emergency landing.', 3),
@@ -7781,7 +7789,7 @@ window.CFI_SCRIPTS['ix-f-eights-on-pylons'] = { nodes: [
   B('PA (ft AGL) = groundspeed² / 11.3 (knots) or groundspeed² / 15 (mph), plus the pylons\' MSL elevation.'),
   P('Calculate the highest expected PA using TAS + tailwind, and the lowest using TAS − headwind — if either altitude is unsafe, don\'t fly the maneuver.', 3),
 
-  S('How: Performing Eights on Pylons — AI.IX.F.K1, K5'),
+  S('Performing Eights on Pylons — AI.IX.F.K1, K5'),
   H('Selecting the Pylons'),
   P('Two prominent, easy-to-see points on a line perpendicular to the wind, in open terrain away from hills or obstructions — smaller pylons make it easier to see reference movement.'),
   P('About ½ mile apart (3–5 seconds of flight between them) and at the same elevation.', 3),
