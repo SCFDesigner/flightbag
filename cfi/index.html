@@ -57,7 +57,7 @@ nav { width:var(--sidebar-w); min-width:var(--sidebar-w); background:var(--bg1);
 select { background:var(--btn); color:var(--text2); border:1px solid var(--bdr); border-radius:6px; padding:4px 6px; font-size:11px; max-width:150px; }
 
 /* ===== content nodes ===== */
-.node { position:relative; padding:2px 4px 2px 50px; border-radius:5px; line-height:1.42; }
+.node { position:relative; padding:2px 56px 2px 8px; border-radius:5px; line-height:1.42; }
 .node:hover { background:var(--bg1); }
 .node.hdr0 { font-weight:700; color:var(--blue); margin-top:14px; font-size:1.05em; }
 .node.sect { font-weight:700; color:var(--orange); margin-top:16px; text-transform:uppercase; font-size:.85em; letter-spacing:.06em; }
@@ -67,7 +67,7 @@ select { background:var(--btn); color:var(--text2); border:1px solid var(--bdr);
 .node .acs { font-size:.68em; color:var(--bg0); background:var(--text4); border-radius:4px; padding:1px 5px; margin-left:7px; vertical-align:middle; white-space:nowrap; }
 .node img { max-width:92%; display:block; margin:8px 0; border-radius:8px; border:1px solid var(--bdr); }
 .node.tblrow { color:var(--text2); font-size:.92em; }
-.node .nbtns { position:absolute; left:0; top:2px; display:none; gap:2px; }
+.node .nbtns { position:absolute; right:2px; top:2px; display:none; gap:2px; }
 .node:hover .nbtns { display:flex; }
 .nb { width:20px; height:20px; border-radius:5px; border:1px solid var(--bdr); background:var(--bg2); color:var(--text3); font-size:12px; line-height:18px; text-align:center; cursor:pointer; user-select:none; }
 .nb:hover { color:var(--text); border-color:var(--text4); }
@@ -166,6 +166,27 @@ select { background:var(--btn); color:var(--text2); border:1px solid var(--bdr);
 .empty-hint { color:var(--text4); font-size:.9em; padding:30px 20px; text-align:center; line-height:1.6; }
 kbd { background:var(--bg3); border:1px solid var(--text4); border-radius:4px; padding:0 5px; font-size:.85em; font-family:inherit; }
 
+/* ===== nav settings block ===== */
+#nav-settings { border-top:1px solid var(--bdr); padding:10px 14px 12px; display:flex; flex-direction:column; gap:6px; flex-shrink:0; }
+#nav-settings .ns-label { font-size:10px; color:var(--text4); text-transform:uppercase; letter-spacing:.09em; margin-bottom:2px; }
+#nav-settings .tbtn { text-align:left; }
+#nav-settings .tctl { justify-content:space-between; }
+#nav-settings .tctl input[type=range] { flex:1; margin-left:8px; }
+
+/* ===== toolbar toggles & read mode ===== */
+.tbtn.on { color:var(--bg0); background:var(--blue); border-color:var(--blue); font-weight:600; }
+#read-ctl { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+body:not(.readmode) #read-ctl { display:none; }
+body:not(.readmode) .nb.play, body:not(.readmode) .mb.play { display:none !important; }
+
+/* ===== split / focus ===== */
+body.nosplit #pane-ext { display:none; }
+@media (max-width: 820px) { #tgl-split { display:none; } }
+
+/* ===== my-script images & figures ===== */
+.ms-item img { max-width:92%; display:block; margin:8px 0; border-radius:8px; border:1px solid var(--bdr); }
+.ms-figs img { max-width:92%; display:block; margin:10px 0; border-radius:8px; border:1px solid var(--bdr); }
+
 /* ===== password gate ===== */
 #gate { position:fixed; inset:0; z-index:200; background:var(--bg0); display:flex; align-items:center; justify-content:center; padding:24px; }
 #gate.hidden { display:none; }
@@ -192,7 +213,7 @@ kbd { background:var(--bg3); border:1px solid var(--text4); border-radius:4px; p
   #toolbar { gap:6px; padding:6px 9px; row-gap:5px; }
   /* the pane title block already names the lesson — no need to repeat it up here */
   #lesson-title { display:none; }
-  .tctl.hide-sm, #btn-copy, #btn-dl, #btn-stop { display:none; }
+  #btn-stop { display:none; }
   #toolbar .tbtn { padding:4px 9px; font-size:11.5px; }
   #toolbar .tctl { font-size:10px; }
   #toolbar .tctl input[type=range] { width:64px; }
@@ -206,11 +227,11 @@ kbd { background:var(--bg3); border:1px solid var(--text4); border-radius:4px; p
   .pane { display:none; border-right:none; }
   .pane.show-sm { display:flex; }
   .pane-body { padding:12px 12px 45vh 10px; }
-  .node { padding-left:44px; }
   .node img { max-width:100%; }
   .ms-item { padding-right:70px; }
   /* no hover on touch — action buttons must always be reachable */
   .node .nbtns, .ms-item .mctl { display:flex; }
+  .node { padding-right:60px; }
   .nb, .mb { width:24px; height:24px; line-height:22px; }
   .flow-item { padding:6px; }
 }
@@ -239,27 +260,34 @@ kbd { background:var(--bg3); border:1px solid var(--text4); border-radius:4px; p
   <div id="nav-scrim"></div>
   <nav>
     <div id="nav-head">
-      <h1>CFI LESSON CONDENSER</h1>
-      <div class="sub">Backseat Pilot · extended vs. teach script</div>
+      <h1>CFI BINDER</h1>
+      <div class="sub">lesson plans · slides · scripts</div>
       <input id="search" type="text" placeholder="Filter lessons…">
     </div>
     <div id="nav-list"></div>
+    <div id="nav-settings">
+      <div class="ns-label">Settings</div>
+      <button class="tbtn" id="btn-copy">Copy My Script</button>
+      <button class="tbtn" id="btn-dl">Export My Script (.md)</button>
+      <div class="tctl">Aa <input type="range" id="fsize" min="12" max="20" step="1" value="15"></div>
+    </div>
   </nav>
   <div id="main">
     <div id="toolbar">
       <button class="tbtn" id="menu-btn" title="Lessons">☰</button>
       <div id="lesson-title">Pick a lesson<span class="refs"></span></div>
+      <button class="tbtn" id="tgl-split" title="Split view / single pane">⿲ Split</button>
+      <button class="tbtn" id="tgl-read" title="Read-aloud mode — off while teaching">🎧 Read</button>
+      <div id="read-ctl">
+        <button class="tbtn primary" id="btn-play" title="Space">▶</button>
+        <button class="tbtn" id="btn-stop" title="Esc">■</button>
+        <div class="tctl">Speed <input type="range" id="rate" min="0.7" max="2.6" step="0.1" value="1.4"><span id="rate-val">1.4x</span></div>
+        <div class="tctl"><select id="voice"></select></div>
+      </div>
       <div id="pane-switch">
         <button data-p="left" class="on">Lesson</button>
         <button data-p="right">Script</button>
       </div>
-      <button class="tbtn primary" id="btn-play" title="Space">▶ Read</button>
-      <button class="tbtn" id="btn-stop" title="Esc">■</button>
-      <div class="tctl">Speed <input type="range" id="rate" min="0.7" max="2.6" step="0.1" value="1.4"><span id="rate-val">1.4x</span></div>
-      <div class="tctl"><select id="voice"></select></div>
-      <div class="tctl hide-sm">Aa <input type="range" id="fsize" min="12" max="20" step="1" value="15"></div>
-      <button class="tbtn" id="btn-copy">Copy My Script</button>
-      <button class="tbtn" id="btn-dl">Export .md</button>
     </div>
     <div id="panes">
       <div class="pane" id="pane-ext">
@@ -276,7 +304,7 @@ kbd { background:var(--bg3); border:1px solid var(--text4); border-radius:4px; p
       <div class="pane" id="pane-right">
         <div class="pane-head">
           <div class="tabs">
-            <div class="tab active" data-tab="con">Teach Script</div>
+            <div class="tab active" data-tab="con">Lesson Plan</div>
             <div class="tab" data-tab="mine">My Script <span class="mcount" id="mine-count"></span></div>
             <div class="tab" data-tab="flow">Flow</div>
             <div class="tab" data-tab="cards">Cards</div>
@@ -497,7 +525,7 @@ function loadLesson(aoe, l) {
     renderFront(l.con.front, cb);
     l.con.nodes.forEach((n, i) => cb.appendChild(nodeEl(n, 'c', i)));
   } else {
-    cb.innerHTML = '<div class="empty-hint">No condensed teach script for this lesson.</div>';
+    cb.innerHTML = '<div class="empty-hint">No condensed lesson plan for this lesson.</div>';
   }
 
   const sel = getSel();
@@ -556,11 +584,14 @@ function msItem(n, src, i, opts) {
   div.style.marginLeft = (Math.max(0, n.l) * 18) + 'px';
   let inner = (n.l > 0 && !n.b && !n._k && !SELF_MARKED.test(text) ? '<span class="bullet">•</span>' : '') +
               `<span class="ms-text">${escapeHtml(text)}</span><span class="mctl">` +
+              `<span class="mb play" title="Read from here">▸</span>` +
               `<span class="mb edit" title="Edit text">✎</span>` +
               `<span class="mb nadd" title="Add your own line below">+</span>` +
               (edited ? `<span class="mb reset" title="Restore original">↺</span>` : '') +
               (opts.removable ? `<span class="mb rm" title="Remove">×</span>` : '') + `</span>`;
   div.innerHTML = inner;
+  if (n.img) n.img.forEach(p => { const im = document.createElement('img'); im.src = p; im.loading = 'lazy'; div.appendChild(im); });
+  div.querySelector('.mb.play').onclick = e => { e.stopPropagation(); if (div.dataset.mi != null) startReading('m', +div.dataset.mi); };
   const span = div.querySelector('.ms-text');
   const startEdit = () => beginEdit(span, t => {
     sel.ed = sel.ed || {};
@@ -585,7 +616,9 @@ function noteItem(note, idx) {
   div.className = 'ms-item note';
   div.style.marginLeft = (26 + Math.max(0, note.l || 0) * 18) + 'px';
   div.innerHTML = `<span class="ms-text">${escapeHtml(note.t)}</span><span class="mctl">` +
+                  `<span class="mb play" title="Read from here">▸</span>` +
                   `<span class="mb edit" title="Edit">✎</span><span class="mb rm" title="Delete">×</span></span>`;
+  div.querySelector('.mb.play').onclick = e => { e.stopPropagation(); if (div.dataset.mi != null) startReading('m', +div.dataset.mi); };
   const span = div.querySelector('.ms-text');
   const sel = getSel();
   const startEdit = () => beginEdit(span, t => {
@@ -662,11 +695,12 @@ function renderMine() {
   }
   // picks made from the source panes, appended below
   [['x', cur.lesson.ext && cur.lesson.ext.nodes, 'From extra detail'],
-   ['c', cur.lesson.con && cur.lesson.con.nodes, 'From teach script']].forEach(([src, srcNodes, label]) => {
+   ['c', cur.lesson.con && cur.lesson.con.nodes, 'From lesson plan']].forEach(([src, srcNodes, label]) => {
     if (src === skelSrc) return;
     const arr = src === 'x' ? sel.x : sel.c;
     if (!arr.length || !srcNodes) return;
-    const h = document.createElement('div'); h.className = 'ms-src'; h.textContent = label;
+    const h = document.createElement('div'); h.className = 'ms-src';
+    h.textContent = label;
     mb.appendChild(h);
     arr.forEach(i => {
       if (!srcNodes[i]) return;
@@ -687,6 +721,28 @@ function renderMine() {
   addBtn.textContent = '＋ Add your own line';
   addBtn.onclick = () => addNote('end', 0);
   mb.appendChild(addBtn);
+
+  // figures from the lesson plan (scripted lessons have no images of their own)
+  if (lessonScript() && cur.lesson.con) {
+    const figs = [];
+    (cur.lesson.con.front || []).forEach(cell => cell.forEach(ln => { if (ln.img) figs.push(ln.img); }));
+    cur.lesson.con.nodes.forEach(n => { if (n.img) figs.push(...n.img); });
+    if (figs.length) {
+      const h = document.createElement('div'); h.className = 'ms-src'; h.textContent = 'Lesson plan figures';
+      mb.appendChild(h);
+      const wrap = document.createElement('div'); wrap.className = 'ms-figs';
+      figs.forEach(p => { const im = document.createElement('img'); im.src = p; im.loading = 'lazy'; wrap.appendChild(im); });
+      mb.appendChild(wrap);
+    }
+  }
+
+  // playlist for read-aloud: every visible line, in order
+  msPlaylist = [];
+  [...mb.querySelectorAll('.ms-item')].forEach((el, i) => {
+    el.dataset.mi = i;
+    const ts = el.querySelector('.ms-text');
+    msPlaylist.push({ t: ts ? ts.textContent : '' });
+  });
 }
 
 function myScriptText() {
@@ -715,7 +771,7 @@ function myScriptText() {
     out += '  '.repeat(Math.max(0, n.l)) + '- ' + (n.b || n._k ? '**' + t + '**' : t) + '\n' + notesFor(key);
   });
   [['x', cur.lesson.ext && cur.lesson.ext.nodes, 'From extra detail'],
-   ['c', cur.lesson.con && cur.lesson.con.nodes, 'From teach script']].forEach(([src, srcNodes, label]) => {
+   ['c', cur.lesson.con && cur.lesson.con.nodes, 'From lesson plan']].forEach(([src, srcNodes, label]) => {
     if (src === skelSrc) return;
     const arr = src === 'x' ? sel.x : sel.c;
     if (!arr.length || !srcNodes) return;
@@ -801,6 +857,15 @@ function jumpToNode(src, i) {
     const el = [...document.querySelectorAll('#mine-body .ms-item')][i];
     if (el) { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); flashEl(el); }
     return;
+  }
+  if (!splitView && !isMobile()) {
+    if (src === 'c') {   // focus mode: the lesson plan lives in the right pane
+      document.querySelector('.tab[data-tab="con"]').click();
+      const el = document.querySelector(`#con-body .node[data-idx="${i}"]`);
+      if (el) { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); flashEl(el); }
+      return;
+    }
+    splitView = true; store.prefs.split = true; save(); applyModes();  // extra detail needs the left pane
   }
   setLeftTab(src === 'x' ? 'ext' : 'lp');
   store.prefs.leftTab = src === 'x' ? 'ext' : 'lp'; save();
@@ -1130,7 +1195,9 @@ synth.onvoiceschanged = populateVoices;
 populateVoices();
 $('#voice').onchange = e => { store.prefs.voice = e.target.value; save(); if (speaking) { const s = spkSrc, i = spkIdx; stopReading(); startReading(s, i); } };
 
+let msPlaylist = [];   // rendered My Script lines, in display order
 function spokenNodes(src) {
+  if (src === 'm') return msPlaylist;
   const nodes = src === 'x' ? (cur.lesson.ext && cur.lesson.ext.nodes) : (cur.lesson.con && cur.lesson.con.nodes);
   return nodes || [];
 }
@@ -1183,8 +1250,9 @@ function speakLocal(n, tok, advance) {
   synth.speak(utter);
 }
 function highlight(src, idx) {
-  document.querySelectorAll('.node.speaking').forEach(e => e.classList.remove('speaking'));
-  document.querySelectorAll(`.node[data-src="${src}"][data-idx="${idx}"]`).forEach(el => {
+  document.querySelectorAll('.node.speaking, .ms-item.speaking').forEach(e => e.classList.remove('speaking'));
+  const sel = src === 'm' ? `.ms-item[data-mi="${idx}"]` : `.node[data-src="${src}"][data-idx="${idx}"]`;
+  document.querySelectorAll(sel).forEach(el => {
     el.classList.add('speaking');
     if (el.offsetParent) el.scrollIntoView({ block: 'center', behavior: 'smooth' });
   });
@@ -1208,8 +1276,13 @@ function togglePlay() {
     else if (synth.paused) { synth.resume(); $('#btn-play').textContent = '⏸ Pause'; }
     else if (synth.speaking) { synth.pause(); $('#btn-play').textContent = '▶ Resume'; }
   } else {
-    const onLp = document.querySelector('.tab[data-ltab="lp"]').classList.contains('active');
-    const src = (onLp && cur.lesson.con) || !cur.lesson.ext ? 'c' : 'x';
+    let src;
+    if ($('#mine-body').style.display !== 'none') src = 'm';        // My Script tab showing
+    else if (!splitView && !isMobile()) src = 'c';                  // focus mode = right pane only
+    else {
+      const onLp = document.querySelector('.tab[data-ltab="lp"]').classList.contains('active');
+      src = (onLp && cur.lesson.con) || !cur.lesson.ext ? 'c' : 'x';
+    }
     startReading(src, spkSrc === src && spkIdx >= 0 ? spkIdx : 0);
   }
 }
@@ -1247,11 +1320,12 @@ document.addEventListener('keydown', e => {
     else if (e.key === 'ArrowLeft') { e.preventDefault(); cardAnswer(false); }
     return;
   }
+  if (!readMode) return;   // teach mode: no accidental read-aloud from keys
   if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
   else if (e.key === 'Escape') stopReading();
   else if (e.key === 'ArrowRight') { e.preventDefault(); skip(1); }
   else if (e.key === 'ArrowLeft') { e.preventDefault(); skip(-1); }
-  else if ((e.key === 'a' || e.key === 'A' || e.key === 'Enter') && speaking && spkIdx >= 0) {
+  else if ((e.key === 'a' || e.key === 'A' || e.key === 'Enter') && speaking && spkIdx >= 0 && spkSrc !== 'm') {
     e.preventDefault();
     toggleSel(spkSrc, spkIdx);
     const sel = getSel();
@@ -1266,6 +1340,20 @@ function toast(msg) {
   const t = $('#toast'); t.textContent = msg; t.classList.add('show');
   clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 1400);
 }
+
+/* ---------- read mode & split view ---------- */
+let readMode = !!store.prefs.read;
+let splitView = store.prefs.split !== false;   // split by default on desktop
+function applyModes() {
+  document.body.classList.toggle('readmode', readMode);
+  document.body.classList.toggle('nosplit', !splitView);
+  $('#tgl-read').classList.toggle('on', readMode);
+  $('#tgl-split').classList.toggle('on', splitView);
+  $('#tgl-split').textContent = splitView ? '⿲ Split' : '▭ Focus';
+  if (!readMode) stopReading();
+}
+$('#tgl-read').onclick = () => { readMode = !readMode; store.prefs.read = readMode; save(); applyModes(); };
+$('#tgl-split').onclick = () => { splitView = !splitView; store.prefs.split = splitView; save(); applyModes(); };
 
 /* ---------- mobile chrome ---------- */
 const mq = window.matchMedia('(max-width: 820px)');
@@ -1318,6 +1406,7 @@ function unlockUI() {
 /* ---------- init ---------- */
 $('#rate').value = store.prefs.rate; $('#rate-val').textContent = store.prefs.rate.toFixed(1) + 'x';
 $('#fsize').value = store.prefs.fs; document.documentElement.style.setProperty('--fs', store.prefs.fs + 'px');
+applyModes();
 renderNav('');
 if (store.last) {
   for (const a of D.aoes) { const l = a.lessons.find(l => l.id === store.last); if (l) { loadLesson(a, l); break; } }
