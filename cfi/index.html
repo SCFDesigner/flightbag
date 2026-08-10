@@ -390,6 +390,7 @@ function getSel() {
 function lessonScript() {
   const sc = window.CFI_SCRIPTS && cur && window.CFI_SCRIPTS[cur.lesson.id];
   if (sc && !sc._marked) {
+    sc.nodes = splitBulletRuns(sc.nodes);
     markScriptTopics(sc.nodes);
     mapScriptImages(sc, cur.lesson.con);
     sc._marked = true;
@@ -467,6 +468,25 @@ function markTopics(nodes) {
     const nxt = nodes[i + 1];
     nodes[i]._k = !!(nxt && nxt.l > Math.max(0, nodes[i].l));
   }
+}
+/* A long middot-joined run (common-error lists, mostly) is a paragraph, not a
+   talking point. Break it into one bullet per item so it is readable on a phone
+   and speakable line by line. */
+function splitBulletRuns(nodes) {
+  const out = [];
+  nodes.forEach(n => {
+    const parts = n.t.split(' · ').map(s => s.trim()).filter(Boolean);
+    if (n.t.length > 200 && parts.length >= 3 && !n.k) {
+      parts.forEach((p, i) => out.push(Object.assign({}, n, {
+        t: p.charAt(0).toUpperCase() + p.slice(1),
+        img: i === 0 ? n.img : undefined,
+        b: n.b && i === 0
+      })));
+    } else {
+      out.push(n);
+    }
+  });
+  return out;
 }
 function markScriptTopics(nodes) {
   // authored scripts: structure is explicit, so topic = a bold level-1 line.
