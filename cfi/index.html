@@ -183,6 +183,13 @@ body:not(.readmode) .nb.play, body:not(.readmode) .mb.play { display:none !impor
 body.nosplit #pane-ext { display:none; }
 @media (max-width: 820px) { #tgl-split { display:none; } }
 
+/* ===== reference links ===== */
+a.reflink { color:var(--orange); text-decoration:none; border-bottom:1px dotted currentColor; }
+a.reflink:hover { color:#ffc84d; border-bottom-style:solid; }
+.ms-link { padding:3px 0 3px 26px; font-size:.92em; }
+.ms-link a.reflink { border-bottom:none; }
+.ms-link a.reflink::before { content:'🔗 '; font-size:.85em; }
+
 /* ===== my-script images & figures ===== */
 .ms-item img { max-width:92%; display:block; margin:8px 0; border-radius:8px; border:1px solid var(--bdr); }
 .ms-figs img { max-width:92%; display:block; margin:10px 0; border-radius:8px; border:1px solid var(--bdr); }
@@ -267,8 +274,8 @@ body.nosplit #pane-ext { display:none; }
     <div id="nav-list"></div>
     <div id="nav-settings">
       <div class="ns-label">Settings</div>
-      <button class="tbtn" id="btn-copy">Copy My Script</button>
-      <button class="tbtn" id="btn-dl">Export My Script (.md)</button>
+      <button class="tbtn" id="btn-copy">Copy My Lesson Plan</button>
+      <button class="tbtn" id="btn-dl">Export My Lesson Plan (.md)</button>
       <div class="tctl">Aa <input type="range" id="fsize" min="12" max="20" step="1" value="15"></div>
     </div>
   </nav>
@@ -305,7 +312,7 @@ body.nosplit #pane-ext { display:none; }
         <div class="pane-head">
           <div class="tabs">
             <div class="tab active" data-tab="con">Lesson Plan</div>
-            <div class="tab" data-tab="mine">My Script <span class="mcount" id="mine-count"></span></div>
+            <div class="tab" data-tab="mine">My Lesson Plan <span class="mcount" id="mine-count"></span></div>
             <div class="tab" data-tab="flow">Flow</div>
             <div class="tab" data-tab="cards">Cards</div>
           </div>
@@ -483,9 +490,9 @@ function nodeEl(n, src, idx) {
   div.dataset.src = src; div.dataset.idx = idx;
   const indent = n.l > 0 ? n.l : 0;
   div.style.marginLeft = (indent * 20) + 'px';
-  let inner = `<span class="nbtns"><span class="nb add" title="Add to My Script">+</span><span class="nb play" title="Read from here">▸</span></span>`;
+  let inner = `<span class="nbtns"><span class="nb add" title="Add to My Lesson Plan">+</span><span class="nb play" title="Read from here">▸</span></span>`;
   if (indent > 0 && !n.b && !SELF_MARKED.test(n.t)) inner += `<span class="bullet">•</span>`;
-  inner += escapeHtml(n.t);
+  inner += linkify(escapeHtml(n.t), n.lk);
   if (n.acs) n.acs.forEach(c => inner += `<span class="acs">${c}</span>`);
   div.innerHTML = inner;
   if (n.img) n.img.forEach(p => { const im = document.createElement('img'); im.src = p; im.loading = 'lazy'; div.appendChild(im); });
@@ -495,6 +502,37 @@ function nodeEl(n, src, idx) {
   return div;
 }
 function escapeHtml(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+/* ---------- reference links ----------
+   Links live on the source nodes (n.lk) and as a per-lesson list. Inside My
+   Lesson Plan the source nodes aren't shown, so any reference named in the
+   script text ("AC 91-73", "AIM 4-3-19") is matched against the lesson's link
+   list and turned into a link automatically. */
+function lessonLinks() {
+  if (!cur) return [];
+  const src = cur.lesson.con || cur.lesson.ext;
+  return (src && src.links) || [];
+}
+function rxEscape(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+function linkify(escaped, pairs) {
+  if (!pairs || !pairs.length) return escaped;
+  // longest anchors first so "AIM 4-3-19" wins over "AIM"
+  const seen = new Set();
+  [...pairs].sort((a, b) => b[0].length - a[0].length).forEach(([anchor, url]) => {
+    if (anchor.length < 3 || seen.has(anchor.toLowerCase())) return;
+    seen.add(anchor.toLowerCase());
+    const esc = escapeHtml(anchor);
+    // skip if this stretch is already inside a tag we added
+    const re = new RegExp('(?![^<]*>)' + rxEscape(esc), 'g');
+    let replaced = false;
+    escaped = escaped.replace(re, m => {
+      if (replaced) return m;      // one link per anchor per line
+      replaced = true;
+      return `<a class="reflink" href="${url}" target="_blank" rel="noopener">${m}</a>`;
+    });
+  });
+  return escaped;
+}
 
 const ROMAN = ['','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV','XVI'];
 function aoeLabel(aoe) {
@@ -628,7 +666,7 @@ function msItem(n, src, i, opts) {
   div.className = 'ms-item' + nodeCls(n) + (opts.empty ? ' skel-empty' : '') + (edited ? ' edited' : '');
   div.style.marginLeft = (Math.max(0, n.l) * 18) + 'px';
   let inner = (n.l > 0 && !n.b && !n._k && !SELF_MARKED.test(text) ? '<span class="bullet">•</span>' : '') +
-              `<span class="ms-text">${escapeHtml(text)}</span><span class="mctl">` +
+              `<span class="ms-text">${linkify(escapeHtml(text), n.lk || lessonLinks())}</span><span class="mctl">` +
               `<span class="mb play" title="Read from here">▸</span>` +
               `<span class="mb edit" title="Edit text">✎</span>` +
               `<span class="mb nadd" title="Add your own line below">+</span>` +
@@ -767,6 +805,22 @@ function renderMine() {
   addBtn.onclick = () => addNote('end', 0);
   mb.appendChild(addBtn);
 
+  // every reference link in this lesson, one click away
+  const links = lessonLinks();
+  if (links.length) {
+    const h = document.createElement('div'); h.className = 'ms-src'; h.textContent = 'References & links';
+    mb.appendChild(h);
+    const seen = new Set();
+    links.forEach(([anchor, url]) => {
+      if (seen.has(url)) return;
+      seen.add(url);
+      const d = document.createElement('div');
+      d.className = 'ms-link';
+      d.innerHTML = `<a class="reflink" href="${url}" target="_blank" rel="noopener">${escapeHtml(anchor)}</a>`;
+      mb.appendChild(d);
+    });
+  }
+
   // any lesson-plan figures that couldn't be anchored inline go at the end
   const sc = lessonScript();
   if (sc && sc._leftoverImgs && sc._leftoverImgs.length) {
@@ -796,7 +850,7 @@ function myScriptText() {
               : (skelSrc === 'x' ? cur.lesson.ext.nodes : cur.lesson.con.nodes);
   const selSet = script ? new Set(nodes.map((_, i) => i).filter(i => !sel.pr.includes(i)))
                         : new Set(skelSrc === 'x' ? sel.x : sel.c);
-  let out = `# ${cur.lesson.title}\n\n_${aoeLabel(cur.aoe)} — My Script_\n\n`;
+  let out = `# ${cur.lesson.title}\n\n_${aoeLabel(cur.aoe)} — My Lesson Plan_\n\n`;
   const txt = (src, i, n) => (sel.ed && sel.ed[src + ':' + i] != null) ? sel.ed[src + ':' + i] : n.t;
   const notesFor = key => (sel.notes || []).filter(nt => nt.a === key)
     .map(nt => '  '.repeat(Math.max(0, nt.l || 0)) + '- ' + nt.t + '  *(mine)*\n').join('');
@@ -832,16 +886,16 @@ function myScriptText() {
 }
 $('#btn-copy').onclick = () => {
   const t = myScriptText();
-  if (!t.trim()) return toast('My Script is empty');
+  if (!t.trim()) return toast('My Lesson Plan is empty');
   navigator.clipboard.writeText(t).then(() => toast('Copied to clipboard'));
 };
 $('#btn-dl').onclick = () => {
   if (!cur) return;
   const t = myScriptText();
-  if (!t.trim()) return toast('My Script is empty');
+  if (!t.trim()) return toast('My Lesson Plan is empty');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([t], { type: 'text/markdown' }));
-  a.download = cur.lesson.title.replace(/[^\w.& -]+/g, '') + ' - My Script.md';
+  a.download = cur.lesson.title.replace(/[^\w.& -]+/g, '') + ' - My Lesson Plan.md';
   a.click();
   toast('Exported');
 };
@@ -1371,7 +1425,7 @@ document.addEventListener('keydown', e => {
     toggleSel(spkSrc, spkIdx);
     const sel = getSel();
     const on = (spkSrc === 'x' ? sel.x : sel.c).includes(spkIdx);
-    toast(on ? '✓ Added to My Script' : 'Removed from My Script');
+    toast(on ? '✓ Added to My Lesson Plan' : 'Removed from My Lesson Plan');
   }
 });
 

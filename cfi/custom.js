@@ -86,7 +86,7 @@
     A('E — Esteem'),
     P('Internal (self-esteem): confidence, independence, achievement, competence.'),
     P('External (reputation): status, recognition, appreciation, respect of associates.'),
-    P('High esteem → confident, independent, motivated. Low esteem → insecure, quicker to quit on a problem.', 3),
+    P('High esteem · confident, independent, motivated. Low esteem · insecure, quicker to quit on a problem.', 3),
     P('The learner who apologizes after every single landing is telling me their esteem needs work before their technique does.', 3),
     B('If esteem is not met they are not ready to learn — build them up and push them out of the comfort zone.', 3),
     A('C — Cognitive & Aesthetic (added years after the original theory)'),
@@ -222,7 +222,7 @@
     P('Practice instructing to build the skill; play ATC for the learner so the radios stop being a threat and their confidence builds before the real thing.'),
 
     S('Conclusion'),
-    P('Brief review: foundations → motivation → PSBECS → DR DR F CPR → learner struggles → SSR / COIL / LIQIR.'),
+    P('Brief review: foundations · motivation · PSBECS · DR DR F CPR · learner struggles · SSR / COIL / LIQIR.'),
     P('Tie back to why: every one of these is a tool for spotting what is blocking the learner and removing it.'),
   ]};
 
@@ -321,14 +321,14 @@
 
     H('Domains of Learning — CAP — FI.I.B.K6'),
     A('C — Cognitive Domain (knowledge) — RUAC'),
-    P('Rote → Understanding → Application → Correlation.'),
+    P('Rote · Understanding · Application · Correlation.'),
     P('Rote: recites V-speeds. Understanding: knows why. Application: uses them in the flare. Correlation: connects gusty winds to adding half the gust factor without being told.', 3),
     A('A — Affective Domain (attitudes/feelings) — ARVOI'),
-    P('Awareness → Response → Value → Organize → Integrate.'),
+    P('Awareness · Response · Value · Organize · Integrate.'),
     P('The safety-culture domain: from hearing about checklist discipline to being someone who would never skip one.', 3),
     A('P — Psychomotor Domain (physical skills) — OIPH'),
-    P('Observe → Imitate → Practice → Habituate.'),
-    P('Watch me land → follow me through → your landings with my coaching → landings are automatic.', 3),
+    P('Observe · Imitate · Practice · Habituate.'),
+    P('Watch me land · follow me through · your landings with my coaching · landings are automatic.', 3),
 
     H('Scenario-Based Training — CTE — FI.I.B.K8'),
     P('Real-world scenarios that force the learner to problem-solve — SBT is how we build HOTS/ADM.'),
@@ -381,7 +381,7 @@
     P('Intended one thing, did another — pulls the mixture instead of the throttle. Signals a lack of practice.'),
     A('M — Mistake'),
     P('Did exactly what they intended, and it was wrong — dumps full flaps abeam the numbers. Signals a gap in knowledge.'),
-    B('Slip → more practice. Mistake → more teaching. Diagnose which one it was before you fix it.'),
+    B('Slip · more practice. Mistake · more teaching. Diagnose which one it was before you fix it.'),
     H('Reducing Errors — CULT DR'),
     P('C — Checking for errors: scan the instruments.'),
     P('U — Using tools: heading bug, altitude bug, timers, checklists, writing things down.'),
@@ -427,7 +427,7 @@
     B('Action: anticipate negative transfer from driving, gaming, and other aircraft — and brief it before it bites.'),
 
     S('Conclusion'),
-    P('Review: A MAP → RIC → G-STEP → MUA → REEPIR → CAP (RUAC/ARVOI/OIPH) → CTE → CAAR → DBR → SM → CULT DR → FIRRS → MALAMP → transfer.'),
+    P('Review: A MAP · RIC · G-STEP · MUA · REEPIR · CAP (RUAC/ARVOI/OIPH) · CTE · CAAR · DBR · SM · CULT DR · FIRRS · MALAMP · transfer.'),
     P('Every acronym here is a lever: readiness before the lesson, primacy during it, meaningful repetition after it.'),
   ]};
 
@@ -531,7 +531,7 @@
     A('Cooperative / Group Learning'),
     P('Small groups organized to maximize learning from each other.'),
     A('Demonstration–Performance'),
-    P('Explanation → Demonstration → Learner performance with supervision → Evaluation. The backbone of flight training.'),
+    P('Explanation · Demonstration · Learner performance with supervision · Evaluation. The backbone of flight training.'),
     A('Drill and Practice'),
     P('Repetition builds retention and skill — connects straight to the Law of Exercise.'),
 
@@ -539,7 +539,7 @@
     A('E-Learning'),
     P('Self-paced learning (Sporty\'s, King, sims, role-playing, even games).'),
     P('Pros: time-flexible, cost-effective, easily updated. Cons: limited feedback, cannot ask questions.', 3),
-    P('Aviation Training Devices: BATD → AATD → FTD → full flight simulators.', 3),
+    P('Aviation Training Devices: BATD · AATD · FTD · full flight simulators.', 3),
     A('Effective instructional aids'),
     P('Cover the key points, straightforward and factual, relatively simple.'),
     P('Reasons: assist the instructor, clarify relationships, help learners connect concepts.', 3),
@@ -549,7 +549,7 @@
     S('Advanced Instructional Methods'),
     H('Problem-Based Instruction & HOTS — FI.I.C.K9'),
     P('Lessons built on real-life situations with no single right answer — this is how you develop higher-order thinking (HOTS).'),
-    P('Set up the problem → determine learning outcomes → solve it → reflect on the process → consider other solutions through guided discovery → re-evaluate.'),
+    P('Set up the problem · determine learning outcomes · solve it · reflect on the process · consider other solutions through guided discovery · re-evaluate.'),
     P('Scenario-Based Training is the PBL form we use most in flight training.', 3),
     H('Integrated Flight Instruction — FI.I.C.K8'),
     P('Every maneuver taught by BOTH outside visual references and instrument indications, from the first time it is introduced.'),
@@ -558,7 +558,7 @@
     B('Build judgment with PBL; build habits with integrated flight instruction.'),
 
     S('Conclusion'),
-    P('Review: PPAR → SPAM → course/syllabus/lesson plan → DCC objectives → IDC (AMO intro) → FIT / ORDRR delivery → aids → PBL + IFI.'),
+    P('Review: PPAR · SPAM · course/syllabus/lesson plan · DCC objectives · IDC (AMO intro) · FIT / ORDRR delivery · aids · PBL + IFI.'),
     P('A lesson plan is not paperwork — it is the difference between teaching and just talking.'),
   ]};
 
@@ -613,14 +613,14 @@
     P('R — Reflect: places meaning on the experience — insight comes from here.'),
     P('R — Redirect: relates the lesson to other experiences and future lessons.'),
     A('Maneuver / Procedure Grades'),
-    P('Describe → Explain → Practice → Perform.'),
+    P('Describe · Explain · Practice · Perform.'),
     P('Describe: knows the elements, needs help executing. Explain: understands concepts, still needs help. Practice: plans and executes, assistance corrects deviations. Perform: identifies and corrects their own errors — no instructor needed.', 3),
     A('Assessing Risk Management Skills'),
-    P('Explain → Practice → Manage/Decide.'),
+    P('Explain · Practice · Manage/Decide.'),
     P('Manage/Decide = gathers the important data, identifies courses of action, evaluates the risk in each, and makes the appropriate decision — without help.', 3),
 
     H('Choosing & Structuring Assessment — FI.I.D.K4'),
-    P('Determine level-of-learning objectives → list indicators of desired behavior → establish criterion-based objectives → develop criterion-referenced items.'),
+    P('Determine level-of-learning objectives · list indicators of desired behavior · establish criterion-based objectives · develop criterion-referenced items.'),
     A('Types of Assessments — WAC'),
     P('W — Written: MC, matching, true/false.'),
     P('A — Authentic: real-world tasks (checkrides).'),
@@ -642,7 +642,7 @@
     A('Questions to avoid — TOP BIT'),
     P('T — Toss-up (two viable options, yes/no) · O — Oversize (too broad) · P — Puzzling (too many parts) · B — Bewildering (hard to even read) · I — Irrelevant · T — Trick questions.'),
     A('Answering learner questions'),
-    P('Understand the question → give a direct answer → verify they are satisfied.'),
+    P('Understand the question · give a direct answer · verify they are satisfied.'),
     B('Action: if you do not know — "great question, let me find out and get back to you." Never bluff.', 3),
 
     S('Assessing Piloting Ability'),
@@ -658,7 +658,7 @@
     B('A serious instructor responsibility: your signature says this pilot is safe and competent — they resemble you and your training.'),
 
     S('Conclusion'),
-    P('Review: FAST COCO → V CROUD → authentic (RRRR, Describe/Explain/Practice/Perform) → WAC → critique types and ground rules → CAB CAP vs TOP BIT → assessing ability through solo and recommendation.'),
+    P('Review: FAST COCO · V CROUD · authentic (RRRR, Describe/Explain/Practice/Perform) · WAC · critique types and ground rules · CAB CAP vs TOP BIT · assessing ability through solo and recommendation.'),
     P('Assessment is not the report card at the end — it is the steering wheel of the whole course.'),
   ]};
 
@@ -744,7 +744,7 @@
     P('Make safety the number one priority · Develop and exercise good judgment · Recognize and manage risk · Be accountable for your actions · Act with responsibility and courtesy · Adhere to prudent operating practices · Adhere to applicable laws and regulations.'),
 
     S('Conclusion'),
-    P('Review: responsibilities (MACKBAG for frustration) → flight-instructor duties (skill set, endorsements, see-and-avoid, currency vs proficiency) → SAD PP professionalism → development → FIMCC ethics.'),
+    P('Review: responsibilities (MACKBAG for frustration) · flight-instructor duties (skill set, endorsements, see-and-avoid, currency vs proficiency) · SAD PP professionalism · development · FIMCC ethics.'),
     P('The through-line: your students become the kind of pilot you model, not the kind you describe.'),
   ]};
 
@@ -844,7 +844,7 @@
     P('Workload management: plan, prioritize, and sequence to stay ahead; prepare for high-workload phases BEFORE they arrive; recognize the pile-up (busy airspace, strong tailwind, tasks stacking).', 3),
 
     S('Conclusion'),
-    P('Review: principles → Identify (PAVE) / Assess (matrix) / Mitigate (TEAM) → 5 P\'s and FRAT → teach RM from day one and by phase → limit-of-error while instructing → DECIDE, SA obstacles, MIRIA antidotes, SRM/CRM.'),
+    P('Review: principles · Identify (PAVE) / Assess (matrix) / Mitigate (TEAM) · 5 P\'s and FRAT · teach RM from day one and by phase · limit-of-error while instructing · DECIDE, SA obstacles, MIRIA antidotes, SRM/CRM.'),
     P('The instructor\'s job: teach, practice, model, and coach risk management until the learner does it without being asked.'),
   ]};
 
@@ -951,15 +951,15 @@
     S('Illusions & Substances'),
     H('Landing / Optical Illusions — AI.II.A.K1k'),
     A('Runway width'),
-    P('Narrow runway → you feel high → you fly a LOW approach. Wide runway → the opposite.'),
+    P('Narrow runway · you feel high · you fly a LOW approach. Wide runway · the opposite.'),
     A('Runway & terrain slope'),
-    P('Upslope → you feel high → low approach. Downslope → the opposite.'),
+    P('Upslope · you feel high · low approach. Downslope · the opposite.'),
     A('Featureless terrain'),
-    P('Water or darkness with no ground features → you feel high → low approach ("black-hole approach").'),
+    P('Water or darkness with no ground features · you feel high · low approach ("black-hole approach").'),
     A('Atmospheric'),
-    P('Rain on the windscreen → feel high. Haze → feel farther away. Fog penetration → an illusion of pitching up, so pilots steepen the approach.'),
+    P('Rain on the windscreen · feel high. Haze · feel farther away. Fog penetration · an illusion of pitching up, so pilots steepen the approach.'),
     A('Ground lighting'),
-    P('A straight road or train at night imitates a runway; brilliant runway lighting feels closer than it is → high approach.'),
+    P('A straight road or train at night imitates a runway; brilliant runway lighting feels closer than it is · high approach.'),
     B('Prevention: anticipate them on every approach and back yourself up with the glide slope or VASI/PAPI.'),
     H('Nitrogen & Scuba Diving — AI.II.A.K1l'),
     P('Diving loads the blood with dissolved nitrogen; climbing too soon brings it out of solution — decompression sickness, severe pain, worst-case death.'),
@@ -984,7 +984,7 @@
     P('Workload management: plan, prioritize, sequence — stay ahead of high-workload phases.'),
 
     S('Conclusion'),
-    P('Review: four H\'s of hypoxia → hyperventilation → ears → spatial disorientation → motion sickness → CO → fatigue/stress/dehydration → COLD → landing illusions → scuba and the 8-hour rule → IMSAFE.'),
+    P('Review: four H\'s of hypoxia · hyperventilation · ears · spatial disorientation · motion sickness · CO · fatigue/stress/dehydration · COLD · landing illusions · scuba and the 8-hour rule · IMSAFE.'),
     P('The pattern: almost every one of these is caught on the ground by an honest IMSAFE — that is the lesson.'),
   ]};
 
@@ -1059,27 +1059,27 @@
     H('Vestibular & Visual Illusions — ICEFLAGS — AI.II.B.K2'),
     P('The inner-ear illusions from II.A, cataloged — remember ICEFLAGS:'),
     A('I — Inversion'),
-    P('Abrupt level-off from a climb → feels like tumbling backward → pilot shoves the nose down.'),
+    P('Abrupt level-off from a climb · feels like tumbling backward · pilot shoves the nose down.'),
     A('C — Coriolis'),
-    P('Abrupt head movement during a prolonged turn → sensation of rotating on a different axis → dangerous attitude chasing a phantom.'),
+    P('Abrupt head movement during a prolonged turn · sensation of rotating on a different axis · dangerous attitude chasing a phantom.'),
     B('The head-down-to-grab-a-pen illusion — brief your passengers and keep your head still in IMC.', 3),
     A('E — Elevator'),
-    P('An updraft\'s vertical acceleration feels like a climb → pilot pushes over (downdraft = the reverse).'),
+    P('An updraft\'s vertical acceleration feels like a climb · pilot pushes over (downdraft = the reverse).'),
     A('F — False Horizon'),
     P('Sloping cloud decks, obscured horizons, or lines of lights get mistaken for level — the pilot aligns with the wrong "horizon."'),
     A('L — The Leans'),
-    P('A bank entered too slowly to feel, then corrected abruptly → feels like banking the OTHER way → pilot rolls back into the original turn.'),
+    P('A bank entered too slowly to feel, then corrected abruptly · feels like banking the OTHER way · pilot rolls back into the original turn.'),
     A('A — Autokinesis'),
     P('Stare at a single static light in the dark and it appears to move — chase it and lose control.'),
     A('G — Graveyard Spin & Spiral'),
-    P('Spin recovery stops stimulating the inner ear → feels like spinning the other way → pilot re-enters the original spin.'),
-    P('Spiral: a prolonged turn feels like wings-level descent → pilot pulls, tightening the spiral and loading the wings.', 3),
+    P('Spin recovery stops stimulating the inner ear · feels like spinning the other way · pilot re-enters the original spin.'),
+    P('Spiral: a prolonged turn feels like wings-level descent · pilot pulls, tightening the spiral and loading the wings.', 3),
     A('S — Somatogravic'),
-    P('Rapid acceleration feels like pitching up → pilot pushes into a dive (deceleration = the nose-up/stall version).'),
+    P('Rapid acceleration feels like pitching up · pilot pushes into a dive (deceleration = the nose-up/stall version).'),
     B('Prevention for all of them: reference the flight instruments and believe them over your body.'),
 
     S('Conclusion'),
-    P('Review: see-and-avoid duty → fovea vs peripheral, 10°-per-second blocks → clearing procedures → 12.5 seconds and no-relative-motion → lights, ADS-B, flight following, safety pilot → vision killers → ICEFLAGS.'),
+    P('Review: see-and-avoid duty · fovea vs peripheral, 10°-per-second blocks · clearing procedures · 12.5 seconds and no-relative-motion · lights, ADS-B, flight following, safety pilot · vision killers · ICEFLAGS.'),
     P('Teach it as habit, not knowledge: eyes outside, clearing turns every maneuver, instruments over inner ear.'),
   ]};
 
@@ -1189,7 +1189,7 @@
     P('Night + low visibility + lost SA on the field, with a 757 departing through the fog. Walk the NTSB animation with the learner and pull out the mitigations: stop, ask, progressive taxi, never assume.'),
 
     S('Conclusion'),
-    P('Review: what an incursion is → readbacks (enter/cross/hold short) → plan-brief-review → sterile flight deck → markings, signs, lights → hold lines → night, low vis, lost SA → United 1448.'),
+    P('Review: what an incursion is · readbacks (enter/cross/hold short) · plan-brief-review · sterile flight deck · markings, signs, lights · hold lines · night, low vis, lost SA · United 1448.'),
     P('One habit covers most of it: never cross a hold line without saying the clearance out loud.'),
   ]};
 
