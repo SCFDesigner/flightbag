@@ -1195,7 +1195,7 @@
 
 /* ============================================================
    II.D — Principles of Flight (ACS Info)
-   Spine: 4 Forces -> Airfoil/AOA/Stalls -> Load Factor & Vg -> Stability -> Turning Tendencies -> Wingtip Vortices/Ground Effect -> RM
+   Spine: 4 Forces to Airfoil/AOA/Stalls to Load Factor & Vg to Stability to Turning Tendencies to Wingtip Vortices/Ground Effect to RM
    ============================================================ */
 window.CFI_SCRIPTS['ii-d-principles-of-flight-acs-info-'] = { nodes: [
   S('Introduction'),
@@ -3090,5 +3090,1345 @@ window.CFI_SCRIPTS['vii-d-soft-field-approach-landing'] = { nodes: [
   S('Conclusion'),
   P('Review: objective and runway selection · stabilized approach with an aim point set for extra float · landing on the wings, cushioned touchdown, wheelie rollout · crosswind considerations · common errors · go-around and LAHSO · wind shear, wake turbulence, low-altitude and collision hazards.'),
   P('One habit covers most of it: fly it onto the ground on the wings, and keep the nosewheel off the surface until you\'re sure it\'s under control.'),
+]};
+
+/* ============================================================
+   X.A — Maneuvering During Slow Flight
+   Spine: pitch for airspeed / power for altitude (backside of the power curve)
+   ============================================================ */
+window.CFI_SCRIPTS['x-a-slow-flight'] = { nodes: [
+  S('Introduction'),
+  H('Attention'),
+  P('Slow flight lives on the back side of the power curve where the airplane behaves backwards from what students expect, which is why we as pilots master it deliberately instead of discovering it by accident on short final.'),
+  H('Overview'),
+  P('Two elements of slow flight — flying slow throughout normal ops, and the training maneuver itself'),
+  P('Region of reversed command — pitch for airspeed, power for altitude'),
+  P('Yaw effects & right rudder at high power, low airspeed'),
+  P('Weight & CG effects on stall speed and controllability'),
+  P('Establishing, maintaining, and returning from slow flight'),
+  P('Common errors'),
+  P('RM — inadvertent slow flight, stall warning, environmental & collision hazards'),
+  H('What'),
+  P('Flight at any speed below cruise — but for the maneuver, flight at the speed where any further increase in AOA or load factor, or any power reduction, triggers the stall warning.'),
+  H('Why'),
+  B('Give the tools to recognize and recover from inadvertent slow flight before it becomes a stall — most stall/spin accidents start as slow flight nobody meant to be in.'),
+
+  S('How:'),
+  H('Slow Flight Aerodynamics — AI.X.A.K2'),
+  P('Airspeed and lift are linked through AOA — the slower the airplane, the higher the AOA required to hold altitude, and the closer it sits to critical AOA.'),
+
+  H('Region of Normal & Reversed Command'),
+  P('Region of Normal Command: above L/DMAX, higher speed needs higher power, and vice versa.'),
+  P('Region of Reversed Command: below L/DMAX, slower speed needs MORE power, not less — this backside-of-the-curve behavior is where slow flight and stalls both live.'),
+
+  H('Yaw Effects — Right Rudder — AI.X.A.R3'),
+  A('Torque reaction'),
+  P('The engine and prop rotate right; Newton\'s 3rd law rolls/turns the airplane left.'),
+  A('Spiraling slipstream'),
+  P('Corkscrewing prop wash strikes the left side of the vertical stabilizer and yaws the nose left — strongest at high prop speed, low forward speed.'),
+  A('P-factor (asymmetric loading)'),
+  P('At high AOA the descending blade bites more air than the ascending blade, walking the center of thrust right of the disc and yawing the nose left.'),
+  A('Gyroscopic precession'),
+  P('A minor factor in most tricycle-gear trainers, but present — pitch changes yaw, yaw changes pitch.'),
+  B('Big picture: a right turn needs even more right rudder; a left turn needs less right rudder — but still some.'),
+
+  H('Maneuvering Loads, Weight & CG'),
+  P('Load factor climbs in any banked turn and climbs fast past 45° of bank — use gentle, coordinated, shallow turns in slow flight to stay well clear of a stall.'),
+  P('A heavier airplane needs more lift and more AOA to hold altitude, but the added weight also adds stability.'),
+  A('Forward-loaded aircraft'),
+  P('Heavier and slower feeling — the tail must produce a greater down load, adding wing loading and raising the stall speed, but the longer arm from elevator to CG makes it more controllable in a stall or spin.'),
+  A('Aft-loaded aircraft'),
+  P('Lighter and faster feeling, lower stall speed, but less controllable in a stall or spin as the CG moves aft.'),
+
+  H('Slow Flight & the Senses — RM: Stall Warning — AI.X.A.R2'),
+  P('Sight: nose high, more sky than usual, few ground references. Sound: less engine and airflow noise, then the horn. Feel: controls going soft, more right rudder needed, buffet.'),
+  P('Buffet usually comes before the horn — but not always (a cross-controlled stall can skip both). By 23.207 the horn must sound at least 5 knots above stall speed and hold until the stall breaks; reference the POH, since uncoordinated flight can mask the indicator.'),
+
+  S('How: Performing Slow Flight — AI.X.A.K1'),
+  H('Pre-Maneuver'),
+  P('Pre-maneuver checklist, clear the area, and pick an altitude no lower than 1,500\' AGL. Configuration is flexible — the "dirtier" the setup, the slower you can go.'),
+  H('Establishing Slow Flight'),
+  P('Gently reduce throttle, holding altitude with back pressure as airspeed bleeds off and trimming as you go; add flaps as speed limits allow.'),
+  P('Approaching the target speed, gently add power to hold altitude and adjust pitch for airspeed — right rudder comes in with the power.'),
+  H('Maneuvering during Slow Flight'),
+  P('Pitch for airspeed in small 1-2° changes, power for altitude, crosscheck 90% outside / 10% inside.'),
+  P('Level turns: shallow bank, coordinated, watch for overbanking as it slows; climbing/descending turns use the same technique with power set for the climb or descent.'),
+  H('Returning to Cruise (very similar to a stall recovery)'),
+  P('Full power, lower the nose to hold altitude and trim, cleaning up flaps as speed builds; approaching cruise speed, reduce power, stay coordinated, and retrim.'),
+
+  S('Common Errors — AI.X.A.K3'),
+  P('Failure to clear the area; inadequate back-pressure as power comes out (altitude loss) or excessive back-pressure (a climb, then a rapid speed loss).'),
+  P('Insufficient right rudder for left yaw; fixating on instruments; not anticipating AOA changes with flaps; poor power management; poor divided attention; failing to trim; ignoring a stall warning.'),
+
+  S('RM: Hazards'),
+  H('Environmental Elements — AI.X.A.R4'),
+  P('Turbulence raises the stall speed and, below L/DMAX, creates real speed instability — a speed loss increases drag, which drops speed further.'),
+  P('Microbursts can bring winds over 100 knots and downdrafts to 6,000 fpm — resist the instinct to pitch hard to fight the sink, which can stall the airplane and make everything worse; avoid convective weather in the first place.'),
+  P('High density altitude thins the air and quietly steals power, thrust, and lift all at once.'),
+  H('Collision Hazards — AI.X.A.R5'),
+  P('Clearing turns before the maneuver and before every turn; short, 10° scan movements; lights on; know FAR 91.113 right-of-way cold.'),
+  H('Distractions, SA & Task Management — AI.X.A.R6'),
+  B('Action: if a distraction pulls attention away mid-maneuver, have the learner say so out loud, fix it, and get back ahead of the airplane — Aviate, Navigate, Communicate.'),
+  P('An upset from disorientation gets the same answer every time: push to unload, roll to the nearest horizon, adjust thrust, stabilize.'),
+  P('When task-saturated, attack the closest alligator — handle the most pressing problem first and work down the list.'),
+
+  S('Conclusion'),
+  P('Review: pitch for airspeed / power for altitude · right rudder · weight & CG effects · establish / maintain / return · common errors · stall warning · environmental & collision hazards.'),
+  P('The whole maneuver is really one habit: recognize the backside of the power curve early, and control it with pitch and power together, not either one alone.'),
+]};
+
+/* ============================================================
+   X.B — Demonstration of Flight Characteristics
+   Spine: a stall is an AOA event, not an airspeed event — proven at both VS1 (clean) and VS0 (landing config)
+   ============================================================ */
+window.CFI_SCRIPTS['x-b-demo-of-flight-characteristics'] = { nodes: [
+  S('Introduction'),
+  H('Attention'),
+  P('A stall has nothing to do with a specific number on the airspeed indicator, which is why we as pilots demonstrate it happening at cruise speed and in a turn, not just slow and quiet in the pattern.'),
+  H('Overview'),
+  P('Critical AOA & CLMAX — how a stall actually happens'),
+  P('More than one way to exceed critical AOA — low speed, high speed, turns'),
+  P('Airspeeds — white/green/yellow arcs, VNE, VX/VY/VA/best glide/VREF/VLO/VLE'),
+  P('Region of reversed command control inputs by phase of flight'),
+  P('Clean configuration demo to VS1'),
+  P('Landing configuration demo to VS0'),
+  P('Common errors'),
+  H('What'),
+  P('Demonstrating that the airplane can be stalled at any airspeed, attitude, or power setting, and building the recognition and recovery reflex at both edges of the envelope — clean and configured for landing.'),
+  H('Why'),
+  B('A learner who only associates "stall" with slow, nose-high, and quiet will not recognize one entered from a dive or a steep turn.'),
+
+  S('How:'),
+  H('Stall Aerodynamics — Critical AOA & CLMAX — AI.X.B.K4'),
+  P('A stall is airflow separation past the critical angle of attack — typically 15-20° in GA aircraft — the point of CLMAX, the maximum coefficient of lift. Any AOA beyond it and lift drops off rapidly.'),
+  A('Wing design & stall progression'),
+  P('Most GA wings are twisted or fitted with stall strips so the root stalls before the tips, keeping aileron authority into the stall.'),
+
+  H('More Than One Way to Exceed Critical AOA'),
+  P('Low speed: AOA climbs to hold altitude until it exceeds critical.'),
+  P('High speed: an abrupt pull-up in a dive spikes AOA from low to critical while the flight path barely changes — the airplane reaches critical AOA at a speed well above its published stall speed.'),
+  P('Turns: AOA must increase to hold altitude in a bank, and enough bank stalls the wing regardless of airspeed.'),
+
+  H('Region of Reversed Command & Minimum Power Required — AI.X.B.K3'),
+  P('Below L/DMAX, slower requires MORE power, not less — the backside of the power curve, where common sense about pitch and power stops applying.'),
+
+  H('Airspeeds to Know — AI.X.B.K7'),
+  A('White arc — flap operating range'),
+  P('Bottom: VS0, the power-off stall speed at max landing weight, landing configuration. Top: VFE, max flap-extended speed.'),
+  A('Green arc — normal operating range'),
+  P('Bottom: VS1, the power-off stall speed at max takeoff weight, clean. Top: VNO, max structural cruising speed — beyond it, smooth air only (yellow arc), and never past VNE, the red line.'),
+  A('Other speeds'),
+  P('VX (best angle), VY (best rate), VA (design maneuvering — the max speed for full control deflection without structural damage), best glide, VREF (about 1.3 VS0), VLO/VLE (gear operating/extended speeds).'),
+  B('These aren\'t arbitrary numbers — they\'re the safety margins the rest of this lesson lives inside. Reference the POH; don\'t carry one airplane\'s numbers into another.'),
+
+  H('Configuration Changes — Flaps & Gear — AI.X.B.K6'),
+  P('Flaps add camber and AOA and lower the stall speed, but demand reduced pitch and added power to hold altitude and airspeed. Gear adds drag and costs climb performance — the worst combination is slow flight with the gear down.'),
+
+  H('RM: Critically Slow Airspeeds — Region of Reversed Command — AI.X.B.R3'),
+  B('Precise aircraft control is required at critically slow airspeeds — common sense does not work on the backside of the power curve: pitch for airspeed, power for altitude, high power, sluggish controls, heavy right rudder, and a strong overbanking tendency.'),
+  H('RM: Stall Indications & Unacknowledged Warnings — AI.X.B.R5/R6'),
+  P('Decreasing noise, sluggish controls, buffet before the horn. The longer a warning goes unacknowledged — unfamiliarity, distraction, fear — the deeper the stall and the more altitude it costs to recover.'),
+  B('Action: recover at the first indication — push, roll, thrust, stabilize. This is not the moment to figure out what happened.'),
+
+  S('How: Demonstrating Flight Characteristics — AI.X.B.K1,K2'),
+  H('Pre-Maneuver'),
+  P('Pre-maneuver checklist, clear the area, altitude no lower than 1,500\' AGL.'),
+  H('Clean Configuration Demo'),
+  P('Level flight at VA, describing pitch/power/trim; slow to and note best glide speed and the change in control feel.'),
+  P('Continue slowing to VS1 — the speed where any more AOA, load factor, or power reduction stalls the wing — calling out the indications as they appear.'),
+  P('Without touching power, lower the nose and accelerate back to level flight; note the altitude lost, then return to cruise.'),
+  H('Landing Configuration Demo'),
+  P('Maintain VA, then extend gear and flaps at their limiting speeds and slow to and maintain VREF, noting power, trim, and control feel.'),
+  P('Continue slowing to VS0 and hold it in level flight, calling out the indications.'),
+  P('Without touching power, lower the nose and accelerate to reestablish level flight; note the altitude lost, then return to cruise at the assigned heading and altitude.'),
+
+  S('Common Errors — AI.X.B.K8'),
+  P('Failure to clear the area; inadequate or excessive back-pressure as power changes; insufficient right rudder; fixating on instruments; not anticipating AOA changes with flaps.'),
+  P('Poor power management; poor divided attention; failing to trim; ignoring a stall warning.'),
+
+  S('Conclusion'),
+  P('Review: critical AOA, not airspeed · white/green/yellow arcs & VNE · VX/VY/VA/best glide/VREF · clean demo to VS1 · landing demo to VS0 · common errors.'),
+  P('VS1 and VS0 are just proof — a stall lives at both ends of the envelope, so the recovery has to be reflexive at both ends too.'),
+]};
+
+/* ============================================================
+   X.C — Power-Off Stalls
+   Spine: Disconnect / Pitch / Roll / Thrust / Stabilize / Configure — landing-configuration entry, straight & turning
+   ============================================================ */
+window.CFI_SCRIPTS['x-c-power-off-stalls'] = { nodes: [
+  S('Introduction'),
+  H('Attention'),
+  P('Most power-off stalls that actually hurt people happen on final approach, not in the practice area, which is why we as pilots drill the recognition and recovery until they\'re reflexive, not remembered.'),
+  H('Overview'),
+  P('What raises stall speed — weight, CG, load factor, bank, ice'),
+  P('Where power-off stalls really happen — approach to landing'),
+  P('Entry — straight-ahead and turning, landing configuration'),
+  P('Recognizing the stall'),
+  P('Recovery — Disconnect, Pitch, Roll, Thrust, Stabilize, Configure'),
+  P('Common errors'),
+  P('RM — secondary, accelerated, and cross-controlled stalls'),
+  H('What'),
+  P('Intentionally slowing to a full stall in landing configuration, straight ahead and turning, and recovering with minimum altitude loss.'),
+  H('Why'),
+  B('This is the stall that\'s actually waiting on every approach — a high sink rate "fixed" with pitch alone, or a base-to-final turn tightened with rudder instead of bank, both end here.'),
+
+  S('How:'),
+  H('Various Factors & Their Effect on Stall Speed — AI.X.C.K2'),
+  P('A stall can happen at any airspeed, attitude, or power setting — it\'s an AOA event, not a number on the ASI.'),
+  A('Weight & CG'),
+  P('More weight means more lift and more AOA needed, raising the stall speed. Forward CG: heavier and slower, higher stall speed, but the longer arm from elevator to CG makes it more controllable in a stall or spin. Aft CG: lighter and faster, lower stall speed, less controllable.'),
+  A('Load factor & bank'),
+  P('Any G above 1 raises the stall speed — proportional to the square root of the load factor — and loads build fast past 45° of bank.'),
+  A('Snow, ice & frost'),
+  P('Disrupts airflow, drops the AOA at which it separates, and adds weight — as little as 0.8 mm of ice on the upper wing can cut lift 25% and add drag.'),
+  P('Same left-turning tendencies as slow flight — torque, spiraling slipstream, P-factor — anticipate right rudder as power comes back in during recovery.'),
+
+  H('RM: Power-Off Stall Situations — AI.X.C.K4,R1'),
+  P('The real trigger is usually trying to arrest a high sink rate on final with pitch alone, or losing airspeed control anywhere in the pattern — distraction, disorientation, wind shear, or not understanding the region of reversed command.'),
+
+  H('RM: Stall Warning Range & Limitations — AI.X.C.R2'),
+  P('Buffet usually comes first, then the horn — a cross-controlled stall can skip both. Per 23.207 the horn must sound at least 5 knots above stall speed and hold until the stall breaks; reference the POH, since uncoordinated flight can mask the indicator.'),
+
+  S('How: Power-Off Stalls — AI.X.C.K1'),
+  H('Entry'),
+  P('Pre-maneuver checklist, clear the area, pick an altitude that guarantees recovery no lower than 1,500\' AGL, landing configuration, bug the heading.'),
+  H('Straight-Ahead Stall'),
+  P('Slow to approach speed holding altitude and configure for landing; smoothly lower the nose to the approach attitude and hold approach speed.'),
+  P('Once stable, idle the power and smoothly raise the nose into the stall — simulating the flare, with smooth inputs throughout.'),
+  H('Turning Stall'),
+  P('Same setup, but hold a specified bank angle through the descent — constant aileron pressure against the overbanking tendency, stay coordinated, and expect the controls to get heavier as it slows.'),
+
+  H('Recognizing the Stall — AI.X.C.K3'),
+  P('Call out the stages out loud — horn, reduced control effectiveness, buffet, stall.'),
+  P('Sight: the attitude. Sound: horn, dropping RPM, less airflow noise. Feel: mushy controls, buffet, the "seat of the pants."'),
+  B('Action: have the learner narrate every stage as it happens — a stall they can name is a stall they catch early.'),
+
+  H('RM: Recovery — Disconnect, Pitch, Roll, Thrust, Stabilize, Configure — AI.X.C.K5,R4'),
+  B('Disconnect the autopilot. Pitch nose-down — AOA must come down positively and immediately. Roll wings level with coordinated aileron and rudder. Thrust to maximum power (typical for a power-off stall), with right rudder to hold heading. Stabilize the climb at VY (or VX). Configure — clean up flaps and gear like a go-around, once climbing.'),
+  A('Ailerons in recovery'),
+  P('Fine once the wing is flying again — but if it\'s still fully stalled, aileron raises the AOA on the low wing and can deepen the stall. Roll with rudder until it flies, then bring in aileron.'),
+  A('Rudder in recovery'),
+  P('Uncoordinated flight at the critical AOA is the primary cause of a spin — hold coordination through the whole recovery.'),
+
+  S('Common Errors — AFH 5-21 — AI.X.C.K6'),
+  P('Failure to clear the area; over-reliance on the ASI/slip-skid indicator after recovery; failing to recognize an impending stall, or recovering too early from an intentional one.'),
+  P('Failure to hold a constant bank in turning stalls; poor rudder coordination; not disconnecting the autopilot before reducing AOA; recovering without prioritizing pitch/AOA.'),
+  P('Excessive forward pressure, or releasing it before the warning clears; leveling the wings or adding power before reducing AOA; failing to roll wings level after the warning clears; an inadvertent secondary or accelerated stall from a rushed recovery; excess airspeed buildup; losing SA on the flightpath or ATC instructions.'),
+
+  S('RM: Hazards'),
+  H('Stall Warning During Normal Operation — AI.X.C.R3'),
+  B('Recover first — the first thought is fixing the problem, not figuring out how it happened.'),
+  H('Secondary Stalls — AI.X.C.R5'),
+  P('Recovering with too little AOA reduction, or with pitch or power alone, restalls the wing — run the recovery again, correctly.'),
+  H('Accelerated Stalls — AI.X.C.R5'),
+  P('Higher G loading — a steep turn, an aggressive pull — raises the stall speed above what the ASI suggests; releasing back pressure alone often breaks it. Use smooth control pressure to stay out of one.'),
+  H('Cross-Controlled Stalls — AI.X.C.R5'),
+  P('Aileron and rudder opposed — this one can come with little or no warning. Release the cross-control and run the same recovery.'),
+
+  S('Conclusion'),
+  P('Review: factors that raise stall speed · real-world triggers on approach · straight & turning entries · recognition · Disconnect-Pitch-Roll-Thrust-Stabilize-Configure · common errors · secondary/accelerated/cross-controlled stalls.'),
+  P('One habit covers it: reduce AOA first, every time, before anything else.'),
+]};
+
+/* ============================================================
+   X.D — Power-On Stalls
+   Spine: Disconnect / Pitch / Roll / Thrust / Stabilize / Configure — takeoff-configuration entry, straight & turning
+   ============================================================ */
+window.CFI_SCRIPTS['x-d-power-on-stalls'] = { nodes: [
+  S('Introduction'),
+  H('Attention'),
+  P('A power-on stall is louder, steeper, and comes faster than a power-off stall, which is why we as pilots practice it deliberately instead of meeting it for the first time on a short-field departure.'),
+  H('Overview'),
+  P('What raises stall speed — same physics as power-off, quick review'),
+  P('Where power-on stalls really happen — short-field VX climbs, go-arounds'),
+  P('Entry — straight-ahead and turning, takeoff configuration'),
+  P('Recognizing the stall'),
+  P('Recovery — Disconnect, Pitch, Roll, Thrust, Stabilize, Configure'),
+  P('Common errors'),
+  P('RM — secondary, accelerated, elevator trim, and cross-controlled stalls'),
+  H('What'),
+  P('Intentionally slowing to a full stall in takeoff configuration and full power, straight ahead and turning, and recovering with minimum altitude loss.'),
+  H('Why'),
+  B('This is the stall waiting behind an aggressive VX climb or a rushed go-around — high pitch, high power, and a learner who hasn\'t felt it coming yet.'),
+
+  S('How:'),
+  H('Various Factors & Their Effect on Stall Speed — AI.X.D.K2'),
+  P('A stall can happen at any airspeed, attitude, or power setting — weight, forward/aft CG, load factor (proportional to the square root of the G), bank above 45°, and ice all raise it further; forward CG stays more controllable in the stall, aft CG less so.'),
+
+  H('RM: Power-On Stall Situations — High Pitch, High Power — AI.X.D.K4,R1'),
+  P('The two most hazardous real setups: a short-field takeoff climbing at VX, already close to the stall speed by design, and a go-around — reconfiguring, adding power and a lot of nose-up trim while distracted.'),
+
+  H('RM: Stall Warning Range & Limitations — AI.X.D.R2'),
+  P('Buffet before the horn, both designed to give time to react — reference the POH for the specific range and any indicator limitations for your airplane.'),
+
+  S('How: Power-On Stalls — AI.X.D.K1'),
+  H('Difference from Power-Off'),
+  P('Considerably louder and steeper.'),
+  H('Entry'),
+  P('Pre-maneuver checklist, clear the area, altitude that guarantees recovery no lower than 1,500\' AGL, takeoff configuration (can also be practiced clean), bug the heading.'),
+  H('Straight-Ahead Stall'),
+  P('Reduce power to slow to about liftoff speed holding altitude; at VR, apply takeoff power and hold the climb attitude.'),
+  P('Counter the left-turning tendency with right rudder, increasing back pressure and rudder together as the controls go mushy — visual references primary, backed up by the instruments.'),
+  H('Turning Stall'),
+  P('Same setup, but hold a 15-20° bank through the climb (per the Airplane Flying Handbook), with steady aileron against the overbanking tendency.'),
+  B('Coordination matters even more here — a turning power-on stall is the classic setup for an unintentional spin.'),
+
+  H('Recognizing the Stall — AI.X.D.K3'),
+  P('Call out horn, reduced control effectiveness, buffet, stall. Sight: an especially high nose. Sound: horn, dropping RPM under prop load, less airflow noise. Feel: mushy controls, buffet.'),
+
+  H('RM: Recovery — Disconnect, Pitch, Roll, Thrust, Stabilize, Configure — AI.X.D.K5,R4'),
+  B('Disconnect the autopilot. Pitch nose-down immediately. Roll wings level with coordinated aileron and rudder. Thrust — verify max power is already set. Stabilize a climb at VY (or VX) with smooth inputs, not a snap back to pitch. Configure once climbing.'),
+  A('Ailerons & rudder in recovery'),
+  P('Same rule as power-off — aileron on a still-stalled wing can deepen it, so roll with rudder until it flies; uncoordinated flight at critical AOA is the primary cause of a spin.'),
+
+  S('Common Errors — AFH 5-21 — AI.X.D.K6'),
+  P('Failure to clear the area; over-reliance on the ASI/slip-skid indicator after recovery; failing to recognize an impending stall, or recovering too early from an intentional one.'),
+  P('Failure to hold a constant bank in turning stalls; poor rudder coordination; not disconnecting the autopilot before reducing AOA; recovering without prioritizing pitch/AOA.'),
+  P('Excessive forward pressure, or releasing it before the warning clears; leveling the wings or adding power before reducing AOA; failing to roll wings level after the warning clears; an inadvertent secondary or accelerated stall from a rushed recovery; excess airspeed buildup; losing SA on the flightpath or ATC instructions.'),
+
+  S('RM: Hazards'),
+  H('Stall Warning During Normal Operation — AI.X.D.R3'),
+  B('Recover first — fix the problem before figuring out how it happened.'),
+  H('Secondary Stalls — AI.X.D.R5'),
+  P('Recovering with too little AOA reduction restalls the wing — run the recovery again, correctly.'),
+  H('Accelerated Stalls — AI.X.D.R5'),
+  P('Higher G loading raises the stall speed above what the ASI suggests — recover at the first indication and use smooth control pressure to avoid one.'),
+  H('Elevator Trim Stalls — AI.X.D.R5'),
+  P('Full power added for a go-around against heavy nose-up trim, without holding the pitch — push to regain control, rough-trim it out (fine-tune later), then roll, thrust, stabilize, and continue the go-around.'),
+  B('Prevention: smooth power application, and anticipate the trim force before it wins.'),
+  H('Cross-Controlled Stalls — AI.X.D.R5'),
+  P('Aileron and rudder opposed, most common in the traffic pattern, and can come with little or no warning — release the cross-control and run the same recovery.'),
+
+  S('Conclusion'),
+  P('Review: same stall-speed factors as power-off · short-field/VX and go-around triggers · straight & turning entries at takeoff config · Disconnect-Pitch-Roll-Thrust-Stabilize-Configure · common errors · secondary/accelerated/trim/cross-controlled stalls.'),
+  P('The habit is the same as power-off: reduce AOA first — the louder, steeper break just makes it more important not to hesitate.'),
+]};
+
+/* ============================================================
+   X.E — Accelerated Stalls
+   Spine: load factor above 1G · 45° steep-turn entry at/below VA · PARE for the spin that can follow
+   ============================================================ */
+window.CFI_SCRIPTS['x-e-accelerated-stalls'] = { nodes: [
+  S('Introduction'),
+  H('Attention'),
+  P('An accelerated stall happens well above the published stall speed, often at a level or even nose-down attitude, which is why we as pilots can\'t rely on "it feels like a stall" to catch one in time.'),
+  H('Overview'),
+  P('What makes a stall accelerated — load factor above 1G'),
+  P('Other factors — weight, CG, ice'),
+  P('Where they happen — steep turns, aggressive pull-ups, stall/spin recoveries'),
+  P('Performing it — 45° bank, at or below VA'),
+  P('Recognizing the stall'),
+  P('Recovery — Disconnect, Pitch, Roll, Thrust, Stabilize, Configure'),
+  P('Common errors'),
+  P('RM — secondary, cross-controlled stalls, and spins (PARE)'),
+  H('What'),
+  P('Deliberately stalling the wing above 1G, in a steep turn, to feel how much sooner and harder it breaks than a straight-and-level stall.'),
+  H('Why'),
+  B('The same forces show up unintentionally in a botched steep turn, a hard pull to dodge traffic, or a rushed stall recovery — this is where those become survivable instead of not.'),
+
+  S('How:'),
+  H('What Makes a Stall Accelerated — AI.X.E.K2'),
+  P('Any load factor above 1G raises the stall speed — proportional to the square root of the load factor. Steep turns, aggressive pull-ups, and abrupt flight-path changes all load the wing this way.'),
+  P('In a high-speed pull-up, AOA jumps from low to critical while the flight path barely changes — the aircraft reaches critical AOA at a speed much higher than the published stall speed.'),
+  B('Loads build fast in a bank — tremendous wing loading above 45° — and the break is harder: sharper buffet, quicker roll-off, less nose-high warning, and if prolonged, real risk of a spin.'),
+
+  H('Other Factors — Weight, CG & Ice — AI.X.E.K2'),
+  P('Heavier, more forward-CG, or iced wings all push the stall speed higher on top of the load factor; forward CG stays more controllable in the stall (the longer arm from elevator to CG), aft CG less so.'),
+
+  H('RM: Accelerated Stall Situations — AI.X.E.K4,R1'),
+  P('Steep, aggressive pull-ups or abrupt path changes; steep turns; and stall or spin recoveries — especially close to the ground, where there\'s no altitude left to trade for the mistake.'),
+
+  S('How: Performing Accelerated Stalls — AI.X.E.K1'),
+  H('Pre-Maneuver'),
+  P('Pre-maneuver checklist, clear the area, pick an altitude that guarantees recovery no lower than 3,000\' AGL, and configure clean.'),
+  B('Never practice with flaps extended — the G-load limit is lower with them out.'),
+  H('Entry'),
+  P('Roll into a level 45° turn. At or below VA — so the wing stalls before the airframe\'s limit load factor can be exceeded — smoothly and firmly increase back pressure until the stall breaks.'),
+  P('Wing loading builds, airspeed bleeds, and G pushes the pilot into the seat as it happens.'),
+
+  H('Recognizing the Stall — AI.X.E.K3'),
+  P('The buffet and horn still warn you, but the normal nose-high, quiet-airplane cues don\'t show up — recognize it by the buffet, the loading, and the break itself.'),
+  P('Coordinated: both wings stall together, like straight-and-level. Slipping: the outside wing stalls first and rolls hard toward the outside. Skidding: the inside wing stalls first and rolls hard toward the inside.'),
+
+  H('RM: Recovery — Disconnect, Pitch, Roll, Thrust, Stabilize, Configure — AI.X.E.K5,R4'),
+  B('Pitch — release the back pressure immediately; that alone often breaks the stall. Roll — coordinated aileron and rudder to level the wings. Thrust — adjust to the situation; power may need to come back rather than up if airspeed is already high, and goes to idle if a spin starts. Stabilize back to the desired flight path. Configure as needed — usually nothing changes.'),
+
+  S('Common Errors — AFH 5-21 — AI.X.E.K6'),
+  P('Failure to clear the area; over-reliance on the ASI/slip-skid indicator after recovery; failing to recognize an impending stall, or recovering too early from an intentional one.'),
+  P('Failure to hold a constant bank in turning stalls; poor rudder coordination; not disconnecting the autopilot before reducing AOA; recovering without prioritizing pitch/AOA.'),
+  P('Excessive forward pressure, or releasing it before the warning clears; leveling the wings or adding power before reducing AOA; an inadvertent secondary stall from a rushed recovery; excess airspeed buildup; losing SA on the flightpath or ATC instructions.'),
+
+  S('RM: Hazards'),
+  H('Secondary & Cross-Controlled Stalls — AI.X.E.R5'),
+  P('Secondary: recovering with too little AOA reduction restalls the wing — run the recovery again, correctly. Cross-controlled: aileron and rudder opposed, most common in the pattern, can come with little or no warning — release the cross-control and recover the same way.'),
+  H('Spins — PARE — AI.X.E.R5'),
+  B('A spin is a stall plus yaw — uncoordinated flight at the critical AOA. Recover with PARE: Power idle, Ailerons neutral, Rudder full opposite the spin, Elevator forward to break the stall; once rotation stops, rudder neutral and ease back pressure to raise the nose.'),
+  P('Mitigation: recover from any stall at the first indication, and stay coordinated the rest of the time.'),
+
+  S('Conclusion'),
+  P('Review: load factor above 1G · weight/CG/ice add on top · 45° bank at or below VA · buffet & loading as the tell · Disconnect-Pitch-Roll-Thrust-Stabilize-Configure · secondary/cross-controlled stalls · PARE for a spin.'),
+  P('The takeaway: a stall is never really about the airspeed indicator — it\'s about AOA, and this is the maneuver that proves it.'),
+]};
+
+/* ============================================================
+   VII.E — Short-Field Takeoff & Maximum Performance Climb
+   Spine: VX vs VY · Limitations + Performance + Personal Minimums · rejected takeoff / engine failure decision point
+   ============================================================ */
+window.CFI_SCRIPTS['vii-e-short-field-takeoff-climb'] = { nodes: [
+  S('Introduction'),
+  H('Attention'),
+  P('A short or obstacle-limited field gives you less runway and less room for error than a normal takeoff, which is why we as pilots fly VX and VY to the numbers instead of hoping extra performance shows up.'),
+  H('Overview'),
+  P('VY vs VX — best rate versus best angle of climb'),
+  P('RM: runway selection — limitations, wind, performance, runway characteristics'),
+  P('Short-field takeoff roll, lift-off, and maximum performance climb technique'),
+  P('Common errors'),
+  P('RM: rejected takeoff & engine failure after takeoff'),
+  P('RM: wind shear, wake turbulence, low-altitude hazards & collision avoidance'),
+  H('What'),
+  P('How to get the airplane off a short or obstacle-limited runway and climb clear of obstacles at VX, then transition to VY once clear.'),
+  H('Why'),
+  B('The margin for error on a short field is thin — technique and precise airspeed control replace the runway length you don\'t have.'),
+
+  S('How:'),
+  H('Best Rate vs Best Angle of Climb — AI.VII.E.K3'),
+  A('VY — Best Rate of Climb'),
+  P('The airspeed producing the most altitude gain in the least time — the most excess power over what\'s needed for level flight. Used for normal takeoff and climb.'),
+  A('VX — Best Angle of Climb'),
+  P('The airspeed producing the most altitude gain in the shortest distance — the most excess thrust over what\'s needed for level flight. Steeper path, longer time to altitude — used to clear obstacles.'),
+  B('Precise airspeed control matters — 5 knots off VX can cost real climb performance in some airplanes.'),
+
+  H('RM: Runway Selection — AI.VII.E.K2, AI.VII.E.R1'),
+  A('Limitations'),
+  P('POH Chapter 2 — max weight, CG, crosswind/tailwind limits, runway length/width, and more.'),
+  A('Wind'),
+  P('A headwind gives airspeed even before you move, cuts the wheel speed needed to fly, and improves climb performance.'),
+  B('RM: a tailwind increases ground roll and decreases performance (RM: Effects of Tailwind) — AI.VII.E.R2c. Check the POH max tailwind limit.'),
+  A('Aircraft performance — density altitude'),
+  P('Density varies directly with pressure and inversely with temperature, altitude, and humidity; less dense air cuts power, thrust, and lift.'),
+  A('Runway characteristics — AI.VII.E.R2e'),
+  P('Surface, gradient (upsloping adds roll), condition, and available distance — cross-check all of it against the performance charts.'),
+  A('Runway selection'),
+  P('It all boils down to Limitations + Performance + Personal Minimums — set them, and hold them.'),
+
+  S('Short-Field Takeoff & Climb — AI.VII.E.K4'),
+  H('Takeoff Roll'),
+  P('Configure per the POH. Start at the very beginning of the takeoff area — the field is short, don\'t waste runway.'),
+  P('Align on centerline, stop, apply crosswind correction (aileron into the wind, rudder for centerline), then smoothly advance to max power.'),
+  P('Check the instruments — "airspeed alive, engine gauges green." Do not hesitate to abort if there is a problem.'),
+  P('Maintain directional control with rudder; let the airplane roll on the mains and accelerate to liftoff speed with neutral elevator.'),
+  H('Lift-Off & Maximum Performance Climb'),
+  P('Rotate smoothly and firmly at VR to the VX pitch attitude, using outside references or the attitude indicator to hold it.'),
+  P('If airborne before VR, let it accelerate in ground effect to VX rather than holding it down with forward pressure — that can cause wheelbarrowing and hurts acceleration; never raise the nose early either, it just adds drag.', 3),
+  P('Once airborne, hold wings level at VX until obstacles are clear — additional back pressure is needed as the airplane accelerates, and once clear of obstacles, remove crosswind corrections and crab into the wind.'),
+  P('Climb at VX, unchanged configuration, until clear of obstacles (unless the manufacturer says otherwise). Once clear, pitch for VY; once stabilized at VY, configure the airplane and complete the climb checklist per the POH.'),
+  H('Common Errors — AI.VII.E.K5'),
+  P('Failure to review the AFM/POH and performance charts before takeoff.'),
+  P('Failure to adequately clear the area, or to use all available runway.'),
+  P('Failure to trim properly before takeoff.'),
+  P('Premature lift-off (high drag) or holding it on the ground too long with excess forward-elevator pressure.'),
+  P('Inadequate rotation leading to excess speed after lift-off.'),
+  P('Inability to hold VX, or fixation on the airspeed indicator during the climb.'),
+  P('Premature retraction of flaps or gear.'),
+
+  S('RM: Hazards & Emergencies'),
+  H('Rejected Takeoff — AI.VII.E.R3a'),
+  P('Engine trouble, poor acceleration, a runway incursion, an ATC conflict — any of these can force a takeoff to be rejected on the runway.'),
+  B('Identify, before the roll, the point by which the airplane should be airborne — if it isn\'t, take immediate action.'),
+  P('Procedure is generally power to idle and maximum braking while holding directional control, per the POH; if you must shut the engine down, mixture to idle cutoff and magnetos off.'),
+  B('Delaying the decision on a short field can mean running out of runway or being unable to clear an obstacle.'),
+  H('Engine Failure After Takeoff — AI.VII.E.R3b'),
+  B('"We don\'t rise to the level of our expectations; we fall to the level of our training" — practice it, plan it, brief it. Step one is always: maintain aircraft control.'),
+  A('During the takeoff roll'),
+  P('Reject the takeoff and stop straight ahead.'),
+  A('Immediately after takeoff'),
+  P('If there is sufficient runway remaining, land on it — know your required distance (descent plus landing roll) before you need it.'),
+  A('During the climb'),
+  P('Lower the nose for best glide and release right rudder, establish a glide toward a landing area, then — time and altitude permitting — notify ATC, run the applicable checklists, and attempt a restart.'),
+  H('Wind Shear & Wake Turbulence — AI.VII.E.R2b, AI.VII.E.R2d'),
+  P('Wind shear, including microbursts, and wake turbulence — wingtip vortices that can drift onto the final approach centerline in a light quartering tailwind — are both real hazards low and slow; know the avoidance procedures and give a departing large aircraft\'s flight path a wide berth.'),
+  H('Low-Altitude Hazards, Collision Avoidance & Runway Incursion — AI.VII.E.R4, AI.VII.E.R5, AI.VII.E.R6, AI.VII.A.R7'),
+  P('A small problem at altitude is a big problem close to the ground — low-altitude stall/spin and CFIT (AC 61-134) both live here; keep scanning, manage distractions, and prioritize tasks.'),
+  P('On the ground: readback every hold-short and crossing instruction, review the airport layout and NOTAMs, write down taxi instructions, and use lights/beacon while taxiing.'),
+
+  S('Conclusion'),
+  P('Review: VX vs VY · runway selection (limitations, wind, performance, runway) · short-field roll, lift-off, and climb · common errors · rejected takeoff / engine failure · wind shear, wake turbulence, low-altitude and ground hazards.'),
+  P('One habit: know your abort point and your VX picture before you ever push the throttle up.'),
+]};
+
+/* ============================================================
+   VII.F — Short-Field Approach & Landing
+   Spine: 4° glide path · aim-point energy corrections · go-around altitude gates
+   ============================================================ */
+window.CFI_SCRIPTS['vii-f-short-field-approach-landing'] = { nodes: [
+  S('Introduction'),
+  H('Attention'),
+  P('A short or obstacle-limited runway leaves no room to float or overshoot, which is why we as pilots fly a steeper, slower, more precise approach instead of a normal one.'),
+  H('Overview'),
+  P('RM: runway selection — limitations, wind, performance, runway characteristics'),
+  P('Configuration, coordination & trim for a steeper approach'),
+  P('The short-field approach — downwind, base, final, roundout, touchdown'),
+  P('Common errors'),
+  P('RM: rejected landing/go-around & LAHSO'),
+  P('RM: wind shear, wake turbulence, low-altitude hazards & collision avoidance'),
+  H('What'),
+  P('How to fly a steeper, slower, precise approach to a spot landing over obstacles limiting the available landing area.'),
+  H('Why'),
+  B('The same margin for error that a short field removes on takeoff, it removes on landing too — precision replaces runway.'),
+
+  S('How:'),
+  H('RM: Runway Selection — AI.VII.F.K3, AI.VII.F.R1'),
+  A('Limitations'),
+  P('POH Chapter 2 — max weight, CG, crosswind/tailwind limits, runway length/width, flap & gear extension speeds, stall speeds, and more.'),
+  A('Wind'),
+  P('A headwind decreases groundspeed and landing distance.'),
+  B('RM: a tailwind increases groundspeed and landing distance (RM: Effects of Tailwind) — AI.VII.F.R2c. Check the POH max tailwind limit; ensure crosswind is within limits and personal minimums.'),
+  A('Aircraft performance — density altitude'),
+  P('Density varies directly with pressure and inversely with temperature, altitude, and humidity; higher density altitude means a higher true airspeed, which increases the landing roll.'),
+  A('Runway characteristics — AI.VII.F.R2e'),
+  P('Surface, gradient (downsloping adds roll), condition, and available distance — cross-check against the performance charts.'),
+  A('Runway selection'),
+  P('It all boils down to Limitations + Performance + Personal Minimums — set them, and hold them.'),
+  H('Configuration, Coordination & Trim'),
+  P('Configure per the POH; final is flown slower than normal to hold a steeper glide path — below L/DMAX, drag rises fast and so does sink rate.'),
+  P('Keep all pattern turns coordinated at 30° bank or less; trim to hold approach speed for a more stable approach.'),
+
+  S('Short-Field Approach — AI.VII.F.K1'),
+  A('Downwind Leg'),
+  P('At midpoint, complete the landing checklist. Pick the touchdown and aim points — the aim point sits closer to touchdown than normal, adjusted for wind — and set go-around points and criteria now, before you need them.'),
+  B('Example altitude gates: 1,000\' configured, on speed, and trimmed · 500\' airspeed ±5 knots, bank under 15°, on the desired path · 250\' same, with crosswind correction established. Miss the gate at or below that altitude, go around.', 3),
+  A('Base Leg'),
+  P('Abeam the landing point (or slightly beyond), configure and start the descent; on base, configure for landing and adjust the turn to final to roll out on centerline with a shallow, coordinated turn.'),
+  H('Final Approach — AI.VII.F.K2'),
+  P('Usually started at 500\' AGL or higher; establish and maintain a 4° glide path — VASI both bars white or PAPI four white lights means high. A simulated obstacle at the approach end should put you at roughly 100\' AGL crossing it.'),
+  P('Maintain a stabilized approach: pitch for airspeed, power for altitude, same as a normal approach but steeper and more precise. If high, reduce power and lower the nose to regain the glidepath; if low, add power and raise the nose to regain the glidepath.'),
+  H('Wind Correction — AI.VII.F.K4'),
+  P('Headwind: lower groundspeed, more power and time needed on final, shorter landing distance. Tailwind: higher groundspeed, less power and a faster descent, longer landing distance.'),
+  B('RM: crab into the wind until ready to establish a sideslip for landing (RM: Effects of Crosswind) — AI.VII.F.R2a.'),
+  H('Roundout, Touchdown & Rollout'),
+  P('Judge the roundout and flare accurately to avoid flying into the ground or stalling and sinking rapidly — minimum floating, settle onto the aim point.'),
+  P('Touch down at minimum controllable airspeed, pitch attitude approximating a power-off stall, throttle closed, sideslip held through touchdown in a crosswind.'),
+  P('On touchdown: apply max effective braking (just short of skidding), retract flaps if the type calls for it to kill lift and load the wheels, and hold back pressure as long as the elevator stays effective for aerodynamic braking.'),
+  P('Maintain directional control with rudder through rollout and taxi; brake evenly.'),
+  H('Common Errors — AI.VII.F.K5'),
+  P('An overly steep approach and high sink rate, or an unstable approach.'),
+  P('Undue delay correcting the glide path.'),
+  P('Too slow on final (can\'t flare properly, lands hard) or too fast (floats on round out).'),
+  P('Reducing power to idle too early on round out — hard landing.'),
+  P('Touching down with excess airspeed, or braking excessively/unnecessarily.'),
+  P('Failure to maintain directional control, or failure to recognize and abort a poor approach.'),
+
+  S('RM: Hazards & Emergencies'),
+  H('Rejected Landing & Go-Around — AI.VII.F.R3a'),
+  P('Go around any time it\'s hazardous to continue or you\'re in doubt of the safety of the approach — Power, Attitude, Configuration.'),
+  B('A go-around is only dangerous when it\'s delayed or flown badly — the usual culprits are landing expectancy ("it\'ll be fine") and pride ("going around means I failed").'),
+  P('Set altitude gates and hold to them; some emergencies (a gear problem, for example) are better handled airborne, others (fire) are better handled by landing.'),
+  H('Land and Hold Short Operations (LAHSO) — AI.VII.F.R3b'),
+  P('PIC has final authority to accept or decline; once accepted, comply unless otherwise coordinated — it does not prevent a rejected landing. Full readback of the clearance is required.'),
+  P('Know the landing distance available and the airport\'s LAHSO signage; not authorized for solo students, generally not authorized at night, and not authorized on wet runways.'),
+  B('LAHSO minimums: basic VFR, 1,000\' ceiling and 3 SM visibility.'),
+  H('Wind Shear, Wake Turbulence & Low-Altitude Hazards — AI.VII.F.R2b, AI.VII.F.R2d, AI.VII.F.R4, AI.VII.F.R5, AI.VII.F.R6'),
+  P('Wind shear (including microbursts) and wake turbulence — wingtip vortices that can drift onto the final approach centerline, especially in a light quartering tailwind, and that can be encountered in any phase of flight, strongest right after a heavy departs — are real hazards on approach; know the avoidance procedures, especially landing after a large aircraft on the same runway.'),
+  P('Manage distractions, keep scanning, and prioritize tasks — low-altitude stall/spin and CFIT (AC 61-134) are unforgiving this close to the ground.'),
+
+  S('Conclusion'),
+  P('Review: runway selection · configuration/coordination/trim · short-field pattern (aim point, go-around gates, 4° glide path, wind correction) · roundout/touchdown/rollout · common errors · rejected landing, LAHSO, wind shear, wake turbulence, low-altitude hazards.'),
+  P('One habit: set your go-around gates before you turn base, and honor them without negotiating.'),
+]};
+
+/* ============================================================
+   VII.M — Slip to a Landing
+   Spine: forward slip vs sideslip · practical slip limit · never land in a forward slip
+   ============================================================ */
+window.CFI_SCRIPTS['vii-m-slip-to-a-landing'] = { nodes: [
+  S('Introduction'),
+  H('Attention'),
+  P('A normal approach doesn\'t always give you the descent angle or the crosswind correction you need, which is why we as pilots use a slip to control both without touching the throttle.'),
+  H('Overview'),
+  P('What a slip is — cross-controlled flight, forward slip vs sideslip'),
+  P('RM: forward slip hazards — airspeed errors, stalls in a slip, fuel flow'),
+  P('Performing the forward slip and the sideslip'),
+  P('RM: runway selection'),
+  P('Common errors'),
+  P('RM: rejected landing/go-around, LAHSO, wind shear, wake turbulence & low-altitude hazards'),
+  H('What'),
+  P('A slip flies the airplane sideways on purpose — forward slip to steepen the descent, sideslip to hold the centerline in a crosswind — using deliberate, continuous cross-controlled ailerons and rudder.'),
+  H('Why'),
+  B('Most airplanes want to fly straight — a slip fights that on purpose, and doing it precisely is what keeps a crosswind landing or a steep approach safe.'),
+
+  S('How:'),
+  H('What is a Slip? — AI.VII.M.K1'),
+  P('A slip combines forward and sideward motion, changing the direction the relative wind meets the airplane — it increases drag and costs climb, cruise, and glide performance.'),
+  P('Most airplanes have positive static directional stability, an innate tendency to undo a slip — holding one takes deliberate, continuous cross-controlled inputs.'),
+  H('Two Types of Slips'),
+  A('Forward Slip'),
+  P('Steepens the descent without letting airspeed build — lower a wing and yaw the nose the opposite way so the ground track stays the same; the amount of slip (and sink rate) is set by bank.'),
+  A('Sideslip'),
+  P('Holds the centerline in a crosswind — the longitudinal axis stays parallel to the original path; lower the wing into the wind, opposite rudder keeps you aligned. Touchdown: upwind wheel, then downwind wheel, then nosewheel.'),
+  A('Practical Slip Limit'),
+  P('Once full rudder is holding heading, more bank just turns you — if a faster descent is needed instead, lower the nose (more airspeed increases rudder effectiveness and allows a steeper slip).'),
+  H('RM: Forward Slip Operations — AI.VII.M.R7'),
+  A('Airspeed indicator errors'),
+  P('A slip can push ram air into the static port or unport the pitot from the relative wind — indicated airspeed can read low or become unreliable. Cross-check with attitude, sound, and control feel.'),
+  A('Stalls in a slip'),
+  B('A cross-controlled stall close to the ground can be extremely hazardous — some airplanes tend to roll. The raised wing (higher AOA) usually stalls first, which tends to reduce bank rather than develop into a spin.'),
+  P('Some POHs prohibit slipping with flaps extended — high AOA can blank the horizontal stabilizer and cause a tail stall. Follow the manufacturer, and get out of the slip at any stall indication.', 3),
+  A('Fuel flow'),
+  P('Uncoordinated flight can pull fuel away from the lines — risk is greatest with low fuel. Remove the slip at any sign of engine coughing or roughness.'),
+
+  S('Performing the Slip — AI.VII.M.K1, AI.VII.M.K2, AI.VII.M.K4'),
+  H('Forward Slip: Setup Through Recovery'),
+  P('Configure per the POH; you\'ll need to be established higher on final. Power to idle — there\'s no logic slipping to lose altitude with power in.'),
+  P('Lower the wing toward the slip direction (into the wind, if a crosswind exists), yaw the nose the opposite way to hold ground track, and raise the nose to keep airspeed from building.'),
+  P('Crosscheck faster than normal and keep it stable — remove the slip and go around at the first unstable swing in descent, airspeed, or track.'),
+  P('Recover by leveling the wings and releasing rudder together while readjusting pitch — smooth and controlled, no abrupt inputs.'),
+  B('Never land in a forward slip — it can impose severe side loads on the gear (RM) — AI.VII.M.R8.'),
+  H('Sideslip: Entry Through Touchdown'),
+  P('Normal landing configuration, power maintained (a sideslip isn\'t meant to add sink like a forward slip does) — keep a hand near the throttle.'),
+  P('Lower the upwind wing and add just enough opposite rudder to prevent a turn; the stronger the crosswind, the steeper the bank and the more opposite rudder required. Raise the nose slightly to hold airspeed.'),
+  B('RM: at some crosswind strength, full rudder is needed just to hold the centerline — beyond that you\'re past the airplane\'s crosswind limit, which is why the POH publishes one (RM: Effects of Crosswind) — AI.VII.M.R2a.'),
+  P('When a high sink rate and a crosswind both apply, fly the forward slip into the wind first, then transition to the sideslip on a normal glidepath without losing airspeed or path.'),
+  P('Landing: hold the sideslip through touchdown — removing it over the runway lets the airplane drift. Touchdown is upwind main, then downwind main, then nosewheel; hold aileron into the wind and increase deflection as speed bleeds off.'),
+  H('RM: Runway Selection — AI.VII.M.R1'),
+  P('POH Chapter 2 limitations (weight, CG, crosswind/tailwind, runway length/width) · headwind preferred (shorter roll), tailwind increases groundspeed and roll (RM: Effects of Tailwind — AI.VII.M.R2c), crosswind within limits (RM: Effects of Crosswind — AI.VII.M.R2a) · density altitude raises true airspeed and landing roll · runway surface, gradient, condition, and available distance checked against performance charts · Limitations + Performance + Personal Minimums.'),
+  H('Common Errors — AI.VII.M.K5'),
+  P('Incorrect pitch adjustments leading to poor airspeed control, or reacting to erroneous airspeed indications.'),
+  P('Using excess power while trying to lose altitude.'),
+  P('Slipping in the same direction as the crosswind, or poor glidepath control.'),
+  P('Late transition to a sideslip when landing in a crosswind.'),
+  P('Landing without the longitudinal axis parallel to the runway, or off centerline.'),
+
+  S('RM: Hazards & Emergencies'),
+  H('Rejected Landing & Go-Around — AI.VII.M.R3a'),
+  P('Same rule as any approach: Power, Attitude, Configuration, and don\'t delay the decision — landing expectancy and pride are the two things that make pilots wait too long.'),
+  H('Land and Hold Short Operations (LAHSO) — AI.VII.M.R3b'),
+  P('PIC accepts or declines, full readback required, and it doesn\'t excuse a rejected landing.'),
+  B('LAHSO minimums: basic VFR, 1,000\' ceiling and 3 SM visibility.'),
+  H('Wind Shear, Wake Turbulence & Low-Altitude Hazards — AI.VII.M.R2b, AI.VII.M.R2d, AI.VII.M.R4, AI.VII.M.R5, AI.VII.M.R6'),
+  P('Wind shear (including microbursts) and wake turbulence — wingtip vortices that can drift onto the final approach centerline in a light quartering tailwind — carry the same low-altitude risk here as any approach.'),
+  B('A slip already eats margin — treat any instability as an immediate go-around, and keep scanning for low-altitude stall/spin and CFIT hazards.'),
+
+  S('Conclusion'),
+  P('Review: what a slip is · forward slip vs sideslip · airspeed errors, stalls, fuel flow · performing and recovering both · runway selection · common errors · rejected landing, LAHSO, wind shear/wake/low-altitude hazards.'),
+  P('One habit: never land in a forward slip, and hold a sideslip landing all the way through to the mains.'),
+]};
+
+/* ============================================================
+   VII.N — Go-Around / Rejected Landing
+   Spine: Power · Attitude · Configuration — decided immediately, flown the same every time
+   ============================================================ */
+window.CFI_SCRIPTS['vii-n-go-around'] = { nodes: [
+  S('Introduction'),
+  H('Attention'),
+  P('A go-around is only dangerous when it\'s delayed or flown badly, which is why we as pilots decide immediately and fly it exactly the same way every time.'),
+  H('Overview'),
+  P('Situations that call for a go-around'),
+  P('RM: making the decision promptly'),
+  P('Cardinal principles — power, attitude, configuration'),
+  P('Climb-out, wind correction & communication'),
+  P('Performance factors — density altitude & wind'),
+  P('Common errors'),
+  P('RM: hazards — distractions, SA, low-altitude, collision, runway incursion'),
+  H('What'),
+  P('A go-around abandons an approach or landing and returns the airplane to a climb — flown to the same standard every time, on demand.'),
+  H('Why'),
+  B('A stable approach is the best defense against ever needing one — but when you do need it, hesitation is what turns a routine maneuver into an accident.'),
+
+  S('How:'),
+  H('Go-Around Situations — AI.VII.N.K2'),
+  P('An unstable approach — too high, too low, off the centerline, wrong airspeed or descent rate — is the most common trigger, and a stable approach in the first place is the best defense against needing one.'),
+  P('Also: an ATC instruction, an unexpected hazard on the runway, another airplane overtaking, wind shear/wake turbulence, a mechanical issue (like a gear problem), or simply whenever safety says so.'),
+  B('AI.VII.N.R9 — be ready to go around if another aircraft enters the runway.'),
+  H('RM: Making a Prompt Decision — AI.VII.N.R1, AI.VII.N.R2'),
+  P('A go-around isn\'t inherently dangerous — it becomes dangerous when it\'s unnecessarily delayed or executed improperly.'),
+  P('Delay usually comes from landing expectancy ("it\'ll work out") or pride ("going around means I failed") — neither is a reason to wait.'),
+  B('Set SOPs and altitude gates: 500\' configured, airspeed ±5 knots, bank under 15°, on path · 250\' same plus crosswind correction established. Outside the gate, go around — no emotion, no questions.', 3),
+  B('If there\'s any question whether to go around — go around. Don\'t let the situation magnify; don\'t hesitate; stick to the decision.'),
+
+  S('Go-Around — AI.VII.N.K1'),
+  H('Cardinal Principles — Power, Attitude, Configuration'),
+  A('Power — AI.VII.N.R3'),
+  P('The instant you decide, apply max takeoff power smoothly and without hesitation — it takes real power and time to stop and reverse the airplane\'s downward inertia.'),
+  P('Expect the nose to rise (especially if trimmed for landing) and to veer left — hold forward pressure, add right rudder, and rough-trim to relieve pressure.', 3),
+  A('Attitude'),
+  P('Establish power, stop the descent, and pitch to climb at VY (VX if there are obstacles) once the airplane has the speed to do it — raising the nose too early or aggressively can stall it.'),
+  A('Configuration — AI.VII.N.R4'),
+  P('Clean up in order: landing flaps first, in increments (a sudden full retraction can cost significant lift), then the gear once a positive rate is established, then takeoff flaps as you normally would.'),
+  B('Flaps before gear — full flaps produce more drag than the gear, and if the airplane touches down anyway, it\'s desirable to still have the gear down and locked.'),
+  H('Climb-Out, Wind Correction & Communication — AI.VII.N.K4, AI.VII.N.R8'),
+  P('Most go-around climb-outs look like a normal takeoff climb-out — adjust for wind, hold the centerline, and maneuver to the side of the runway if needed to keep conflicting traffic in sight.'),
+  P('Crab to hold the extended centerline; pick two reference points ahead and keep them aligned, and glance back occasionally to confirm no drift.'),
+  B('Aviate, Navigate, then Communicate — fly the airplane and get it under control before you key the mic and call "going around."'),
+  P('A LAHSO clearance never precludes a go-around — execute it, keep clear of traffic and vehicles, and notify ATC (AIM 4-3-11b(6)).'),
+  H('Performance Factors — AI.VII.N.K3'),
+  P('Density altitude — pressure, temperature, altitude, and humidity all change air density, and thinner air cuts power, thrust, and lift right when you need all three.'),
+  P('Headwinds improve climb performance; tailwinds reduce it.'),
+  H('Common Errors — AI.VII.N.K5'),
+  P('Failing to recognize the need for a go-around, or delaying the decision once recognized.'),
+  P('Improper power application, poor pitch control, or failing to compensate for torque/left-turning tendency.'),
+  P('Improper trim, or failing to hold recommended airspeeds.'),
+  P('Improper flap or gear retraction sequence.'),
+  P('Failing to hold proper track during climb-out, or failing to stay clear of obstructions and other traffic.'),
+
+  S('RM: Hazards — AI.VII.N.R5, AI.VII.N.R6, AI.VII.N.R7, AI.VII.N.R9'),
+  H('Distractions, SA & Task Prioritization'),
+  P('A go-around loads the cockpit fast — manage distractions, keep scanning, and prioritize aviating first.'),
+  H('Low-Altitude & Collision Hazards'),
+  P('Low-altitude stall/spin and CFIT (AC 61-134) are unforgiving this close to the ground — keep the scan going and stay clear of terrain, obstacles, and traffic.'),
+  H('Runway Incursion'),
+  P('Readback hold-short instructions, know the airport layout and NOTAMs, and keep situational awareness of everyone else in the pattern or on the field.'),
+
+  S('Conclusion'),
+  P('Review: go-around triggers · prompt decision-making & altitude gates · Power/Attitude/Configuration · climb-out, wind correction & communication · performance factors · common errors · distractions/SA, low-altitude, collision, runway incursion.'),
+  P('One habit: the moment you decide to go around, full power, and never look back at the runway you left.'),
+]};
+
+/* ============================================================
+   VII.O — Power-Off 180° Accuracy Approach & Landing
+   Spine: key positions (downwind/base) · aim-point energy management · 200' ACS touchdown tolerance
+   ============================================================ */
+window.CFI_SCRIPTS['vii-o-power-off-180'] = { nodes: [
+  S('Introduction'),
+  H('Attention'),
+  P('A real engine failure won\'t give you a throttle to fix a bad pattern, which is why we as pilots practice landing on a spot from idle power every time.'),
+  H('Overview'),
+  P('Basics — key positions & gliding to a preselected spot'),
+  P('Configuring & flying the power-off descent'),
+  P('RM: runway & touchdown point selection'),
+  P('The power-off 180 — downwind, base, final, roundout'),
+  P('Common errors'),
+  P('RM: rejected landing/go-around, LAHSO, wind shear, wake turbulence & low-altitude hazards'),
+  H('What'),
+  P('Gliding at idle power from a point on the downwind leg to a preselected landing spot, continuously judging whether the glide will make it.'),
+  H('Why'),
+  B('This is the skill that saves the airplane — and you — the day the engine actually quits. Accuracy under a dead throttle is not optional.'),
+
+  S('How:'),
+  H('Basics & Key Positions — AI.VII.O.K1'),
+  P('Downwind key: abeam the intended landing point, where power comes back to idle. Base key: on base, 45° from the landing point — both are places to judge whether the glide will make the spot.'),
+  H('Configuring & Flying the Descent'),
+  P('Normal landing configuration, but flaps are used as needed to control the glide path — not on a fixed schedule. Trim for best glide and hold it with pitch — faster than best glide steepens the descent, slower causes rapid settling.'),
+  H('Working the Pattern — AI.VII.O.K3, AI.VII.O.K4'),
+  P('Wind, altitude, and approach speed all change pattern size — this is not a mechanical maneuver; adjust altitudes and configuration timing as needed.'),
+  P('Tools available: drag (flaps, forward slips), airspeed (faster or slower than best glide changes descent rate), and pattern size (early/late base, dogleg, S-turns).'),
+  B('RM: forward slips carry the same airspeed-error, tail-stall, and fuel-flow cautions covered in VII.M, Slip to a Landing — AI.VII.O.R7.', 3),
+  P('Trim for best glide to avoid pitch/airspeed swings, and if the approach can\'t be completed safely, add power and go around (training) or take the best real-world course of action.'),
+  B('Don\'t use rudder to tighten the turn to final — that\'s a crossed-control stall waiting to happen.'),
+  H('RM: Runway & Touchdown Point Selection — AI.VII.O.R1'),
+  P('POH Chapter 2 limitations (weight, CG, crosswind/tailwind, runway length/width) · headwind preferred, tailwind increases groundspeed and roll (RM: Effects of Tailwind — AI.VII.O.R2c), crosswind within limits (RM: Effects of Crosswind — AI.VII.O.R2a) · density altitude raises true airspeed and landing roll · runway surface, gradient, condition, and available distance checked against performance charts · Limitations + Performance + Personal Minimums.'),
+  A('Touchdown & aim point'),
+  B('Commercial ACS: touch down at the proper pitch attitude, on or within 200\' beyond the specified point, with no side drift and the longitudinal axis aligned over the centerline.'),
+  P('Pick an easily recognizable touchdown point; adjust the aim point for standard float distance, wind (closer with a headwind), and airspeed (aim earlier if fast).'),
+
+  S('Power-Off 180 Maneuver — AI.VII.O.K1'),
+  H('Downwind & Base'),
+  P('At 1,000\' AGL, complete the before-landing checklist by midpoint; abeam the touchdown point (downwind key), throttle to idle, hold altitude to best glide speed, then pitch and trim for it.'),
+  P('Turn to base positioned by altitude and wind — early if the headwind is strong or you\'re low, extended if calm or high; crab to hold the base leg.'),
+  A('Base Leg'),
+  P('Base key: 45° to the landing point — use it to reassess the glide. Approach flaps are typically set here (landing flaps only once landing is assured, and never raised again once set).'),
+  H('Turning Final & the Aim Point — AI.VII.O.K2'),
+  P('Roll out aligned with the centerline, coordinated, without rudder to tighten the turn.'),
+  P('Watch the aim point in the windscreen: steady means on path, moving up means low, moving down means high. High: use flaps, S-turns, or a slip. Low: go straight in and delay configuring.'),
+  P('Small, early corrections beat large, late ones. Crab for crosswind on final; transition to a sideslip for landing (RM: Effects of Crosswind) — AI.VII.O.R2a.'),
+  H('Roundout & Touchdown'),
+  P('Accuracy matters, but a safe, properly flown approach matters more — don\'t force the airplane down or stretch the glide; either can produce a hard landing or a stall.'),
+  P('Use a sideslip through touchdown for crosswind; delay flaps for added float if low. Hold directional control with rudder, use even, minimum braking only once firmly down.'),
+  H('Common Errors — AI.VII.O.K5'),
+  P('Failure to establish approach/landing configuration at the proper time or sequence, or to identify the key points in the pattern.'),
+  P('Failure to establish and hold a stabilized approach, or to account for wind and landing surface.'),
+  P('Improper use of power, flaps, or trim.'),
+  P('Improper roundout/touchdown technique, or failure to hold back-elevator pressure after touchdown.'),
+  P('Poor directional control or improper brake use after touchdown.'),
+
+  S('RM: Hazards & Emergencies'),
+  H('Rejected Landing & Go-Around — AI.VII.O.R3a'),
+  P('Same rule as any approach — Power, Attitude, Configuration, decided immediately.'),
+  H('Land and Hold Short Operations (LAHSO) — AI.VII.O.R3b'),
+  P('PIC accepts or declines, full readback required, doesn\'t excuse a rejected landing.'),
+  B('LAHSO minimums: basic VFR, 1,000\' ceiling and 3 SM visibility.'),
+  H('Wind Shear, Wake Turbulence & Low-Altitude Hazards — AI.VII.O.R2b, AI.VII.O.R2d, AI.VII.O.R4, AI.VII.O.R5, AI.VII.O.R6'),
+  P('Wind shear (including microbursts) and wake turbulence — wingtip vortices that can be encountered in any phase of flight, strongest right after a heavy departs — are real hazards here too; know the avoidance procedures, especially landing after a large aircraft on the same runway.'),
+  B('A dead-engine approach has zero power in reserve to fix a mistake — keep scanning for low-altitude stall/spin and CFIT hazards the entire way down.'),
+
+  S('Conclusion'),
+  P('Review: key positions · configuring & flying the glide · runway/touchdown point selection (200\' ACS tolerance) · downwind, base, final, aim-point corrections · roundout · common errors · rejected landing, LAHSO, wind shear/wake/low-altitude hazards.'),
+  P('One habit: pick your spot, trim for best glide, and manage the glide path the entire way down — the throttle isn\'t coming back.'),
+]};
+
+/* ============================================================
+   VIII.A — Straight-and-Level Flight
+   Spine: Establish-Trim-Crosscheck-Adjust · 90/10 outside/inside scan
+   ============================================================ */
+window.CFI_SCRIPTS['viii-a-straight-and-level'] = { nodes: [
+  S('Introduction'),
+  H('Attention'),
+  P('Straight-and-level is the maneuver you\'ll fly more than any other, which is why we as pilots treat it as the foundation every other maneuver is really just a deviation from.'),
+  H('Overview'),
+  P('Flight controls (pitch, roll, yaw)'),
+  P('Control pressures & trim'),
+  P('Integrated flight instruction — 90/10 scan'),
+  P('Level flight (pitch) & straight flight (bank) references'),
+  P('Power — constant power holds constant airspeed'),
+  P('Common errors'),
+  P('RM: hazards'),
+  H('What'),
+  P('Flight that holds a constant heading and altitude through immediate, measured corrections for any unintentional turn, climb, or descent.'),
+  H('Why'),
+  B('Nearly every pilot who falls short of standards traces it back to one thing: they never learned to fly straight-and-level cleanly.'),
+
+  S('How:'),
+
+  H('Flight Controls — AI.VIII.A.K2'),
+  A('Pitch — elevator'),
+  P('Back pressure deflects the trailing edge up, decreases camber, tail moves down, nose up — about the CG.'),
+  A('Roll — ailerons'),
+  P('Right aileron up (less lift, wing lowers), left aileron down (more lift, wing raises) rolls the plane right; opposite for left.'),
+  A('Yaw — rudder'),
+  P('Left rudder deflects the rudder left, pushing the tail right and yawing the nose left; opposite for right rudder.'),
+
+  H('Control Pressures & Trim'),
+  P('Light fingertip grip, only enough pressure for the result — jolty inputs, white knuckles, and nervousness are the tell of over-controlling.'),
+  B('Action: fix over-controlling with a pencil under the index/pointer and over the middle/ring finger — it reminds the hand to relax.', 3),
+  A('Trim technique'),
+  P('Establish, trim, crosscheck, adjust — set pitch and power, let airspeed stabilize, trim rudder then elevator then aileron, and retrim on any change.'),
+  P('Retrim as CG shifts with fuel burn on longer flights. Don\'t fly the airplane with trim.', 3),
+
+  H('Integrated Flight Instruction — AI.VIII.A.K4'),
+  P('90% outside, 10% inside — fly by outside references, validate on the instruments, correct against the horizon, then reverify.'),
+
+  H('Straight-and-Level Flight — Overview — AI.VIII.A.K1'),
+  P('Fix a reference point on the airplane against the natural horizon and correct small deviations the instant they appear — the goal is to never let a deviation grow.'),
+
+  H('Level Flight — Pitch — AI.VIII.A.K3'),
+  A('Outside'),
+  P('Pick a reference off the nose or glareshield and hold it fixed on the horizon.'),
+  A('Inside'),
+  P('Crosscheck the attitude indicator, altimeter, VSI, and airspeed.'),
+  A('Corrections'),
+  P('Elevator is the control — adjust pitch to the horizon, then verify on the altimeter.'),
+
+  H('Straight Flight — Bank — AI.VIII.A.K3'),
+  A('Outside'),
+  P('Wingtips level and equidistant from the horizon; pick two points ahead and fly the imaginary line between them.'),
+  A('Adjust bank to realign the reference points'),
+  P('If the points drift out of line, bank to put both wings back an equal distance from the horizon.'),
+  A('Inside'),
+  P('Crosscheck the heading indicator, attitude indicator, turn coordinator, and magnetic compass.'),
+
+  H('Power'),
+  P('Constant power holds constant airspeed — a power change demands a pitch change or altitude follows it.'),
+  A('Crosscheck changes in airspeed with the RPM and manifold pressure gauges'),
+  P('Increased power climbs, decreased power descends, unless pitch compensates.'),
+  P('Increasing power: progressively lower pitch as airspeed builds. Decreasing power: progressively raise pitch as airspeed bleeds off.', 3),
+
+  S('Common Errors — AI.VIII.A.K5'),
+  P('Wrong or forgotten reference points · correcting off instruments instead of the horizon · chasing the instruments · mechanical rather than smooth inputs · not scanning outside · white-knuckle grip · flying one wing low · rudder-only heading control · slow to correct deviations.'),
+
+  S('RM: Hazards'),
+  H('Distractions, SA & Task Prioritization — AI.VIII.A.R1'),
+  P('Remove distractions or address them and move on — sterile flight deck on taxi, takeoff, climb, descent, and landing. Aviate, Navigate, Communicate.'),
+  B('If situational awareness is lost, admit it and fix it — it starts with preflight planning and staying ahead of the airplane.'),
+  P('An upset from lost SA: Push (unload), Roll (to the nearest horizon), Thrust (adjust), Stabilize.', 3),
+
+  H('Collision Hazards — AI.VIII.A.R2'),
+  P('Scan in short 10° increments, hold each area at least one second; clear the direction of any turn and above/below/front/behind before any maneuver.'),
+  P('Lights on below 10,000\' day or night · right-of-way goes to the aircraft in distress, to the right in a head-on category match, to the less maneuverable type, and to whoever is lower or already on final.', 3),
+  A('Terrain & obstacles'),
+  P('Use MEFs and terminal charts; minimum safe altitudes are 1,000\' above the highest obstacle within 2,000\' in congested areas, 500\' otherwise. Towers can run 1,000–2,000\' AGL with guy wires out to 1,500\' — watch for unlit wires along the routes pilots default to (lakes, highways, rail lines).'),
+
+  S('Conclusion'),
+  P('Review: pitch/roll/yaw controls · light grip & trim (Establish-Trim-Crosscheck-Adjust) · 90/10 scan · pitch holds altitude, bank holds heading, power holds airspeed · common errors · SA and collision hazards.'),
+  P('One good reference point, held on the horizon, is worth more than any instrument scan — instruments only confirm what your eyes already told you.'),
+]};
+
+/* ============================================================
+   VIII.B — Level Turns
+   Spine: VCL/HCL lift vector · adverse yaw & overbanking · coordinated aileron+rudder
+   ============================================================ */
+window.CFI_SCRIPTS['viii-b-level-turns'] = { nodes: [
+  S('Introduction'),
+  H('Attention'),
+  P('A turn is nothing more than redirecting lift to the side, which is why we as pilots treat every turn as an aileron-and-rudder team effort, never a rudder-only heading change.'),
+  H('Overview'),
+  P('How the turn works — the lift vector'),
+  P('Adverse yaw & overbanking tendency'),
+  P('Rate of turn & coordination'),
+  P('Control pressures & trim'),
+  P('Turn entry, in-the-turn, and rollout'),
+  P('Common errors'),
+  P('RM: hazards'),
+  H('What'),
+  P('Turns that hold a constant bank angle and altitude while the airplane changes heading at a predictable rate.'),
+  H('Why'),
+  B('An uncoordinated or unsteady turn bleeds altitude and airspeed without the pilot ever noticing — coordination is what keeps a turn from becoming a hazard.'),
+
+  S('How:'),
+
+  H('How the Turn Works'),
+  A('Lift — VCL & HCL'),
+  P('Level flight: lift acts straight up. Banked: lift splits into the Vertical Component (opposes weight) and the Horizontal Component (opposes inertia/centrifugal force and is what actually turns the plane) — increase AOA to hold altitude since some lift shifted horizontal.'),
+
+  A('Adverse Yaw'),
+  P('Deflected ailerons add lift and drag on the rising wing, less on the lowering wing — the drag difference yaws the nose opposite the turn; counter it with coordinated rudder in the turn direction.'),
+
+  A('Overbanking Tendency'),
+  P('In a tight turn the outside wing travels farther in the same time and makes more lift than the inside wing.'),
+  P('Shallow bank: lateral stability wins. Medium: they match. Steep: the lift differential wins and the bank keeps steepening on its own — opposite aileron is needed to hold it.', 3),
+
+  H('Rate of Turn'),
+  P('Set by bank angle (more bank = more HCL = faster turn) and airspeed (more airspeed = more inertia = slower turn, wider radius) at a given bank.'),
+
+  H('Coordination'),
+  P('Coordinated aileron and rudder in every turn — step on the ball to center it; uncoordinated flight adds drag and kills performance.'),
+
+  H('Control Pressures & Trim — AI.VIII.B.K2'),
+  P('Light fingertip grip; over-controlling shows as jolty inputs, white knuckles, nervousness — the pencil trick under the flying hand\'s fingers fixes it.', 3),
+  P('Establish-Trim-Crosscheck-Adjust — set pitch/power, let airspeed stabilize, trim rudder-elevator-aileron, retrim on any change (and as CG shifts with fuel burn).'),
+
+  H('Integrated Flight Instruction — AI.VIII.B.K4'),
+  P('90% outside, 10% inside — fly the horizon, validate on instruments, correct outside, reverify inside.'),
+
+  S('Level Turns — AI.VIII.B.K1'),
+  H('Turn Entry — AI.VIII.B.K2'),
+  P('Aileron and rudder together, smooth and small — the faster/firmer the aileron, the faster the roll; the longer it\'s held, the greater the bank.'),
+  A('Coordination check'),
+  P('The nose should rotate on the horizon with the bank, neither leading it (rudder too soon) nor lagging it (rudder late).'),
+  A('Elevator & power'),
+  P('Gently add back pressure as bank increases to hold altitude; add power above roughly 30° of bank to hold airspeed.'),
+
+  H('Establishing the Bank Angle — Outside References — AI.VIII.B.K3'),
+  A('Use the top of the engine cowling or glareshield to set bank and pitch attitude'),
+  P('Crosscheck the turn against the instruments.'),
+  A('Parallax error'),
+  P('Left seat: nose appears to rise in a left turn and descend in a right turn (opposite for right seat) — don\'t let the illusion fool the correction.'),
+  A('Leaning'),
+  B('Leaning away from the turn to feel upright defeats the visual reference — catch it and correct immediately.'),
+
+  H('In the Turn — AI.VIII.B.K2/K3'),
+  P('Reference the horizon, scan for traffic, crosscheck occasionally — hold the bank relationship, don\'t relax elevator back pressure, hold power, and correct any airspeed drift beyond ±5 knots.', 3),
+  P('If bank strays, re-establish it with aileron/rudder; if altitude strays, adjust pitch and re-trim — bank and pitch are linked, so a change in one often needs the other.'),
+
+  H('Roll Out — AI.VIII.B.K2'),
+  P('Opposite control pressures from the entry, led early since the plane keeps turning through any bank.'),
+  P('Lead the rollout by about half the bank angle, relax back pressure as bank comes off, reduce power for straight-and-level airspeed, and re-trim.', 3),
+
+  S('Common Errors — AI.VIII.B.K5'),
+  P('Not clearing the turn direction · gaining/losing altitude · unsteady bank angle · flying the turn on instruments alone · leaning away from the turn · no feel for slip/skid without instruments · watching only the nose to hold bank · skidding flat turns to avoid banking · excess rudder in the turn · one-directional proficiency · uncoordinated controls.'),
+
+  S('RM: Hazards'),
+  H('Distractions, SA & Task Prioritization — AI.VIII.B.R1'),
+  P('Remove or address distractions and move on — sterile flight deck on taxi, takeoff, climb, descent, landing. Aviate, Navigate, Communicate.'),
+  B('Lost SA? Admit it and fix it — stay ahead of the airplane starting at preflight.'),
+  P('Upset from lost SA: Push, Roll, Thrust, Stabilize.', 3),
+
+  H('Collision Hazards — AI.VIII.B.R2'),
+  P('Clear the direction of the turn before every one; scan in 10° increments, hold each area a second; lights on below 10,000\'.'),
+  P('Right-of-way: distress traffic first, to the right in a category match, to the less maneuverable type, and to whoever is lower or already on final.', 3),
+  A('Terrain & obstacles'),
+  P('MSAs are 1,000\' above obstacles within 2,000\' in congested areas, 500\' otherwise; towers run 1,000–2,000\' AGL with guy wires to 1,500\' — watch unlit wires along the lakes/highways/rail lines pilots track.'),
+
+  S('Conclusion'),
+  P('Review: HCL turns the plane · adverse yaw & overbanking · rate of turn (bank & airspeed) · coordination · entry, in-the-turn, rollout · common errors · SA and collision hazards.'),
+  P('A turn that stays coordinated and holds its numbers is just level flight redirected — never a separate skill from straight-and-level.'),
+]};
+
+/* ============================================================
+   VIII.C — Straight Climbs & Climbing Turns
+   Spine: thrust-limited climb · VY vs VX · P-factor right rudder
+   ============================================================ */
+window.CFI_SCRIPTS['viii-c-climbs'] = { nodes: [
+  S('Introduction'),
+  H('Attention'),
+  P('A climb only exists because there\'s more thrust available than drag requires, which is why we as pilots respect that a climb angle is always limited by the power actually on hand.'),
+  H('Overview'),
+  P('Forces in the climb & propeller effects'),
+  P('Types of climbs — Normal, VY, VX'),
+  P('Control pressures & trim'),
+  P('Straight climb — entry, maintaining, level-off'),
+  P('Climbing turns'),
+  P('Common errors'),
+  P('RM: hazards'),
+  H('What'),
+  P('A steady climb, straight or turning, flown to a known pitch and power and returned smoothly to level flight.'),
+  H('Why'),
+  B('Every climb is a negotiation between thrust and drag — understand that and the airplane\'s limits stop being a surprise.'),
+
+  S('How:'),
+
+  H('Forces in the Climb'),
+  P('Weight now acts partly rearward instead of straight down, adding drag — a climb is only possible, and only as steep as, the thrust available to cover that extra drag.'),
+  A('Propeller effects'),
+  P('Lower prop speed and higher AOA than cruise increase P-factor\'s left-turning tendency — right rudder is needed to hold coordination.'),
+
+  H('Types of Climbs'),
+  A('Normal (cruise) climb'),
+  P('Manufacturer-recommended speed, faster than VY but with better engine cooling, control, and visibility.'),
+  A('Best Rate — VY'),
+  P('The speed with the most excess power over what level flight needs — maximum feet per minute; VY decreases as altitude increases.'),
+  A('Best Angle — VX'),
+  P('Slower than VY; the speed with the most excess thrust over what level flight needs — maximum altitude for a given distance, at the cost of more time to reach altitude.'),
+  P('VX increases as altitude increases — the two speeds converge toward the absolute ceiling.', 3),
+
+  H('Control Pressures & Trim — AI.VIII.C.K2'),
+  P('Light fingertip grip; the pencil-under-the-fingers trick corrects white-knuckle over-controlling.', 3),
+  P('Establish-Trim-Crosscheck-Adjust — set pitch/power, stabilize, trim rudder-elevator-aileron, retrim on any change.'),
+
+  H('Integrated Flight Instruction — AI.VIII.C.K4'),
+  P('90% outside, 10% inside — fly the horizon, validate on instruments, correct outside, reverify inside.'),
+
+  S('Straight Climb — AI.VIII.C.K1/K2'),
+  H('Entering the Climb'),
+  P('Raise the nose and add power together; anticipate the slipstream pitching the nose up on its own as power comes in, and add right rudder as power increases.', 3),
+  P('Trim to hold the climb pitch; wingtips level, two points ahead aligned, same as straight-and-level.'),
+
+  H('Maintaining the Straight Climb'),
+  P('Airspeed is an elevator job — small pitch adjustments off the known attitude, crosschecked on the instruments; raise the nose if fast, lower if slow, then trim.'),
+  A('Off Heading: bank angle to correct back equals the number of degrees off'),
+  P('Keep the wings level to hold heading, same reference-point technique as straight flight.'),
+
+  H('Returning to Straight-and-Level'),
+  P('Lead the level-off by 10% of the rate of climb (500 fpm climb to  lead by 50\').'),
+  P('Lower the nose smoothly — too fast a pitch change costs altitude — hold climb power briefly to accelerate to cruise, then reduce rudder with power and trim level.', 3),
+
+  S('Climbing Turn — AI.VIII.C.K1/K2'),
+  P('Needs more back pressure than a straight climb since banking bleeds vertical lift; shallow bank climbs best, medium/steep bank degrades or kills climb performance.'),
+  A('Adverse yaw in the turn'),
+  P('Left turn needs less right rudder than a straight climb, right turn needs more — P-factor and turn direction either add or subtract.'),
+  H('Entering the Climbing Turn'),
+  P('Enter the climb then bank, or both together — establish pitch and bank on the horizon while adding power and anticipated right rudder, crosscheck, and trim to hold the pitch attitude and climb airspeed.'),
+  H('Maintaining the Climbing Turn'),
+  P('Hold bank and pitch together — pitch relates to the horizon as in a straight climb, bank to the cowling/glareshield — a change in one often forces a change in the other; trim often to cut workload.'),
+  H('Returning to Straight-and-Level'),
+  P('Same 10%-of-rate lead; level the nose and wings together, hold climb power to reach cruise speed, reduce rudder with power, then trim.'),
+
+  S('Common Errors — AI.VIII.C.K5'),
+  P('Chasing the airspeed indicator to set pitch · too much elevator (excessive climb angle) · wrong rudder in the turn · yaw from insufficient right rudder · fixating on the nose (one wing low) · uncoordinated turn entry (no real turn, one wing low) · a slip that kills the climb rate · unsteady pitch/bank in the turn · exceeding the airplane\'s climb capability · excess forward pressure on level-off (altitude loss or low-G).'),
+
+  S('RM: Hazards'),
+  H('Distractions, SA & Task Prioritization — AI.VIII.C.R1'),
+  P('Remove or address distractions and move on — sterile flight deck through taxi, takeoff, climb, descent, landing. Aviate, Navigate, Communicate.'),
+  B('Lost SA? Admit it and fix it — stay ahead of the airplane from preflight on.'),
+  P('Upset from lost SA: Push, Roll, Thrust, Stabilize.', 3),
+  H('Collision Hazards — AI.VIII.C.R2'),
+  P('Scan in 10° increments, a second per area; clear above/below with gentle banks in any climb; lights on below 10,000\'.'),
+  P('Right-of-way: distress first, right in a category match, less maneuverable type, whoever\'s lower or already on final.', 3),
+  A('Terrain & obstacles'),
+  P('MSAs: 1,000\' above obstacles within 2,000\' in congested areas, 500\' otherwise. Towers 1,000–2,000\' AGL, guy wires to 1,500\' — watch unlit wires along the lakes/highways/rail lines pilots default to following.'),
+
+  S('Conclusion'),
+  P('Review: thrust-limited climb · P-factor & right rudder · VY vs VX · entry-maintain-level off · climbing turns need more back pressure & shallower bank · common errors · SA and collision hazards.'),
+  P('The nose and the airspeed indicator are always in a conversation in a climb — let pitch, not power, do the talking.'),
+]};
+
+/* ============================================================
+   VIII.D — Straight Descents & Descending Turns
+   Spine: weight helps thrust in a descent · pitch controls airspeed when power is fixed
+   ============================================================ */
+window.CFI_SCRIPTS['viii-d-descents'] = { nodes: [
+  S('Introduction'),
+  H('Attention'),
+  P('A descent is just a climb with weight helping instead of hurting, which is why we as pilots know that pitch, not power, is what controls airspeed once power is fixed.'),
+  H('Overview'),
+  P('Forces in a descent'),
+  P('Types of descents — partial power, minimum safe airspeed, emergency, glide'),
+  P('Control pressures & trim'),
+  P('Straight descent — entry, maintaining, returning to level'),
+  P('Turning descents'),
+  P('Common errors'),
+  P('RM: hazards'),
+  H('What'),
+  P('A steady descent, straight or turning, flown to a known pitch and power and returned smoothly to level flight.'),
+  H('Why'),
+  B('Once power is set, the airspeed indicator only answers to pitch — mixing that up is where descents go wrong.'),
+
+  S('How:'),
+
+  H('Forces in a Descent'),
+  P('Weight now acts partly forward along the flightpath instead of straight down, effectively adding to thrust — reduce power (or add drag) or airspeed will build on its own.'),
+
+  H('Types of Descents'),
+  A('Partial power (normal method)'),
+  P('Manufacturer-recommended airspeed and power setting.'),
+  A('Minimum safe airspeed descent'),
+  P('Nose-high, power-assisted, steeper than normal — used to clear obstacles on a short-field approach; needs excess power on hand to accelerate out of it if required.'),
+  A('Emergency descent'),
+  P('A specific POH configuration and speed for losing altitude fast — high drag, high speed, often with turns.'),
+  A('Glide'),
+  P('A controlled descent with little or no power.'),
+
+  H('Control Pressures & Trim — AI.VIII.D.K2'),
+  P('Light fingertip grip; the pencil trick fixes white-knuckle over-controlling.', 3),
+  P('Establish-Trim-Crosscheck-Adjust — set pitch/power, stabilize, trim rudder-elevator-aileron, retrim on any change.'),
+
+  H('Integrated Flight Instruction — AI.VIII.D.K4'),
+  P('90% outside, 10% inside — fly the horizon, validate on instruments, correct outside, reverify inside.'),
+
+  S('Straight Descent — AI.VIII.D.K1/K2'),
+  H('Entering the Descent'),
+  P('Reduce power gently and hold altitude as speed bleeds off — losing slipstream over the tail lets the nose fall on its own, so add back pressure to hold altitude while slowing.'),
+  P('Just before descent speed, lower the nose to the descent pitch attitude, crosscheck instruments, and trim once stable.'),
+
+  H('Maintaining the Descent — AI.VIII.D.K3'),
+  A('Pitch controls airspeed'),
+  P('Small adjustments off the known attitude — too fast, raise the nose and trim; too slow, lower it and trim.'),
+  A('Bank — keep the wings level to hold heading'),
+  P('Same two-points-ahead technique as straight-and-level; correct with a bank angle equal to the degrees off.'),
+  A('Coordination'),
+  P('Little rudder is needed at low power, but adverse yaw is still there — don\'t skip it.'),
+
+  H('Returning to Straight-and-Level'),
+  P('Power is fixed, so airspeed is a pitch job — raise the nose if fast, lower if slow, then trim; keep the wings level throughout.'),
+
+  S('Turning Descent — AI.VIII.D.K1/K2'),
+  P('Enter the descent then bank, or both together — reduce power and hold altitude as speed bleeds off, then establish pitch and bank together just before descent speed, crosscheck, and trim.'),
+  H('Maintaining the Turning Descent — AI.VIII.D.K3'),
+  P('Pitch adjustments are the same as a straight descent; adjust aileron for the desired bank, and expect a bank change to need a pitch change (more back pressure if airspeed builds, and vice versa).'),
+  P('Without power, left-turning tendencies are much smaller, but adverse yaw is still present — trim to relieve pressures and crosscheck the result.', 3),
+  H('Returning to Straight-and-Level'),
+  P('Same as a straight descent, plus rolling the wings level — lead the level-off by 10% of the descent rate, add power smoothly, and try to level the nose and wings together; set cruise power at cruise airspeed, then trim.'),
+
+  S('Common Errors — AI.VIII.D.K5'),
+  P('Not clearing the turn/descent direction · too little back pressure entering the glide (steep glide) · not slowing to glide speed before lowering pitch · flying the glide on instruments alone · no feel for airspeed by sound · chasing the airspeed indicator · trying to "stretch" the glide with back pressure · skidding/slipping in a turning glide without noticing the rudder-force difference without power · not lowering pitch entering a gliding turn (airspeed loss) · excess rudder on recovery · poor pitch control recovering from a straight glide · cross-controlling near the ground · unsteady bank angle in a gliding turn.'),
+
+  S('RM: Hazards'),
+  H('Distractions, SA & Task Prioritization — AI.VIII.D.R1'),
+  P('Remove or address distractions and move on — sterile flight deck through taxi, takeoff, climb, descent, landing. Aviate, Navigate, Communicate.'),
+  B('Lost SA? Admit it and fix it — stay ahead of the airplane from preflight on.'),
+  P('Upset from lost SA: Push, Roll, Thrust, Stabilize.', 3),
+  H('Collision Hazards — AI.VIII.D.R2'),
+  P('Scan in 10° increments, a second per area; clear with gentle banks above/below in any descent; lights on below 10,000\'.'),
+  P('Right-of-way: distress first, right in a category match, less maneuverable type, whoever\'s lower or already on final.', 3),
+  A('Terrain & obstacles'),
+  P('MSAs: 1,000\' above obstacles within 2,000\' in congested areas, 500\' otherwise. Towers 1,000–2,000\' AGL, guy wires to 1,500\' — unlit wires often follow the lakes/highways/rail lines pilots track.'),
+
+  S('Conclusion'),
+  P('Review: weight helps thrust in a descent · partial power, min-safe-airspeed, emergency, glide · pitch controls airspeed when power\'s fixed · straight & turning descent procedure · common errors · SA and collision hazards.'),
+  P('When the power is set, the nose is the only thing left to argue with the airspeed indicator — let it win.'),
+]};
+
+/* ============================================================
+   XI.A-D — Basic Attitude Instrument Flight
+   Spine: Pitch+Power=Performance · Control/Performance/Nav instruments · Establish-Trim-Crosscheck-Adjust · Hub-and-Spoke scan
+   ============================================================ */
+window.CFI_SCRIPTS['xi-a-d-bai-flight'] = { nodes: [
+  S('Introduction'),
+  H('Attention'),
+  P('Losing outside visual references doesn\'t stop the airplane from flying, which is why we as pilots learn to fly that same airplane by trusting a scan of instruments instead of the horizon.'),
+  H('Overview'),
+  P('RM — the real hazards of losing VFR, and the pilot actions that prevent it'),
+  P('Control & Performance concept — 3 instrument categories, Establish-Trim-Crosscheck-Adjust'),
+  P('Reading and trusting each instrument (and its quirks)'),
+  P('The four core maneuvers — straight-and-level, turns to headings, constant-airspeed climbs & descents'),
+  P('Crosscheck breakdowns (fixation, omission, emphasis) & common errors'),
+  P('RM — collision, terrain, obstacles, distractions, SA, task prioritization'),
+  H('What'),
+  P('Flying the airplane to a known pitch and power setting and confirming performance on the instruments, with no outside reference available.'),
+  H('Why'),
+  B('An unproficient pilot loses control roughly 10 minutes after being forced onto instruments alone — this is a survival skill, not an academic exercise.'),
+
+  S('How:'),
+
+  H('RM: Instrument Flying Hazards — AI.XI.A.R1'),
+  A('Failure to maintain VFR'),
+  P('Brings disorientation, loss of control, getting lost, icing, stress, and midair or terrain collision risk.'),
+  A('Spatial disorientation & loss of control'),
+  P('In visual flight the eyes win over false sensations; in IMC they can\'t correct for them — see II.A. Human Factors for the illusions themselves.'),
+  A('Stress & fatigue'),
+  B('"We don\'t rise to the level of our expectations; we fall to the level of our training" — inadequate proficiency is what turns inadvertent IMC into loss of control.'),
+  A('Pilot actions (mitigation)'),
+  P('Stay proficient on instruments · thorough preflight weather planning and alternates · a plan (automation, ATC, GPS) to reach an airport safely.'),
+  P('If VMC slips away: transition to and trust the instruments, use automation, ask ATC for assistance (or Guard, FSS, another aircraft, a phone), and use the GPS moving map for SA.', 3),
+
+  H('RM: Assistance & Emergencies — AI.XI.A.R2'),
+  P('Distress: serious, imminent danger, immediate help needed — declare it without hesitation (fire, mechanical failure, structural damage).'),
+  P('Urgency: concerned about safety, needs timely (not immediate) help — you\'re at least in an urgency condition the moment you\'re doubtful about position, fuel, weather, or anything else affecting safety. Ask for help before it becomes distress.', 3),
+
+  S('Control & Performance Concept'),
+  H('Pitch + Power = Performance — AI.XI.A.K1a/b/c'),
+  A('The 3 instrument categories'),
+  P('Control — attitude indicator and throttle, for immediate attitude/power adjustments · Performance — altimeter, airspeed, VSI, heading indicator, turn coordinator, showing actual results · Navigation — position relative to a fix or facility.'),
+  A('Procedural steps'),
+  B('Establish — Trim — Crosscheck — Adjust: set an approximate attitude/power on the control instruments, trim off the pressure, crosscheck the performance instruments, then adjust and repeat.'),
+
+  H('Establish — Control Instruments — AI.XI.A.K1a/b/c'),
+  A('Attitude indicator — pitch & bank'),
+  P('Changes are precise amounts against the horizon (pitch, in degrees or bar widths) and the bank scale.'),
+  A('Throttle — power'),
+  P('Set with the throttle, then crosscheck the engine gauges — don\'t fixate on them while setting power.'),
+
+  H('RM: Trim — AI.XI.A.R8'),
+  B('Don\'t fly with trim — set pitch and power first, then trim the pressure away for hands-off flight.'),
+
+  H('Crosscheck — AI.XI.A.K1d'),
+  P('The continuous, logical scan of instruments for attitude and performance information.'),
+  A('Hub-and-Spoke method'),
+  P('Attitude indicator is the hub; establish, then move out to a performance "spoke" and back, over and over.'),
+  A('Crosscheck & Bank'),
+  P('Establish, then check the heading indicator and turn coordinator.'),
+  A('Crosscheck & Pitch'),
+  P('Establish, then check the altimeter, VSI, and airspeed indicator.'),
+
+  H('RM: Crosscheck Errors — AI.XI.A.R5/R6'),
+  P('Fixation — staring at one instrument and losing the rest of the scan · Omission — dropping an instrument from the scan, often after not anticipating an attitude change\'s effect · Emphasis — over-relying on the instrument you understand best (VSI-chasing is the classic case).'),
+  B('Instrument interpretation only works if you understand what each gauge is actually built to tell you — know the instrument, not just its needle.'),
+
+  S('Instrument Operation & Limitations — AI.XI.A.K1a/c'),
+  H('Heading Indicator'),
+  P('A vertically-spinning gyro sensing rotation about the vertical axis, set to the compass; precession plus the Earth\'s 15°/hour rotation means it should be checked and reset about every 15 minutes.'),
+  H('Turn Coordinator'),
+  P('A canted gimbal sensing roll rate and turn rate together — a fast roll banks the mini-aircraft more steeply than a slow one. Align the wing with the turn index for a standard-rate (3°/sec) turn.'),
+  H('Airspeed Indicator'),
+  P('A differential pressure gauge — pitot pressure expands a diaphragm against static case pressure, and gearing reads the difference out as airspeed.'),
+  H('Altimeter'),
+  P('Reads ambient pressure as feet above a selected level; aneroid wafers compress/expand against pressure and drive the needles through gears — the Kollsman window sets the baseline.'),
+  A('Temperature & pressure errors'),
+  P('Warmer/higher-pressure than standard: true altitude reads higher than indicated. Colder/lower-pressure than standard: true altitude reads lower than indicated.'),
+  B('From hot to cold, or high to low, look out below.'),
+  H('Vertical Speed Indicator'),
+  P('A differential pressure instrument — the diaphragm reacts to static pressure immediately, the case lags briefly, and that pressure difference displays as rate of climb or descent.'),
+
+  H('Adjust'),
+  P('Correction size follows deviation size — restrict attitude-indicator pitch changes to a bar or half-bar width, keep bank at roughly the number of degrees to turn (never past 30°), and make every change smooth and small.', 3),
+
+  S('The Four Maneuvers'),
+  H('Straight-and-Level Flight — AI.XI.A.K1b'),
+  P('Nose on the horizon, wings level, cruise power — altimeter, bank, and heading constant; VSI at 0; turn coordinator level and coordinated.'),
+  P('Establish wings level and nose on the horizon, set cruise power, trim off the pressure, crosscheck for deviations, adjust and repeat.', 3),
+
+  H('Turns to Headings — AI.XI.D.K1b'),
+  P('Wings banked, nose slightly high, cruise power — constant altitude and airspeed, heading turning, turn coordinator banked and coordinated.'),
+  P('Coordinated aileron and rudder to the desired bank (turn coordinator for a standard-rate turn), adjust pitch to hold altitude, trim, crosscheck, adjust.', 3),
+  P('Roll out with coordinated opposite pressure, then re-establish straight-and-level pitch and power, crosscheck, and repeat.', 3),
+
+  H('Constant Airspeed Climb — AI.XI.B.K1b'),
+  P('10° nose up, full power — positive VSI, constant airspeed and heading, wings and turn coordinator level.'),
+  P('Raise the nose to the approximate climb pitch, set full power approaching climb speed, trim, then fine-tune pitch in 1-bar or half-bar movements to hold climb airspeed.', 3),
+  A('Level-off'),
+  P('Lead the altitude by 10% of the vertical speed (500 fpm to  lead by 50\') — reduce power, ease toward level on the attitude indicator, trim, and crosscheck VSI/altimeter/attitude indicator for level flight.'),
+  A('Turning climbs'),
+  P('Same procedure plus the desired bank on the attitude indicator; monitor the turn on the heading indicator and turn coordinator, and accelerate the crosscheck — there\'s more to track.'),
+
+  H('Constant Airspeed Descent — AI.XI.C.K1b'),
+  P('3° nose down, descent power — negative VSI, constant airspeed and heading, wings and turn coordinator level.'),
+  P('Reduce power and hold straight-and-level as speed bleeds off, then lower the nose to the descent attitude as descent speed is reached, trim, crosscheck.', 3),
+  A('Level-off'),
+  P('Same 10%-of-VSI lead — add power, ease to level, trim, crosscheck VSI/altimeter/attitude indicator.'),
+  A('Turning descents'),
+  P('Same procedure plus the desired bank; monitor on the heading indicator and turn coordinator, and accelerate the crosscheck.'),
+
+  S('Common Errors — AI.XI.A.K2'),
+  P('Fixation, omission, or emphasis in the crosscheck · misreading an instrument · wrong control application · not adjusting pitch/bank/power enough for altitude, heading, or speed corrections · sloppy climb/descent entry or level-off · sloppy turn entry or rollout · faulty trim procedure.'),
+
+  S('RM: Hazards'),
+  H('Collision Hazards — AI.XI.A.R3'),
+  P('Clear with gentle banks above/below and side to side before any climb, descent, or turn (AIM 4-4-15); scan in 10° increments, one second per area (AIM 4-4-14); lights on below 10,000\'.'),
+  P('Right-of-way (FAR 91.113): distress traffic first · same-category converging goes to the aircraft on the right · less maneuverable type wins between categories (balloons/gliders/airships over airplanes, a towing/refueling aircraft over an engine-driven one) · head-on, both alter right · overtaking goes to the one being overtaken, pass on the right · landing goes to final or the lower aircraft — don\'t take advantage of either rule.', 3),
+  H('Terrain & Obstacles'),
+  P('Use MEFs and terminal/IFR-VFR chart altitudes, extra vigilance at night; minimum safe altitudes (FAR 91.119) are 1,000\' above the highest obstacle within 2,000\' in congested areas, 500\' otherwise (500\' from any person/vessel/vehicle/structure over open water or sparse areas).'),
+  P('Towers can run 1,000–2,000\' AGL with guy wires out to 1,500\'; unlit overhead wires tend to follow the lakes, highways, and rail lines pilots use as visual cues.', 3),
+  H('Distractions, SA & Task Prioritization — AI.XI.A.R4'),
+  P('Distractions are dangerous — remove them or address them and move on; focus on performance especially with no visual references.'),
+  B('Lost SA? Admit it and fix it — it starts at preflight planning and staying ahead of the airplane.'),
+  P('An upset from lost SA: Push, Roll, Thrust, Stabilize. Lacking visual references, trust the instruments, use automation, ask for help, and get back to VMC.', 3),
+  P('Prioritize like the alligator closest to the boat — handle the most pressing task, then the next; Aviate, Navigate, Communicate always wins the argument.', 3),
+  H('RM: Control Solely by Reference to Instruments — AI.XI.A.R7'),
+  P('This whole lesson is the risk-management conversation for exactly that skill — every technique above exists because the horizon disappeared.'),
+
+  S('Conclusion'),
+  P('Review: hazards of losing VFR · distress vs urgency · Control/Performance/Navigation instruments · Establish-Trim-Crosscheck-Adjust · hub-and-spoke scan · fixation/omission/emphasis · each instrument\'s operation and errors · the four maneuvers and their level-offs · collision, terrain, SA, task prioritization.'),
+  P('The scan never stops moving — the moment it parks on one instrument is the moment the airplane starts doing something you don\'t know about.'),
+]};
+
+/* ============================================================
+   XI.E — Recovery from Unusual Flight Attitudes
+   Spine: nose-high = Power-Pitch-Bank (avoid a stall) · nose-low = Power-Bank-Pitch (avoid overstress)
+   ============================================================ */
+window.CFI_SCRIPTS['xi-e-unusual-attitudes'] = { nodes: [
+  S('Introduction'),
+  H('Attention'),
+  P('An unusual attitude is never something you plan for, which is why we as pilots train the recovery until it\'s a reflex instead of a decision.'),
+  H('Overview'),
+  P('What causes unusual attitudes — environmental, mechanical, human'),
+  P('Recognizing nose-high vs nose-low from the instruments'),
+  P('Recovery — nose-high (avoid a stall) and nose-low (avoid overstress)'),
+  P('Coordination during recovery'),
+  P('Common errors'),
+  P('RM: inadvertent IMC, collision, terrain, distractions/SA'),
+  H('What'),
+  P('Getting the airplane back to straight-and-level as fast and safely as possible from an unintended attitude — not diagnosing how it got there.'),
+  H('Why'),
+  B('Untrained pilots react to a UA instinctively, and instinct is usually wrong — training is what makes the correct response automatic instead of a guess made under startle.'),
+
+  S('How:'),
+
+  H('Unusual Attitude Situations — AI.XI.E.R1/R3'),
+  P('Turbulence, preoccupation with flight-deck duties, disorientation or confusion, task saturation, instrument failure, crosscheck/interpretation errors, stress, or a control-input error can all put the airplane somewhere you didn\'t intend.'),
+
+  H('Preventing Unusual Attitudes — AI.XI.E.K1'),
+  A('Environmental'),
+  P('Turbulence and sudden wind shifts (clear-air turbulence, mountain waves, wind shear, thunderstorms, microbursts) — avoid the weather with preflight planning, reports, and PIREPs.'),
+  A('Mechanical'),
+  P('Instrument or autopilot failure, or a runaway trim/control malfunction — an autopilot fault can be insidious, so disengage it and fly the airplane the moment something feels off.'),
+  P('Know the systems and POH procedures well enough to prevent the failure from becoming a UA in the first place.', 3),
+  A('Human'),
+  P('VMC-to-IMC loses the natural horizon and invites disorientation · diverted attention or task saturation (poor SRM/CRM, an unorganized flight deck) narrows the margin between task demand and pilot capability · fixation parks the crosscheck on one instrument · sensory overload/deprivation makes warnings hard to sort out.'),
+  A('Spatial disorientation'),
+  P('Recognized (caught and corrected) · unrecognized (unaware, no correction) · incapacitating (can\'t process it, lacks the skill, or it exceeds what the pilot can cope with) — training and practice are what move a pilot toward "recognized."'),
+  B('Flying by feel instead of the instruments leads almost always to the wrong correction.'),
+  P('Surprise (violates your expectations) and startle (the involuntary physical reflex) hit untrained pilots hardest — "we don\'t rise to the level of our expectations, we fall to the level of our training." BAI skills fade if they aren\'t practiced.', 3),
+
+  S('RM: Recognizing Unusual Attitudes — AI.XI.E.R2'),
+  B('Any instrument rate or indication outside a normal maneuver means: assume a UA and accelerate the crosscheck to confirm it.'),
+  A('Nose-high (climbing turn)'),
+  P('Airspeed decreasing, altitude/VSI increasing, turn coordinator may show a bank, attitude indicator mostly blue.'),
+  A('Nose-low (diving spiral)'),
+  P('Same instruments, opposite directions — airspeed increasing, altitude/VSI decreasing, attitude indicator mostly brown.'),
+
+  H('RM: Recovery Basics — AI.XI.E.K2/R6'),
+  P('On analog instruments, recover without the attitude indicator — it can be spilled, wrong by up to 5° even when working, inoperative, or simply hard to read at extreme attitudes; use airspeed, altimeter, VSI, and the turn coordinator instead.'),
+  P('Follow the POH if it differs; a glass-panel attitude indicator is reliable and should be used for recovery.', 3),
+  A('Nose-high vs nose-low intent'),
+  P('Nose-high recovery is built to avoid a stall; nose-low recovery is built to avoid overstressing the airframe.'),
+
+  H('Nose-High (Climbing Turn) Recovery — AI.XI.E.K2'),
+  B('Power — Pitch — Bank, nearly simultaneously.'),
+  P('Power: add as needed for the deceleration. Pitch: forward elevator to lower the nose and reduce AOA. Bank: coordinated aileron/rudder to level the wings on the turn coordinator.'),
+  A('Verify the recovery'),
+  P('As the altimeter and airspeed needles slow, level flight is close; when they stop and reverse, you\'re passing through level. Return to altitude, confirm level and coordinated (turn coordinator level, ball centered), then set power for the desired airspeed.'),
+
+  H('Nose-Low (Diving Spiral) Recovery — AI.XI.E.K2'),
+  B('Power — Bank — Pitch, all together.'),
+  P('Power: reduce to stop the airspeed and altitude loss. Bank: level the wings first on the turn coordinator — leveling before raising the nose cuts the G load. Pitch: smoothly raise the nose for level flight.'),
+  P('If terrain is a factor, use whatever back pressure is necessary to survive.', 3),
+  P('Verify the same way — needles slowing and reversing means passing through level; confirm level/coordinated, then set power for the desired airspeed.'),
+
+  H('Coordination During Recovery'),
+  P('Use the turn coordinator (and attitude indicator, if available) throughout — skidding or slipping sensations make disorientation worse and slow the recovery. A nose-low recovery risks excess Gs and uncoordinated flight; a nose-high recovery risks an uncoordinated stall and a possible spin.'),
+
+  S('Common Errors — AI.XI.E.K5'),
+  P('Not recognizing the UA in the first place · recovering by feel instead of by instrument indication · wrong control application during recovery (can aggravate or induce a UA) · missing the instrument cue for passing through level flight.'),
+
+  S('RM: Hazards'),
+  H('Inadvertent Flight into IMC — AI.XI.E.K3'),
+  B('Losing the ability to control the airplane by the natural horizon is IMC — recognize it and treat it as a genuine emergency, right then.'),
+  H('RM: Maintain Control — AI.XI.E.R7'),
+  P('Trust the instruments — they\'re the only safe way to fly it now. Priority one is wings level.'),
+  P('Trim for hands-off cruise, make small changes (no more than a bar width), use any automation on board (autopilot, wing leveler), and hold cruise speed until it\'s time to slow for landing. See XI.A-D. Basic Attitude Instrument Flight for the full technique.', 3),
+  A('Get help, find VMC'),
+  P('Call ATC, Guard, FSS — check weather for the nearest VMC, bug a heading, engage the autopilot if available, and consider a 180° back to the last known VMC.'),
+
+  H('Collision Hazards — AI.XI.E.R4'),
+  P('Clear with gentle banks above/below and side to side before any turn or climb/descent, scan in 10° increments, a second per area, lights on below 10,000\'.'),
+  P('Right-of-way: distress first, right in a category match, less maneuverable type, whoever\'s lower or already on final.', 3),
+  A('Terrain & obstacles'),
+  P('MSAs: 1,000\' above obstacles within 2,000\' in congested areas, 500\' otherwise. Towers 1,000–2,000\' AGL, guy wires to 1,500\' — unlit wires often follow the lakes/highways/rail lines pilots track.'),
+
+  H('Distractions, SA & Task Prioritization — AI.XI.E.R5'),
+  P('Remove or address distractions and move on; if SA is lost, admit it and fix it, starting from preflight planning.'),
+  P('An upset from lost SA: Push, Roll, Thrust, Stabilize. Attack the closest alligator, and let Aviate-Navigate-Communicate settle any argument about priority.', 3),
+
+  S('Conclusion'),
+  P('Review: environmental, mechanical, human causes · nose-high vs nose-low instrument picture · Power-Pitch-Bank (nose-high) and Power-Bank-Pitch (nose-low) · coordination through the recovery · common errors · inadvertent IMC and collision/terrain/SA hazards.'),
+  P('Every recovery starts the same way: stop trusting your inner ear and start trusting the needles.'),
 ]};
 })();
