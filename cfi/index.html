@@ -173,6 +173,8 @@ kbd { background:var(--bg3); border:1px solid var(--text4); border-radius:4px; p
 .toc-item.sect { color:var(--orange); text-transform:uppercase; font-size:10px; letter-spacing:.05em; margin-top:4px; }
 .toc-item.deep { padding-left:46px; color:var(--text4); font-size:11px; }
 .toc-item.deep:hover { color:var(--text2); }
+.toc-item.here { color:#ffd24a; border-left-color:#ffd24a; background:rgba(255,210,74,.07); font-weight:600; }
+.toc-item.here.sect { color:#ffd24a; }
 
 /* ===== nav: library (documents · videos · links) ===== */
 #nav-library { border-top:1px solid var(--bdr); max-height:34vh; overflow-y:auto; flex-shrink:0; }
@@ -372,6 +374,7 @@ function save() { localStorage.setItem(LS_KEY, JSON.stringify(store)); }
 
 let cur = null;        // {aoe, lesson}
 let curKey = null;     // selection key
+let tocOpen = true;    // the open lesson's topic list in the sidebar
 let openAoes = new Set(D.aoes.map(a => a.num));
 
 /* ---------- sidebar ---------- */
@@ -400,9 +403,18 @@ function renderNav(filter) {
       const scripted = !!(window.CFI_SCRIPTS && window.CFI_SCRIPTS[l.id]);
       const badge = n ? n : (scripted ? '✎' : '');
       it.innerHTML = `<span>${l.title.replace(/^[IVXLC]+\.[A-Z](-[A-Z])?\.\s*/, m => m)}</span><span class="cnt${badge === '' ? ' zero' : ''}">${badge}</span>`;
-      it.onclick = () => { loadLesson(aoe, l); if (isMobile()) openNav(false); };
+      it.onclick = () => {
+        if (cur && cur.lesson === l) {                 // clicking the open lesson collapses its topics
+          tocOpen = !tocOpen;
+          renderNav($('#search').value);
+          return;
+        }
+        tocOpen = true;
+        loadLesson(aoe, l);
+        if (isMobile()) openNav(false);
+      };
       list.appendChild(it);
-      if (cur && cur.lesson === l) renderToc(list);   // expand the open lesson's topics
+      if (cur && cur.lesson === l && tocOpen) renderToc(list);   // expand the open lesson's topics
     });
   });
 }
@@ -434,10 +446,63 @@ function renderToc(container) {
     const label = shortCue(t.t);
     d.textContent = label.length > 42 ? label.slice(0, 40).trim() + '…' : label;
     d.title = t.t;
+    d.dataset.nodeIdx = t.i;
+    d.dataset.src = o.src;
     d.onclick = e => { e.stopPropagation(); jumpToNode(o.src, t.i); if (isMobile()) openNav(false); };
     container.appendChild(d);
   });
+  requestAnimationFrame(syncTocHighlight);
 }
+
+/* ---------- scroll-spy: light up where you are ---------- */
+function visiblePaneBody() {
+  for (const s of ['#mine-body', '#con-body', '#flow-body', '#lp-body', '#ext-body']) {
+    const el = $(s);
+    if (el && el.style.display !== 'none' && el.offsetParent) return el;
+  }
+  return null;
+}
+function syncTocHighlight() {
+  const toc = [...document.querySelectorAll('.toc-item')];
+  if (!toc.length) return;
+  const body = visiblePaneBody();
+  if (!body) return;
+  const src = toc[0].dataset.src;
+  const sel = src === 'p' ? '#mine-body .ms-item' : (src === 'x' ? '#ext-body .node' : null);
+  let rows;
+  if (sel) rows = [...document.querySelectorAll(sel)];
+  else rows = [...body.querySelectorAll('.ms-item, .node')];
+  if (!rows.length) return;
+
+  // the topic whose line is highest in the upper quarter of the viewport
+  const top = body.getBoundingClientRect().top;
+  const cutoff = top + body.clientHeight * 0.25;
+  let curIdx = -1;
+  toc.forEach(t => {
+    const i = +t.dataset.nodeIdx;
+    const row = rows[i];
+    if (!row) return;
+    if (row.getBoundingClientRect().top <= cutoff) curIdx = i;
+  });
+  toc.forEach(t => t.classList.toggle('here', +t.dataset.nodeIdx === curIdx));
+  const active = toc.find(t => t.classList.contains('here'));
+  if (active) {
+    const nav = $('#nav-list');
+    const r = active.getBoundingClientRect(), nr = nav.getBoundingClientRect();
+    if (r.top < nr.top + 8 || r.bottom > nr.bottom - 8)
+      active.scrollIntoView({ block: 'center' });
+  }
+}
+let spyTick = false;
+function onPaneScroll() {
+  if (spyTick) return;
+  spyTick = true;
+  requestAnimationFrame(() => { spyTick = false; syncTocHighlight(); });
+}
+['#mine-body', '#con-body', '#flow-body', '#lp-body', '#ext-body'].forEach(s => {
+  const el = document.querySelector(s);
+  if (el) el.addEventListener('scroll', onPaneScroll, { passive: true });
+});
 
 /* ---------- library: documents · videos · links ---------- */
 const DOCS = [
