@@ -166,6 +166,35 @@ select { background:var(--btn); color:var(--text2); border:1px solid var(--bdr);
 .empty-hint { color:var(--text4); font-size:.9em; padding:30px 20px; text-align:center; line-height:1.6; }
 kbd { background:var(--bg3); border:1px solid var(--text4); border-radius:4px; padding:0 5px; font-size:.85em; font-family:inherit; }
 
+/* ===== nav: in-lesson table of contents ===== */
+.toc-item { padding:3px 12px 3px 34px; font-size:11.5px; color:var(--text3); cursor:pointer;
+            border-left:2px solid var(--bdr); margin-left:12px; line-height:1.3; }
+.toc-item:hover { color:var(--text); background:var(--bg2); border-left-color:var(--blue); }
+.toc-item.sect { color:var(--orange); text-transform:uppercase; font-size:10px; letter-spacing:.05em; margin-top:4px; }
+.toc-item.deep { padding-left:46px; color:var(--text4); font-size:11px; }
+.toc-item.deep:hover { color:var(--text2); }
+
+/* ===== nav: library (documents · videos · links) ===== */
+#nav-library { border-top:1px solid var(--bdr); max-height:34vh; overflow-y:auto; flex-shrink:0; }
+.lib-hdr { padding:8px 14px 5px; font-size:11px; color:var(--lime); text-transform:uppercase;
+           letter-spacing:.06em; cursor:pointer; user-select:none; display:flex; justify-content:space-between; }
+.lib-hdr:hover { color:var(--text); }
+.lib-hdr .tri { color:var(--text4); }
+.lib-item { padding:5px 12px 5px 20px; font-size:11.5px; color:var(--text2); cursor:pointer;
+            display:flex; gap:7px; align-items:baseline; line-height:1.3; }
+.lib-item:hover { background:var(--bg2); color:var(--text); }
+.lib-item .code { color:var(--orange); font-size:9.5px; min-width:34px; flex-shrink:0; font-variant-numeric:tabular-nums; }
+.lib-item .lbl { flex:1; overflow:hidden; text-overflow:ellipsis; }
+.lib-sub { padding:6px 14px 2px 20px; font-size:10px; color:var(--text4); text-transform:uppercase; letter-spacing:.05em; }
+
+/* ===== media viewer ===== */
+#media-body .mv-head { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+#media-body .mv-title { font-size:1.05em; font-weight:700; color:var(--text); flex:1; }
+#media-body .mv-frame { width:100%; aspect-ratio:16/9; border:1px solid var(--bdr); border-radius:10px; background:#000; }
+#media-body .mv-frame.doc { aspect-ratio:auto; height:78vh; background:var(--bg1); }
+#media-body .mv-meta { margin-top:10px; font-size:12px; color:var(--text3); }
+#media-body .mv-meta a { color:var(--orange); }
+
 /* ===== nav settings block ===== */
 #nav-settings { border-top:1px solid var(--bdr); padding:10px 14px 12px; display:flex; flex-direction:column; gap:6px; flex-shrink:0; }
 #nav-settings .ns-label { font-size:10px; color:var(--text4); text-transform:uppercase; letter-spacing:.09em; margin-bottom:2px; }
@@ -272,6 +301,7 @@ a.reflink:hover { color:#ffc84d; border-bottom-style:solid; }
       <input id="search" type="text" placeholder="Filter lessons…">
     </div>
     <div id="nav-list"></div>
+    <div id="nav-library"></div>
     <div id="nav-settings">
       <div class="ns-label">Settings</div>
       <button class="tbtn" id="btn-copy">Copy My Lesson Plan</button>
@@ -321,6 +351,7 @@ a.reflink:hover { color:#ffc84d; border-bottom-style:solid; }
         <div class="pane-body" id="mine-body" style="display:none"></div>
         <div class="pane-body" id="flow-body" style="display:none"></div>
         <div class="pane-body" id="cards-body" style="display:none"></div>
+        <div class="pane-body" id="media-body" style="display:none"></div>
       </div>
     </div>
   </div>
@@ -371,10 +402,149 @@ function renderNav(filter) {
       it.innerHTML = `<span>${l.title.replace(/^[IVXLC]+\.[A-Z](-[A-Z])?\.\s*/, m => m)}</span><span class="cnt${badge === '' ? ' zero' : ''}">${badge}</span>`;
       it.onclick = () => { loadLesson(aoe, l); if (isMobile()) openNav(false); };
       list.appendChild(it);
+      if (cur && cur.lesson === l) renderToc(list);   // expand the open lesson's topics
     });
   });
 }
 $('#search').addEventListener('input', e => renderNav(e.target.value));
+
+/* ---------- in-lesson table of contents ----------
+   Outlines whichever pane is actually on screen, so the jump lands where the
+   user is reading. */
+function activeOutline() {
+  if (!cur) return null;
+  if ($('#mine-body').style.display !== 'none' && lessonScript())
+    return { nodes: lessonScript().nodes, src: 'p' };
+  if ($('#con-body').style.display !== 'none' && cur.lesson.con)
+    return { nodes: cur.lesson.con.nodes, src: 'c' };
+  if (!splitView && cur.lesson.con) return { nodes: cur.lesson.con.nodes, src: 'c' };
+  const onLp = document.querySelector('.tab[data-ltab="lp"]').classList.contains('active');
+  if (onLp && cur.lesson.con) return { nodes: cur.lesson.con.nodes, src: 'c' };
+  if (cur.lesson.ext) return { nodes: cur.lesson.ext.nodes, src: 'x' };
+  return cur.lesson.con ? { nodes: cur.lesson.con.nodes, src: 'c' } : null;
+}
+function renderToc(container) {
+  const o = activeOutline();
+  if (!o) return;
+  // same topic filter the Flow tab uses — headings and ACS elements, not prose
+  flowTopics(o.nodes, false).forEach(t => {
+    if (/^(attention|overview|what|why|introduction)$/i.test(t.t.trim())) return;
+    const d = document.createElement('div');
+    d.className = 'toc-item' + (t.kind === 'sect' ? ' sect' : (t.kind === 'sub' ? ' deep' : ''));
+    const label = shortCue(t.t);
+    d.textContent = label.length > 42 ? label.slice(0, 40).trim() + '…' : label;
+    d.title = t.t;
+    d.onclick = e => { e.stopPropagation(); jumpToNode(o.src, t.i); if (isMobile()) openNav(false); };
+    container.appendChild(d);
+  });
+}
+
+/* ---------- library: documents · videos · links ---------- */
+const DOCS = [
+  { title: 'AC 61-65K — Certification: Pilots & Flight Instructors',
+    url: 'docs/AC 61-65K - Certification of Pilots and Flight Instructors.pdf', code: 'AC' },
+];
+let libOpen = { docs: true, videos: true, links: false };
+
+function lessonCode(title) {
+  const m = title.match(/^([IVXLC]+\.[A-Z](?:-[A-Z])?)/);
+  return m ? m[1] : title.slice(0, 5);
+}
+function buildLibrary() {
+  const byUrl = new Map();
+  CFI_DATA.aoes.forEach(a => a.lessons.forEach(l => {
+    const src = l.con || l.ext;
+    if (!src || !src.links) return;
+    const code = lessonCode(l.title);
+    src.links.forEach(([anchor, url]) => {
+      if (!byUrl.has(url)) byUrl.set(url, { anchor, codes: new Set(), url });
+      byUrl.get(url).codes.add(code);
+      if (anchor.length > byUrl.get(url).anchor.length) byUrl.get(url).anchor = anchor;
+    });
+  }));
+  const all = [...byUrl.values()];
+  const isVid = u => /youtube\.com|youtu\.be|vimeo\.com/.test(u);
+  return {
+    videos: all.filter(x => isVid(x.url)),
+    links: all.filter(x => !isVid(x.url)).sort((a, b) =>
+      [...a.codes][0].localeCompare([...b.codes][0]) || a.anchor.localeCompare(b.anchor)),
+  };
+}
+let LIB = null;
+function renderLibrary() {
+  if (!LIB) LIB = buildLibrary();
+  const c = $('#nav-library'); c.innerHTML = '';
+  const section = (key, label, count, items, render) => {
+    const h = document.createElement('div');
+    h.className = 'lib-hdr';
+    h.innerHTML = `<span>${label} <span style="color:var(--text4)">${count}</span></span><span class="tri">${libOpen[key] ? '▾' : '▸'}</span>`;
+    h.onclick = () => { libOpen[key] = !libOpen[key]; renderLibrary(); };
+    c.appendChild(h);
+    if (libOpen[key]) items.forEach(render);
+  };
+
+  section('docs', 'Documents', DOCS.length, DOCS, d => {
+    const el = document.createElement('div');
+    el.className = 'lib-item';
+    el.innerHTML = `<span class="code">📄</span><span class="lbl">${escapeHtml(d.title)}</span>`;
+    el.onclick = () => openMedia({ type: 'doc', url: d.url, title: d.title });
+    c.appendChild(el);
+  });
+
+  section('videos', 'Videos', LIB.videos.length, LIB.videos, v => {
+    const el = document.createElement('div');
+    el.className = 'lib-item';
+    el.innerHTML = `<span class="code">${[...v.codes].sort().join(',')}</span>` +
+                   `<span class="lbl">▶ ${escapeHtml(v.anchor)}</span>`;
+    el.onclick = () => openMedia({ type: 'video', url: v.url, title: v.anchor, code: [...v.codes].sort().join(', ') });
+    c.appendChild(el);
+  });
+
+  section('links', 'Links', LIB.links.length, LIB.links, l => {
+    const el = document.createElement('div');
+    el.className = 'lib-item';
+    el.innerHTML = `<span class="code">${[...l.codes].sort().join(',')}</span>` +
+                   `<span class="lbl">${escapeHtml(l.anchor)}</span>`;
+    el.onclick = () => window.open(l.url, '_blank', 'noopener');
+    c.appendChild(el);
+  });
+}
+
+/* ---------- media viewer (in-page video / PDF) ---------- */
+function ytEmbed(url) {
+  const m = url.match(/(?:v=|youtu\.be\/|embed\/)([\w-]{6,})/);
+  const t = (url.match(/[?&]t=(\d+)/) || [])[1];
+  return m ? `https://www.youtube.com/embed/${m[1]}?rel=0${t ? '&start=' + t : ''}` : null;
+}
+function openMedia({ type, url, title, code }) {
+  stopReading();
+  ['#con-body', '#mine-body', '#flow-body', '#cards-body'].forEach(s => $(s).style.display = 'none');
+  document.querySelectorAll('.tab[data-tab]').forEach(x => x.classList.remove('active'));
+  if (isMobile()) showPane('right');
+  const mb = $('#media-body'); mb.style.display = ''; mb.innerHTML = '';
+
+  const head = document.createElement('div');
+  head.className = 'mv-head';
+  head.innerHTML = `<button class="tbtn" id="mv-back">‹ Back</button>` +
+                   `<div class="mv-title">${code ? escapeHtml(code) + ' · ' : ''}${escapeHtml(title)}</div>`;
+  mb.appendChild(head);
+  head.querySelector('#mv-back').onclick = () => {
+    mb.style.display = 'none';
+    document.querySelector('.tab[data-tab="mine"]').click();
+  };
+
+  const frame = document.createElement('iframe');
+  frame.className = 'mv-frame' + (type === 'doc' ? ' doc' : '');
+  frame.setAttribute('allow', 'accelerometer; encrypted-media; picture-in-picture; fullscreen');
+  frame.setAttribute('allowfullscreen', '');
+  frame.src = type === 'video' ? (ytEmbed(url) || url) : url;
+  mb.appendChild(frame);
+
+  const meta = document.createElement('div');
+  meta.className = 'mv-meta';
+  meta.innerHTML = `<a href="${url}" target="_blank" rel="noopener">Open in a new tab ↗</a>`;
+  mb.appendChild(meta);
+}
 
 /* ---------- selections ---------- */
 function getSel() {
@@ -424,7 +594,13 @@ function mapScriptImages(sc, con) {
   // script line AT OR AFTER the previous figure's line. Searching a shrinking
   // window keeps figures in source order without shoving mismatches onto one
   // line (which is what a plain "clamp forward" did).
-  let lastAnchor = 0;
+  // Figures belong in the teaching body, never in the Introduction boilerplate.
+  const howIdx = sc.nodes.findIndex(n => /^How:?$/i.test(n.t));
+  const concIdx = sc.nodes.findIndex(n => /^Conclusion$/i.test(n.t));
+  const bodyStart = howIdx >= 0 ? howIdx + 1 : 0;
+  const bodyEnd = concIdx > bodyStart ? concIdx - 1 : sc.nodes.length - 1;
+
+  let lastAnchor = bodyStart;
   const load = {};   // how many figures already sit on a line
   con.nodes.forEach((n, i) => {
     if (!n.img) return;
@@ -438,13 +614,18 @@ function mapScriptImages(sc, con) {
       if ((load[k] || 0) >= 2) s *= 0.5;       // stop piling figures on one line
       if (s > score) { score = s; best = k; }
     }
-    if (best >= 0 && score >= 0.3) {
-      (sc.nodes[best].img = sc.nodes[best].img || []).push(...n.img);
-      load[best] = (load[best] || 0) + n.img.length;
-      lastAnchor = best;
-    } else {
-      sc._leftoverImgs.push(...n.img);
+    if (best < 0 || score < 0.3) {
+      // No wording match (the script condensed that section away). Fall back to
+      // the figure's RELATIVE position in the lesson plan so it still lands in
+      // roughly the right place inline, rather than being dumped at the end.
+      const frac = i / Math.max(1, con.nodes.length - 1);
+      const prop = bodyStart + Math.round(frac * Math.max(0, bodyEnd - bodyStart));
+      best = Math.min(bodyEnd, Math.max(lastAnchor, prop));
+      while (best < bodyEnd && (load[best] || 0) >= 2) best++;   // don't stack
     }
+    (sc.nodes[best].img = sc.nodes[best].img || []).push(...n.img);
+    load[best] = (load[best] || 0) + n.img.length;
+    lastAnchor = best;
   });
 }
 function toggleSel(src, idx) {
@@ -1200,11 +1381,14 @@ document.querySelectorAll('.tab[data-tab]').forEach(t => t.onclick = () => {
   $('#mine-body').style.display = w === 'mine' ? '' : 'none';
   $('#flow-body').style.display = w === 'flow' ? '' : 'none';
   $('#cards-body').style.display = w === 'cards' ? '' : 'none';
+  $('#media-body').style.display = 'none';
   if (w === 'flow') renderFlow();
   if (w === 'cards') startDeck();
+  renderNav($('#search').value);   // the table of contents follows the visible pane
 });
 function setLeftTab(which) {
   document.querySelectorAll('.tab[data-ltab]').forEach(x => x.classList.toggle('active', x.dataset.ltab === which));
+  if (cur) setTimeout(() => renderNav($('#search').value), 0);
   $('#ext-body').style.display = which === 'ext' ? '' : 'none';
   $('#lp-body').style.display = which === 'lp' ? '' : 'none';
   const n = which === 'ext'
@@ -1532,6 +1716,7 @@ $('#rate').value = store.prefs.rate; $('#rate-val').textContent = store.prefs.ra
 $('#fsize').value = store.prefs.fs; document.documentElement.style.setProperty('--fs', store.prefs.fs + 'px');
 applyModes();
 renderNav('');
+renderLibrary();
 if (store.last) {
   for (const a of D.aoes) { const l = a.lessons.find(l => l.id === store.last); if (l) { loadLesson(a, l); break; } }
 }
