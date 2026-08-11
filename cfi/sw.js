@@ -1,7 +1,7 @@
 /* CFI Binder service worker — makes the whole binder work with no internet.
    Core files are cached on install; figures and PDFs are cached as they are
    viewed, or all at once via "Save all for offline" in Settings. */
-const CACHE = 'cfi-binder-v2';
+const CACHE = 'cfi-binder-v3';
 const CORE = ['./', './index.html', './custom.js', './data.js'];
 // Content files change as lessons are edited — always try the network first so
 // an online device picks up updates, falling back to cache when offline.

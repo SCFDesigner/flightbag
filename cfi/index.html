@@ -339,6 +339,7 @@ a.reflink:hover { color:#ffc84d; border-bottom-style:solid; }
       <div id="offline-state">checking…</div>
       <button class="tbtn" id="btn-offline-lib">⤓ Save FAA handbooks (256 MB)</button>
       <div id="offline-lib-state"></div>
+      <button class="tbtn" id="btn-update">↻ Force update</button>
       <div class="tctl">Aa <input type="range" id="fsize" min="12" max="20" step="1" value="15"></div>
     </div>
   </nav>
@@ -1921,7 +1922,7 @@ function unlockUI() {
 })();
 
 /* ---------- offline (checkride-day insurance) ---------- */
-const SW_CACHE = 'cfi-binder-v2';   // keep in step with sw.js
+const SW_CACHE = 'cfi-binder-v3';   // keep in step with sw.js
 function libraryUrls() {
   return Object.values((window.CFI_REFS || { books: {} }).books).map(b => b.file);
 }
@@ -1952,7 +1953,18 @@ async function offlineReport() {
   else setOfflineState(`${have} of ${all.length} files saved for offline`);
 }
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').then(() => { offlineReport(); libReport(); }).catch(() => setOfflineState('offline unavailable'));
+  // When a newer worker takes over, reload once so the page it serves is the
+  // new one — otherwise a fix can sit on the server and never reach the device.
+  let reloadedForUpdate = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (reloadedForUpdate) return;
+    reloadedForUpdate = true;
+    location.reload();
+  });
+  navigator.serviceWorker.register('sw.js').then(reg => {
+    reg.update();
+    offlineReport(); libReport();
+  }).catch(() => setOfflineState('offline unavailable'));
   navigator.serviceWorker.addEventListener('message', e => {
     const d = e.data || {};
     if (d.type !== 'CACHE_PROGRESS') return;
@@ -1978,6 +1990,23 @@ async function libReport() {
   el.textContent = have >= lib.length ? `✓ all ${lib.length} handbooks saved` : `${have} of ${lib.length} handbooks saved`;
   el.className = have >= lib.length ? 'ready' : '';
 }
+/* Nuclear option: throw away the worker and every cached file, then reload
+   fresh from the server. Use it if the binder ever looks out of date. */
+$('#btn-update').onclick = async () => {
+  setOfflineState('updating…', 'working');
+  try {
+    if (navigator.serviceWorker) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r => r.unregister()));
+    }
+    if ('caches' in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => caches.delete(k)));
+    }
+  } catch (e) { /* fall through to the reload regardless */ }
+  location.replace(location.pathname + '?u=' + Date.now());
+};
+
 $('#btn-offline-lib').onclick = () => {
   if (!navigator.serviceWorker || !navigator.serviceWorker.controller) return;
   const el = $('#offline-lib-state');
