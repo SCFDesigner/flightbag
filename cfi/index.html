@@ -88,10 +88,18 @@ select { background:var(--btn); color:var(--text2); border:1px solid var(--bdr);
 .pt-name { font-size:1.12em; font-weight:700; color:var(--text); margin-top:3px; line-height:1.25; }
 .pt-refs { font-size:.72em; color:var(--text3); margin-top:3px; }
 
-.front-card { background:var(--bg1); border:1px solid var(--bdr); border-radius:10px; padding:10px 14px; margin-bottom:8px; font-size:.88em; }
-.front-card .fc-h { color:var(--orange); font-weight:700; font-size:.82em; text-transform:uppercase; letter-spacing:.05em; margin-bottom:3px; }
-.front-card div { color:var(--text2); padding:1px 0; }
+/* the lesson-plan header reads as columns, like the printed plan — not a
+   half-page stack of one-line boxes */
+.front-wrap { display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:8px; margin-bottom:12px; align-items:start; }
+.front-card { background:var(--bg1); border:1px solid var(--bdr); border-radius:10px; padding:9px 12px; font-size:.86em; break-inside:avoid; }
+.front-card.wide { grid-column:1 / -1; }
+.front-card .fc-h { color:var(--orange); font-weight:700; font-size:.8em; text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px; }
+.front-card div { color:var(--text2); padding:1px 0 1px 11px; position:relative; line-height:1.35; }
+.front-card div::before { content:'•'; position:absolute; left:0; color:var(--text4); }
+.front-card .fc-h::before, .front-card div.nob::before { content:none; }
+.front-card .fc-h { padding-left:0; }
 .front-card div.fb { color:var(--text); font-weight:600; }
+@media (max-width: 820px) { .front-wrap { grid-template-columns:1fr; } }
 .front-toggle { cursor:pointer; color:var(--text3); font-size:11.5px; margin-bottom:10px; user-select:none; }
 .front-toggle:hover { color:var(--text); }
 
@@ -103,10 +111,12 @@ select { background:var(--btn); color:var(--text2); border:1px solid var(--bdr);
 .tab .mcount { color:var(--lime); font-weight:700; }
 
 /* ===== my script ===== */
-.ms-item { position:relative; padding:2px 84px 2px 26px; border-radius:5px; line-height:1.4; }
-.ms-item.sect { font-weight:700; color:var(--orange); margin-top:14px; text-transform:uppercase; font-size:.85em; letter-spacing:.06em; }
-.ms-item.hdr0 { font-weight:700; color:var(--blue); margin-top:10px; font-size:1.03em; }
-.ms-item.topic { font-weight:600; color:#7fc9ff; }
+.ms-item { position:relative; padding:3px 84px 3px 26px; border-radius:5px; line-height:1.48; }
+.ms-item.sect { font-weight:700; color:var(--orange); margin-top:22px; margin-bottom:4px; text-transform:uppercase;
+                font-size:.85em; letter-spacing:.06em; padding-bottom:4px; border-bottom:1px solid var(--bdr); }
+.ms-item.hdr0 { font-weight:700; color:var(--blue); margin-top:16px; margin-bottom:3px; font-size:1.05em; }
+.ms-item.topic { font-weight:600; color:#7fc9ff; margin-top:9px; }
+.ms-item .bullet { color:var(--text4); margin-right:6px; }
 .ms-item.skel-empty { opacity:.32; }
 .ms-item:hover { background:var(--bg1); }
 .ms-item.note { border-left:2px solid var(--lime); padding-left:10px; }
@@ -222,6 +232,15 @@ body:not(.readmode) .nb.play, body:not(.readmode) .mb.play { display:none !impor
 body.nosplit #pane-ext { display:none; }
 @media (max-width: 820px) { #tgl-split { display:none; } }
 
+/* ===== handbook deep links ===== */
+.ref-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(250px, 1fr)); gap:6px; margin:2px 0 6px 26px; }
+.ref-chip { background:var(--bg1); border:1px solid var(--bdr); border-radius:8px; padding:7px 10px;
+            cursor:pointer; display:flex; flex-direction:column; gap:1px; }
+.ref-chip:hover { border-color:var(--orange); background:var(--bg2); }
+.rc-book { font-size:.82em; color:var(--text); font-weight:600; }
+.rc-ch { font-size:.78em; color:var(--text3); }
+.rc-go { font-size:.72em; color:var(--orange); }
+
 /* ===== reference links ===== */
 a.reflink { color:var(--orange); text-decoration:none; border-bottom:1px dotted currentColor; }
 a.reflink:hover { color:#ffc84d; border-bottom-style:solid; }
@@ -316,8 +335,10 @@ a.reflink:hover { color:#ffc84d; border-bottom-style:solid; }
       <div class="ns-label">Settings</div>
       <button class="tbtn" id="btn-copy">Copy My Lesson Plan</button>
       <button class="tbtn" id="btn-dl">Export My Lesson Plan (.md)</button>
-      <button class="tbtn" id="btn-offline">⤓ Save all for offline</button>
+      <button class="tbtn" id="btn-offline">⤓ Save binder offline</button>
       <div id="offline-state">checking…</div>
+      <button class="tbtn" id="btn-offline-lib">⤓ Save FAA handbooks (256 MB)</button>
+      <div id="offline-lib-state"></div>
       <div class="tctl">Aa <input type="range" id="fsize" min="12" max="20" step="1" value="15"></div>
     </div>
   </nav>
@@ -372,6 +393,7 @@ a.reflink:hover { color:#ffc84d; border-bottom-style:solid; }
 <script src="data.js"></script>
 <!-- custom.js holds the hand-authored scripts and gets edited often, so always
      fetch a fresh copy instead of whatever the browser has cached. -->
+<script src="refs.js"></script>
 <script>document.write('<script src="custom.js?t=' + Date.now() + '"><\/script>');</script>
 <script>
 const D = window.CFI_DATA;
@@ -518,7 +540,8 @@ function onPaneScroll() {
 const DOCS = [
   { title: 'AC 61-65K — Certification: Pilots & Flight Instructors',
     url: 'docs/AC 61-65K - Certification of Pilots and Flight Instructors.pdf', code: 'AC' },
-];
+].concat(Object.values((window.CFI_REFS || { books: {} }).books)
+  .map(b => ({ title: b.name, url: b.file, code: 'FAA' })));
 let libOpen = { docs: true, videos: true, links: false };
 
 function lessonCode(title) {
@@ -592,6 +615,9 @@ function ytEmbed(url) {
   return m ? `https://www.youtube.com/embed/${m[1]}?rel=0${t ? '&start=' + t : ''}` : null;
 }
 function openMedia({ type, url, title, code }) {
+  // PDFs go to the browser's own viewer — it honours #page= and handles a
+  // 40 MB handbook far better than an iframe does, on iPad especially.
+  if (type === 'doc') { window.open(url, '_blank', 'noopener'); return; }
   stopReading();
   ['#con-body', '#mine-body', '#flow-body', '#cards-body'].forEach(s => $(s).style.display = 'none');
   document.querySelectorAll('.tab[data-tab]').forEach(x => x.classList.remove('active'));
@@ -876,18 +902,26 @@ function renderFront(front, container, expanded) {
   tog.className = 'front-toggle';
   tog.textContent = (expanded ? '▾' : '▸') + ' Lesson plan header (objectives · completion standards · elements · schedule)';
   const wrap = document.createElement('div');
+  wrap.className = 'front-wrap';
   wrap.style.display = expanded ? '' : 'none';
   front.forEach(cell => {
     const card = document.createElement('div');
     card.className = 'front-card';
+    let head = '';
     cell.forEach((ln, i) => {
-      if (ln.img) { const im = document.createElement('img'); im.src = ln.img; im.style.maxWidth = '92%'; card.appendChild(im); return; }
+      if (ln.img) { const im = document.createElement('img'); im.src = ln.img; im.style.maxWidth = '100%'; card.appendChild(im); return; }
       const d = document.createElement('div');
-      if (i === 0 && (ln.b || /^[A-Z\s&']+$/.test(ln.t))) d.className = 'fc-h';
+      if (i === 0 && (ln.b || /^[A-Z\s&'’/-]+$/.test(ln.t))) { d.className = 'fc-h'; head = ln.t; }
       else if (ln.b) d.className = 'fb';
       d.textContent = ln.t;
       card.appendChild(d);
     });
+    // prose blocks (objectives, notes, the hook) want the full width; short
+    // lists (key points, elements, equipment) tile into columns
+    const lines = cell.filter(l => l.t).length;
+    const longest = Math.max(0, ...cell.map(l => (l.t || '').length));
+    if (/OBJECTIVE|COMPLETION|NOTE|ATTENTION|HOOK|WHAT|WHY|OVERVIEW/i.test(head) || longest > 150)
+      card.classList.add('wide');
     wrap.appendChild(card);
   });
   tog.onclick = () => { const show = wrap.style.display === 'none'; wrap.style.display = show ? '' : 'none'; tog.textContent = (show ? '▾' : '▸') + ' Lesson plan header (objectives · completion standards · elements · schedule)'; };
@@ -986,7 +1020,8 @@ function msItem(n, src, i, opts) {
   const div = document.createElement('div');
   div.className = 'ms-item' + nodeCls(n) + (opts.empty ? ' skel-empty' : '') + (edited ? ' edited' : '');
   div.style.marginLeft = (Math.max(0, n.l) * 18) + 'px';
-  let inner = (n.l > 0 && !n.b && !n._k && !SELF_MARKED.test(text) ? '<span class="bullet">•</span>' : '') +
+  const marked = SELF_MARKED.test(text);
+  let inner = (n.l > 0 && !marked ? `<span class="bullet">${n._k || n.b ? '▸' : '•'}</span>` : '') +
               `<span class="ms-text">${linkify(escapeHtml(text), n.lk || lessonLinks())}</span><span class="mctl">` +
               `<span class="mb play" title="Read from here">▸</span>` +
               `<span class="mb edit" title="Edit text">✎</span>` +
@@ -1043,6 +1078,51 @@ function addNote(anchorKey, level) {
   pendingNoteFocus = sel.notes.length - 1;
   save(); renderMine();
 }
+/* ---------- FAA handbook deep links ----------
+   The task -> book -> chapter -> PDF page map came out of the CFI dashboard;
+   a click opens the handbook in the viewer at that exact page. */
+function taskCode(title) {
+  const m = title.match(/^([IVXLC]+)\.([A-Z])/);
+  return m ? m[1] + '.' + m[2] : null;
+}
+function lessonRefs() {
+  if (!cur || !window.CFI_REFS) return [];
+  const code = taskCode(cur.lesson.title);
+  return (code && CFI_REFS.tasks[code]) || [];
+}
+function renderHandbookRefs(mb) {
+  const refs = lessonRefs();
+  if (!refs.length) return;
+  const h = document.createElement('div');
+  h.className = 'ms-src'; h.textContent = 'Open the handbook at this task';
+  mb.appendChild(h);
+  const wrap = document.createElement('div');
+  wrap.className = 'ref-grid';
+  refs.forEach(r => {
+    const book = r.b === 'AIM' ? null : CFI_REFS.books[r.b];
+    const el = document.createElement('div');
+    el.className = 'ref-chip';
+    if (book) {
+      const local = book.file && !book.remote;
+      el.innerHTML = `<span class="rc-book">${escapeHtml(book.name)}</span>` +
+                     `<span class="rc-ch">Ch ${r.ch} · ${escapeHtml(r.t)}</span>` +
+                     `<span class="rc-go">p.${r.p} ${local ? '↗' : '· faa.gov ↗'}</span>`;
+      el.onclick = () => {
+        const url = (local ? book.file : book.url) + '#page=' + r.p;
+        if (local) openMedia({ type: 'doc', url, title: `${book.name} — Ch ${r.ch}: ${r.t}`, code: 'p.' + r.p });
+        else window.open(url, '_blank', 'noopener');
+      };
+    } else {
+      el.innerHTML = `<span class="rc-book">AIM</span>` +
+                     `<span class="rc-ch">${escapeHtml(r.sec)} · ${escapeHtml(r.t)}</span>` +
+                     `<span class="rc-go">open ↗</span>`;
+      el.onclick = () => r.url && window.open(r.url, '_blank', 'noopener');
+    }
+    wrap.appendChild(el);
+  });
+  mb.appendChild(wrap);
+}
+
 function renderMine() {
   const mb = $('#mine-body'); mb.innerHTML = '';
   if (!cur) return;
@@ -1129,6 +1209,9 @@ function renderMine() {
   addBtn.textContent = '＋ Add your own line';
   addBtn.onclick = () => addNote('end', 0);
   mb.appendChild(addBtn);
+
+  // FAA handbooks opened straight to the chapter that covers this task
+  renderHandbookRefs(mb);
 
   // every reference link in this lesson, one click away
   const links = lessonLinks();
@@ -1839,9 +1922,13 @@ function unlockUI() {
 
 /* ---------- offline (checkride-day insurance) ---------- */
 const SW_CACHE = 'cfi-binder-v2';   // keep in step with sw.js
+function libraryUrls() {
+  return Object.values((window.CFI_REFS || { books: {} }).books).map(b => b.file);
+}
 function everyAssetUrl() {
-  const urls = new Set(['./', './index.html', './custom.js', './data.js', './manifest.webmanifest']);
-  DOCS.forEach(d => urls.add(d.url));
+  const urls = new Set(['./', './index.html', './custom.js', './data.js', './refs.js', './manifest.webmanifest']);
+  const lib = new Set(libraryUrls());
+  DOCS.forEach(d => { if (!lib.has(d.url)) urls.add(d.url); });   // handbooks download separately
   CFI_DATA.aoes.forEach(a => a.lessons.forEach(l => {
     ['con', 'ext'].forEach(v => {
       const src = l[v]; if (!src) return;
@@ -1865,7 +1952,7 @@ async function offlineReport() {
   else setOfflineState(`${have} of ${all.length} files saved for offline`);
 }
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').then(offlineReport).catch(() => setOfflineState('offline unavailable'));
+  navigator.serviceWorker.register('sw.js').then(() => { offlineReport(); libReport(); }).catch(() => setOfflineState('offline unavailable'));
   navigator.serviceWorker.addEventListener('message', e => {
     const d = e.data || {};
     if (d.type !== 'CACHE_PROGRESS') return;
@@ -1880,6 +1967,23 @@ $('#btn-offline').onclick = async () => {
   }
   setOfflineState('saving…', 'working');
   navigator.serviceWorker.controller.postMessage({ type: 'CACHE_ALL', urls: everyAssetUrl() });
+};
+
+async function libReport() {
+  const el = $('#offline-lib-state'); if (!el || !('caches' in window)) return;
+  const lib = libraryUrls(); if (!lib.length) return;
+  const c = await caches.open(SW_CACHE);
+  let have = 0;
+  for (const u of lib) if (await c.match(u, { ignoreSearch: true })) have++;
+  el.textContent = have >= lib.length ? `✓ all ${lib.length} handbooks saved` : `${have} of ${lib.length} handbooks saved`;
+  el.className = have >= lib.length ? 'ready' : '';
+}
+$('#btn-offline-lib').onclick = () => {
+  if (!navigator.serviceWorker || !navigator.serviceWorker.controller) return;
+  const el = $('#offline-lib-state');
+  el.textContent = 'downloading handbooks — leave this open…'; el.className = 'working';
+  navigator.serviceWorker.controller.postMessage({ type: 'CACHE_ALL', urls: libraryUrls() });
+  setTimeout(libReport, 8000);
 };
 
 /* ---------- init ---------- */
