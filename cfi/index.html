@@ -647,6 +647,20 @@ function dice(a, b) {
   a.forEach(w => { if (b.has(w)) hit++; });
   return (2 * hit) / (a.size + b.size);
 }
+/* A figure introduces a topic — it must never land inside a list or an acronym
+   breakdown. Promote any anchor to the heading that owns that content, so the
+   image renders directly under the heading and above its points. */
+function isHeadingNode(n) { return n.l === -1 || (n.b && (n.l <= 1 || n.k)); }
+function headingFor(nodes, idx, floor) {
+  if (isHeadingNode(nodes[idx])) return idx;
+  const lvl = Math.max(0, nodes[idx].l);
+  for (let j = idx - 1; j >= 0; j--) {
+    const n = nodes[j];
+    if (n.l === -1) return Math.max(j, floor);                       // section
+    if (isHeadingNode(n) && Math.max(0, n.l) < lvl) return Math.max(j, floor);
+  }
+  return idx;
+}
 function mapScriptImages(sc, con) {
   sc._leftoverImgs = [];
   if (!con) return;
@@ -688,6 +702,7 @@ function mapScriptImages(sc, con) {
       best = Math.min(bodyEnd, Math.max(lastAnchor, prop));
       while (best < bodyEnd && (load[best] || 0) >= 2) best++;   // don't stack
     }
+    best = headingFor(sc.nodes, best, bodyStart);   // sit above the content, never inside a list
     (sc.nodes[best].img = sc.nodes[best].img || []).push(...n.img);
     load[best] = (load[best] || 0) + n.img.length;
     lastAnchor = best;
