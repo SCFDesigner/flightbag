@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="CFI Binder">
+<meta name="theme-color" content="#08080a">
 <title>CFI Lesson Condenser</title>
 <style>
 :root {
@@ -202,6 +207,9 @@ kbd { background:var(--bg3); border:1px solid var(--text4); border-radius:4px; p
 #nav-settings .ns-label { font-size:10px; color:var(--text4); text-transform:uppercase; letter-spacing:.09em; margin-bottom:2px; }
 #nav-settings .tbtn { text-align:left; }
 #nav-settings .tctl { justify-content:space-between; }
+#offline-state { font-size:10.5px; color:var(--text4); line-height:1.35; }
+#offline-state.ready { color:var(--lime); }
+#offline-state.working { color:var(--orange); }
 #nav-settings .tctl input[type=range] { flex:1; margin-left:8px; }
 
 /* ===== toolbar toggles & read mode ===== */
@@ -308,6 +316,8 @@ a.reflink:hover { color:#ffc84d; border-bottom-style:solid; }
       <div class="ns-label">Settings</div>
       <button class="tbtn" id="btn-copy">Copy My Lesson Plan</button>
       <button class="tbtn" id="btn-dl">Export My Lesson Plan (.md)</button>
+      <button class="tbtn" id="btn-offline">⤓ Save all for offline</button>
+      <div id="offline-state">checking…</div>
       <div class="tctl">Aa <input type="range" id="fsize" min="12" max="20" step="1" value="15"></div>
     </div>
   </nav>
@@ -1811,6 +1821,50 @@ function unlockUI() {
   $('#gate-pw').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') go(); });
   setTimeout(() => $('#gate-pw').focus(), 100);
 })();
+
+/* ---------- offline (checkride-day insurance) ---------- */
+function everyAssetUrl() {
+  const urls = new Set(['./', './index.html', './custom.js', './data.js', './manifest.webmanifest']);
+  DOCS.forEach(d => urls.add(d.url));
+  CFI_DATA.aoes.forEach(a => a.lessons.forEach(l => {
+    ['con', 'ext'].forEach(v => {
+      const src = l[v]; if (!src) return;
+      (src.front || []).forEach(cell => cell.forEach(ln => { if (ln.img) urls.add(ln.img); }));
+      (src.nodes || []).forEach(n => (n.img || []).forEach(p => urls.add(p)));
+    });
+  }));
+  return [...urls];
+}
+function setOfflineState(txt, cls) {
+  const el = $('#offline-state');
+  if (el) { el.textContent = txt; el.className = cls || ''; }
+}
+async function offlineReport() {
+  if (!('caches' in window)) return setOfflineState('offline not supported in this browser');
+  const all = everyAssetUrl();
+  const c = await caches.open('cfi-binder-v1');
+  let have = 0;
+  for (const u of all) if (await c.match(u, { ignoreSearch: true })) have++;
+  if (have >= all.length) setOfflineState(`✓ all ${all.length} files saved — works with no signal`, 'ready');
+  else setOfflineState(`${have} of ${all.length} files saved for offline`);
+}
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').then(offlineReport).catch(() => setOfflineState('offline unavailable'));
+  navigator.serviceWorker.addEventListener('message', e => {
+    const d = e.data || {};
+    if (d.type !== 'CACHE_PROGRESS') return;
+    if (d.done < d.total) setOfflineState(`saving ${d.done} / ${d.total}…`, 'working');
+    else offlineReport();
+  });
+} else setOfflineState('offline unavailable (open over https)');
+
+$('#btn-offline').onclick = async () => {
+  if (!navigator.serviceWorker || !navigator.serviceWorker.controller) {
+    setOfflineState('reload once, then try again'); return;
+  }
+  setOfflineState('saving…', 'working');
+  navigator.serviceWorker.controller.postMessage({ type: 'CACHE_ALL', urls: everyAssetUrl() });
+};
 
 /* ---------- init ---------- */
 $('#rate').value = store.prefs.rate; $('#rate-val').textContent = store.prefs.rate.toFixed(1) + 'x';
