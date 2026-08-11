@@ -874,7 +874,7 @@ function renderFront(front, container, expanded) {
   if (!front || !front.length) return;
   const tog = document.createElement('div');
   tog.className = 'front-toggle';
-  tog.textContent = (expanded ? '▾' : '▸') + ' Lesson plan overview (objectives · elements · schedule)';
+  tog.textContent = (expanded ? '▾' : '▸') + ' Lesson plan header (objectives · completion standards · elements · schedule)';
   const wrap = document.createElement('div');
   wrap.style.display = expanded ? '' : 'none';
   front.forEach(cell => {
@@ -890,7 +890,7 @@ function renderFront(front, container, expanded) {
     });
     wrap.appendChild(card);
   });
-  tog.onclick = () => { const show = wrap.style.display === 'none'; wrap.style.display = show ? '' : 'none'; tog.textContent = (show ? '▾' : '▸') + ' Lesson plan overview (objectives · elements · schedule)'; };
+  tog.onclick = () => { const show = wrap.style.display === 'none'; wrap.style.display = show ? '' : 'none'; tog.textContent = (show ? '▾' : '▸') + ' Lesson plan header (objectives · completion standards · elements · schedule)'; };
   container.appendChild(tog);
   container.appendChild(wrap);
 }
@@ -1051,6 +1051,10 @@ function renderMine() {
   const skelSrc = script ? 'p' : (cur.lesson.ext ? 'x' : (cur.lesson.con ? 'c' : null));
   if (!skelSrc) { mb.innerHTML = '<div class="empty-hint">No lesson content.</div>'; return; }
   mb.appendChild(paneTitleEl());
+  // the lesson-plan header the examiner expects: objectives, completion
+  // standards, elements, references, schedule, equipment, IP/SP actions
+  const front = (cur.lesson.con && cur.lesson.con.front) || (cur.lesson.ext && cur.lesson.ext.front);
+  if (front && front.length) renderFront(front, mb, true);
   const nodes = script ? script.nodes
               : (skelSrc === 'x' ? cur.lesson.ext.nodes : cur.lesson.con.nodes);
   const selSet = script ? null : new Set(skelSrc === 'x' ? sel.x : sel.c);
@@ -1172,6 +1176,17 @@ function myScriptText() {
   const selSet = script ? new Set(nodes.map((_, i) => i).filter(i => !sel.pr.includes(i)))
                         : new Set(skelSrc === 'x' ? sel.x : sel.c);
   let out = `# ${cur.lesson.title}\n\n_${aoeLabel(cur.aoe)} — My Lesson Plan_\n\n`;
+  const refs = (cur.lesson.con && cur.lesson.con.refs) || (cur.lesson.ext && cur.lesson.ext.refs) || '';
+  if (refs) out += `**References:** ${refs}\n\n`;
+  const front = (cur.lesson.con && cur.lesson.con.front) || (cur.lesson.ext && cur.lesson.ext.front);
+  (front || []).forEach(cell => {
+    cell.forEach((ln, i) => {
+      if (!ln.t) return;
+      const head = i === 0 && (ln.b || /^[A-Z0-9 &'’/-]+$/.test(ln.t));
+      out += head ? `\n**${ln.t}**\n` : `- ${ln.t}\n`;
+    });
+  });
+  if (front && front.length) out += '\n---\n';
   const txt = (src, i, n) => (sel.ed && sel.ed[src + ':' + i] != null) ? sel.ed[src + ':' + i] : n.t;
   const notesFor = key => (sel.notes || []).filter(nt => nt.a === key)
     .map(nt => '  '.repeat(Math.max(0, nt.l || 0)) + '- ' + nt.t + '  *(mine)*\n').join('');
@@ -1823,6 +1838,7 @@ function unlockUI() {
 })();
 
 /* ---------- offline (checkride-day insurance) ---------- */
+const SW_CACHE = 'cfi-binder-v2';   // keep in step with sw.js
 function everyAssetUrl() {
   const urls = new Set(['./', './index.html', './custom.js', './data.js', './manifest.webmanifest']);
   DOCS.forEach(d => urls.add(d.url));
@@ -1842,7 +1858,7 @@ function setOfflineState(txt, cls) {
 async function offlineReport() {
   if (!('caches' in window)) return setOfflineState('offline not supported in this browser');
   const all = everyAssetUrl();
-  const c = await caches.open('cfi-binder-v1');
+  const c = await caches.open(SW_CACHE);
   let have = 0;
   for (const u of all) if (await c.match(u, { ignoreSearch: true })) have++;
   if (have >= all.length) setOfflineState(`✓ all ${all.length} files saved — works with no signal`, 'ready');
