@@ -214,7 +214,11 @@ kbd { background:var(--bg3); border:1px solid var(--text4); border-radius:4px; p
 
 /* ===== nav settings block ===== */
 #nav-settings { border-top:1px solid var(--bdr); padding:10px 14px 12px; display:flex; flex-direction:column; gap:6px; flex-shrink:0; }
-#nav-settings .ns-label { font-size:10px; color:var(--text4); text-transform:uppercase; letter-spacing:.09em; margin-bottom:2px; }
+#nav-settings .ns-label { font-size:10px; color:var(--text4); text-transform:uppercase; letter-spacing:.09em;
+                          margin-bottom:2px; cursor:pointer; user-select:none; display:flex; justify-content:space-between; }
+#nav-settings .ns-label:hover { color:var(--text2); }
+#ns-body { display:flex; flex-direction:column; gap:6px; }
+#nav-settings.collapsed #ns-body { display:none; }
 #nav-settings .tbtn { text-align:left; }
 #nav-settings .tctl { justify-content:space-between; }
 #offline-state { font-size:10.5px; color:var(--text4); line-height:1.35; }
@@ -332,7 +336,8 @@ a.reflink:hover { color:#ffc84d; border-bottom-style:solid; }
     <div id="nav-list"></div>
     <div id="nav-library"></div>
     <div id="nav-settings">
-      <div class="ns-label">Settings</div>
+      <div class="ns-label" id="ns-toggle"><span>Settings</span><span class="tri">▾</span></div>
+      <div id="ns-body">
       <button class="tbtn" id="btn-copy">Copy My Lesson Plan</button>
       <button class="tbtn" id="btn-dl">Export My Lesson Plan (.md)</button>
       <button class="tbtn" id="btn-offline">⤓ Save binder offline</button>
@@ -341,6 +346,7 @@ a.reflink:hover { color:#ffc84d; border-bottom-style:solid; }
       <div id="offline-lib-state"></div>
       <button class="tbtn" id="btn-update">↻ Force update</button>
       <div class="tctl">Aa <input type="range" id="fsize" min="12" max="20" step="1" value="15"></div>
+      </div>
     </div>
   </nav>
   <div id="main">
@@ -432,10 +438,10 @@ function renderNav(filter) {
     lessons.forEach(l => {
       const it = document.createElement('div');
       it.className = 'lesson-item' + (cur && cur.lesson === l ? ' active' : '');
+      // badge only when this lesson carries your own picks or notes — every
+      // lesson has a script now, so a "scripted" marker would just be noise
       const n = selCount(l.id);
-      const scripted = !!(window.CFI_SCRIPTS && window.CFI_SCRIPTS[l.id]);
-      const badge = n ? n : (scripted ? '✎' : '');
-      it.innerHTML = `<span>${l.title.replace(/^[IVXLC]+\.[A-Z](-[A-Z])?\.\s*/, m => m)}</span><span class="cnt${badge === '' ? ' zero' : ''}">${badge}</span>`;
+      it.innerHTML = `<span>${l.title.replace(/^[IVXLC]+\.[A-Z](-[A-Z])?\.\s*/, m => m)}</span><span class="cnt${n ? '' : ' zero'}">${n}</span>`;
       it.onclick = () => {
         if (cur && cur.lesson === l) {                 // clicking the open lesson collapses its topics
           tocOpen = !tocOpen;
@@ -1990,6 +1996,20 @@ async function libReport() {
   el.textContent = have >= lib.length ? `✓ all ${lib.length} handbooks saved` : `${have} of ${lib.length} handbooks saved`;
   el.className = have >= lib.length ? 'ready' : '';
 }
+/* settings can fold away — it is reference furniture, not something you use
+   while teaching */
+(function initSettingsToggle() {
+  const box = $('#nav-settings'), tog = $('#ns-toggle');
+  if (!box || !tog) return;
+  const apply = () => {
+    const open = store.prefs.settingsOpen !== false;
+    box.classList.toggle('collapsed', !open);
+    tog.querySelector('.tri').textContent = open ? '▾' : '▸';
+  };
+  tog.onclick = () => { store.prefs.settingsOpen = store.prefs.settingsOpen === false; save(); apply(); };
+  apply();
+})();
+
 /* Nuclear option: throw away the worker and every cached file, then reload
    fresh from the server. Use it if the binder ever looks out of date. */
 $('#btn-update').onclick = async () => {
