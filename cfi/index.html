@@ -231,10 +231,23 @@ kbd { background:var(--bg3); border:1px solid var(--text4); border-radius:4px; p
 #read-ctl { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
 body:not(.readmode) #read-ctl { display:none; }
 body:not(.readmode) .nb.play, body:not(.readmode) .mb.play { display:none !important; }
+/* clean teaching page: no edit / add / remove chrome hanging off every line */
+body.noedit .mb.edit, body.noedit .mb.nadd, body.noedit .mb.rm,
+body.noedit .mb.reset, body.noedit .nb.add, body.noedit #ms-addline { display:none !important; }
+body.noedit .ms-item { padding-right:30px; }
+body.noedit .node { padding-right:30px; }
 
 /* ===== split / focus ===== */
 body.nosplit #pane-ext { display:none; }
 @media (max-width: 820px) { #tgl-split { display:none; } }
+
+/* ===== inline handbook button on a heading ===== */
+.inline-ref { display:inline-block; margin-left:8px; padding:1px 7px; border-radius:5px; cursor:pointer;
+              font-size:.62em; font-weight:700; letter-spacing:.04em; vertical-align:middle;
+              color:var(--orange); border:1px solid rgba(255,170,0,.35); background:rgba(255,170,0,.07);
+              text-transform:none; white-space:nowrap; }
+.inline-ref:hover { color:var(--bg0); background:var(--orange); border-color:var(--orange); }
+body.noedit .inline-ref { opacity:.85; }
 
 /* ===== handbook deep links ===== */
 .ref-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(250px, 1fr)); gap:6px; margin:2px 0 6px 26px; }
@@ -355,6 +368,7 @@ a.reflink:hover { color:#ffc84d; border-bottom-style:solid; }
       <div id="lesson-title">Pick a lesson<span class="refs"></span></div>
       <button class="tbtn" id="tgl-split" title="Split view / single pane">⿲ Split</button>
       <button class="tbtn" id="tgl-read" title="Read-aloud mode — off while teaching">🎧 Read</button>
+      <button class="tbtn" id="tgl-edit" title="Show or hide the edit controls">✎ Edit</button>
       <div id="read-ctl">
         <button class="tbtn primary" id="btn-play" title="Space">▶</button>
         <button class="tbtn" id="btn-stop" title="Esc">■</button>
@@ -1036,6 +1050,14 @@ function msItem(n, src, i, opts) {
               (edited ? `<span class="mb reset" title="Restore original">↺</span>` : '') +
               (opts.removable ? `<span class="mb rm" title="Remove">×</span>` : '') + `</span>`;
   div.innerHTML = inner;
+  // a handbook button on every section and topic heading, straight to the page
+  // (the intro/conclusion scaffolding is ours, not the handbook's)
+  // handbook button on a heading — only where the chapter actually changes, so
+  // it reads as "this part is covered over here" instead of 24 identical chips
+  if (opts.ref) {
+    const chip = refChipEl(opts.ref, true);
+    if (chip) div.querySelector('.ms-text').insertAdjacentElement('afterend', chip);
+  }
   if (n.img) n.img.forEach(p => { const im = document.createElement('img'); im.src = p; im.loading = 'lazy'; div.appendChild(im); });
   div.querySelector('.mb.play').onclick = e => { e.stopPropagation(); if (div.dataset.mi != null) startReading('m', +div.dataset.mi); };
   const span = div.querySelector('.ms-text');
@@ -1097,6 +1119,75 @@ function lessonRefs() {
   const code = taskCode(cur.lesson.title);
   return (code && CFI_REFS.tasks[code]) || [];
 }
+/* Resolve ONE heading to the handbook chapter that covers it:
+   1. an explicit citation in the heading itself ("…Handbook, Chapter 7", "AFH 5-21")
+   2. otherwise the lesson's mapped chapter whose title best matches the heading
+   3. otherwise the lesson's primary chapter */
+const BOOK_PATTERNS = [
+  [/aviation instructor|\bAIH\b/i, 'FAA-H-8083-9'],
+  [/airplane flying|\bAFH\b/i,     'FAA-H-8083-3'],
+  [/pilot'?s handbook|\bPHAK\b/i,  'FAA-H-8083-25'],
+  [/risk management|\bRMH\b/i,     'FAA-H-8083-2'],
+  [/weight *(&|and) *balance/i,    'FAA-H-8083-1'],
+  [/aviation weather|\bAWH\b/i,    'FAA-H-8083-28'],
+];
+function chapterPage(bcode, ch) {
+  const book = CFI_REFS.books[bcode];
+  if (!book) return null;
+  const rec = book.chapters.find(c => c.n === ch);
+  return rec ? { b: bcode, ch, t: rec.t, p: rec.p } : null;
+}
+function refForHeading(text, prev) {
+  if (!window.CFI_REFS || !cur) return null;
+  // 1. explicit citation
+  for (const [re, bcode] of BOOK_PATTERNS) {
+    if (!re.test(text)) continue;
+    let m = text.match(/chapter\s*(\d+)/i) || text.match(/\bch\.?\s*(\d+)/i);
+    if (!m) { const abbr = text.match(/\b(?:AFH|PHAK|AIH|RMH|AWH)\s*(\d+)\s*-\s*\d+/i); if (abbr) m = abbr; }
+    if (m) { const hit = chapterPage(bcode, +m[1]); if (hit) return hit; }
+  }
+  // 2/3. fall back to what this task maps to
+  const mapped = lessonRefs().filter(r => r.b !== 'AIM');
+  if (!mapped.length) return null;
+  if (mapped.length === 1) return mapped[0];
+  const words = simTokens(text);
+  let best = null, score = 0;
+  mapped.forEach(r => { const s = dice(words, simTokens(r.t)); if (s > score) { score = s; best = r; } });
+  // a weak match is a guess — stay on the chapter we were already in rather
+  // than flip-flopping between chapters heading by heading
+  if (score < 0.2) return prev || mapped[0];
+  return best;
+}
+const SKIP_REF = /^(introduction|attention|overview|what|why|how:?|conclusion)$/i;
+function computeHeadingRefs(nodes) {
+  const out = {};
+  if (!window.CFI_REFS) return out;
+  let lastKey = null, lastRef = null;
+  nodes.forEach((n, i) => {
+    const major = n.l === -1 || (n.l === 0 && n.b);
+    if (!major || !n.t || SKIP_REF.test(n.t.trim())) return;
+    const r = refForHeading(n.t, lastRef);
+    if (!r) return;
+    lastRef = r;
+    const key = r.b + ':' + r.ch;
+    if (key !== lastKey) { out[i] = r; lastKey = key; }
+  });
+  return out;
+}
+function refChipEl(ref, compact) {
+  const book = CFI_REFS.books[ref.b];
+  if (!book) return null;
+  const a = document.createElement('span');
+  a.className = 'inline-ref';
+  a.textContent = compact ? `${book.abbr} ${ref.p}` : `${book.abbr} · Ch ${ref.ch} · p.${ref.p}`;
+  a.title = `${book.name} — Chapter ${ref.ch}: ${ref.t} (opens at page ${ref.p})`;
+  a.onclick = e => {
+    e.stopPropagation();
+    window.open(`${book.file}#page=${ref.p}`, '_blank', 'noopener');
+  };
+  return a;
+}
+
 function renderHandbookRefs(mb) {
   const refs = lessonRefs();
   if (!refs.length) return;
@@ -1164,9 +1255,10 @@ function renderMine() {
 
   if (script) {
     const gone = new Set(sel.pr);
+    const hrefs = computeHeadingRefs(nodes);
     nodes.forEach((n, i) => {
       if (gone.has(i)) return;
-      mb.appendChild(msItem(n, 'p', i, { removable: true }));
+      mb.appendChild(msItem(n, 'p', i, { removable: true, ref: hrefs[i] }));
       appendNotes('p:' + i);
     });
     if (gone.size) {
@@ -1868,14 +1960,18 @@ function toast(msg) {
 /* ---------- read mode & split view ---------- */
 let readMode = !!store.prefs.read;
 let splitView = store.prefs.split !== false;   // split by default on desktop
+let editMode = store.prefs.edit !== false;     // edit controls visible by default
 function applyModes() {
   document.body.classList.toggle('readmode', readMode);
   document.body.classList.toggle('nosplit', !splitView);
+  document.body.classList.toggle('noedit', !editMode);
   $('#tgl-read').classList.toggle('on', readMode);
+  $('#tgl-edit').classList.toggle('on', editMode);
   $('#tgl-split').classList.toggle('on', splitView);
   $('#tgl-split').textContent = splitView ? '⿲ Split' : '▭ Focus';
   if (!readMode) stopReading();
 }
+$('#tgl-edit').onclick = () => { editMode = !editMode; store.prefs.edit = editMode; save(); applyModes(); };
 $('#tgl-read').onclick = () => { readMode = !readMode; store.prefs.read = readMode; save(); applyModes(); };
 $('#tgl-split').onclick = () => { splitView = !splitView; store.prefs.split = splitView; save(); applyModes(); };
 
@@ -1928,7 +2024,7 @@ function unlockUI() {
 })();
 
 /* ---------- offline (checkride-day insurance) ---------- */
-const SW_CACHE = 'cfi-binder-v3';   // keep in step with sw.js
+const SW_CACHE = 'cfi-binder-v4';   // keep in step with sw.js
 function libraryUrls() {
   return Object.values((window.CFI_REFS || { books: {} }).books).map(b => b.file);
 }
