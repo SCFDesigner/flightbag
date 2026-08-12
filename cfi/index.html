@@ -417,6 +417,7 @@ a.reflink:hover { color:#ffc84d; border-bottom-style:solid; }
      fetch a fresh copy instead of whatever the browser has cached. -->
 <script src="refs.js"></script>
 <script src="docs.js"></script>
+<script src="topicrefs.js"></script>
 <script>document.write('<script src="custom.js?t=' + Date.now() + '"><\/script>');</script>
 <script>
 const D = window.CFI_DATA;
@@ -1163,10 +1164,18 @@ const SKIP_REF = /^(introduction|attention|overview|what|why|how:?|conclusion)$/
 function computeHeadingRefs(nodes) {
   const out = {};
   if (!window.CFI_REFS) return out;
+  const exact = (window.CFI_TOPICREFS || {})[cur ? cur.lesson.id : ''] || {};
   let lastKey = null, lastRef = null;
   nodes.forEach((n, i) => {
     const major = n.l === -1 || (n.l === 0 && n.b);
     if (!major || !n.t || SKIP_REF.test(n.t.trim())) return;
+    const hit = exact[n.t];
+    if (hit) {   // this heading was found in the handbook text — exact page
+      const key = 'x' + hit.b + ':' + hit.p;
+      if (key !== lastKey) { out[i] = { b: hit.b, p: hit.p, exact: true }; lastKey = key; }
+      lastRef = { b: hit.b, ch: 0, t: '', p: hit.p };
+      return;
+    }
     const r = refForHeading(n.t, lastRef);
     if (!r) return;
     lastRef = r;
@@ -1180,8 +1189,10 @@ function refChipEl(ref, compact) {
   if (!book) return null;
   const a = document.createElement('span');
   a.className = 'inline-ref';
-  a.textContent = compact ? `${book.abbr} ${ref.p}` : `${book.abbr} · Ch ${ref.ch} · p.${ref.p}`;
-  a.title = `${book.name} — Chapter ${ref.ch}: ${ref.t} (opens at page ${ref.p})`;
+  a.textContent = `${book.abbr} p.${ref.p}`;
+  a.title = ref.exact
+    ? `${book.name} — this topic starts on page ${ref.p}`
+    : `${book.name} — Chapter ${ref.ch}: ${ref.t} (opens at page ${ref.p})`;
   a.onclick = e => {
     e.stopPropagation();
     window.open(`${book.file}#page=${ref.p}`, '_blank', 'noopener');
@@ -2025,12 +2036,12 @@ function unlockUI() {
 })();
 
 /* ---------- offline (checkride-day insurance) ---------- */
-const SW_CACHE = 'cfi-binder-v5';   // keep in step with sw.js
+const SW_CACHE = 'cfi-binder-v6';   // keep in step with sw.js
 function libraryUrls() {
   return (window.CFI_DOCS || []).map(d => d.url);
 }
 function everyAssetUrl() {
-  const urls = new Set(['./', './index.html', './custom.js', './data.js', './refs.js', './docs.js', './manifest.webmanifest']);
+  const urls = new Set(['./', './index.html', './custom.js', './data.js', './refs.js', './docs.js', './topicrefs.js', './manifest.webmanifest']);
   const lib = new Set(libraryUrls());
   DOCS.forEach(d => { if (!lib.has(d.url)) urls.add(d.url); });   // handbooks download separately
   CFI_DATA.aoes.forEach(a => a.lessons.forEach(l => {

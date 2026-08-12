@@ -1,12 +1,12 @@
 /* CFI Binder service worker — makes the whole binder work with no internet.
    Core files are cached on install; figures and PDFs are cached as they are
    viewed, or all at once via "Save all for offline" in Settings. */
-const CACHE = 'cfi-binder-v5';
-const CORE = ['./', './index.html', './custom.js', './data.js', './refs.js', './docs.js'];
+const CACHE = 'cfi-binder-v6';
+const CORE = ['./', './index.html', './custom.js', './data.js', './refs.js', './docs.js', './topicrefs.js'];
 // Content files change as lessons are edited — always try the network first so
 // an online device picks up updates, falling back to cache when offline.
 // Figures and PDFs never change once written, so those stay cache-first.
-const isContent = url => /\/(index\.html|custom\.js|data\.js|refs\.js|docs\.js|manifest\.webmanifest)$/.test(url)
+const isContent = url => /\/(index\.html|custom\.js|data\.js|refs\.js|docs\.js|topicrefs\.js|manifest\.webmanifest)$/.test(url)
                       || url.endsWith('/cfi/') || url.endsWith('/');
 
 self.addEventListener('install', e => {
