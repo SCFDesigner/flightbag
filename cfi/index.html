@@ -201,6 +201,7 @@ kbd { background:var(--bg3); border:1px solid var(--text4); border-radius:4px; p
             display:flex; gap:7px; align-items:baseline; line-height:1.3; }
 .lib-item:hover { background:var(--bg2); color:var(--text); }
 .lib-item .code { color:var(--orange); font-size:9.5px; min-width:34px; flex-shrink:0; font-variant-numeric:tabular-nums; }
+.lib-item .dsize { color:var(--text4); font-size:9px; flex-shrink:0; }
 .lib-item .lbl { flex:1; overflow:hidden; text-overflow:ellipsis; }
 .lib-sub { padding:6px 14px 2px 20px; font-size:10px; color:var(--text4); text-transform:uppercase; letter-spacing:.05em; }
 
@@ -355,7 +356,7 @@ a.reflink:hover { color:#ffc84d; border-bottom-style:solid; }
       <button class="tbtn" id="btn-dl">Export My Lesson Plan (.md)</button>
       <button class="tbtn" id="btn-offline">⤓ Save binder offline</button>
       <div id="offline-state">checking…</div>
-      <button class="tbtn" id="btn-offline-lib">⤓ Save FAA handbooks (256 MB)</button>
+      <button class="tbtn" id="btn-offline-lib">⤓ Save all documents (360 MB)</button>
       <div id="offline-lib-state"></div>
       <button class="tbtn" id="btn-update">↻ Force update</button>
       <div class="tctl">Aa <input type="range" id="fsize" min="12" max="20" step="1" value="15"></div>
@@ -415,6 +416,7 @@ a.reflink:hover { color:#ffc84d; border-bottom-style:solid; }
 <!-- custom.js holds the hand-authored scripts and gets edited often, so always
      fetch a fresh copy instead of whatever the browser has cached. -->
 <script src="refs.js"></script>
+<script src="docs.js"></script>
 <script>document.write('<script src="custom.js?t=' + Date.now() + '"><\/script>');</script>
 <script>
 const D = window.CFI_DATA;
@@ -558,11 +560,9 @@ function onPaneScroll() {
 });
 
 /* ---------- library: documents · videos · links ---------- */
-const DOCS = [
-  { title: 'AC 61-65K — Certification: Pilots & Flight Instructors',
-    url: 'docs/AC 61-65K - Certification of Pilots and Flight Instructors.pdf', code: 'AC' },
-].concat(Object.values((window.CFI_REFS || { books: {} }).books)
-  .map(b => ({ title: b.name, url: b.file, code: 'FAA' })));
+const KIND_TAG = { acs: 'ACS', handbook: 'BOOK', ac: 'AC' };
+const DOCS = (window.CFI_DOCS || []).map(d =>
+  ({ title: d.title, url: d.url, code: KIND_TAG[d.kind] || 'DOC', mb: d.mb }));
 let libOpen = { docs: true, videos: true, links: false };
 
 function lessonCode(title) {
@@ -605,7 +605,8 @@ function renderLibrary() {
   section('docs', 'Documents', DOCS.length, DOCS, d => {
     const el = document.createElement('div');
     el.className = 'lib-item';
-    el.innerHTML = `<span class="code">📄</span><span class="lbl">${escapeHtml(d.title)}</span>`;
+    el.innerHTML = `<span class="code">${d.code}</span><span class="lbl">${escapeHtml(d.title)}</span>` +
+                   (d.mb ? `<span class="dsize">${d.mb >= 1 ? d.mb + 'M' : ''}</span>` : '');
     el.onclick = () => openMedia({ type: 'doc', url: d.url, title: d.title });
     c.appendChild(el);
   });
@@ -2024,12 +2025,12 @@ function unlockUI() {
 })();
 
 /* ---------- offline (checkride-day insurance) ---------- */
-const SW_CACHE = 'cfi-binder-v4';   // keep in step with sw.js
+const SW_CACHE = 'cfi-binder-v5';   // keep in step with sw.js
 function libraryUrls() {
-  return Object.values((window.CFI_REFS || { books: {} }).books).map(b => b.file);
+  return (window.CFI_DOCS || []).map(d => d.url);
 }
 function everyAssetUrl() {
-  const urls = new Set(['./', './index.html', './custom.js', './data.js', './refs.js', './manifest.webmanifest']);
+  const urls = new Set(['./', './index.html', './custom.js', './data.js', './refs.js', './docs.js', './manifest.webmanifest']);
   const lib = new Set(libraryUrls());
   DOCS.forEach(d => { if (!lib.has(d.url)) urls.add(d.url); });   // handbooks download separately
   CFI_DATA.aoes.forEach(a => a.lessons.forEach(l => {
@@ -2089,7 +2090,7 @@ async function libReport() {
   const c = await caches.open(SW_CACHE);
   let have = 0;
   for (const u of lib) if (await c.match(u, { ignoreSearch: true })) have++;
-  el.textContent = have >= lib.length ? `✓ all ${lib.length} handbooks saved` : `${have} of ${lib.length} handbooks saved`;
+  el.textContent = have >= lib.length ? `✓ all ${lib.length} documents saved` : `${have} of ${lib.length} documents saved`;
   el.className = have >= lib.length ? 'ready' : '';
 }
 /* settings can fold away — it is reference furniture, not something you use
@@ -2126,7 +2127,7 @@ $('#btn-update').onclick = async () => {
 $('#btn-offline-lib').onclick = () => {
   if (!navigator.serviceWorker || !navigator.serviceWorker.controller) return;
   const el = $('#offline-lib-state');
-  el.textContent = 'downloading handbooks — leave this open…'; el.className = 'working';
+  el.textContent = 'downloading documents — leave this open…'; el.className = 'working';
   navigator.serviceWorker.controller.postMessage({ type: 'CACHE_ALL', urls: libraryUrls() });
   setTimeout(libReport, 8000);
 };
