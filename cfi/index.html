@@ -242,6 +242,29 @@ body.noedit .node { padding-right:30px; }
 body.nosplit #pane-ext { display:none; }
 @media (max-width: 820px) { #tgl-split { display:none; } }
 
+/* ===== pdf viewer ===== */
+#pv-stage { border:1px solid var(--bdr); border-radius:10px; background:#26262e; overflow:auto;
+            max-height:calc(100vh - 130px); text-align:center; position:relative; }
+#pv-canvas { display:inline-block; margin:8px 0; background:#fff; box-shadow:0 4px 18px rgba(0,0,0,.5); }
+#pv-msg { position:absolute; top:16px; left:0; right:0; color:var(--text3); font-size:13px; }
+#pv-page { width:56px; background:var(--bg2); border:1px solid var(--bdr); color:var(--text);
+           border-radius:6px; padding:4px 6px; font-size:12px; text-align:center; }
+.pv-total { color:var(--text4); font-size:12px; }
+
+/* ===== school standards card ===== */
+.school-card { background:var(--bg1); border:1px solid rgba(136,255,102,.25); border-radius:10px;
+               padding:10px 14px; margin:0 0 12px; font-size:.88em; }
+.sc-head { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+.sc-tag { background:var(--lime); color:var(--bg0); font-weight:700; font-size:.68em; border-radius:4px; padding:1px 6px; }
+.sc-title { color:var(--text); font-weight:600; flex:1; font-size:.92em; }
+.sc-var { color:var(--lime); font-weight:600; font-size:.82em; margin:7px 0 2px; }
+.sc-grid { display:grid; grid-template-columns:auto 1fr; gap:2px 14px; margin:4px 0; }
+.sc-grid.two { grid-template-columns:auto 1fr 1fr; }
+.sc-k { color:var(--text3); font-size:.85em; }
+.sc-lbl { color:var(--text4); font-size:.72em; text-transform:uppercase; letter-spacing:.05em; }
+.sc-v { color:var(--text); font-variant-numeric:tabular-nums; }
+.sc-note { color:var(--text2); font-size:.85em; padding:1px 0 1px 4px; }
+
 /* ===== inline handbook button on a heading ===== */
 .inline-ref { display:inline-block; margin-left:8px; padding:1px 7px; border-radius:5px; cursor:pointer;
               font-size:.62em; font-weight:700; letter-spacing:.04em; vertical-align:middle;
@@ -418,6 +441,8 @@ a.reflink:hover { color:#ffc84d; border-bottom-style:solid; }
 <script src="refs.js"></script>
 <script src="docs.js"></script>
 <script src="topicrefs.js"></script>
+<script src="schoolrefs.js"></script>
+<script src="vendor/pdf.min.js"></script>
 <script>document.write('<script src="custom.js?t=' + Date.now() + '"><\/script>');</script>
 <script>
 const D = window.CFI_DATA;
@@ -561,7 +586,7 @@ function onPaneScroll() {
 });
 
 /* ---------- library: documents · videos · links ---------- */
-const KIND_TAG = { acs: 'ACS', handbook: 'BOOK', ac: 'AC' };
+const KIND_TAG = { school: 'USAA', acs: 'ACS', handbook: 'BOOK', ac: 'AC' };
 const DOCS = (window.CFI_DOCS || []).map(d =>
   ({ title: d.title, url: d.url, code: KIND_TAG[d.kind] || 'DOC', mb: d.mb }));
 let libOpen = { docs: true, videos: true, links: false };
@@ -638,9 +663,10 @@ function ytEmbed(url) {
   return m ? `https://www.youtube.com/embed/${m[1]}?rel=0${t ? '&start=' + t : ''}` : null;
 }
 function openMedia({ type, url, title, code }) {
-  // PDFs go to the browser's own viewer — it honours #page= and handles a
-  // 40 MB handbook far better than an iframe does, on iPad especially.
-  if (type === 'doc') { window.open(url, '_blank', 'noopener'); return; }
+  if (type === 'doc') {
+    if (window.pdfjsLib) { openPdfViewer(url, title); return; }
+    window.open(url, '_blank', 'noopener'); return;   // fallback
+  }
   stopReading();
   ['#con-body', '#mine-body', '#flow-body', '#cards-body'].forEach(s => $(s).style.display = 'none');
   document.querySelectorAll('.tab[data-tab]').forEach(x => x.classList.remove('active'));
@@ -979,15 +1005,18 @@ function loadLesson(aoe, l) {
   } else {
     lb.innerHTML = '<div class="empty-hint">No standard lesson plan for this lesson.</div>';
   }
-  setLeftTab(store.prefs.leftTab === 'lp' && l.con ? 'lp' : (l.ext ? 'ext' : 'lp'));
+  // XV.C-style lessons live entirely in their front matter (flight profiles);
+  // with no body nodes a collapsed header reads as an empty page
+  const conEmpty = l.con && !l.con.nodes.length;
 
   const cb = $('#con-body'); cb.innerHTML = ''; cb.appendChild(paneTitleEl());
   if (l.con) {
-    renderFront(l.con.front, cb);
+    renderFront(l.con.front, cb, conEmpty);
     l.con.nodes.forEach((n, i) => cb.appendChild(nodeEl(n, 'c', i)));
   } else {
     cb.innerHTML = '<div class="empty-hint">No condensed lesson plan for this lesson.</div>';
   }
+  setLeftTab(store.prefs.leftTab === 'lp' && l.con ? 'lp' : (l.ext ? 'ext' : 'lp'));
 
   const sel = getSel();
   sel.x.forEach(i => refreshSelUI('x', i));
@@ -1109,6 +1138,40 @@ function addNote(anchorKey, level) {
   pendingNoteFocus = sel.notes.length - 1;
   save(); renderMine();
 }
+/* ---------- school standards (USAA) ---------- */
+function renderSchoolCard(mb) {
+  const sch = window.CFI_SCHOOL;
+  if (!sch || !cur) return;
+  const e = sch.lessons[cur.lesson.id];
+  if (!e) return;
+  const entries = [e].concat(e.variants || []);
+  const wrap = document.createElement('div');
+  wrap.className = 'school-card';
+  let h = `<div class="sc-head"><span class="sc-tag">USAA</span>` +
+          `<span class="sc-title">School Standards — ${escapeHtml(sch.meta.guide.name)}</span>` +
+          (e.page ? `<span class="inline-ref" data-doc="${escapeHtml(sch.meta.guide.file)}#page=${e.page}">Guide p.${e.page}</span>` : '') +
+          `</div>`;
+  entries.forEach(v => {
+    if (entries.length > 1) h += `<div class="sc-var">${escapeHtml(v.title)}</div>`;
+    if (v.rows && v.rows.length) {
+      const twoCol = v.rows.some(r => r.pvt);
+      h += `<div class="sc-grid${twoCol ? ' two' : ''}">`;
+      if (twoCol) h += `<span class="sc-k"></span><span class="sc-lbl">Private</span><span class="sc-lbl">Commercial</span>`;
+      v.rows.forEach(r => {
+        h += `<span class="sc-k">${escapeHtml(r.k)}</span>`;
+        if (twoCol) h += `<span class="sc-v">${escapeHtml(r.pvt || '—')}</span>`;
+        h += `<span class="sc-v">${escapeHtml(r.com || '—')}</span>`;
+      });
+      h += `</div>`;
+    }
+    (v.notes || []).forEach(nt => { h += `<div class="sc-note">• ${escapeHtml(nt)}</div>`; });
+  });
+  wrap.innerHTML = h;
+  const chip = wrap.querySelector('[data-doc]');
+  if (chip) chip.onclick = () => openDoc(chip.dataset.doc, sch.meta.guide.name);
+  mb.appendChild(wrap);
+}
+
 /* ---------- FAA handbook deep links ----------
    The task -> book -> chapter -> PDF page map came out of the CFI dashboard;
    a click opens the handbook in the viewer at that exact page. */
@@ -1195,7 +1258,7 @@ function refChipEl(ref, compact) {
     : `${book.name} — Chapter ${ref.ch}: ${ref.t} (opens at page ${ref.p})`;
   a.onclick = e => {
     e.stopPropagation();
-    window.open(`${book.file}#page=${ref.p}`, '_blank', 'noopener');
+    openDoc(`${book.file}#page=${ref.p}`, `${book.name} — p.${ref.p}`);
   };
   return a;
 }
@@ -1219,7 +1282,7 @@ function renderHandbookRefs(mb) {
                      `<span class="rc-go">p.${r.p} ${local ? '↗' : '· faa.gov ↗'}</span>`;
       el.onclick = () => {
         const url = (local ? book.file : book.url) + '#page=' + r.p;
-        if (local) openMedia({ type: 'doc', url, title: `${book.name} — Ch ${r.ch}: ${r.t}`, code: 'p.' + r.p });
+        if (local) openDoc(url, `${book.name} — Ch ${r.ch}: ${r.t}`);
         else window.open(url, '_blank', 'noopener');
       };
     } else {
@@ -1320,6 +1383,8 @@ function renderMine() {
   addBtn.textContent = '＋ Add your own line';
   addBtn.onclick = () => addNote('end', 0);
   mb.appendChild(addBtn);
+
+  renderSchoolCard(mb);
 
   // FAA handbooks opened straight to the chapter that covers this task
   renderHandbookRefs(mb);
@@ -1692,6 +1757,76 @@ function renderCards() {
 }
 function cardsVisible() { return $('#cards-body').style.display !== 'none'; }
 
+/* ---------- in-app PDF viewer (pdf.js) ----------
+   Renders pages on a canvas so "open at page 38" actually lands on page 38,
+   on every platform, with no download prompt. */
+let pdfDoc = null, pdfPage = 1, pdfScale = 0, pdfRendering = false, pdfPending = null, pdfUrl = null;
+function openDoc(url, title) {
+  if (window.pdfjsLib && !/^https?:/.test(url)) openPdfViewer(url, title);
+  else window.open(url, '_blank', 'noopener');
+}
+function openPdfViewer(url, title) {
+  stopReading();
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdf.worker.min.js';
+  const [file, frag] = url.split('#');
+  const want = +(frag || '').replace(/^page=/, '') || 1;
+  ['#con-body', '#mine-body', '#flow-body', '#cards-body'].forEach(sel => $(sel).style.display = 'none');
+  document.querySelectorAll('.tab[data-tab]').forEach(x => x.classList.remove('active'));
+  if (isMobile()) showPane('right');
+  const mb = $('#media-body'); mb.style.display = ''; mb.innerHTML = '';
+  mb.innerHTML =
+    `<div class="mv-head">
+       <button class="tbtn" id="mv-back">‹ Back</button>
+       <div class="mv-title">${escapeHtml(title || file.split('/').pop())}</div>
+       <button class="tbtn" id="pv-prev">‹</button>
+       <input id="pv-page" type="number" min="1" value="${want}">
+       <span id="pv-total" class="pv-total">/ …</span>
+       <button class="tbtn" id="pv-next">›</button>
+       <button class="tbtn" id="pv-zoomout">−</button>
+       <button class="tbtn" id="pv-zoomin">+</button>
+       <a class="reflink" style="margin-left:6px" href="${url}" target="_blank" rel="noopener">↗</a>
+     </div>
+     <div id="pv-stage"><canvas id="pv-canvas"></canvas><div id="pv-msg">loading…</div></div>`;
+  $('#mv-back').onclick = () => { mb.style.display = 'none'; pdfDoc = null; document.querySelector('.tab[data-tab="mine"]').click(); };
+  $('#pv-prev').onclick = () => pdfGo(pdfPage - 1);
+  $('#pv-next').onclick = () => pdfGo(pdfPage + 1);
+  $('#pv-page').onchange = e => pdfGo(+e.target.value || 1);
+  $('#pv-zoomin').onclick = () => { pdfScale = Math.min((pdfScale || 1) * 1.25, 4); pdfRender(); };
+  $('#pv-zoomout').onclick = () => { pdfScale = Math.max((pdfScale || 1) / 1.25, 0.4); pdfRender(); };
+  pdfUrl = file; pdfPage = want; pdfScale = 0; pdfDoc = null;
+  pdfjsLib.getDocument(file).promise.then(doc => {
+    pdfDoc = doc;
+    $('#pv-total').textContent = '/ ' + doc.numPages;
+    pdfPage = Math.min(want, doc.numPages);
+    pdfRender();
+  }).catch(err => { $('#pv-msg').textContent = 'could not open — ' + err.message; });
+}
+function pdfGo(p) {
+  if (!pdfDoc) return;
+  pdfPage = Math.max(1, Math.min(p, pdfDoc.numPages));
+  $('#pv-page').value = pdfPage;
+  pdfRender();
+}
+function pdfRender() {
+  if (!pdfDoc) return;
+  if (pdfRendering) { pdfPending = pdfPage; return; }
+  pdfRendering = true;
+  pdfDoc.getPage(pdfPage).then(page => {
+    const stage = $('#pv-stage');
+    if (!pdfScale) pdfScale = (stage.clientWidth - 8) / page.getViewport({ scale: 1 }).width;
+    const vp = page.getViewport({ scale: pdfScale * (window.devicePixelRatio || 1) });
+    const canvas = $('#pv-canvas');
+    canvas.width = vp.width; canvas.height = vp.height;
+    canvas.style.width = (vp.width / (window.devicePixelRatio || 1)) + 'px';
+    $('#pv-msg').textContent = '';
+    return page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+  }).then(() => {
+    pdfRendering = false;
+    if (pdfPending !== null && pdfPending !== pdfPage) { pdfPage = pdfPending; pdfPending = null; pdfRender(); }
+    else pdfPending = null;
+  }).catch(() => { pdfRendering = false; });
+}
+
 /* ---------- tabs ---------- */
 document.querySelectorAll('.tab[data-tab]').forEach(t => t.onclick = () => {
   document.querySelectorAll('.tab[data-tab]').forEach(x => x.classList.remove('active'));
@@ -2036,12 +2171,12 @@ function unlockUI() {
 })();
 
 /* ---------- offline (checkride-day insurance) ---------- */
-const SW_CACHE = 'cfi-binder-v6';   // keep in step with sw.js
+const SW_CACHE = 'cfi-binder-v7';   // keep in step with sw.js
 function libraryUrls() {
   return (window.CFI_DOCS || []).map(d => d.url);
 }
 function everyAssetUrl() {
-  const urls = new Set(['./', './index.html', './custom.js', './data.js', './refs.js', './docs.js', './topicrefs.js', './manifest.webmanifest']);
+  const urls = new Set(['./', './index.html', './custom.js', './data.js', './refs.js', './docs.js', './topicrefs.js', './schoolrefs.js', './manifest.webmanifest', 'vendor/pdf.min.js', 'vendor/pdf.worker.min.js']);
   const lib = new Set(libraryUrls());
   DOCS.forEach(d => { if (!lib.has(d.url)) urls.add(d.url); });   // handbooks download separately
   CFI_DATA.aoes.forEach(a => a.lessons.forEach(l => {
