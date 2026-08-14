@@ -287,6 +287,9 @@ body.nosplit #pane-ext { display:none; }
 .sc-note { color:var(--text2); font-size:.85em; padding:1px 0 1px 4px; }
 
 /* ===== inline handbook button on a heading ===== */
+.draw-chip { display:inline-block; margin-left:8px; padding:1px 7px; border-radius:5px; font-size:9.5px;
+             font-weight:700; letter-spacing:.06em; color:var(--lime); border:1px solid var(--lime);
+             opacity:.85; vertical-align:1px; white-space:nowrap; }
 .inline-ref { display:inline-block; margin-left:8px; padding:1px 7px; border-radius:5px; cursor:pointer;
               font-size:.62em; font-weight:700; letter-spacing:.04em; vertical-align:middle;
               color:var(--orange); border:1px solid rgba(255,170,0,.35); background:rgba(255,170,0,.07);
@@ -492,6 +495,7 @@ a.reflink:hover { color:#ffc84d; border-bottom-style:solid; }
 <script src="docs.js"></script>
 <script src="topicrefs.js"></script>
 <script src="schoolrefs.js"></script>
+<script src="draw.js"></script>
 <script src="vendor/pdf.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
@@ -1154,6 +1158,7 @@ function msItem(n, src, i, opts) {
     const chip = refChipEl(opts.ref, true);
     if (chip) div.querySelector('.ms-text').insertAdjacentElement('afterend', chip);
   }
+  if (opts.draw) div.querySelector('.ms-text').insertAdjacentElement('afterend', drawChipEl());
   if (n.img) n.img.forEach(p => { const im = document.createElement('img'); im.src = p; im.loading = 'lazy'; div.appendChild(im); });
   div.querySelector('.mb.play').onclick = e => { e.stopPropagation(); if (div.dataset.mi != null) startReading('m', +div.dataset.mi); };
   const span = div.querySelector('.ms-text');
@@ -1312,6 +1317,17 @@ function computeHeadingRefs(nodes) {
   });
   return out;
 }
+/* topics the examiner expects DRAWN on the whiteboard, not just talked through */
+function drawSet() {
+  return new Set((window.CFI_DRAW || {})[cur ? cur.lesson.id : ''] || []);
+}
+function drawChipEl() {
+  const s = document.createElement('span');
+  s.className = 'draw-chip';
+  s.textContent = '✏ DRAW';
+  s.title = 'Draw this out while teaching it';
+  return s;
+}
 function refChipEl(ref, compact) {
   const book = CFI_REFS.books[ref.b];
   if (!book) return null;
@@ -1396,9 +1412,10 @@ function renderMine() {
   if (script) {
     const gone = new Set(sel.pr);
     const hrefs = computeHeadingRefs(nodes);
+    const dset = drawSet();
     nodes.forEach((n, i) => {
       if (gone.has(i)) return;
-      mb.appendChild(msItem(n, 'p', i, { removable: true, ref: hrefs[i] }));
+      mb.appendChild(msItem(n, 'p', i, { removable: true, ref: hrefs[i], draw: dset.has(n.t) }));
       appendNotes('p:' + i);
     });
     if (gone.size) {
@@ -1640,6 +1657,7 @@ function renderFlow() {
   fb.appendChild(paneTitleEl());
   const deep = store.prefs.flowDeep !== false;   // detailed outline by default
   const topics = flowTopics(srcData.nodes, deep);
+  const dset = drawSet();
   if (!topics.length) { fb.insertAdjacentHTML('beforeend', '<div class="empty-hint">No topic headers found in this lesson.</div>'); return; }
 
   const tools = document.createElement('div');
@@ -1657,6 +1675,7 @@ function renderFlow() {
     if (t.kind === 'sect') {
       const s = document.createElement('div');
       s.className = 'flow-sect'; s.textContent = flowLabel(t.t);
+      if (dset.has(t.t)) s.insertAdjacentHTML('beforeend', '<span class="draw-chip">✏ DRAW</span>');
       fb.appendChild(s);
       return;
     }
@@ -1670,6 +1689,7 @@ function renderFlow() {
     const label = numbered ? flowLabel(t.t) : shortCue(t.t);
     const marker = numbered ? `${n}.` : (t.kind === 'd2' ? '' : '–');
     d.innerHTML = `<span class="flow-num">${marker}</span><span class="flow-text">${escapeHtml(label)}</span>` +
+                  (dset.has(t.t) ? '<span class="draw-chip">✏ DRAW</span>' : '') +
                   (t.acs ? `<span class="flow-acs">${t.acs[0]}</span>` : '');
     d.onclick = () => {
       if (d.classList.contains('masked')) { d.classList.remove('masked'); return; } // reveal first
@@ -1791,8 +1811,9 @@ function renderCards() {
     const card = document.createElement('div');
     card.id = 'fcard';
     if (!cardFlipped) {
+      const dr = drawSet().has(c.front) ? '<div style="margin-top:8px"><span class="draw-chip">✏ DRAW THIS ONE</span></div>' : '';
       card.innerHTML = `<div class="fc-kicker">${escapeHtml(c.sect || cur.lesson.title)}</div>` +
-                       `<div class="fc-front">${escapeHtml(c.front)}</div>` +
+                       `<div class="fc-front">${escapeHtml(c.front)}</div>` + dr +
                        `<div class="fc-hint">tap to reveal</div>`;
     } else {
       card.innerHTML = `<div class="fc-kicker">${escapeHtml(c.front)}</div>` +
@@ -2317,7 +2338,7 @@ function libraryUrls() {
   return (window.CFI_DOCS || []).map(d => d.url);
 }
 function everyAssetUrl() {
-  const urls = new Set(['./', './index.html', './custom.js', './data.js', './refs.js', './docs.js', './topicrefs.js', './schoolrefs.js', './manifest.webmanifest', 'vendor/pdf.min.js', 'vendor/pdf.worker.min.js']);
+  const urls = new Set(['./', './index.html', './custom.js', './data.js', './refs.js', './docs.js', './topicrefs.js', './schoolrefs.js', './draw.js', './manifest.webmanifest', 'vendor/pdf.min.js', 'vendor/pdf.worker.min.js']);
   const lib = new Set(libraryUrls());
   DOCS.forEach(d => { if (!lib.has(d.url)) urls.add(d.url); });   // handbooks download separately
   CFI_DATA.aoes.forEach(a => a.lessons.forEach(l => {
