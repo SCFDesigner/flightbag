@@ -258,6 +258,16 @@ body.nosplit #pane-ext { display:none; }
             max-height:calc(100vh - 130px); text-align:center; position:relative; }
 #pv-canvas { display:inline-block; margin:8px 0; background:#fff; box-shadow:0 4px 18px rgba(0,0,0,.5); }
 #pv-msg { position:absolute; top:16px; left:0; right:0; color:var(--text3); font-size:13px; }
+#pv-scrub { margin:2px 0 8px; }
+#pv-slider { width:100%; accent-color:var(--blue); cursor:pointer; }
+#pv-toc { display:none; border:1px solid var(--bdr); border-radius:10px; background:var(--bg1);
+          max-height:42vh; overflow-y:auto; margin-bottom:8px; padding:6px 0; }
+.pv-toc-item { padding:7px 14px; font-size:12.5px; color:var(--text2); cursor:pointer;
+               display:flex; justify-content:space-between; gap:10px; }
+.pv-toc-item:hover { background:var(--bg2); color:var(--text); }
+.pv-toc-item .pg { color:var(--text4); font-size:11px; flex-shrink:0; }
+.pv-toc-item.d1 { padding-left:28px; font-size:12px; color:var(--text3); }
+.pv-toc-item.d2 { padding-left:42px; font-size:11.5px; color:var(--text4); }
 #pv-page { width:56px; background:var(--bg2); border:1px solid var(--bdr); color:var(--text);
            border-radius:6px; padding:4px 6px; font-size:12px; text-align:center; }
 .pv-total { color:var(--text4); font-size:12px; }
@@ -1833,6 +1843,7 @@ function openPdfViewer(url, title) {
     `<div class="mv-head">
        <button class="tbtn" id="mv-back">‹ Back</button>
        <div class="mv-title">${escapeHtml(title || file.split('/').pop())}</div>
+       <button class="tbtn" id="pv-toc-btn" style="display:none" title="Contents">☰</button>
        <button class="tbtn" id="pv-prev">‹</button>
        <input id="pv-page" type="number" min="1" value="${want}">
        <span id="pv-total" class="pv-total">/ …</span>
@@ -1841,25 +1852,61 @@ function openPdfViewer(url, title) {
        <button class="tbtn" id="pv-zoomin">+</button>
        <a class="reflink" style="margin-left:6px" href="${url}" target="_blank" rel="noopener">↗</a>
      </div>
+     <div id="pv-toc"></div>
+     <div id="pv-scrub"><input id="pv-slider" type="range" min="1" max="1" value="${want}"></div>
      <div id="pv-stage"><canvas id="pv-canvas"></canvas><div id="pv-msg">loading…</div></div>`;
   $('#mv-back').onclick = () => { mb.style.display = 'none'; pdfDoc = null; document.querySelector('.tab[data-tab="mine"]').click(); };
   $('#pv-prev').onclick = () => pdfGo(pdfPage - 1);
   $('#pv-next').onclick = () => pdfGo(pdfPage + 1);
   $('#pv-page').onchange = e => pdfGo(+e.target.value || 1);
+  $('#pv-slider').oninput = e => pdfGo(+e.target.value || 1);
+  $('#pv-toc-btn').onclick = () => { const t = $('#pv-toc'); t.style.display = t.style.display === 'block' ? 'none' : 'block'; };
   $('#pv-zoomin').onclick = () => { pdfScale = Math.min((pdfScale || 1) * 1.25, 4); pdfRender(); };
   $('#pv-zoomout').onclick = () => { pdfScale = Math.max((pdfScale || 1) / 1.25, 0.4); pdfRender(); };
   pdfUrl = file; pdfPage = want; pdfScale = 0; pdfDoc = null;
   pdfjsLib.getDocument(file).promise.then(doc => {
     pdfDoc = doc;
     $('#pv-total').textContent = '/ ' + doc.numPages;
+    $('#pv-slider').max = doc.numPages;
     pdfPage = Math.min(want, doc.numPages);
     pdfRender();
+    doc.getOutline().then(outline => { if (outline && outline.length) buildPdfToc(outline); }).catch(() => {});
   }).catch(err => { $('#pv-msg').textContent = 'could not open — ' + err.message; });
+}
+/* the PDF's own bookmarks -> tappable contents list (books without bookmarks
+   just never show the ☰ button) */
+function buildPdfToc(outline) {
+  const box = $('#pv-toc');
+  if (!box) return;
+  box.innerHTML = '';
+  const add = (items, depth) => items.forEach(it => {
+    const d = document.createElement('div');
+    d.className = 'pv-toc-item' + (depth ? ' d' + Math.min(depth, 2) : '');
+    d.innerHTML = `<span>${escapeHtml(it.title || '…')}</span><span class="pg"></span>`;
+    d.onclick = () => pdfDestPage(it.dest).then(p => {
+      if (p) { pdfGo(p); box.style.display = 'none'; }
+    });
+    box.appendChild(d);
+    // show the page number once resolved, without blocking the list
+    pdfDestPage(it.dest).then(p => { if (p) d.querySelector('.pg').textContent = 'p.' + p; }).catch(() => {});
+    if (it.items && it.items.length && depth < 2) add(it.items, depth + 1);
+  });
+  add(outline, 0);
+  $('#pv-toc-btn').style.display = '';
+}
+async function pdfDestPage(dest) {
+  if (!pdfDoc || !dest) return null;
+  let d = dest;
+  if (typeof d === 'string') d = await pdfDoc.getDestination(d);
+  if (!d || !d[0]) return null;
+  return (await pdfDoc.getPageIndex(d[0])) + 1;
 }
 function pdfGo(p) {
   if (!pdfDoc) return;
   pdfPage = Math.max(1, Math.min(p, pdfDoc.numPages));
   $('#pv-page').value = pdfPage;
+  const sl = $('#pv-slider');
+  if (sl && +sl.value !== pdfPage) sl.value = pdfPage;
   pdfRender();
 }
 function pdfRender() {
