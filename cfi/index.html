@@ -48,6 +48,8 @@ nav { width:var(--sidebar-w); min-width:var(--sidebar-w); background:var(--bg1);
 .lesson-item.active { background:var(--bg2); border-left-color:var(--blue); color:var(--text); }
 .lesson-item .cnt { font-size:10px; color:var(--bg0); background:var(--lime); border-radius:8px; padding:0 6px; line-height:15px; font-weight:600; }
 .lesson-item .cnt.zero { display:none; }
+.lesson-item .toc-tri { color:var(--text4); padding:2px 4px; margin:-2px -4px; flex:0 0 auto; }
+.lesson-item .toc-tri:hover { color:var(--text); }
 
 /* ===== header/toolbar ===== */
 #toolbar { background:var(--bg1); border-bottom:1px solid var(--bdr); padding:8px 14px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; flex-shrink:0; }
@@ -350,6 +352,25 @@ a.reflink:hover { color:#ffc84d; border-bottom-style:solid; }
   .node .nbtns, .ms-item .mctl { display:flex; }
 }
 
+/* ===== quick-action dock (styled after the W&B calculator's floating bar) ===== */
+#dock { display:none; }
+@media (max-width: 820px), (pointer: coarse) {
+  #dock { display:flex; position:fixed; left:12px; right:12px;
+    bottom:calc(12px + env(safe-area-inset-bottom, 0px)); z-index:105; gap:8px; padding:7px;
+    background:rgba(16,16,22,.92); /* --bg1 at 92% for the blur */
+    border:1px solid var(--bdr); border-radius:14px;
+    box-shadow:0 8px 32px rgba(0,0,0,.45); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+    opacity:0; transform:translateY(130%); transition:opacity .25s, transform .25s; pointer-events:none; }
+  #dock.show { opacity:1; transform:none; pointer-events:auto; }
+  .dock-btn { flex:1; padding:11px 8px; font-size:13px; font-family:inherit; background:var(--btn);
+    color:var(--text2); border:1px solid var(--bdr); border-radius:10px; cursor:pointer; }
+  .dock-btn:active { background:var(--bg2); color:var(--text); border-color:var(--blue); }
+  .dock-btn:disabled { opacity:.35; }
+  #dock-menu { flex:0 0 56px; font-size:16px; }
+  #dock-prev { text-align:left; padding-left:16px; }
+  #dock-next { text-align:right; padding-right:16px; }
+}
+
 ::-webkit-scrollbar { width:9px; }
 ::-webkit-scrollbar-thumb { background:var(--bg3); border-radius:5px; }
 ::-webkit-scrollbar-track { background:transparent; }
@@ -441,6 +462,13 @@ a.reflink:hover { color:#ffc84d; border-bottom-style:solid; }
   </div>
 </div>
 <div id="toast"></div>
+
+<!-- quick-action dock: touch devices only, shows while scrolling -->
+<div id="dock">
+  <button class="dock-btn" id="dock-prev">‹ Prev</button>
+  <button class="dock-btn" id="dock-menu" title="Lessons">☰</button>
+  <button class="dock-btn" id="dock-next">Next ›</button>
+</div>
 <script src="data.js"></script>
 <!-- custom.js holds the hand-authored scripts and gets edited often, so always
      fetch a fresh copy instead of whatever the browser has cached. -->
@@ -467,7 +495,7 @@ function save() {
 
 let cur = null;        // {aoe, lesson}
 let curKey = null;     // selection key
-let tocOpen = true;    // the open lesson's topic list in the sidebar
+let tocOpen = false;   // the open lesson's topic list in the sidebar (arrow-toggled)
 let openAoes = new Set(D.aoes.map(a => a.num));
 
 /* ---------- sidebar ---------- */
@@ -495,16 +523,24 @@ function renderNav(filter) {
       // badge only when this lesson carries your own picks or notes — every
       // lesson has a script now, so a "scripted" marker would just be noise
       const n = selCount(l.id);
-      it.innerHTML = `<span>${l.title.replace(/^[IVXLC]+\.[A-Z](-[A-Z])?\.\s*/, m => m)}</span><span class="cnt${n ? '' : ' zero'}">${n}</span>`;
+      const hereOpen = cur && cur.lesson === l && tocOpen;
+      it.innerHTML = `<span>${l.title.replace(/^[IVXLC]+\.[A-Z](-[A-Z])?\.\s*/, m => m)}</span><span class="cnt${n ? '' : ' zero'}">${n}</span><span class="toc-tri">${hereOpen ? '▾' : '▸'}</span>`;
+      // name = navigate only (fast cycling); the arrow owns expand/collapse
       it.onclick = () => {
-        if (cur && cur.lesson === l) {                 // clicking the open lesson collapses its topics
-          tocOpen = !tocOpen;
-          renderNav($('#search').value);
-          return;
-        }
-        tocOpen = true;
+        if (cur && cur.lesson === l) return;
+        tocOpen = false;
         loadLesson(aoe, l);
         if (isMobile()) openNav(false);
+      };
+      it.querySelector('.toc-tri').onclick = e => {
+        e.stopPropagation();
+        if (cur && cur.lesson === l) {
+          tocOpen = !tocOpen;
+          renderNav($('#search').value);
+        } else {
+          tocOpen = true;                              // open a new lesson with its topics showing
+          loadLesson(aoe, l);                          // keep the sidebar up so the topics are visible
+        }
       };
       list.appendChild(it);
       if (cur && cur.lesson === l && tocOpen) renderToc(list);   // expand the open lesson's topics
@@ -590,7 +626,7 @@ let spyTick = false;
 function onPaneScroll() {
   if (spyTick) return;
   spyTick = true;
-  requestAnimationFrame(() => { spyTick = false; syncTocHighlight(); });
+  requestAnimationFrame(() => { spyTick = false; syncTocHighlight(); showDock(); });
 }
 ['#mine-body', '#con-body', '#flow-body', '#lp-body', '#ext-body'].forEach(s => {
   const el = document.querySelector(s);
@@ -598,7 +634,7 @@ function onPaneScroll() {
 });
 
 /* ---------- library: documents · videos · links ---------- */
-const KIND_TAG = { school: 'USAA', acs: 'ACS', handbook: 'BOOK', ac: 'AC' };
+const KIND_TAG = { mine: 'MINE', school: 'USAA', acs: 'ACS', handbook: 'BOOK', ac: 'AC' };
 const DOCS = (window.CFI_DOCS || []).map(d =>
   ({ title: d.title, url: d.url, code: KIND_TAG[d.kind] || 'DOC', mb: d.mb }));
 let libOpen = { docs: true, videos: true, links: false };
@@ -847,6 +883,7 @@ function updateCounts() {
   const total = script ? script.nodes.length - getSel().pr.length + n : n;
   $('#mine-count').textContent = total ? `(${total})` : '';
   renderNav($('#search').value);
+  updateDock();
 }
 
 /* ---------- lesson rendering ---------- */
@@ -2158,6 +2195,42 @@ function showPane(which) {
 document.querySelectorAll('#pane-switch button').forEach(b => b.onclick = () => showPane(b.dataset.p));
 showPane('left');
 
+/* ---------- quick-action dock: prev/next lesson + thumb-reach menu ---------- */
+const dockEl = $('#dock');
+let dockTimer = null;
+function flatLessons() {
+  const out = [];
+  D.aoes.forEach(a => a.lessons.forEach(l => out.push({ aoe: a, lesson: l })));
+  return out;
+}
+function dockNeighbors() {
+  if (!cur) return {};
+  const flat = flatLessons();
+  const i = flat.findIndex(e => e.lesson === cur.lesson);
+  return { prev: flat[i - 1], next: flat[i + 1] };
+}
+function lessonCode(l) {
+  const m = l.title.match(/^[IVXLC]+\.[A-Z](?:-[A-Z])?/);
+  return m ? m[0] : l.title.slice(0, 8);
+}
+function updateDock() {
+  if (!dockEl) return;
+  const { prev, next } = dockNeighbors();
+  $('#dock-prev').textContent = prev ? '‹ ' + lessonCode(prev.lesson) : '‹';
+  $('#dock-next').textContent = next ? lessonCode(next.lesson) + ' ›' : '›';
+  $('#dock-prev').disabled = !prev;
+  $('#dock-next').disabled = !next;
+}
+function showDock() {
+  if (!dockEl || !cur) return;
+  dockEl.classList.add('show');
+  clearTimeout(dockTimer);
+  dockTimer = setTimeout(() => dockEl.classList.remove('show'), 1800);
+}
+$('#dock-prev').onclick = () => { const { prev } = dockNeighbors(); if (prev) { tocOpen = false; loadLesson(prev.aoe, prev.lesson); showDock(); } };
+$('#dock-next').onclick = () => { const { next } = dockNeighbors(); if (next) { tocOpen = false; loadLesson(next.aoe, next.lesson); showDock(); } };
+$('#dock-menu').onclick = () => { openNav(!document.querySelector('nav').classList.contains('open')); showDock(); };
+
 /* ---------- password gate ----------
    Note: this gates the interface, not the files. A static site can always be
    fetched directly (data.js, assets/…), so this deters casual browsing only.
@@ -2190,7 +2263,7 @@ function unlockUI() {
 })();
 
 /* ---------- offline (checkride-day insurance) ---------- */
-const SW_CACHE = 'cfi-binder-v7';   // keep in step with sw.js
+const SW_CACHE = 'cfi-binder-v8';   // keep in step with sw.js
 function libraryUrls() {
   return (window.CFI_DOCS || []).map(d => d.url);
 }
