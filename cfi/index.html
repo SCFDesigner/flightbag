@@ -39,7 +39,8 @@ nav { width:var(--sidebar-w); min-width:var(--sidebar-w); background:var(--bg1);
 #nav-head .sub { font-size:11px; color:var(--text3); margin-top:2px; }
 #search { width:100%; margin-top:8px; background:var(--bg2); border:1px solid var(--bdr); color:var(--text); border-radius:6px; padding:5px 8px; font-size:12px; outline:none; }
 #search:focus { border-color:var(--blue); }
-#nav-list { flex:1; overflow-y:auto; padding:6px 0 30px; }
+#nav-scroll { flex:1; overflow-y:auto; }
+#nav-list { padding:6px 0 0; }
 .aoe-hdr { padding:7px 14px 4px; font-size:11px; color:var(--orange); text-transform:uppercase; letter-spacing:.06em; cursor:pointer; user-select:none; display:flex; justify-content:space-between; }
 .aoe-hdr:hover { color:var(--text); }
 .aoe-hdr .tri { color:var(--text4); }
@@ -194,7 +195,10 @@ kbd { background:var(--bg3); border:1px solid var(--text4); border-radius:4px; p
 .toc-item.here.sect { color:#ffd24a; }
 
 /* ===== nav: library (documents · videos · links) ===== */
-#nav-library { border-top:1px solid var(--bdr); max-height:34vh; overflow-y:auto; flex-shrink:0; }
+/* library lives in the main sidebar scroll, one divider per section;
+   only Settings stays pinned at the bottom */
+#nav-library { border-top:1px solid var(--bdr); margin-top:8px; padding-bottom:30px; }
+#nav-library .lib-hdr:not(:first-child) { border-top:1px solid var(--bdr); margin-top:6px; padding-top:9px; }
 .lib-hdr { padding:8px 14px 5px; font-size:11px; color:var(--lime); text-transform:uppercase;
            letter-spacing:.06em; cursor:pointer; user-select:none; display:flex; justify-content:space-between; }
 .lib-hdr:hover { color:var(--text); }
@@ -396,8 +400,10 @@ a.reflink:hover { color:#ffc84d; border-bottom-style:solid; }
       <div class="sub">lesson plans · slides · scripts</div>
       <input id="search" type="text" placeholder="Filter lessons…">
     </div>
-    <div id="nav-list"></div>
-    <div id="nav-library"></div>
+    <div id="nav-scroll">
+      <div id="nav-list"></div>
+      <div id="nav-library"></div>
+    </div>
     <div id="nav-settings">
       <div class="ns-label" id="ns-toggle"><span>Settings</span><span class="tri">▾</span></div>
       <div id="ns-body">
@@ -676,15 +682,6 @@ function renderLibrary() {
     if (libOpen[key]) items.forEach(render);
   };
 
-  section('docs', 'Documents', DOCS.length, DOCS, d => {
-    const el = document.createElement('div');
-    el.className = 'lib-item';
-    el.innerHTML = `<span class="code">${d.code}</span><span class="lbl">${escapeHtml(d.title)}</span>` +
-                   (d.mb ? `<span class="dsize">${d.mb >= 1 ? d.mb + 'M' : ''}</span>` : '');
-    el.onclick = () => openMedia({ type: 'doc', url: d.url, title: d.title });
-    c.appendChild(el);
-  });
-
   section('videos', 'Videos', LIB.videos.length, LIB.videos, v => {
     const el = document.createElement('div');
     el.className = 'lib-item';
@@ -700,6 +697,15 @@ function renderLibrary() {
     el.innerHTML = `<span class="code">${[...l.codes].sort().join(',')}</span>` +
                    `<span class="lbl">${escapeHtml(l.anchor)}</span>`;
     el.onclick = () => window.open(l.url, '_blank', 'noopener');
+    c.appendChild(el);
+  });
+
+  section('docs', 'Documents', DOCS.length, DOCS, d => {
+    const el = document.createElement('div');
+    el.className = 'lib-item';
+    el.innerHTML = `<span class="code">${d.code}</span><span class="lbl">${escapeHtml(d.title)}</span>` +
+                   (d.mb ? `<span class="dsize">${d.mb >= 1 ? d.mb + 'M' : ''}</span>` : '');
+    el.onclick = () => openMedia({ type: 'doc', url: d.url, title: d.title });
     c.appendChild(el);
   });
 }
@@ -2209,15 +2215,11 @@ function dockNeighbors() {
   const i = flat.findIndex(e => e.lesson === cur.lesson);
   return { prev: flat[i - 1], next: flat[i + 1] };
 }
-function lessonCode(l) {
-  const m = l.title.match(/^[IVXLC]+\.[A-Z](?:-[A-Z])?/);
-  return m ? m[0] : l.title.slice(0, 8);
-}
 function updateDock() {
   if (!dockEl) return;
   const { prev, next } = dockNeighbors();
-  $('#dock-prev').textContent = prev ? '‹ ' + lessonCode(prev.lesson) : '‹';
-  $('#dock-next').textContent = next ? lessonCode(next.lesson) + ' ›' : '›';
+  $('#dock-prev').textContent = prev ? '‹ ' + lessonCode(prev.lesson.title) : '‹';
+  $('#dock-next').textContent = next ? lessonCode(next.lesson.title) + ' ›' : '›';
   $('#dock-prev').disabled = !prev;
   $('#dock-next').disabled = !next;
 }
@@ -2385,8 +2387,11 @@ function setSyncState(txt, cls) {
   if (el) { el.textContent = 'sync: ' + txt; el.className = cls || ''; }
 }
 function syncPayload() {
-  return { sel: store.sel, selTs: store.selTs || {}, last: store.last,
-           clientId, updatedAt: Date.now() };
+  // JSON round-trip drops `undefined` values — Firebase set() rejects a payload
+  // containing any (and empty-object lessons pruned by Firebase can reappear
+  // locally as undefined via mergeRemote on other devices)
+  return JSON.parse(JSON.stringify({ sel: store.sel, selTs: store.selTs || {}, last: store.last,
+           clientId, updatedAt: Date.now() }));
 }
 function schedulePush() {
   if (!syncDb || applyingRemote) return;
@@ -2404,7 +2409,9 @@ function mergeRemote(remote) {
   const keys = new Set([...Object.keys(remote.sel), ...Object.keys(store.sel)]);
   keys.forEach(k => {
     if ((rTs[k] || 0) > (lTs[k] || 0)) {
-      store.sel[k] = remote.sel[k];
+      // Firebase strips empty objects/arrays, so a lesson with no picks comes
+      // back as undefined — restore an empty shell instead of storing undefined
+      store.sel[k] = remote.sel[k] || { x: [], c: [] };
       (store.selTs = store.selTs || {})[k] = rTs[k];
       changed = true;
     }
