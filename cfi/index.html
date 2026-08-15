@@ -844,8 +844,16 @@ function mapScriptImages(sc, con) {
   const pinned = new Set();
   const overrides = (window.CFI_FIGS || {})[cur ? cur.lesson.id : ''];
   if (overrides) {
-    Object.entries(overrides).forEach(([heading, imgs]) => {
-      const at = sc.nodes.findIndex(n => n.t === heading);
+    Object.entries(overrides).forEach(([key, imgs]) => {
+      // "Lift-Off#2" targets the 2nd line with that text (crosswind sections
+      // repeat headings like Takeoff Roll / Lift-Off / Common Errors)
+      const hash = key.lastIndexOf('#');
+      const nth = hash > 0 ? +key.slice(hash + 1) : 1;
+      const heading = hash > 0 && nth ? key.slice(0, hash) : key;
+      let seen = 0, at = -1;
+      for (let k = 0; k < sc.nodes.length; k++) {
+        if (sc.nodes[k].t === heading && ++seen === nth) { at = k; break; }
+      }
       if (at < 0) return;                       // heading reworded — leave to the mapper
       imgs.forEach(p => pinned.add(p));
       sc.nodes[at].img = (sc.nodes[at].img || []).concat(imgs);
