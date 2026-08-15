@@ -496,6 +496,7 @@ a.reflink:hover { color:#ffc84d; border-bottom-style:solid; }
 <script src="topicrefs.js"></script>
 <script src="schoolrefs.js"></script>
 <script src="draw.js"></script>
+<script src="figs.js"></script>
 <script src="vendor/pdf.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
@@ -839,6 +840,17 @@ function mapScriptImages(sc, con) {
   sc._leftoverImgs = [];
   if (!con) return;
   const scTok = sc.nodes.map(n => simTokens(n.t));
+  // hand-placed figures win; everything they claim is skipped by the fuzzy pass
+  const pinned = new Set();
+  const overrides = (window.CFI_FIGS || {})[cur ? cur.lesson.id : ''];
+  if (overrides) {
+    Object.entries(overrides).forEach(([heading, imgs]) => {
+      const at = sc.nodes.findIndex(n => n.t === heading);
+      if (at < 0) return;                       // heading reworded — leave to the mapper
+      imgs.forEach(p => pinned.add(p));
+      sc.nodes[at].img = (sc.nodes[at].img || []).concat(imgs);
+    });
+  }
   // front-matter images (rare) belong at the very top — first section line
   (con.front || []).forEach(cell => cell.forEach(ln => {
     if (ln.img) { (sc.nodes[0].img = sc.nodes[0].img || []).push(ln.img); }
@@ -857,6 +869,8 @@ function mapScriptImages(sc, con) {
   const load = {};   // how many figures already sit on a line
   con.nodes.forEach((n, i) => {
     if (!n.img) return;
+    const imgs = n.img.filter(p => !pinned.has(p));   // hand-placed above
+    if (!imgs.length) return;
     let at = (n.b || n.l <= 1) && n.t ? n.t : '';
     if (!at) for (let j = i; j >= 0 && !at; j--) if (con.nodes[j].b && con.nodes[j].t) at = con.nodes[j].t;
     const tok = simTokens(at || n.t || '');
@@ -877,8 +891,8 @@ function mapScriptImages(sc, con) {
       while (best < bodyEnd && (load[best] || 0) >= 2) best++;   // don't stack
     }
     best = blockTailFor(sc.nodes, best, bodyStart, bodyEnd);   // sit after the topic, never inside it
-    (sc.nodes[best].img = sc.nodes[best].img || []).push(...n.img);
-    load[best] = (load[best] || 0) + n.img.length;
+    (sc.nodes[best].img = sc.nodes[best].img || []).push(...imgs);
+    load[best] = (load[best] || 0) + imgs.length;
     lastAnchor = best;
   });
 }
@@ -2338,7 +2352,7 @@ function libraryUrls() {
   return (window.CFI_DOCS || []).map(d => d.url);
 }
 function everyAssetUrl() {
-  const urls = new Set(['./', './index.html', './custom.js', './data.js', './refs.js', './docs.js', './topicrefs.js', './schoolrefs.js', './draw.js', './manifest.webmanifest', 'vendor/pdf.min.js', 'vendor/pdf.worker.min.js']);
+  const urls = new Set(['./', './index.html', './custom.js', './data.js', './refs.js', './docs.js', './topicrefs.js', './schoolrefs.js', './draw.js', './figs.js', './manifest.webmanifest', 'vendor/pdf.min.js', 'vendor/pdf.worker.min.js']);
   const lib = new Set(libraryUrls());
   DOCS.forEach(d => { if (!lib.has(d.url)) urls.add(d.url); });   // handbooks download separately
   CFI_DATA.aoes.forEach(a => a.lessons.forEach(l => {
