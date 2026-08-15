@@ -315,6 +315,22 @@ a.reflink:hover { color:#ffc84d; border-bottom-style:solid; }
 
 /* ===== my-script images & figures ===== */
 .ms-item img { max-width:92%; display:block; margin:8px 0; border-radius:8px; border:1px solid var(--bdr); }
+/* every figure opens full-screen — teaching diagrams are useless at thumbnail size */
+.node img, .ms-item img, .ms-figs img { cursor:zoom-in; }
+#lightbox { position:fixed; inset:0; z-index:300; background:rgba(4,4,7,.94); display:none;
+            flex-direction:column; backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px); }
+#lightbox.show { display:flex; }
+#lb-bar { display:flex; align-items:center; gap:10px; padding:10px 12px;
+          padding-top:calc(10px + env(safe-area-inset-top, 0px)); flex-shrink:0; }
+#lb-cap { flex:1; color:var(--text3); font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+#lb-bar .tbtn { font-size:13px; padding:7px 13px; }
+#lb-stage { flex:1; overflow:auto; display:flex; align-items:center; justify-content:center;
+            padding:0 12px calc(14px + env(safe-area-inset-bottom, 0px)); }
+/* Sized in JS so the white matte hugs the diagram — most figures are RGBA with
+   transparent backgrounds, so they need white behind them, but a stretched
+   element would letterbox big white slabs above and below. */
+#lb-img { display:block; border-radius:8px; background:#fff; cursor:zoom-in; margin:auto; }
+#lb-img.zoomed { cursor:zoom-out; margin:0 auto; }
 .ms-figs img { max-width:92%; display:block; margin:10px 0; border-radius:8px; border:1px solid var(--bdr); }
 
 /* ===== password gate ===== */
@@ -481,6 +497,17 @@ a.reflink:hover { color:#ffc84d; border-bottom-style:solid; }
   </div>
 </div>
 <div id="toast"></div>
+
+<!-- full-screen figure viewer -->
+<div id="lightbox">
+  <div id="lb-bar">
+    <button class="tbtn" id="lb-close">‹ Back</button>
+    <span id="lb-cap"></span>
+    <button class="tbtn" id="lb-zoom">＋ Zoom</button>
+    <button class="tbtn" id="lb-x">✕</button>
+  </div>
+  <div id="lb-stage"><img id="lb-img" alt=""></div>
+</div>
 
 <!-- quick-action dock: touch devices only, shows while scrolling -->
 <div id="dock">
@@ -2290,6 +2317,71 @@ function showPane(which) {
 }
 document.querySelectorAll('#pane-switch button').forEach(b => b.onclick = () => showPane(b.dataset.p));
 showPane('left');
+
+/* ---------- figure lightbox ----------
+   Tap any diagram to fill the screen; Back / ✕ / backdrop / Esc all close it,
+   and it takes a history entry so the tablet's back gesture closes it too. */
+let lbOpen = false, lbPushed = false, lbOpenedAt = 0, lbZoom = 1;
+/* scale the figure UP to fill the screen (these plates are small originals and
+   the whole point is to read them from across the table) */
+function fitLightbox() {
+  const im = $('#lb-img'), st = $('#lb-stage');
+  if (!im.naturalWidth || !st.clientWidth) return;
+  const k = Math.min((st.clientWidth - 20) / im.naturalWidth,
+                     (st.clientHeight - 20) / im.naturalHeight) * lbZoom;
+  im.style.width = Math.round(im.naturalWidth * k) + 'px';
+  im.style.height = Math.round(im.naturalHeight * k) + 'px';
+}
+function openLightbox(src, caption) {
+  const lb = $('#lightbox'), im = $('#lb-img');
+  lbZoom = 1;
+  im.classList.remove('zoomed');
+  $('#lb-zoom').textContent = '＋ Zoom';
+  im.style.width = im.style.height = '';
+  im.onload = fitLightbox;
+  im.src = src;
+  $('#lb-cap').textContent = caption || '';
+  lb.classList.add('show');
+  lbOpen = true;
+  lbOpenedAt = Date.now();
+  requestAnimationFrame(fitLightbox);   // stage has real dimensions once shown
+  stopReading();
+  if (!lbPushed) { try { history.pushState({ lb: 1 }, ''); lbPushed = true; } catch (e) {} }
+}
+function closeLightbox(fromPop) {
+  if (!lbOpen) return;
+  $('#lightbox').classList.remove('show');
+  $('#lb-img').src = '';
+  lbOpen = false;
+  if (lbPushed && !fromPop) { lbPushed = false; try { history.back(); } catch (e) {} }
+  if (fromPop) lbPushed = false;
+}
+$('#lb-close').onclick = () => closeLightbox();
+$('#lb-x').onclick = () => closeLightbox();
+$('#lb-zoom').onclick = () => {
+  lbZoom = lbZoom > 1 ? 1 : 2;
+  $('#lb-img').classList.toggle('zoomed', lbZoom > 1);
+  $('#lb-zoom').textContent = lbZoom > 1 ? '− Fit' : '＋ Zoom';
+  fitLightbox();
+};
+window.addEventListener('resize', () => { if (lbOpen) fitLightbox(); });
+$('#lb-img').onclick = e => { e.stopPropagation(); $('#lb-zoom').click(); };
+$('#lb-stage').onclick = () => closeLightbox();          // tap the space around it
+// a close-then-reopen can land its own history.back() here — ignore a pop that
+// arrives right after an open, or tapping a figure twice would shut instantly
+window.addEventListener('popstate', () => {
+  if (lbOpen && Date.now() - lbOpenedAt > 350) closeLightbox(true);
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && lbOpen) closeLightbox(); }, true);
+// one delegated handler covers every pane, including figures rendered later
+document.addEventListener('click', e => {
+  const im = e.target.closest && e.target.closest('.node img, .ms-item img, .ms-figs img');
+  if (!im) return;
+  e.preventDefault(); e.stopPropagation();
+  const row = im.closest('.node, .ms-item');
+  const cap = row ? (row.querySelector('.ms-text, .ntext') || {}).textContent : '';
+  openLightbox(im.src, (cap || '').trim().slice(0, 90));
+}, true);
 
 /* ---------- quick-action dock: prev/next lesson + thumb-reach menu ---------- */
 const dockEl = $('#dock');
