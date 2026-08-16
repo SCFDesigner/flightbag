@@ -34,3 +34,4 @@ Never estimate, approximate, or invent values. If a number is in this tool, it h
 | `general_knowledge.html` | Regs / airspace knowledge |
 | `written-exams.html` | FOI + FIA written exam prep |
 | `p2006t_chairfly.html` | Chairfly trainer with G1000 simulation |
+| `navlog.html` | C-152 cross-country planner — POH Fig 5-1/5-6/5-7 data baked in, vertical profile view, wind triangle, fillable Jeppesen VFR nav log. Descent figures are user-set, not POH. |
