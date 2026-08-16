@@ -411,6 +411,8 @@ a.reflink:hover { color:#ffc84d; border-bottom-style:solid; }
 .acs-item.hit .ac-text { color:var(--text); }
 .acs-item.hit .ac-code { color:var(--lime); }
 .acs-item .ac-hit { color:var(--lime); font-size:11px; flex-shrink:0; }
+.acs-meta { color:var(--text3); font-size:11.5px; line-height:1.5; margin-bottom:6px; }
+.acs-meta b { color:var(--text4); text-transform:uppercase; letter-spacing:.07em; font-size:9.5px; margin-right:6px; }
 .acs-note { margin-top:20px; padding-top:10px; border-top:1px solid var(--bdr);
             color:var(--text4); font-size:11px; line-height:1.45; }
 
@@ -2070,7 +2072,11 @@ function setLeftTab(which) {
 /* ---------- ACS tab ----------
    The task's ACS elements, in code order, with a check against your own
    script so you can see what you actually cover. */
-const ACS_GROUPS = [['K', 'Knowledge'], ['R', 'Risk Management'], ['S', 'Skills']];
+const ACS_GROUPS = [
+  ['K', 'Knowledge — describe and explain'],
+  ['R', 'Risk Management — identify and manage'],
+  ['S', 'Skills — demonstrate and explain'],
+];
 function acsGroupOf(code) { const m = code.match(/\.([KRS])\d/); return m ? m[1] : 'K'; }
 function renderAcs() {
   const ab = $('#acs-body');
@@ -2091,8 +2097,12 @@ function renderAcs() {
   const head = document.createElement('div');
   head.className = 'acs-task';
   head.innerHTML = `<span class="at-code">${escapeHtml(data.task)}</span>` +
-                   `<span class="at-name">${escapeHtml(cur.lesson.title.replace(/^[IVXLC]+\.[A-Z](-[A-Z])?\.\s*/, ''))}</span>`;
+                   `<span class="at-name">${escapeHtml(data.title || cur.lesson.title)}</span>`;
   ab.appendChild(head);
+  if (data.obj) ab.insertAdjacentHTML('beforeend',
+    `<div class="acs-meta"><b>Objective</b> ${escapeHtml(data.obj)}</div>`);
+  if (data.refs) ab.insertAdjacentHTML('beforeend',
+    `<div class="acs-meta"><b>References</b> ${escapeHtml(data.refs)}</div>`);
 
   let shown = 0;
   ACS_GROUPS.forEach(([g, label]) => {
@@ -2117,8 +2127,9 @@ function renderAcs() {
   const n = data.items.filter(it => covered.has(it.c)).length;
   $('#ext-count').textContent = `${n}/${shown} in your script`;
   ab.insertAdjacentHTML('beforeend',
-    '<div class="acs-note">Elements and codes as tagged by the Backseat lesson plans — ' +
-    'wording is theirs, not verbatim FAA-S-ACS-25. Tap an element to jump to it in your lesson plan.</div>');
+    '<div class="acs-note">Verbatim FAA-S-ACS-25. ✓ marks elements your lesson plan tags by code — ' +
+    'absence of a ✓ means the code isn’t cited, not necessarily that the topic is missing. ' +
+    'Tap an element to jump to it in your lesson plan.</div>');
 }
 function jumpToAcs(code) {
   const script = lessonScript();
