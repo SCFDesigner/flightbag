@@ -72,6 +72,11 @@ select { background:var(--btn); color:var(--text2); border:1px solid var(--bdr);
 .node.bold { font-weight:600; }
 .node.topic { font-weight:600; color:#7fc9ff; }
 .node .bullet { color:var(--text4); margin-right:6px; }
+/* depth markers: ▸/▪ topic · • point · ◦ sub-point · – detail, each dimmer */
+.bullet.b1 { color:var(--text2); }
+.bullet.b2 { color:var(--text3); }
+.bullet.b3 { color:var(--text4); font-size:.9em; }
+.bullet.b4 { color:var(--text4); font-size:.85em; }
 .node .acs { font-size:.68em; color:var(--bg0); background:var(--text4); border-radius:4px; padding:1px 5px; margin-left:7px; vertical-align:middle; white-space:nowrap; }
 .node img { max-width:92%; display:block; margin:8px 0; border-radius:8px; border:1px solid var(--bdr); }
 .node.tblrow { color:var(--text2); font-size:.92em; }
@@ -120,6 +125,10 @@ select { background:var(--btn); color:var(--text2); border:1px solid var(--bdr);
 .ms-item.hdr0 { font-weight:700; color:var(--blue); margin-top:16px; margin-bottom:3px; font-size:1.05em; }
 .ms-item.topic { font-weight:600; color:#7fc9ff; margin-top:9px; }
 .ms-item .bullet { color:var(--text4); margin-right:6px; }
+.ms-item .bullet.b1 { color:var(--text2); }
+.ms-item .bullet.b2 { color:var(--text3); }
+.ms-item .bullet.b3 { color:var(--text4); font-size:.9em; }
+.ms-item .bullet.b4 { color:var(--text4); font-size:.85em; }
 .ms-item.skel-empty { opacity:.32; }
 .ms-item:hover { background:var(--bg1); }
 .ms-item.note { border-left:2px solid var(--lime); padding-left:10px; }
@@ -385,6 +394,26 @@ a.reflink:hover { color:#ffc84d; border-bottom-style:solid; }
   .node .nbtns, .ms-item .mctl { display:flex; }
 }
 
+/* ===== ACS tab ===== */
+.acs-task { display:flex; align-items:baseline; gap:10px; padding:2px 0 12px; border-bottom:1px solid var(--bdr); margin-bottom:10px; }
+.acs-task .at-code { color:var(--orange); font-weight:700; font-size:1.05em; letter-spacing:.03em; }
+.acs-task .at-name { color:var(--text2); font-size:.92em; }
+.acs-grp { color:var(--lime); font-size:10.5px; text-transform:uppercase; letter-spacing:.08em;
+           margin:16px 0 6px; padding-bottom:3px; border-bottom:1px solid var(--bdr); }
+.acs-item { display:flex; gap:10px; align-items:baseline; padding:6px 8px; border-radius:6px;
+            cursor:pointer; border-left:2px solid transparent; }
+.acs-item:hover { background:var(--bg2); border-left-color:var(--blue); }
+.acs-item.sub { padding-left:26px; }
+.acs-item .ac-code { color:var(--text4); font-size:10.5px; min-width:96px; flex-shrink:0;
+                     font-variant-numeric:tabular-nums; }
+.acs-item.sub .ac-code { min-width:82px; }
+.acs-item .ac-text { color:var(--text2); flex:1; line-height:1.35; }
+.acs-item.hit .ac-text { color:var(--text); }
+.acs-item.hit .ac-code { color:var(--lime); }
+.acs-item .ac-hit { color:var(--lime); font-size:11px; flex-shrink:0; }
+.acs-note { margin-top:20px; padding-top:10px; border-top:1px solid var(--bdr);
+            color:var(--text4); font-size:11px; line-height:1.45; }
+
 /* ===== quick-action dock (styled after the W&B calculator's floating bar) ===== */
 #dock { display:none; }
 @media (max-width: 820px), (pointer: coarse) {
@@ -472,11 +501,13 @@ a.reflink:hover { color:#ffc84d; border-bottom-style:solid; }
           <div class="tabs">
             <div class="tab active" data-ltab="ext">Extra Detail</div>
             <div class="tab" data-ltab="lp">Lesson Plan</div>
+            <div class="tab" data-ltab="acs">ACS</div>
           </div>
           <span style="margin-left:auto;color:var(--text4);text-transform:none;letter-spacing:0" id="ext-count"></span>
         </div>
         <div class="pane-body" id="ext-body"></div>
         <div class="pane-body" id="lp-body" style="display:none"></div>
+        <div class="pane-body" id="acs-body" style="display:none"></div>
       </div>
       <div class="pane" id="pane-right">
         <div class="pane-head">
@@ -524,6 +555,7 @@ a.reflink:hover { color:#ffc84d; border-bottom-style:solid; }
 <script src="schoolrefs.js"></script>
 <script src="draw.js"></script>
 <script src="figs.js"></script>
+<script src="acs.js"></script>
 <script src="vendor/pdf.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
@@ -996,6 +1028,15 @@ function nodeCls(n) {
   if (n.b) return ' bold';
   return '';
 }
+/* One marker per depth so topic / point / sub-point are distinguishable at a
+   glance while teaching (levels 2 and 3 both used to render a plain dot). */
+function bulletEl(level, key) {
+  const d = Math.max(1, level);
+  if (d <= 1) return `<span class="bullet b1">${key ? '▸' : '▪'}</span>`;
+  if (d === 2) return '<span class="bullet b2">•</span>';
+  if (d === 3) return '<span class="bullet b3">◦</span>';
+  return '<span class="bullet b4">–</span>';
+}
 function nodeEl(n, src, idx) {
   const div = document.createElement('div');
   let cls = 'node' + nodeCls(n);
@@ -1005,7 +1046,7 @@ function nodeEl(n, src, idx) {
   const indent = n.l > 0 ? n.l : 0;
   div.style.marginLeft = (indent * 20) + 'px';
   let inner = `<span class="nbtns"><span class="nb add" title="Add to My Lesson Plan">+</span><span class="nb play" title="Read from here">▸</span></span>`;
-  if (indent > 0 && !n.b && !SELF_MARKED.test(n.t)) inner += `<span class="bullet">•</span>`;
+  if (indent > 0 && !n.b && !SELF_MARKED.test(n.t)) inner += bulletEl(indent, false);
   inner += linkify(escapeHtml(n.t), n.lk);
   if (n.acs) n.acs.forEach(c => inner += `<span class="acs">${c}</span>`);
   div.innerHTML = inner;
@@ -1191,7 +1232,7 @@ function msItem(n, src, i, opts) {
   div.className = 'ms-item' + nodeCls(n) + (opts.empty ? ' skel-empty' : '') + (edited ? ' edited' : '');
   div.style.marginLeft = (Math.max(0, n.l) * 18) + 'px';
   const marked = SELF_MARKED.test(text);
-  let inner = (n.l > 0 && !marked ? `<span class="bullet">${n._k || n.b ? '▸' : '•'}</span>` : '') +
+  let inner = (n.l > 0 && !marked ? bulletEl(n.l, n._k || n.b) : '') +
               `<span class="ms-text">${linkify(escapeHtml(text), n.lk || lessonLinks())}</span><span class="mctl">` +
               `<span class="mb play" title="Read from here">▸</span>` +
               `<span class="mb edit" title="Edit text">✎</span>` +
@@ -2018,10 +2059,79 @@ function setLeftTab(which) {
   if (cur) setTimeout(() => renderNav($('#search').value), 0);
   $('#ext-body').style.display = which === 'ext' ? '' : 'none';
   $('#lp-body').style.display = which === 'lp' ? '' : 'none';
+  $('#acs-body').style.display = which === 'acs' ? '' : 'none';
+  if (which === 'acs') { renderAcs(); return; }
   const n = which === 'ext'
     ? (cur && cur.lesson.ext ? cur.lesson.ext.nodes.length : 0)
     : (cur && cur.lesson.con ? cur.lesson.con.nodes.length : 0);
   $('#ext-count').textContent = n ? n + ' points' : '';
+}
+
+/* ---------- ACS tab ----------
+   The task's ACS elements, in code order, with a check against your own
+   script so you can see what you actually cover. */
+const ACS_GROUPS = [['K', 'Knowledge'], ['R', 'Risk Management'], ['S', 'Skills']];
+function acsGroupOf(code) { const m = code.match(/\.([KRS])\d/); return m ? m[1] : 'K'; }
+function renderAcs() {
+  const ab = $('#acs-body');
+  ab.innerHTML = '';
+  ab.appendChild(paneTitleEl());
+  const data = (window.CFI_ACS || {})[cur ? cur.lesson.id : ''];
+  if (!data) {
+    ab.insertAdjacentHTML('beforeend', '<div class="empty-hint">No ACS codes are tagged on this lesson.</div>');
+    $('#ext-count').textContent = '';
+    return;
+  }
+  // which elements does the authored script actually mention?
+  const script = lessonScript();
+  const covered = new Set();
+  if (script) script.nodes.forEach(n =>
+    (n.t.match(/(?:AI|FI)\.[IVXLC]+\.[A-Z]\.[KRS]\d+[a-z]?/g) || []).forEach(c => covered.add(c)));
+
+  const head = document.createElement('div');
+  head.className = 'acs-task';
+  head.innerHTML = `<span class="at-code">${escapeHtml(data.task)}</span>` +
+                   `<span class="at-name">${escapeHtml(cur.lesson.title.replace(/^[IVXLC]+\.[A-Z](-[A-Z])?\.\s*/, ''))}</span>`;
+  ab.appendChild(head);
+
+  let shown = 0;
+  ACS_GROUPS.forEach(([g, label]) => {
+    const rows = data.items.filter(it => acsGroupOf(it.c) === g);
+    if (!rows.length) return;
+    const h = document.createElement('div');
+    h.className = 'acs-grp';
+    h.textContent = label + ' · ' + rows.length;
+    ab.appendChild(h);
+    rows.forEach(it => {
+      shown++;
+      const sub = /[a-z]$/.test(it.c);
+      const d = document.createElement('div');
+      d.className = 'acs-item' + (sub ? ' sub' : '') + (covered.has(it.c) ? ' hit' : '');
+      d.innerHTML = `<span class="ac-code">${escapeHtml(it.c)}</span>` +
+                    `<span class="ac-text">${escapeHtml(it.t)}</span>` +
+                    (covered.has(it.c) ? '<span class="ac-hit" title="your script covers this">✓</span>' : '');
+      d.onclick = () => jumpToAcs(it.c);
+      ab.appendChild(d);
+    });
+  });
+  const n = data.items.filter(it => covered.has(it.c)).length;
+  $('#ext-count').textContent = `${n}/${shown} in your script`;
+  ab.insertAdjacentHTML('beforeend',
+    '<div class="acs-note">Elements and codes as tagged by the Backseat lesson plans — ' +
+    'wording is theirs, not verbatim FAA-S-ACS-25. Tap an element to jump to it in your lesson plan.</div>');
+}
+function jumpToAcs(code) {
+  const script = lessonScript();
+  if (script) {
+    const i = script.nodes.findIndex(n => n.t.includes(code));
+    if (i >= 0) { jumpToNode('p', i); return; }
+  }
+  for (const [src, nodes] of [['c', cur.lesson.con && cur.lesson.con.nodes], ['x', cur.lesson.ext && cur.lesson.ext.nodes]]) {
+    if (!nodes) continue;
+    const i = nodes.findIndex(n => (n.acs || []).includes(code));
+    if (i >= 0) { jumpToNode(src, i); return; }
+  }
+  toast('Not found in this lesson’s text');
 }
 document.querySelectorAll('.tab[data-ltab]').forEach(t => t.onclick = () => {
   setLeftTab(t.dataset.ltab);
@@ -2452,7 +2562,7 @@ function libraryUrls() {
   return (window.CFI_DOCS || []).map(d => d.url);
 }
 function everyAssetUrl() {
-  const urls = new Set(['./', './index.html', './custom.js', './data.js', './refs.js', './docs.js', './topicrefs.js', './schoolrefs.js', './draw.js', './figs.js', './manifest.webmanifest', 'vendor/pdf.min.js', 'vendor/pdf.worker.min.js']);
+  const urls = new Set(['./', './index.html', './custom.js', './data.js', './refs.js', './docs.js', './topicrefs.js', './schoolrefs.js', './draw.js', './figs.js', './acs.js', './manifest.webmanifest', 'vendor/pdf.min.js', 'vendor/pdf.worker.min.js']);
   const lib = new Set(libraryUrls());
   DOCS.forEach(d => { if (!lib.has(d.url)) urls.add(d.url); });   // handbooks download separately
   CFI_DATA.aoes.forEach(a => a.lessons.forEach(l => {
