@@ -11,466 +11,253 @@
    DESIGN TOKENS
    ═══════════════════════════════════════════════════════════ */
 :root {
-  /* surfaces */
-  --bg0:        #08080a;
-  --bg1:        #0d0d10;
-  --bg2:        #111116;
-  --bg3:        #16161c;
-  --field:      #0a0a0d;
+  --bg0:#08080a; --bg1:#0d0d10; --bg2:#111116; --bg3:#16161c; --field:#0a0a0d;
+  --bdr:#1e1e22; --bdr2:#252528; --bdr3:#33333a;
+  --text:#ccc; --text-hi:#fff; --text-dim:#888; --text-dim2:#555; --text-dim3:#333;
 
-  /* borders */
-  --bdr:        #1e1e22;
-  --bdr2:       #252528;
-  --bdr3:       #33333a;
+  --acc:#33ddcc;          /* tool accent */
+  --acc-dim:#1a6b64;
+  --acc-bg:#08201e;
+  --ghost:#2f8f86;        /* calculated-answer ghost text */
+  --given:#3a3a44;        /* placeholder for cells you fill from the chart */
+  --calc:#ffaa33;         /* derived readouts in the performance cards */
+  --warn:#ff5566;
+  --ok:#66dd77;
+  --climb:#4aaaff; --cruise:#33ddcc; --desc:#b58cff;
 
-  /* text */
-  --text:       #ccc;
-  --text-hi:    #fff;
-  --text-dim:   #888;
-  --text-dim2:  #555;
-  --text-dim3:  #333;
+  --font:'Courier New',Courier,monospace;
+  --fs-xs:9px; --fs-sm:10px; --fs-md:11px; --fs-lg:13px;
+  --fs-title:clamp(18px,4vw,30px);
 
-  /* accents */
-  --acc:        #33ddcc;   /* nav log teal */
-  --acc-dim:    #1a6b64;
-  --acc-bg:     #08201e;
-  --calc:       #ffaa33;   /* computed value */
-  --warn:       #ff5566;
-  --ok:         #66dd77;
-  --climb:      #4aaaff;
-  --cruise:     #33ddcc;
-  --desc:       #b58cff;
-
-  /* type */
-  --font:       'Courier New', Courier, monospace;
-  --fs-xs:      9px;
-  --fs-sm:      10px;
-  --fs-md:      11px;
-  --fs-lg:      13px;
-  --fs-xl:      16px;
-  --fs-title:   clamp(18px, 4vw, 30px);
-
-  /* metrics */
-  --r-sm:       4px;
-  --r-md:       6px;
-  --r-lg:       10px;
-  --sp-1:       4px;
-  --sp-2:       8px;
-  --sp-3:       12px;
-  --sp-4:       16px;
-  --sp-5:       20px;
-  --sp-6:       28px;
-  --ls-1:       1px;
-  --ls-2:       2px;
-  --ls-3:       3px;
-  --ls-4:       4px;
+  --r-sm:4px; --r-md:6px; --r-lg:10px;
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:20px; --sp-6:28px;
+  --ls-1:1px; --ls-2:2px; --ls-3:3px; --ls-4:4px;
 }
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  background: var(--bg0);
-  min-height: 100vh;
-  font-family: var(--font);
-  color: var(--text);
-  font-size: var(--fs-md);
-  padding: var(--sp-4) var(--sp-4) 60px;
-  -webkit-text-size-adjust: 100%;
-}
-
-.wrap { max-width: 1500px; margin: 0 auto; }
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg0);min-height:100vh;font-family:var(--font);color:var(--text);
+  font-size:var(--fs-md);padding:var(--sp-4) var(--sp-4) 60px;-webkit-text-size-adjust:100%}
+.wrap{max-width:1560px;margin:0 auto}
 
 /* ── HEADER ── */
-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--sp-3);
-  padding-bottom: var(--sp-4);
-  border-bottom: 1px solid var(--bdr);
-  margin-bottom: var(--sp-5);
-  flex-wrap: wrap;
-}
-.hd-l h1 {
-  font-size: var(--fs-title);
-  letter-spacing: var(--ls-4);
-  color: var(--text-hi);
-  font-weight: normal;
-}
-.hd-l p {
-  font-size: var(--fs-sm);
-  letter-spacing: var(--ls-2);
-  color: var(--text-dim3);
-  margin-top: var(--sp-1);
-}
-.hd-r { display: flex; gap: var(--sp-2); flex-wrap: wrap; }
+header{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);
+  padding-bottom:var(--sp-4);border-bottom:1px solid var(--bdr);margin-bottom:var(--sp-5);flex-wrap:wrap}
+.hd-l h1{font-size:var(--fs-title);letter-spacing:var(--ls-4);color:var(--text-hi);font-weight:normal}
+.hd-l p{font-size:var(--fs-sm);letter-spacing:var(--ls-2);color:var(--text-dim3);margin-top:var(--sp-1)}
+.hd-r{display:flex;gap:var(--sp-2);flex-wrap:wrap}
 
 /* ── BUTTONS ── */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  background: var(--field);
-  border: 1px solid var(--bdr2);
-  border-radius: var(--r-md);
-  color: var(--text-dim);
-  text-decoration: none;
-  font-family: var(--font);
-  font-size: var(--fs-md);
-  letter-spacing: var(--ls-1);
-  cursor: pointer;
-  transition: border-color .15s, background .15s, color .15s;
-  white-space: nowrap;
-}
-.btn:hover { border-color: var(--acc); background: var(--acc-bg); color: var(--text-hi); }
-.btn.primary { border-color: var(--acc-dim); color: var(--acc); }
-.btn.primary:hover { background: var(--acc-bg); }
-.btn.danger:hover { border-color: var(--warn); background: #1a0a0c; color: #fff; }
-.btn.sm { padding: 5px 9px; font-size: var(--fs-sm); }
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:var(--field);
+  border:1px solid var(--bdr2);border-radius:var(--r-md);color:var(--text-dim);text-decoration:none;
+  font-family:var(--font);font-size:var(--fs-md);letter-spacing:var(--ls-1);cursor:pointer;
+  transition:border-color .15s,background .15s,color .15s;white-space:nowrap}
+.btn:hover{border-color:var(--acc);background:var(--acc-bg);color:var(--text-hi)}
+.btn.primary{border-color:var(--acc-dim);color:var(--acc)}
+.btn.danger:hover{border-color:var(--warn);background:#1a0a0c;color:#fff}
+.btn.sm{padding:5px 9px;font-size:var(--fs-sm)}
+.btn.on{border-color:var(--acc);background:var(--acc-bg);color:var(--acc)}
 
 /* ── PANELS ── */
-.panel {
-  background: var(--bg1);
-  border: 1px solid var(--bdr);
-  border-radius: var(--r-lg);
-  margin-bottom: var(--sp-5);
-  overflow: hidden;
-}
-.panel-hd {
-  padding: var(--sp-3) var(--sp-4);
-  border-bottom: 1px solid var(--bdr);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--sp-3);
-  flex-wrap: wrap;
-}
-.panel-title {
-  font-size: var(--fs-lg);
-  letter-spacing: var(--ls-3);
-  color: var(--text-hi);
-}
-.panel-title small {
-  display: block;
-  font-size: var(--fs-xs);
-  letter-spacing: var(--ls-1);
-  color: var(--text-dim3);
-  margin-top: 3px;
-  letter-spacing: var(--ls-1);
-}
-.panel-body { padding: var(--sp-4); }
+.panel{background:var(--bg1);border:1px solid var(--bdr);border-radius:var(--r-lg);
+  margin-bottom:var(--sp-5);overflow:hidden}
+.panel-hd{padding:var(--sp-3) var(--sp-4);border-bottom:1px solid var(--bdr);display:flex;
+  align-items:center;justify-content:space-between;gap:var(--sp-3);flex-wrap:wrap}
+.panel-title{font-size:var(--fs-lg);letter-spacing:var(--ls-3);color:var(--text-hi)}
+.panel-title small{display:block;font-size:var(--fs-xs);letter-spacing:var(--ls-1);
+  color:var(--text-dim3);margin-top:3px}
+.panel-body{padding:var(--sp-4)}
 
-/* ── FIELD GRID ── */
-.grid {
-  display: grid;
-  gap: var(--sp-3);
-  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
-}
-.fld { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
-.fld label {
-  font-size: var(--fs-xs);
-  letter-spacing: var(--ls-1);
-  color: var(--text-dim2);
-  text-transform: uppercase;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-input, select {
-  background: var(--field);
-  border: 1px solid var(--bdr2);
-  border-radius: var(--r-sm);
-  color: var(--text-hi);
-  font-family: var(--font);
-  font-size: var(--fs-md);
-  padding: 7px 8px;
-  width: 100%;
-  min-width: 0;
-  transition: border-color .15s;
-}
-input:focus, select:focus { outline: none; border-color: var(--acc); }
-input::placeholder { color: var(--text-dim3); }
-select { cursor: pointer; }
-input[type=checkbox] { width: auto; accent-color: var(--acc); cursor: pointer; }
+/* ── FIELDS ── */
+.grid{display:grid;gap:var(--sp-3);grid-template-columns:repeat(auto-fit,minmax(132px,1fr))}
+.fld{display:flex;flex-direction:column;gap:5px;min-width:0}
+.fld label{font-size:var(--fs-xs);letter-spacing:var(--ls-1);color:var(--text-dim2);
+  text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+input,select{background:var(--field);border:1px solid var(--bdr2);border-radius:var(--r-sm);
+  color:var(--text-hi);font-family:var(--font);font-size:var(--fs-md);padding:7px 8px;
+  width:100%;min-width:0;transition:border-color .15s}
+input:focus,select:focus{outline:none;border-color:var(--acc)}
+input::placeholder{color:var(--given)}
+select{cursor:pointer}
+input[type=checkbox]{width:auto;accent-color:var(--acc);cursor:pointer}
+input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{
+  -webkit-appearance:none;margin:0}
+input[type=number]{-moz-appearance:textfield}
 
 /* ── PROFILE ── */
-#profileSvg {
-  width: 100%;
-  height: auto;
-  display: block;
-  background: var(--field);
-  border: 1px solid var(--bdr);
-  border-radius: var(--r-md);
-}
-.node-cards {
-  display: grid;
-  gap: var(--sp-3);
-  grid-template-columns: repeat(auto-fit, minmax(232px, 1fr));
-  margin-top: var(--sp-4);
-}
-.node-card {
-  background: var(--bg2);
-  border: 1px solid var(--bdr2);
-  border-left: 3px solid var(--bdr3);
-  border-radius: var(--r-md);
-  padding: var(--sp-3);
-}
-.node-card.dep    { border-left-color: var(--text-dim); }
-.node-card.climb  { border-left-color: var(--climb); }
-.node-card.cruise { border-left-color: var(--cruise); }
-.node-card.dest   { border-left-color: var(--desc); }
-.node-card h4 {
-  font-size: var(--fs-sm);
-  letter-spacing: var(--ls-2);
-  color: var(--text-hi);
-  font-weight: normal;
-  margin-bottom: var(--sp-3);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--sp-2);
-}
-.node-card .grid { grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); gap: var(--sp-2); }
+#profileSvg{width:100%;height:auto;display:block;background:var(--field);
+  border:1px solid var(--bdr);border-radius:var(--r-md)}
+.node-cards{display:grid;gap:var(--sp-3);
+  grid-template-columns:repeat(auto-fit,minmax(232px,1fr));margin-top:var(--sp-4)}
+.node-card{background:var(--bg2);border:1px solid var(--bdr2);border-left:3px solid var(--bdr3);
+  border-radius:var(--r-md);padding:var(--sp-3)}
+.node-card.dep{border-left-color:var(--text-dim)}
+.node-card.climb{border-left-color:var(--climb)}
+.node-card.cruise{border-left-color:var(--cruise)}
+.node-card.dest{border-left-color:var(--desc)}
+.node-card h4{font-size:var(--fs-sm);letter-spacing:var(--ls-2);color:var(--text-hi);
+  font-weight:normal;margin-bottom:var(--sp-3);display:flex;align-items:center;
+  justify-content:space-between;gap:var(--sp-2)}
+.node-card .grid{grid-template-columns:repeat(auto-fit,minmax(84px,1fr));gap:var(--sp-2)}
 
-/* ── RESULT READOUTS ── */
-.readouts {
-  display: grid;
-  gap: var(--sp-3);
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-}
-.rcard {
-  background: var(--bg2);
-  border: 1px solid var(--bdr2);
-  border-radius: var(--r-md);
-  padding: var(--sp-3);
-}
-.rcard h5 {
-  font-size: var(--fs-sm);
-  letter-spacing: var(--ls-2);
-  font-weight: normal;
-  color: var(--text-hi);
-  padding-bottom: var(--sp-2);
-  margin-bottom: var(--sp-2);
-  border-bottom: 1px solid var(--bdr);
-  display: flex;
-  justify-content: space-between;
-  gap: var(--sp-2);
-}
-.rcard h5 .tag { font-size: var(--fs-xs); letter-spacing: var(--ls-1); }
-.tag.climb  { color: var(--climb); }
-.tag.cruise { color: var(--cruise); }
-.tag.desc   { color: var(--desc); }
-.rrow {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--sp-2);
-  font-size: var(--fs-sm);
-  padding: 3px 0;
-  line-height: 1.5;
-}
-.rrow span:first-child { color: var(--text-dim2); }
-.rrow span:last-child  { color: var(--text); text-align: right; }
-.rrow.big span:last-child { color: var(--calc); font-size: var(--fs-md); }
-.rrow.hi span:last-child  { color: var(--acc); }
-.rrow.note { color: var(--text-dim3); font-size: var(--fs-xs); display: block; padding-top: var(--sp-2); line-height: 1.6; }
-.rsep { height: 1px; background: var(--bdr); margin: var(--sp-2) 0; }
+/* ── PERF CARDS ── */
+.readouts{display:grid;gap:var(--sp-3);grid-template-columns:repeat(auto-fit,minmax(224px,1fr))}
+.rcard{background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--r-md);padding:var(--sp-3)}
+.rcard h5{font-size:var(--fs-sm);letter-spacing:var(--ls-2);font-weight:normal;color:var(--text-hi);
+  padding-bottom:var(--sp-2);margin-bottom:var(--sp-2);border-bottom:1px solid var(--bdr);
+  display:flex;justify-content:space-between;gap:var(--sp-2)}
+.rcard h5 .tag{font-size:var(--fs-xs);letter-spacing:var(--ls-1)}
+.tag.climb{color:var(--climb)} .tag.cruise{color:var(--cruise)} .tag.desc{color:var(--desc)}
+.rrow{display:flex;justify-content:space-between;gap:var(--sp-2);font-size:var(--fs-sm);
+  padding:3px 0;line-height:1.5;align-items:center}
+.rrow span:first-child{color:var(--text-dim2)}
+.rrow span:last-child{color:var(--text);text-align:right}
+.rrow.big span:last-child{color:var(--calc);font-size:var(--fs-md)}
+.rrow.hi span:last-child{color:var(--acc)}
+.rrow.note{color:var(--text-dim3);font-size:var(--fs-xs);display:block;padding-top:var(--sp-2);line-height:1.6}
+.rsep{height:1px;background:var(--bdr);margin:var(--sp-2) 0}
+/* editable POH override rows */
+.orow{display:grid;grid-template-columns:1fr 68px 30px;gap:6px;align-items:center;
+  font-size:var(--fs-sm);padding:2px 0}
+.orow label{color:var(--text-dim2)}
+.orow input{padding:4px 6px;text-align:right;font-size:var(--fs-sm);height:24px}
+.orow input::placeholder{color:var(--ghost)}
+.orow .unit{color:var(--text-dim3);font-size:var(--fs-xs)}
 
-/* ── NAV LOG TABLE ── */
-.nl-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-table.navlog {
-  border-collapse: collapse;
-  width: 100%;
-  min-width: 1320px;
-  font-size: var(--fs-sm);
-}
-table.navlog th, table.navlog td {
-  border: 1px solid var(--bdr2);
-  padding: 0;
-  text-align: center;
-  vertical-align: middle;
-}
-table.navlog thead th {
-  background: var(--bg3);
-  color: var(--text-hi);
-  font-weight: normal;
-  font-size: var(--fs-xs);
-  letter-spacing: var(--ls-1);
-  padding: 5px 3px;
-  line-height: 1.35;
-  white-space: nowrap;
-}
-table.navlog thead th .sub {
-  display: block;
-  color: var(--text-dim2);
-  font-size: 8px;
-  letter-spacing: 0;
-  margin-top: 1px;
-}
-table.navlog thead th.grp {
-  background: #1b1b22;
-  border-bottom-color: var(--bdr3);
-}
-table.navlog tr.p0 td { background: #0b0b0e; }
-table.navlog tr.p1 td { background: #0e0e12; }
-table.navlog tr.hot td { background: #12121a; }
+/* ═══════════════ NAV LOG SHEET ═══════════════ */
+.sheet{border:1px solid var(--bdr2);border-radius:var(--r-md);background:var(--bg1);
+  margin-bottom:var(--sp-5);overflow:hidden}
+.sheet-bar{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);
+  padding:var(--sp-2) var(--sp-3);background:var(--bg3);border-bottom:1px solid var(--bdr2);flex-wrap:wrap}
+.sheet-no{font-size:var(--fs-sm);letter-spacing:var(--ls-2);color:var(--acc)}
+.sheet-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.sheet-inner{display:flex;align-items:stretch;min-width:1660px}
+.sheet-main{flex:1;min-width:0;display:flex;flex-direction:column}
+.sheet-side{width:330px;flex:0 0 330px;border-left:2px solid var(--bdr3)}
 
-table.navlog input {
-  border: none;
-  background: transparent;
-  border-radius: 0;
-  padding: 5px 3px;
-  text-align: center;
-  font-size: var(--fs-sm);
-  color: var(--text-hi);
-  height: 26px;
-}
-table.navlog input[type=number]::-webkit-outer-spin-button,
-table.navlog input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-table.navlog input[type=number] { -moz-appearance: textfield; }
-.namecell { display: flex; align-items: center; gap: 2px; }
-.namecell input { flex: 1; min-width: 0; }
-table.navlog input:focus { background: var(--acc-bg); border: none; outline: 1px solid var(--acc); outline-offset: -1px; }
-table.navlog input.name  { text-align: left; padding-left: 6px; }
-table.navlog td.out {
-  color: var(--calc);
-  font-size: var(--fs-sm);
-  padding: 5px 3px;
-  height: 26px;
-  white-space: nowrap;
-}
-table.navlog td.out.acc { color: var(--acc); }
-table.navlog td.out.dim { color: var(--text-dim2); }
-table.navlog td.out.bad { color: var(--warn); }
-table.navlog td.act input { color: var(--ok); }
-table.navlog td.phase {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  font-size: 8px;
-  letter-spacing: var(--ls-1);
-  color: var(--text-dim3);
-  width: 16px;
-  padding: 0;
-}
-table.navlog td.phase.CLIMB  { color: var(--climb); }
-table.navlog td.phase.CRUISE { color: var(--cruise); }
-table.navlog td.phase.DESC   { color: var(--desc); }
-table.navlog tfoot td {
-  background: var(--bg3) !important;
-  color: var(--calc);
-  padding: 6px 3px;
-  font-size: var(--fs-sm);
-}
-table.navlog tfoot td.lbl { color: var(--text-dim); text-align: right; padding-right: 8px; letter-spacing: var(--ls-1); }
-.rowbtn {
-  background: none; border: none; color: var(--text-dim3);
-  cursor: pointer; font-family: var(--font); font-size: var(--fs-md);
-  padding: 4px 5px; line-height: 1;
-}
-.rowbtn:hover { color: var(--warn); }
+/* form title + aircraft/notes block */
+.form-title{background:#1b1b22;color:var(--text-hi);text-align:center;font-size:var(--fs-md);
+  letter-spacing:var(--ls-4);padding:5px;border-bottom:1px solid var(--bdr2)}
+table.acblk{border-collapse:collapse;width:100%;font-size:var(--fs-sm)}
+table.acblk td{border:1px solid var(--bdr2);padding:0}
+table.acblk td.lbl{padding:4px 7px;color:var(--text-dim2);white-space:nowrap;width:1%;background:var(--bg3)}
+
+/* the log table */
+table.navlog{border-collapse:collapse;width:100%;font-size:var(--fs-sm);table-layout:fixed}
+table.navlog th,table.navlog td{border:1px solid var(--bdr2);padding:0;text-align:center;vertical-align:middle}
+table.navlog thead th{background:var(--bg3);color:var(--text-hi);font-weight:normal;
+  font-size:var(--fs-xs);letter-spacing:var(--ls-1);padding:4px 2px;line-height:1.3}
+table.navlog thead th.grp{background:#1b1b22;letter-spacing:var(--ls-2)}
+table.navlog thead th .sub{display:block;color:var(--text-dim2);font-size:8px;letter-spacing:0;margin-top:1px}
+table.navlog thead th.hdrbox{padding:2px}
+table.navlog thead th.hdrbox input{height:22px;font-size:var(--fs-sm);text-align:center;
+  background:var(--field);border:1px solid var(--bdr2)}
+
+table.navlog tbody tr.p0 td{background:#0b0b0e}
+table.navlog tbody tr.p1 td{background:#0e0e12}
+table.navlog td.cp{border-left:3px solid transparent}
+tbody[data-phase="CLIMB"]  td.cp{border-left-color:var(--climb)}
+tbody[data-phase="CRUISE"] td.cp{border-left-color:var(--cruise)}
+tbody[data-phase="DESC"]   td.cp{border-left-color:var(--desc)}
+
+/* every cell is an input */
+table.navlog input{border:none;background:transparent;border-radius:0;padding:4px 2px;
+  text-align:center;font-size:var(--fs-sm);color:var(--text-hi);height:25px}
+table.navlog input:focus{background:var(--acc-bg);outline:1px solid var(--acc);outline-offset:-1px}
+table.navlog input.name{text-align:left;padding-left:5px}
+/* ghost = the answer, shown only while the cell is empty */
+table.navlog input.ans::placeholder{color:var(--ghost);opacity:1}
+table.navlog input.giv::placeholder{color:var(--given)}
+table.navlog input.act{color:var(--ok)}
+/* check-my-work */
+table.navlog input.right{box-shadow:inset 2px 0 0 var(--ok)}
+table.navlog input.wrong{box-shadow:inset 2px 0 0 var(--warn);color:var(--warn)}
+
+table.navlog tfoot td{background:var(--bg3)!important;color:var(--calc);padding:5px 2px;font-size:var(--fs-sm)}
+table.navlog tfoot td.lbl{color:var(--text-dim);text-align:right;padding-right:8px;letter-spacing:var(--ls-1)}
+table.navlog tfoot tr.bf td{color:var(--text-dim2);background:#101015!important}
+
+.gut{width:26px}
+.rowbtn{background:none;border:none;color:var(--text-dim3);cursor:pointer;font-family:var(--font);
+  font-size:var(--fs-sm);padding:2px 3px;line-height:1;display:block;width:100%}
+.rowbtn:hover{color:var(--acc)}
+.rowbtn.del:hover{color:var(--warn)}
+
+/* side panel */
+table.side{border-collapse:collapse;width:100%;font-size:var(--fs-xs);height:100%}
+table.side th,table.side td{border:1px solid var(--bdr2);padding:0;text-align:center}
+table.side th{background:#1b1b22;color:var(--text-hi);font-weight:normal;letter-spacing:var(--ls-2);padding:4px}
+table.side td.lbl{background:var(--bg3);color:var(--text-dim);padding:3px 6px;text-align:center;white-space:nowrap}
+table.side td.lbl.l{text-align:left}
+table.side input{border:none;background:transparent;height:22px;padding:3px 5px;
+  font-size:var(--fs-xs);text-align:center;color:var(--text-hi);border-radius:0}
+table.side input:focus{background:var(--acc-bg);outline:1px solid var(--acc);outline-offset:-1px}
 
 /* ── FUEL BAR ── */
-.fuelbar {
-  display: flex; align-items: center; gap: var(--sp-3);
-  flex-wrap: wrap; margin-top: var(--sp-4);
-  padding: var(--sp-3);
-  background: var(--bg2);
-  border: 1px solid var(--bdr2);
-  border-radius: var(--r-md);
-}
-.fuelbar .item { font-size: var(--fs-sm); color: var(--text-dim2); }
-.fuelbar .item b { color: var(--calc); font-weight: normal; margin-left: 5px; }
-.fuelbar .item.ok b   { color: var(--ok); }
-.fuelbar .item.bad b  { color: var(--warn); }
-.pill {
-  font-size: var(--fs-xs); letter-spacing: var(--ls-1);
-  padding: 3px 8px; border-radius: 20px;
-  border: 1px solid var(--bdr3); color: var(--text-dim2);
-}
-.pill.ok  { border-color: var(--ok);   color: var(--ok); }
-.pill.bad { border-color: var(--warn); color: var(--warn); }
+.fuelbar{display:flex;align-items:center;gap:var(--sp-3);flex-wrap:wrap;margin-top:var(--sp-4);
+  padding:var(--sp-3);background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--r-md)}
+.fuelbar .item{font-size:var(--fs-sm);color:var(--text-dim2)}
+.fuelbar .item b{color:var(--calc);font-weight:normal;margin-left:5px}
+.fuelbar .item.ok b{color:var(--ok)} .fuelbar .item.bad b{color:var(--warn)}
+.pill{font-size:var(--fs-xs);letter-spacing:var(--ls-1);padding:3px 8px;border-radius:20px;
+  border:1px solid var(--bdr3);color:var(--text-dim2)}
+.pill.ok{border-color:var(--ok);color:var(--ok)}
+.pill.bad{border-color:var(--warn);color:var(--warn)}
+
+.legend{display:flex;gap:var(--sp-4);flex-wrap:wrap;font-size:var(--fs-xs);
+  color:var(--text-dim2);margin-bottom:var(--sp-3);letter-spacing:var(--ls-1)}
+.legend b{font-weight:normal}
+.sw{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
 
 /* ── NOTES ── */
-.notes { columns: 2; column-gap: var(--sp-6); }
-@media (max-width: 900px) { .notes { columns: 1; } }
-.note-blk { break-inside: avoid; margin-bottom: var(--sp-5); }
-.note-blk h4 {
-  font-size: var(--fs-md);
-  letter-spacing: var(--ls-2);
-  color: var(--acc);
-  font-weight: normal;
-  margin-bottom: var(--sp-2);
-}
-.note-blk p, .note-blk li {
-  font-size: var(--fs-sm);
-  line-height: 1.75;
-  color: var(--text-dim);
-  margin-bottom: 6px;
-}
-.note-blk ul, .note-blk ol { padding-left: 18px; }
-.note-blk code {
-  background: var(--field);
-  border: 1px solid var(--bdr2);
-  border-radius: var(--r-sm);
-  padding: 1px 5px;
-  color: var(--calc);
-  font-size: var(--fs-sm);
-}
-.note-blk .eq {
-  display: block;
-  background: var(--field);
-  border: 1px solid var(--bdr2);
-  border-left: 2px solid var(--acc-dim);
-  border-radius: var(--r-sm);
-  padding: 8px 10px;
-  margin: 8px 0;
-  color: var(--calc);
-  font-size: var(--fs-sm);
-  line-height: 1.7;
-  overflow-x: auto;
-  white-space: pre;
-}
-.chain {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
-  margin: var(--sp-2) 0 var(--sp-3);
-}
-.chain .step {
-  border: 1px solid var(--bdr3); border-radius: var(--r-sm);
-  padding: 5px 9px; font-size: var(--fs-sm); color: var(--text-hi);
-}
-.chain .op { color: var(--acc); font-size: var(--fs-sm); }
-table.mini { border-collapse: collapse; width: 100%; font-size: var(--fs-xs); margin-top: var(--sp-2); }
-table.mini th, table.mini td {
-  border: 1px solid var(--bdr2); padding: 4px 3px; text-align: center; color: var(--text-dim);
-}
-table.mini th { background: var(--bg3); color: var(--text); font-weight: normal; }
-.src {
-  font-size: var(--fs-xs); color: var(--text-dim3);
-  letter-spacing: var(--ls-1); line-height: 1.7;
+.notes{columns:2;column-gap:var(--sp-6)}
+@media (max-width:900px){.notes{columns:1}}
+.note-blk{break-inside:avoid;margin-bottom:var(--sp-5)}
+.note-blk h4{font-size:var(--fs-md);letter-spacing:var(--ls-2);color:var(--acc);
+  font-weight:normal;margin-bottom:var(--sp-2)}
+.note-blk p,.note-blk li{font-size:var(--fs-sm);line-height:1.75;color:var(--text-dim);margin-bottom:6px}
+.note-blk ul,.note-blk ol{padding-left:18px}
+.note-blk code{background:var(--field);border:1px solid var(--bdr2);border-radius:var(--r-sm);
+  padding:1px 5px;color:var(--calc);font-size:var(--fs-sm)}
+.note-blk .eq{display:block;background:var(--field);border:1px solid var(--bdr2);
+  border-left:2px solid var(--acc-dim);border-radius:var(--r-sm);padding:8px 10px;margin:8px 0;
+  color:var(--calc);font-size:var(--fs-sm);line-height:1.7;overflow-x:auto;white-space:pre}
+.chain{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:var(--sp-2) 0 var(--sp-3)}
+.chain .step{border:1px solid var(--bdr3);border-radius:var(--r-sm);padding:5px 9px;
+  font-size:var(--fs-sm);color:var(--text-hi)}
+.chain .op{color:var(--acc);font-size:var(--fs-sm)}
+table.mini{border-collapse:collapse;width:100%;font-size:var(--fs-xs);margin-top:var(--sp-2)}
+table.mini th,table.mini td{border:1px solid var(--bdr2);padding:4px 3px;text-align:center;color:var(--text-dim)}
+table.mini th{background:var(--bg3);color:var(--text);font-weight:normal}
+.src{font-size:var(--fs-xs);color:var(--text-dim3);letter-spacing:var(--ls-1);line-height:1.7}
+
+@media (max-width:700px){
+  body{padding:var(--sp-3) var(--sp-3) 48px}
+  header{flex-direction:column;align-items:flex-start}
+  .panel-body{padding:var(--sp-3)}
+  .grid{grid-template-columns:repeat(auto-fit,minmax(108px,1fr))}
 }
 
-/* ── MOBILE ── */
-@media (max-width: 700px) {
-  body { padding: var(--sp-3) var(--sp-3) 48px; }
-  header { flex-direction: column; align-items: flex-start; }
-  .panel-body { padding: var(--sp-3); }
-  .grid { grid-template-columns: repeat(auto-fit, minmax(108px, 1fr)); }
-}
-
-/* ── PRINT ── */
-@media print {
-  :root { --text: #000; --text-hi: #000; --text-dim: #333; --text-dim2: #555; --calc: #000; --acc: #000; }
-  body { background: #fff; color: #000; padding: 0; font-size: 9px; }
-  .noprint, .hd-r { display: none !important; }
-  .panel { border-color: #000; background: #fff; page-break-inside: avoid; margin-bottom: 10px; }
-  .panel-hd, .rcard, .node-card, table.navlog thead th, table.navlog tfoot td { background: #fff !important; }
-  table.navlog tbody tr td { background: #fff !important; }
-  table.navlog th, table.navlog td, .rcard, .node-card, input, select { border-color: #666 !important; }
-  input, select { color: #000; background: #fff; }
-  #profileSvg { background: #fff; }
-  table.navlog { min-width: 0; font-size: 8px; }
-  .nl-scroll { overflow: visible; }
-  .notes { columns: 2; }
+/* ── PRINT: landscape sheets, one per page ── */
+@page{size:landscape;margin:8mm}
+@media print{
+  :root{--text:#000;--text-hi:#000;--text-dim:#333;--text-dim2:#555;--text-dim3:#666;
+        --calc:#000;--acc:#000;--ghost:#999;--given:#fff}
+  body{background:#fff;color:#000;padding:0;font-size:8px}
+  .noprint,.hd-r{display:none!important}
+  .panel{border-color:#000;background:#fff;margin-bottom:8px;break-inside:avoid}
+  .panel-hd,.rcard,.node-card,.form-title,table.navlog thead th,table.navlog tfoot td,
+  table.side th,table.side td.lbl,table.acblk td.lbl{background:#fff!important}
+  table.navlog tbody tr td{background:#fff!important}
+  table.navlog th,table.navlog td,table.side th,table.side td,table.acblk td,
+  .rcard,.node-card,input,select{border-color:#555!important}
+  input,select{color:#000;background:#fff}
+  table.navlog input.act,table.navlog input.wrong{color:#000}
+  table.navlog input.right,table.navlog input.wrong{box-shadow:none}
+  #profileSvg{background:#fff}
+  .sheet{break-after:page;border-color:#000}
+  .sheet:last-of-type{break-after:auto}
+  .sheet-scroll{overflow:visible}
+  .sheet-inner{min-width:0}
+  .notes{columns:2}
 }
 </style>
 </head>
@@ -483,6 +270,7 @@ table.mini th { background: var(--bg3); color: var(--text); font-weight: normal;
     <p>CESSNA 152 &middot; VFR CROSS COUNTRY PLANNING</p>
   </div>
   <div class="hd-r noprint">
+    <button class="btn" id="btnCheck">◉ CHECK MY WORK</button>
     <button class="btn" id="btnSave">◈ SAVE</button>
     <button class="btn" id="btnPrint">⎙ PRINT</button>
     <button class="btn danger" id="btnClear">✕ CLEAR</button>
@@ -490,26 +278,19 @@ table.mini th { background: var(--bg3); color: var(--text); font-weight: normal;
   </div>
 </header>
 
-<!-- ══════════════════ 1. FLIGHT SETUP ══════════════════ -->
+<!-- ═══════════ FLIGHT SETUP ═══════════ -->
 <div class="panel">
   <div class="panel-hd">
-    <div class="panel-title">FLIGHT SETUP
-      <small>AIRCRAFT, ROUTE ENDS, ALTIMETER, VARIATION &amp; FUEL</small>
-    </div>
+    <div class="panel-title">FLIGHT SETUP<small>ALTIMETER, VARIATION, FUEL &amp; ROUTE LENGTH</small></div>
   </div>
   <div class="panel-body">
     <div class="grid">
-      <div class="fld"><label>Aircraft N#</label><input id="acN" placeholder="N152XX"></div>
       <div class="fld"><label>Date</label><input id="acDate" type="date"></div>
-      <div class="fld"><label>Time Off (HH:MM)</label><input id="timeOff" placeholder="14:30"></div>
       <div class="fld"><label>Altimeter (in Hg)</label><input id="altimeter" type="number" step="0.01" value="29.92"></div>
-      <div class="fld"><label>Mag Var (− E / + W)</label><input id="magVar" type="number" step="0.5" value="0"></div>
-      <div class="fld"><label>Compass Dev (±)</label><input id="magDev" type="number" step="1" value="0"></div>
+      <div class="fld"><label>Mag Var (− E / + W)</label><input id="magVar" inputmode="text" value="0"></div>
+      <div class="fld"><label>Compass Dev (±)</label><input id="magDev" inputmode="text" value="0"></div>
       <div class="fld"><label>Usable Fuel (gal)</label>
-        <select id="fuelCap">
-          <option value="24.5">24.5 — Standard</option>
-          <option value="37.5">37.5 — Long Range</option>
-        </select>
+        <select id="fuelCap"><option value="24.5">24.5 — Standard</option><option value="37.5">37.5 — Long Range</option></select>
       </div>
       <div class="fld"><label>Start/Taxi/T-O (gal)</label><input id="taxiFuel" type="number" step="0.1" value="0.8"></div>
       <div class="fld"><label>Reserve (min)</label><input id="reserveMin" type="number" step="5" value="30"></div>
@@ -518,24 +299,17 @@ table.mini th { background: var(--bg3); color: var(--text); font-weight: normal;
   </div>
 </div>
 
-<!-- ══════════════════ 2. PROFILE VIEW ══════════════════ -->
+<!-- ═══════════ PROFILE ═══════════ -->
 <div class="panel">
   <div class="panel-hd">
-    <div class="panel-title">PROFILE VIEW
-      <small>VERTICAL PROFILE — DEPARTURE · TOC · STEP CLIMB · TOD · DESTINATION</small>
-    </div>
+    <div class="panel-title">PROFILE VIEW<small>DEPARTURE · TOC · STEP CLIMB · TOD · DESTINATION</small></div>
     <div class="hd-r noprint">
-      <label class="btn sm" style="cursor:pointer">
-        <input type="checkbox" id="useStep" style="margin-right:6px"> SECOND CLIMB
-      </label>
+      <label class="btn sm" style="cursor:pointer"><input type="checkbox" id="useStep" style="margin-right:6px"> SECOND CLIMB</label>
     </div>
   </div>
   <div class="panel-body">
-    <svg id="profileSvg" viewBox="0 0 1000 300" preserveAspectRatio="xMidYMid meet" role="img"
-         aria-label="Vertical flight profile"></svg>
-
+    <svg id="profileSvg" viewBox="0 0 1000 300" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Vertical flight profile"></svg>
     <div class="node-cards">
-      <!-- DEPARTURE -->
       <div class="node-card dep">
         <h4>DEPARTURE</h4>
         <div class="grid">
@@ -544,10 +318,8 @@ table.mini th { background: var(--bg3); color: var(--text); font-weight: normal;
           <div class="fld"><label>OAT °C</label><input id="depOat" type="number" step="1" value="15"></div>
         </div>
       </div>
-
-      <!-- CRUISE 1 -->
       <div class="node-card cruise">
-        <h4>CRUISE 1 <span class="tag cruise" id="tocLbl">TOC</span></h4>
+        <h4>CRUISE 1 <span class="tag cruise">TOC</span></h4>
         <div class="grid">
           <div class="fld"><label>Altitude</label><input id="c1Alt" type="number" step="500" value="4500"></div>
           <div class="fld"><label>OAT °C</label><input id="c1Oat" type="number" step="1" value="7"></div>
@@ -556,12 +328,10 @@ table.mini th { background: var(--bg3); color: var(--text); font-weight: normal;
           <div class="fld"><label>RPM</label><input id="c1Rpm" type="number" step="50" value="2300"></div>
         </div>
       </div>
-
-      <!-- CRUISE 2 (step climb) -->
       <div class="node-card cruise" id="c2Card" style="display:none">
-        <h4>CRUISE 2 <span class="tag cruise" id="toc2Lbl">TOC 2</span></h4>
+        <h4>CRUISE 2 <span class="tag cruise">TOC 2</span></h4>
         <div class="grid">
-          <div class="fld"><label>Climb starts @NM</label><input id="c2Start" type="number" step="1" value="35"></div>
+          <div class="fld"><label>Climb @NM</label><input id="c2Start" type="number" step="1" value="35"></div>
           <div class="fld"><label>Altitude</label><input id="c2Alt" type="number" step="500" value="6500"></div>
           <div class="fld"><label>OAT °C</label><input id="c2Oat" type="number" step="1" value="3"></div>
           <div class="fld"><label>Wind °T</label><input id="c2Wdir" type="number" step="5" value="280"></div>
@@ -569,8 +339,6 @@ table.mini th { background: var(--bg3); color: var(--text); font-weight: normal;
           <div class="fld"><label>RPM</label><input id="c2Rpm" type="number" step="50" value="2300"></div>
         </div>
       </div>
-
-      <!-- DESTINATION -->
       <div class="node-card dest">
         <h4>DESTINATION &amp; DESCENT</h4>
         <div class="grid">
@@ -580,91 +348,46 @@ table.mini th { background: var(--bg3); color: var(--text); font-weight: normal;
           <div class="fld"><label>TPA AGL</label><input id="tpa" type="number" step="100" value="1000"></div>
           <div class="fld"><label>Desc FPM</label><input id="descRate" type="number" step="50" value="500"></div>
           <div class="fld"><label>Desc KIAS</label><input id="descKias" type="number" step="5" value="90"></div>
-          <div class="fld"><label>Desc GPH</label><input id="descGph" type="number" step="0.1" value="4.5"></div>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ══════════════════ 3. PERFORMANCE ══════════════════ -->
+<!-- ═══════════ POH PERFORMANCE ═══════════ -->
 <div class="panel">
   <div class="panel-hd">
     <div class="panel-title">POH PERFORMANCE
-      <small>C-152 FIG 5-6 TIME/FUEL/DIST TO CLIMB · FIG 5-7 CRUISE · FIG 5-1 AIRSPEED CALIBRATION</small>
-    </div>
+      <small>FIG 5-6 CLIMB · FIG 5-7 CRUISE · FIG 5-1 CALIBRATION — TYPE OVER ANY VALUE TO USE YOUR OWN</small></div>
     <div class="hd-r noprint">
-      <button class="btn primary" id="btnBuild">↻ BUILD NAV LOG LEGS FROM PROFILE</button>
+      <button class="btn primary" id="btnBuild">↻ FILL NAV LOG FROM PROFILE</button>
     </div>
   </div>
-  <div class="panel-body">
-    <div class="readouts" id="perfOut"></div>
-  </div>
+  <div class="panel-body"><div class="readouts" id="perfOut"></div></div>
 </div>
 
-<!-- ══════════════════ 4. NAV LOG ══════════════════ -->
+<!-- ═══════════ NAV LOG ═══════════ -->
 <div class="panel">
   <div class="panel-hd">
     <div class="panel-title">VFR NAVIGATION LOG
-      <small>ORANGE = CALCULATED · WHITE = YOU FILL IN · GREEN = ACTUALS IN FLIGHT</small>
-    </div>
+      <small>EVERY BOX IS HAND-FILLABLE — THE DIM FIGURE IN AN EMPTY BOX IS WHAT THE MATH GIVES</small></div>
     <div class="hd-r noprint">
-      <button class="btn sm" id="btnAddRow">+ CHECKPOINT</button>
-      <button class="btn sm" id="btnTasPoh">↻ TAS FROM POH</button>
+      <button class="btn sm" id="btnSolve">= SOLVE ALL</button>
+      <button class="btn sm" id="btnUnsolve">⌫ CLEAR ANSWERS</button>
+      <button class="btn sm primary" id="btnAddPage">+ ADD PAGE</button>
     </div>
   </div>
   <div class="panel-body">
-    <div class="nl-scroll">
-      <table class="navlog">
-        <thead>
-          <tr>
-            <th rowspan="2" class="grp"></th>
-            <th rowspan="2" class="grp" style="min-width:126px">CHECK POINTS<span class="sub">(FIXES)</span></th>
-            <th class="grp">VOR<span class="sub">IDENT</span></th>
-            <th rowspan="2" class="grp" style="min-width:74px">COURSE<span class="sub">(ROUTE)</span></th>
-            <th rowspan="2" class="grp">ALTITUDE</th>
-            <th class="grp">WIND<span class="sub">DIR</span></th>
-            <th class="grp">WIND<span class="sub">VEL</span></th>
-            <th class="grp">CAS</th>
-            <th class="grp">TC</th>
-            <th class="grp">TH</th>
-            <th class="grp">MH</th>
-            <th rowspan="2" class="grp">CH</th>
-            <th class="grp">DIST<span class="sub">LEG</span></th>
-            <th class="grp">GS<span class="sub">EST</span></th>
-            <th class="grp">ETE</th>
-            <th class="grp">ETA</th>
-            <th class="grp">FUEL</th>
-          </tr>
-          <tr>
-            <th>FREQ</th>
-            <th colspan="2">TEMP °C</th>
-            <th>TAS</th>
-            <th>WCA<span class="sub">−L / +R</span></th>
-            <th>VAR<span class="sub">−E / +W</span></th>
-            <th>DEV<span class="sub">±</span></th>
-            <th>DIST<span class="sub">REM</span></th>
-            <th>GS<span class="sub">ACT</span></th>
-            <th>ATE</th>
-            <th>ATA</th>
-            <th>REM</th>
-          </tr>
-        </thead>
-        <tbody id="nlBody"></tbody>
-        <tfoot>
-          <tr>
-            <td class="lbl"></td>
-            <td class="lbl" colspan="11">TOTALS &raquo;</td>
-            <td id="totDist">—</td>
-            <td class="lbl"></td>
-            <td id="totEte">—</td>
-            <td id="totEta">—</td>
-            <td id="totFuel">—</td>
-          </tr>
-        </tfoot>
-      </table>
+    <div class="legend noprint">
+      <span><span class="sw" style="background:var(--text-hi)"></span><b>white</b> — what you write in</span>
+      <span><span class="sw" style="background:var(--ghost)"></span><b>dim</b> — the worked answer, shown only while the box is empty</span>
+      <span><span class="sw" style="background:var(--ok)"></span><b>green</b> — actuals, filled in flight</span>
+      <span>climb &amp; descent fuel comes from the handbook, not the GPH box</span>
+      <span><span class="sw" style="background:var(--climb)"></span>climb</span>
+      <span><span class="sw" style="background:var(--cruise)"></span>cruise</span>
+      <span><span class="sw" style="background:var(--desc)"></span>descent</span>
     </div>
-
+    <div id="sheets"></div>
     <div class="fuelbar">
       <span class="item">USABLE <b id="fbCap">—</b></span>
       <span class="item">START/TAXI/T-O <b id="fbTaxi">—</b></span>
@@ -676,12 +399,10 @@ table.mini th { background: var(--bg3); color: var(--text); font-weight: normal;
   </div>
 </div>
 
-<!-- ══════════════════ 5. NOTES ══════════════════ -->
+<!-- ═══════════ NOTES ═══════════ -->
 <div class="panel">
   <div class="panel-hd">
-    <div class="panel-title">CONVERSIONS &amp; HOW THIS IS CALCULATED
-      <small>WHAT THE WHIZ WHEEL WOULD DO — WRITTEN OUT</small>
-    </div>
+    <div class="panel-title">CONVERSIONS &amp; HOW THIS IS CALCULATED<small>WHAT THE WHIZ WHEEL WOULD DO — WRITTEN OUT</small></div>
   </div>
   <div class="panel-body">
     <div class="notes">
@@ -694,24 +415,23 @@ table.mini th { background: var(--bg3); color: var(--text); font-weight: normal;
           <span class="step">TAS</span><span class="op">± wind →</span>
           <span class="step">GS</span>
         </div>
-        <p><b>IAS → CAS.</b> What the airspeed indicator reads vs. what it should read. Read it off POH Figure 5-1 (table below). On the 152 the error is largest slow — 40 KIAS is really 46 KCAS — and near zero around 60 KIAS.</p>
+        <p><b>IAS → CAS.</b> What the airspeed indicator reads vs. what it should read. Read it off POH Figure 5-1 (table in section 9). On the 152 the error is largest slow — 40 KIAS is really 46 KCAS — and near zero around 60 KIAS.</p>
         <p><b>CAS → TAS.</b> Thinner air means the same dynamic pressure comes from a higher true speed. The rule of thumb is <b>+2% per 1,000 ft</b>, which is deliberately generous — the real figure at light-single altitudes is closer to <b>+1.6% per 1,000 ft</b>, so the rule runs a few knots fast by 8,000 ft. This page uses the exact form:</p>
         <span class="eq">σ = (1 − 6.87535e-6 × PA)^5.2559 ÷ ((OAT+273.15) ÷ 288.15)
 TAS = CAS ÷ √σ</span>
-        <p>For cruise legs this page does <b>not</b> use that formula — it reads KTAS straight out of POH Figure 5-7, which already accounts for altitude and temperature. The formula is used for climb and descent legs, and shown as a cross-check.</p>
-        <p><b>TAS → GS.</b> Wind triangle — section 2.</p>
+        <p>For cruise legs the page does <b>not</b> use that formula — it reads KTAS straight out of POH Figure 5-7, which already accounts for altitude and temperature. The formula is used for climb and descent legs.</p>
       </div>
 
       <div class="note-blk">
         <h4>2 · WIND TRIANGLE — WCA AND GROUND SPEED</h4>
-        <p>Wind direction on a nav log is <b>true</b> and is where the wind is coming <b>from</b>. Winds aloft forecasts are true; tower/ATIS winds are magnetic.</p>
+        <p>Wind direction on a nav log is <b>true</b> and is where the wind is coming <b>from</b>. Winds aloft forecasts are true; tower and ATIS winds are magnetic.</p>
         <span class="eq">θ  = wind dir − true course
 XW = wind vel × sin θ        (+ = from the right)
 HW = wind vel × cos θ        (+ = headwind)
 
 WCA = arcsin( XW ÷ TAS )     (+ = crab right)
 GS  = TAS × cos(WCA) − HW</span>
-        <p>Turn into the wind: wind from the right gives a <b>positive (right) WCA</b>, which is added to true course. That is the same answer a whiz wheel gives, and it is exactly what your ASA calculator's wind function does.</p>
+        <p>Turn into the wind: wind from the right gives a <b>positive (right) WCA</b>, added to true course. Same answer a whiz wheel gives, and the same thing your ASA calculator's wind function does.</p>
         <p>Rough check: a direct headwind subtracts its full value from TAS; a direct crosswind barely changes GS at all.</p>
       </div>
 
@@ -723,7 +443,7 @@ GS  = TAS × cos(WCA) − HW</span>
           <span class="step">MH</span><span class="op">+ DEV →</span>
           <span class="step">CH</span>
         </div>
-        <p><b>True Virgins Make Dull Company</b> — True, Virgins(Variation), Magnetic, Dull(Deviation), Compass. Add Whiskey going down (Add Westerly) — westerly variation and deviation are added.</p>
+        <p><b>True Virgins Make Dull Company</b> — True, Variation, Magnetic, Deviation, Compass. <b>Add Whiskey</b> going down: westerly variation and deviation are added.</p>
         <ul>
           <li><b>TC</b> — measured off the sectional against a meridian.</li>
           <li><b>WCA</b> — from the wind triangle. <b>−Left / +Right.</b></li>
@@ -738,8 +458,8 @@ GS  = TAS × cos(WCA) − HW</span>
         <span class="eq">PA  = indicated alt + (29.92 − altimeter) × 1000
 ISA = 15 − 2 × (PA ÷ 1000)      °C
 DA  = PA + 118.8 × (OAT − ISA)</span>
-        <p>Every POH performance table on this page is entered with <b>pressure altitude</b>, never indicated. Density altitude is shown for situational awareness — it drives what the airplane actually feels like, but the 152 tables are indexed on PA and temperature separately.</p>
-        <p>ISA deviation (OAT − ISA) is what picks the column in the cruise table: 20°C below standard, standard, or 20°C above. This page interpolates between those columns rather than rounding to the nearest.</p>
+        <p>Every POH performance table is entered with <b>pressure altitude</b>, never indicated. Density altitude is shown for situational awareness — it drives what the airplane actually feels like, but the 152 tables are indexed on PA and temperature separately.</p>
+        <p>ISA deviation (OAT − ISA) picks the column in the cruise table: 20 °C below standard, standard, or 20 °C above. This page interpolates between those columns rather than rounding to the nearest.</p>
       </div>
 
       <div class="note-blk">
@@ -750,11 +470,11 @@ climb fuel = f(PA at TOC) − f(PA at field)
 climb dist = d(PA at TOC) − d(PA at field)</span>
         <p>Then the POH's own notes are applied:</p>
         <ul>
-          <li><b>+ 0.8 gal</b> for engine start, taxi and takeoff (added once, at the top of the fuel column — not per climb).</li>
+          <li><b>+ 0.8 gal</b> for engine start, taxi and takeoff — added once, off the top of the tank, not to any leg.</li>
           <li><b>+ 10% to time, fuel and distance for each 10 °C above standard.</b> No credit is taken below standard; the POH does not offer one.</li>
-          <li>POH climb distances are <b>zero wind</b>. This page also computes a wind-corrected ground distance using average climb TAS through the wind triangle — that is the number carried into the nav log.</li>
+          <li>POH climb distances are <b>zero wind</b>. The page also computes a wind-corrected ground distance using average climb TAS through the wind triangle.</li>
         </ul>
-        <p>A step climb is the same subtraction run a second time between the two cruise altitudes.</p>
+        <p>A step climb is the same subtraction run again between the two cruise altitudes. Every one of these figures is a box you can type over on the climb card.</p>
       </div>
 
       <div class="note-blk">
@@ -765,16 +485,30 @@ climb dist = d(PA at TOC) − d(PA at field)</span>
       </div>
 
       <div class="note-blk">
-        <h4>7 · DESCENT — NOT POH DATA</h4>
-        <p>The 152 POH publishes no descent table. Descent time, distance and fuel here come from the three fields you set on the Destination card — rate, IAS and GPH — not from the handbook:</p>
-        <span class="eq">time = (cruise alt − TPA alt) ÷ descent rate
-dist = time × GS at descent TAS
-fuel = time × descent GPH</span>
-        <p>Defaults are 500 fpm, 90 KIAS and 4.5 gph, which is a normal power-on cruise descent in a 152. Change them to match how you actually fly it.</p>
+        <h4>7 · DESCENT — THE 3-TO-1 RULE</h4>
+        <p>The 152 POH publishes <b>no descent table</b>, so none of this is handbook data. It is the arithmetic every pilot does in their head:</p>
+        <span class="eq">distance = 3 × (feet to lose ÷ 1000)      NM
+time     = feet to lose ÷ descent rate   min
+rate     ≈ GS × 5                        fpm (3° path)</span>
+        <p><b>3 to 1</b> means three miles for every thousand feet. Losing 3,500 ft takes about 10 NM, so start down 10 NM before you need to be level. It is a 3° path — close to what every airliner and every instrument approach flies, which is why it is worth having in your head.</p>
+        <p>The reverse form gives the rate: multiply groundspeed by 5. At 90 kt GS that is 450 fpm, which is why 500 fpm is the number everyone actually uses in a 152.</p>
+        <p><b>Power does not change in the descent</b> — you trade the altitude for airspeed at cruise RPM. Fuel flow therefore stays at the cruise figure, and that is what this page uses. The descent card shows both the rate-based distance and the 3-to-1 distance so you can see them agree.</p>
       </div>
 
       <div class="note-blk">
-        <h4>8 · POH FIG 5-1 — AIRSPEED CALIBRATION, FLAPS UP</h4>
+        <h4>8 · HOW TO USE THIS AS A TEACHING SHEET</h4>
+        <ol>
+          <li>Fill the <b>givens</b> off the chart and the forecast — checkpoints, route, altitude, TC, leg distance, wind, temperature, variation.</li>
+          <li>Work the rest <b>by hand</b> on the whiz wheel. Every box takes typing.</li>
+          <li>The dim figure sitting in an empty box is what the math gives. It disappears the moment you type, so it never does the work for the student.</li>
+          <li>Press <b>CHECK MY WORK</b> to mark each written answer against the computed one — green stripe agrees, red stripe does not. Each box is checked against the values <i>next to it</i>, so a wrong WCA shows up on the WCA box rather than turning the whole row red.</li>
+          <li><b>SOLVE ALL</b> fills every blank; <b>CLEAR ANSWERS</b> wipes the worked columns and leaves the givens, so the same flight can be re-worked from scratch.</li>
+          <li><b>ADD PAGE</b> gives another sheet with totals carried forward, the way a second piece of paper would.</li>
+        </ol>
+      </div>
+
+      <div class="note-blk">
+        <h4>9 · POH FIG 5-1 — AIRSPEED CALIBRATION, FLAPS UP</h4>
         <table class="mini">
           <tr><th>KIAS</th><td>40</td><td>50</td><td>60</td><td>70</td><td>80</td><td>90</td><td>100</td><td>110</td><td>120</td><td>130</td><td>140</td></tr>
           <tr><th>KCAS</th><td>46</td><td>53</td><td>60</td><td>69</td><td>78</td><td>88</td><td>97</td><td>107</td><td>117</td><td>127</td><td>136</td></tr>
@@ -784,7 +518,8 @@ fuel = time × descent GPH</span>
           Fig 5-1 Airspeed Calibration (p 5-8), Fig 5-6 Time, Fuel and Distance to Climb (p 5-13),
           Fig 5-7 Cruise Performance (p 5-14, Rev 1 · 31 Mar 1983). Data applies to the Lycoming
           O-235-L2C engine only. Transcribed from a scanned handbook — verify against the POH in
-          your aircraft before flight. This is a planning aid, not a substitute for the AFM.
+          your aircraft before flight. Nav log form after Jeppesen Sanderson. This is a planning
+          and teaching aid, not a substitute for the AFM.
         </p>
       </div>
 
@@ -798,1006 +533,950 @@ fuel = time × descent GPH</span>
 /* ═══════════════════════════════════════════════════════════
    POH DATA — CESSNA 152 (1979), LYCOMING O-235-L2C
    ═══════════════════════════════════════════════════════════ */
-
-/* Fig 5-1 Airspeed Calibration, flaps up */
 const CAL_UP = [[40,46],[50,53],[60,60],[70,69],[80,78],[90,88],
                 [100,97],[110,107],[120,117],[130,127],[140,136]];
 
-/* Fig 5-6 Time, Fuel and Distance to Climb — 1670 lb, max rate, standard temp
-   [pressureAlt, ISA temp C, climb KIAS, ROC fpm, time min, fuel gal, dist NM] */
+/* Fig 5-6 — [pressureAlt, ISA temp C, climb KIAS, ROC fpm, time min, fuel gal, dist NM] */
 const CLIMB = [
-  [    0, 15, 67, 715,  0, 0.0,  0],
-  [ 1000, 13, 66, 675,  1, 0.2,  2],
-  [ 2000, 11, 66, 630,  3, 0.4,  3],
-  [ 3000,  9, 65, 590,  5, 0.7,  5],
-  [ 4000,  7, 65, 550,  6, 0.9,  7],
-  [ 5000,  5, 64, 505,  8, 1.2,  9],
-  [ 6000,  3, 63, 465, 10, 1.4, 12],
-  [ 7000,  1, 63, 425, 13, 1.7, 14],
-  [ 8000, -1, 62, 380, 15, 2.0, 17],
-  [ 9000, -3, 62, 340, 18, 2.3, 21],
-  [10000, -5, 61, 300, 21, 2.6, 25],
-  [11000, -7, 61, 255, 25, 3.0, 29],
+  [    0, 15, 67, 715,  0, 0.0,  0], [ 1000, 13, 66, 675,  1, 0.2,  2],
+  [ 2000, 11, 66, 630,  3, 0.4,  3], [ 3000,  9, 65, 590,  5, 0.7,  5],
+  [ 4000,  7, 65, 550,  6, 0.9,  7], [ 5000,  5, 64, 505,  8, 1.2,  9],
+  [ 6000,  3, 63, 465, 10, 1.4, 12], [ 7000,  1, 63, 425, 13, 1.7, 14],
+  [ 8000, -1, 62, 380, 15, 2.0, 17], [ 9000, -3, 62, 340, 18, 2.3, 21],
+  [10000, -5, 61, 300, 21, 2.6, 25], [11000, -7, 61, 255, 25, 3.0, 29],
   [12000, -9, 60, 215, 29, 3.4, 34]
 ];
-const CLIMB_TAXI_FUEL = 0.8;   /* POH Fig 5-6 note 1 */
 
-/* Fig 5-7 Cruise Performance — 1670 lb, recommended lean mixture
-   alt -> rpm -> { b:[%BHP,KTAS,GPH] 20C below, s:[...] std, a:[...] 20C above }
-   null = published dashes (power setting unavailable at that temperature) */
+/* Fig 5-7 — alt -> rpm -> {b|s|a: [%BHP, KTAS, GPH]}; null = published dashes */
 const CRUISE = {
-  2000: {
-    2400: { b: null,           s: [75,101,6.1], a: [70,101,5.7] },
-    2300: { b: [71, 97,5.7],   s: [66, 96,5.4], a: [63, 95,5.1] },
-    2200: { b: [62, 92,5.1],   s: [59, 91,4.8], a: [56, 90,4.6] },
-    2100: { b: [55, 87,4.5],   s: [53, 86,4.3], a: [51, 85,4.2] },
-    2000: { b: [49, 81,4.1],   s: [47, 80,3.9], a: [46, 79,3.8] }
-  },
-  4000: {
-    2450: { b: null,           s: [75,103,6.1], a: [70,102,5.7] },
-    2400: { b: [76,102,6.1],   s: [71,101,5.7], a: [67,100,5.4] },
-    2300: { b: [67, 96,5.4],   s: [63, 95,5.1], a: [60, 95,4.9] },
-    2200: { b: [60, 91,4.8],   s: [56, 90,4.6], a: [54, 89,4.4] },
-    2100: { b: [53, 86,4.4],   s: [51, 85,4.2], a: [49, 84,4.0] },
-    2000: { b: [48, 81,3.9],   s: [46, 80,3.8], a: [45, 78,3.7] }
-  },
-  6000: {
-    2500: { b: null,           s: [75,105,6.1], a: [71,104,5.7] },
-    2400: { b: [72,101,5.8],   s: [67,100,5.4], a: [64, 99,5.2] },
-    2300: { b: [64, 96,5.2],   s: [60, 95,4.9], a: [57, 94,4.7] },
-    2200: { b: [57, 90,4.6],   s: [54, 89,4.4], a: [52, 88,4.3] },
-    2100: { b: [51, 85,4.2],   s: [49, 84,4.0], a: [48, 83,3.9] },
-    2000: { b: [46, 80,3.8],   s: [45, 79,3.7], a: [44, 77,3.6] }
-  },
-  8000: {
-    2550: { b: null,           s: [75,107,6.1], a: [71,106,5.7] },
-    2500: { b: [76,105,6.2],   s: [71,104,5.8], a: [67,103,5.4] },
-    2400: { b: [68,100,5.5],   s: [64, 99,5.2], a: [61, 98,4.9] },
-    2300: { b: [61, 95,5.0],   s: [58, 94,4.7], a: [55, 93,4.5] },
-    2200: { b: [55, 90,4.5],   s: [52, 89,4.3], a: [51, 87,4.2] },
-    2100: { b: [49, 84,4.1],   s: [48, 83,3.9], a: [48, 82,3.8] }
-  },
-  10000: {
-    2500: { b: [72,105,5.8],   s: [68,103,5.5], a: [64,103,5.2] },
-    2400: { b: [65, 99,5.3],   s: [61, 98,5.0], a: [58, 97,4.8] },
-    2300: { b: [58, 94,4.7],   s: [56, 93,4.5], a: [53, 92,4.4] },
-    2200: { b: [53, 89,4.3],   s: [51, 88,4.2], a: [49, 86,4.0] },
-    2100: { b: [48, 83,4.0],   s: [46, 82,3.9], a: [45, 81,3.8] }
-  },
-  12000: {
-    2450: { b: [65,101,5.3],   s: [62,100,5.0], a: [59, 99,4.8] },
-    2400: { b: [62, 99,5.0],   s: [59, 97,4.8], a: [56, 96,4.6] },
-    2300: { b: [56, 93,4.6],   s: [54, 92,4.4], a: [52, 91,4.3] },
-    2200: { b: [51, 88,4.2],   s: [49, 87,4.1], a: [48, 86,4.0] },
-    2100: { b: [47, 82,3.9],   s: [45, 81,3.8], a: [44, 79,3.7] }
-  }
+  2000:{2400:{b:null,s:[75,101,6.1],a:[70,101,5.7]},2300:{b:[71,97,5.7],s:[66,96,5.4],a:[63,95,5.1]},
+        2200:{b:[62,92,5.1],s:[59,91,4.8],a:[56,90,4.6]},2100:{b:[55,87,4.5],s:[53,86,4.3],a:[51,85,4.2]},
+        2000:{b:[49,81,4.1],s:[47,80,3.9],a:[46,79,3.8]}},
+  4000:{2450:{b:null,s:[75,103,6.1],a:[70,102,5.7]},2400:{b:[76,102,6.1],s:[71,101,5.7],a:[67,100,5.4]},
+        2300:{b:[67,96,5.4],s:[63,95,5.1],a:[60,95,4.9]},2200:{b:[60,91,4.8],s:[56,90,4.6],a:[54,89,4.4]},
+        2100:{b:[53,86,4.4],s:[51,85,4.2],a:[49,84,4.0]},2000:{b:[48,81,3.9],s:[46,80,3.8],a:[45,78,3.7]}},
+  6000:{2500:{b:null,s:[75,105,6.1],a:[71,104,5.7]},2400:{b:[72,101,5.8],s:[67,100,5.4],a:[64,99,5.2]},
+        2300:{b:[64,96,5.2],s:[60,95,4.9],a:[57,94,4.7]},2200:{b:[57,90,4.6],s:[54,89,4.4],a:[52,88,4.3]},
+        2100:{b:[51,85,4.2],s:[49,84,4.0],a:[48,83,3.9]},2000:{b:[46,80,3.8],s:[45,79,3.7],a:[44,77,3.6]}},
+  8000:{2550:{b:null,s:[75,107,6.1],a:[71,106,5.7]},2500:{b:[76,105,6.2],s:[71,104,5.8],a:[67,103,5.4]},
+        2400:{b:[68,100,5.5],s:[64,99,5.2],a:[61,98,4.9]},2300:{b:[61,95,5.0],s:[58,94,4.7],a:[55,93,4.5]},
+        2200:{b:[55,90,4.5],s:[52,89,4.3],a:[51,87,4.2]},2100:{b:[49,84,4.1],s:[48,83,3.9],a:[48,82,3.8]}},
+  10000:{2500:{b:[72,105,5.8],s:[68,103,5.5],a:[64,103,5.2]},2400:{b:[65,99,5.3],s:[61,98,5.0],a:[58,97,4.8]},
+        2300:{b:[58,94,4.7],s:[56,93,4.5],a:[53,92,4.4]},2200:{b:[53,89,4.3],s:[51,88,4.2],a:[49,86,4.0]},
+        2100:{b:[48,83,4.0],s:[46,82,3.9],a:[45,81,3.8]}},
+  12000:{2450:{b:[65,101,5.3],s:[62,100,5.0],a:[59,99,4.8]},2400:{b:[62,99,5.0],s:[59,97,4.8],a:[56,96,4.6]},
+        2300:{b:[56,93,4.6],s:[54,92,4.4],a:[52,91,4.3]},2200:{b:[51,88,4.2],s:[49,87,4.1],a:[48,86,4.0]},
+        2100:{b:[47,82,3.9],s:[45,81,3.8],a:[44,79,3.7]}}
 };
 const CRUISE_ALTS = Object.keys(CRUISE).map(Number).sort((x,y)=>x-y);
 
 /* ═══════════════════════════════════════════════════════════
-   ATMOSPHERE / AIRSPEED MATH
+   MATH
    ═══════════════════════════════════════════════════════════ */
+const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
+const lerp=(a,b,t)=>a+(b-a)*t;
+/* Tolerant number parse: accepts a leading "+" and a typographic minus (−),
+   both of which turn up in signed columns like WCA and VAR. */
+const pf=v=>{
+  if(typeof v==='number')return isFinite(v)?v:NaN;
+  const n=parseFloat(String(v??'').replace(/−/g,'-').replace(/^\s*\+/,''));
+  return isFinite(n)?n:NaN;
+};
+const norm360=d=>((d%360)+360)%360;
+const $=id=>document.getElementById(id);
+const num=(el,d=0)=>{const v=parseFloat(el&&el.value);return isFinite(v)?v:d;};
 
-const clamp = (v,lo,hi) => Math.max(lo, Math.min(hi, v));
-const lerp  = (a,b,t)   => a + (b-a)*t;
-const num   = (el, dflt=0) => { const v = parseFloat(el && el.value); return isFinite(v) ? v : dflt; };
-const norm360 = d => ((d % 360) + 360) % 360;
-
-/* Interpolate a y-value from an [x,y] pair list, clamped at both ends */
-function interpPairs(pairs, x) {
-  if (x <= pairs[0][0])                   return pairs[0][1];
-  if (x >= pairs[pairs.length-1][0])      return pairs[pairs.length-1][1];
-  for (let i = 0; i < pairs.length-1; i++) {
-    const [x0,y0] = pairs[i], [x1,y1] = pairs[i+1];
-    if (x >= x0 && x <= x1) return lerp(y0, y1, (x-x0)/(x1-x0));
-  }
+function interpPairs(pairs,x){
+  if(x<=pairs[0][0])return pairs[0][1];
+  if(x>=pairs[pairs.length-1][0])return pairs[pairs.length-1][1];
+  for(let i=0;i<pairs.length-1;i++){const[x0,y0]=pairs[i],[x1,y1]=pairs[i+1];
+    if(x>=x0&&x<=x1)return lerp(y0,y1,(x-x0)/(x1-x0));}
   return pairs[pairs.length-1][1];
 }
-
-const pressureAlt   = (indicated, altimeter) => indicated + (29.92 - altimeter) * 1000;
-const isaTempC      = pa => 15 - 2 * (pa / 1000);          /* matches POH table exactly */
-const densityAlt    = (pa, oat) => pa + 118.8 * (oat - isaTempC(pa));
-const iasToCas      = kias => interpPairs(CAL_UP, kias);
-
-/* Density ratio σ and CAS→TAS */
-function sigma(pa, oatC) {
-  const pRatio = Math.pow(1 - 6.87535e-6 * pa, 5.2558797);
-  const tRatio = (oatC + 273.15) / 288.15;
-  return pRatio / tRatio;
+const pressureAlt=(ind,alt)=>ind+(29.92-alt)*1000;
+const isaTempC=pa=>15-2*(pa/1000);
+const densityAlt=(pa,oat)=>pa+118.8*(oat-isaTempC(pa));
+const iasToCas=k=>interpPairs(CAL_UP,k);
+function sigma(pa,oatC){
+  const p=Math.pow(1-6.87535e-6*pa,5.2558797), t=(oatC+273.15)/288.15;
+  return p/t;
 }
-const casToTas = (cas, pa, oatC) => cas / Math.sqrt(sigma(pa, oatC));
+const casToTas=(cas,pa,oat)=>cas/Math.sqrt(sigma(pa,oat));
 
-/* Wind triangle. Angles in degrees. Returns WCA (+right), GS, head/cross components. */
-function windTriangle(tc, tas, windDir, windVel) {
-  if (!(tas > 0)) return { wca: 0, gs: 0, hw: 0, xw: 0, valid: false };
-  const th   = (windDir - tc) * Math.PI / 180;
-  const xw   = windVel * Math.sin(th);      /* + = from the right */
-  const hw   = windVel * Math.cos(th);      /* + = headwind       */
-  const s    = clamp(xw / tas, -1, 1);
-  const wcaR = Math.asin(s);
-  return {
-    wca: wcaR * 180 / Math.PI,
-    gs:  tas * Math.cos(wcaR) - hw,
-    hw, xw,
-    valid: Math.abs(xw) <= tas
-  };
+function windTriangle(tc,tas,wd,wv){
+  if(!(tas>0))return{wca:NaN,gs:NaN,hw:NaN,xw:NaN,valid:false};
+  const th=(wd-tc)*Math.PI/180, xw=wv*Math.sin(th), hw=wv*Math.cos(th);
+  const wcaR=Math.asin(clamp(xw/tas,-1,1));
+  return{wca:wcaR*180/Math.PI, gs:tas*Math.cos(wcaR)-hw, hw, xw, valid:Math.abs(xw)<=tas};
 }
 
-/* ═══════════════════════════════════════════════════════════
-   POH LOOKUPS
-   ═══════════════════════════════════════════════════════════ */
-
-/* Cumulative climb values at a pressure altitude (standard temp, zero wind) */
-function climbAt(pa) {
-  const p = clamp(pa, CLIMB[0][0], CLIMB[CLIMB.length-1][0]);
-  return {
-    kias: interpPairs(CLIMB.map(r => [r[0], r[2]]), p),
-    roc:  interpPairs(CLIMB.map(r => [r[0], r[3]]), p),
-    time: interpPairs(CLIMB.map(r => [r[0], r[4]]), p),
-    fuel: interpPairs(CLIMB.map(r => [r[0], r[5]]), p),
-    dist: interpPairs(CLIMB.map(r => [r[0], r[6]]), p),
-    capped: pa > CLIMB[CLIMB.length-1][0]
-  };
+function climbAt(pa){
+  const p=clamp(pa,CLIMB[0][0],CLIMB[CLIMB.length-1][0]);
+  return{kias:interpPairs(CLIMB.map(r=>[r[0],r[2]]),p), roc:interpPairs(CLIMB.map(r=>[r[0],r[3]]),p),
+    time:interpPairs(CLIMB.map(r=>[r[0],r[4]]),p), fuel:interpPairs(CLIMB.map(r=>[r[0],r[5]]),p),
+    dist:interpPairs(CLIMB.map(r=>[r[0],r[6]]),p), capped:pa>CLIMB[CLIMB.length-1][0]};
+}
+/* POH note 3: +10% per 10 C ABOVE standard; no credit below */
+function climbSegment(paFrom,paTo,isaDev){
+  const a=climbAt(paFrom), b=climbAt(paTo);
+  const rawTime=Math.max(0,b.time-a.time), rawFuel=Math.max(0,b.fuel-a.fuel), rawDist=Math.max(0,b.dist-a.dist);
+  const k=1+0.10*Math.max(0,isaDev)/10;
+  const paMid=(paFrom+paTo)/2, kias=climbAt(paMid).kias, kcas=iasToCas(kias);
+  const oatMid=isaTempC(paMid)+isaDev, ktas=casToTas(kcas,paMid,oatMid);
+  const time=rawTime*k;
+  return{rawTime,rawFuel,rawDist,factor:k,time,fuel:rawFuel*k,dist:rawDist*k,
+    kias,kcas,ktas,oatMid,paMid,roc:(paTo-paFrom)>0&&time>0?(paTo-paFrom)/time:0,capped:a.capped||b.capped};
 }
 
-/*
- * Climb segment between two pressure altitudes.
- * isaDev — mean ISA deviation over the segment. POH note 3: +10% per 10°C ABOVE standard.
- */
-function climbSegment(paFrom, paTo, isaDev) {
-  const a = climbAt(paFrom), b = climbAt(paTo);
-  const rawTime = Math.max(0, b.time - a.time);
-  const rawFuel = Math.max(0, b.fuel - a.fuel);
-  const rawDist = Math.max(0, b.dist - a.dist);
-  const k = 1 + 0.10 * Math.max(0, isaDev) / 10;
-
-  const time = rawTime * k, fuel = rawFuel * k, dist = rawDist * k;
-
-  /* Average climb airspeed at the mid-point of the segment */
-  const paMid  = (paFrom + paTo) / 2;
-  const kias   = climbAt(paMid).kias;
-  const kcas   = iasToCas(kias);
-  const oatMid = isaTempC(paMid) + isaDev;
-  const ktas   = casToTas(kcas, paMid, oatMid);
-
-  return {
-    rawTime, rawFuel, rawDist, factor: k,
-    time, fuel, dist,
-    kias, kcas, ktas, oatMid, paMid,
-    roc: (paTo - paFrom) > 0 && time > 0 ? (paTo - paFrom) / time : 0,
-    capped: a.capped || b.capped
-  };
+function cruiseRowAt(alt,rpm,isaDev){
+  const table=CRUISE[alt], rpms=Object.keys(table).map(Number).sort((x,y)=>x-y);
+  const series=(col,idx)=>{const o=[];for(const r of rpms){const v=table[r][col];if(v)o.push([r,v[idx]]);}return o;};
+  const triple=col=>{const s0=series(col,0);if(!s0.length)return null;
+    return{bhp:interpPairs(series(col,0),rpm),ktas:interpPairs(series(col,1),rpm),
+      gph:interpPairs(series(col,2),rpm),maxRpm:s0[s0.length-1][0]};};
+  const cB=triple('b'), cS=triple('s'), cA=triple('a');
+  const d=clamp(isaDev,-20,20);
+  let bhp,ktas,gph,limitRpm;
+  if(d<=0){const t=(d+20)/20, lo=cB||cS;
+    bhp=lerp(lo.bhp,cS.bhp,t); ktas=lerp(lo.ktas,cS.ktas,t); gph=lerp(lo.gph,cS.gph,t);
+    limitRpm=lerp(lo.maxRpm,cS.maxRpm,t);
+  }else{const t=d/20;
+    bhp=lerp(cS.bhp,cA.bhp,t); ktas=lerp(cS.ktas,cA.ktas,t); gph=lerp(cS.gph,cA.gph,t);
+    limitRpm=lerp(cS.maxRpm,cA.maxRpm,t);}
+  return{bhp,ktas,gph,limitRpm};
+}
+function cruisePerf(pa,rpm,isaDev){
+  const p=clamp(pa,CRUISE_ALTS[0],CRUISE_ALTS[CRUISE_ALTS.length-1]);
+  let lo=CRUISE_ALTS[0],hi=CRUISE_ALTS[CRUISE_ALTS.length-1];
+  for(let i=0;i<CRUISE_ALTS.length-1;i++)
+    if(p>=CRUISE_ALTS[i]&&p<=CRUISE_ALTS[i+1]){lo=CRUISE_ALTS[i];hi=CRUISE_ALTS[i+1];break;}
+  const rLo=cruiseRowAt(lo,rpm,isaDev), rHi=cruiseRowAt(hi,rpm,isaDev);
+  const t=hi===lo?0:(p-lo)/(hi-lo);
+  const limitRpm=lerp(rLo.limitRpm,rHi.limitRpm,t);
+  return{bhp:lerp(rLo.bhp,rHi.bhp,t),ktas:lerp(rLo.ktas,rHi.ktas,t),gph:lerp(rLo.gph,rHi.gph,t),
+    rpmLimited:rpm>limitRpm?limitRpm:null,
+    altClamped:pa<CRUISE_ALTS[0]?CRUISE_ALTS[0]:pa>CRUISE_ALTS[CRUISE_ALTS.length-1]?CRUISE_ALTS[CRUISE_ALTS.length-1]:null,
+    bracket:[lo,hi]};
 }
 
-/*
- * Cruise lookup. Interpolates RPM within an altitude, then across altitude,
- * then across ISA deviation between the −20 / 0 / +20 columns. Clamps at edges.
- */
-function cruiseRowAt(alt, rpm, isaDev) {
-  const table = CRUISE[alt];
-  const rpms  = Object.keys(table).map(Number).sort((x,y)=>x-y);
-
-  /* Pick the temperature column, or blend two of them */
-  function colValue(rpmKey, col) { return table[rpmKey][col]; }
-
-  /* For each of the 3 columns build an [rpm, value] list skipping nulls */
-  function seriesFor(col, idx) {
-    const out = [];
-    for (const r of rpms) {
-      const v = colValue(r, col);
-      if (v) out.push([r, v[idx]]);
-    }
-    return out;
-  }
-
-  function colTriple(col) {
-    const s0 = seriesFor(col, 0);
-    if (!s0.length) return null;
-    const maxRpm = s0[s0.length-1][0];
-    return {
-      bhp:    interpPairs(seriesFor(col,0), rpm),
-      ktas:   interpPairs(seriesFor(col,1), rpm),
-      gph:    interpPairs(seriesFor(col,2), rpm),
-      maxRpm
-    };
-  }
-
-  const cB = colTriple('b'), cS = colTriple('s'), cA = colTriple('a');
-
-  /* Blend across ISA deviation: −20 → b, 0 → s, +20 → a.
-     limitRpm is interpolated too, so a setting that is legal at standard temp
-     is not falsely flagged just because the cold column stops lower. */
-  const d = clamp(isaDev, -20, 20);
-  let bhp, ktas, gph, limitRpm;
-  if (d <= 0) {
-    const t  = (d + 20) / 20;                /* −20 → 0, 0 → 1 */
-    const lo = cB || cS;                     /* fall back if whole column missing */
-    bhp  = lerp(lo.bhp,  cS.bhp,  t);
-    ktas = lerp(lo.ktas, cS.ktas, t);
-    gph  = lerp(lo.gph,  cS.gph,  t);
-    limitRpm = lerp(lo.maxRpm, cS.maxRpm, t);
-  } else {
-    const t = d / 20;
-    bhp  = lerp(cS.bhp,  cA.bhp,  t);
-    ktas = lerp(cS.ktas, cA.ktas, t);
-    gph  = lerp(cS.gph,  cA.gph,  t);
-    limitRpm = lerp(cS.maxRpm, cA.maxRpm, t);
-  }
-  return { bhp, ktas, gph, limitRpm };
-}
-
-function cruisePerf(pa, rpm, isaDev) {
-  const p  = clamp(pa, CRUISE_ALTS[0], CRUISE_ALTS[CRUISE_ALTS.length-1]);
-  let lo = CRUISE_ALTS[0], hi = CRUISE_ALTS[CRUISE_ALTS.length-1];
-  for (let i = 0; i < CRUISE_ALTS.length-1; i++) {
-    if (p >= CRUISE_ALTS[i] && p <= CRUISE_ALTS[i+1]) { lo = CRUISE_ALTS[i]; hi = CRUISE_ALTS[i+1]; break; }
-  }
-  const rLo = cruiseRowAt(lo, rpm, isaDev);
-  const rHi = cruiseRowAt(hi, rpm, isaDev);
-  const t   = hi === lo ? 0 : (p - lo) / (hi - lo);
-
-  const limitRpm = lerp(rLo.limitRpm, rHi.limitRpm, t);
-  return {
-    bhp:  lerp(rLo.bhp,  rHi.bhp,  t),
-    ktas: lerp(rLo.ktas, rHi.ktas, t),
-    gph:  lerp(rLo.gph,  rHi.gph,  t),
-    rpmLimited: rpm > limitRpm ? limitRpm : null,
-    altClamped: pa < CRUISE_ALTS[0] ? CRUISE_ALTS[0]
-              : pa > CRUISE_ALTS[CRUISE_ALTS.length-1] ? CRUISE_ALTS[CRUISE_ALTS.length-1] : null,
-    bracket: [lo, hi]
-  };
-}
-
-/* ═══════════════════════════════════════════════════════════
-   FORMATTING
-   ═══════════════════════════════════════════════════════════ */
-const f0 = v => isFinite(v) ? Math.round(v).toString() : '—';
-const f1 = v => isFinite(v) ? v.toFixed(1) : '—';
-const fDeg = v => isFinite(v) ? String(Math.round(norm360(v))).padStart(3,'0') : '—';
-const fSign = v => !isFinite(v) ? '—' : (v >= 0 ? '+' : '−') + Math.abs(Math.round(v));
-
-/* minutes → "H:MM" over an hour, else plain minutes */
-function fMin(m) {
-  if (!isFinite(m) || m < 0) return '—';
-  const t = Math.round(m);
-  return t >= 60 ? Math.floor(t/60) + ':' + String(t%60).padStart(2,'0') : String(t);
-}
-function parseClock(s) {
-  const m = /^(\d{1,2}):?(\d{2})$/.exec((s||'').trim());
-  if (!m) return null;
-  const h = +m[1], mi = +m[2];
-  if (h > 23 || mi > 59) return null;
-  return h*60 + mi;
-}
-const fClock = mins => !isFinite(mins) ? '—'
-  : String(Math.floor(norm(mins)/60)).padStart(2,'0') + ':' + String(Math.round(norm(mins))%60).padStart(2,'0');
-function norm(m) { return ((m % 1440) + 1440) % 1440; }
+/* ── formatting ── */
+const f0=v=>isFinite(v)?String(Math.round(v)):'';
+const f1=v=>isFinite(v)?v.toFixed(1):'';
+const fDeg=v=>isFinite(v)?String(Math.round(norm360(v))).padStart(3,'0'):'';
+/* ASCII '-' on purpose — solved values get written back into inputs and must re-parse */
+const fSign=v=>!isFinite(v)?'':(v>=0?'+':'-')+Math.abs(Math.round(v));
+const fMin=m=>!isFinite(m)||m<0?'':(Math.round(m)>=60?Math.floor(Math.round(m)/60)+':'+String(Math.round(m)%60).padStart(2,'0'):String(Math.round(m)));
+function parseClock(s){const m=/^(\d{1,2}):?(\d{2})$/.exec((s||'').trim());
+  if(!m)return null;const h=+m[1],mi=+m[2];return(h>23||mi>59)?null:h*60+mi;}
+const wrapDay=m=>((m%1440)+1440)%1440;
+const fClock=m=>!isFinite(m)?'':String(Math.floor(wrapDay(m)/60)).padStart(2,'0')+':'+String(Math.round(wrapDay(m))%60).padStart(2,'0');
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 /* ═══════════════════════════════════════════════════════════
    STATE
    ═══════════════════════════════════════════════════════════ */
-const $  = id => document.getElementById(id);
-const SETUP_IDS = ['acN','acDate','timeOff','altimeter','magVar','magDev','fuelCap','taxiFuel',
-  'reserveMin','routeDist','depId','depElev','depOat','c1Alt','c1Oat','c1Wdir','c1Wvel','c1Rpm',
-  'c2Start','c2Alt','c2Oat','c2Wdir','c2Wvel','c2Rpm','dstId','dstElev','dstOat','tpa',
-  'descRate','descKias','descGph'];
+const ROWS_PER_PAGE = 11;
+const SETUP_IDS=['acDate','altimeter','magVar','magDev','fuelCap','taxiFuel','reserveMin','routeDist',
+  'depId','depElev','depOat','c1Alt','c1Oat','c1Wdir','c1Wvel','c1Rpm',
+  'c2Start','c2Alt','c2Oat','c2Wdir','c2Wvel','c2Rpm','dstId','dstElev','dstOat','tpa','descRate','descKias'];
 
-let legs = [];   /* nav log rows */
-let uid  = 1;
+/* Values you write in from chart / forecast / handbook.
+   There is no per-row GPH: the Jeppesen form carries one GPH box for the flight,
+   and climb / descent fuel comes from the handbook rather than a flat burn rate. */
+const GIVEN_KEYS = ['name','vorId','vorFreq','route','alt','wdir','wvel','temp','cas','tc','varn','dev','distLeg'];
+/* Values you work out — these carry the ghost answer and are what CLEAR ANSWERS wipes */
+const ANS_KEYS   = ['tas','wca','th','mh','ch','gsEst','ete','eta','fuel','distRem','fuelRem'];
+/* Filled in flight */
+const ACT_KEYS   = ['gsAct','ate','ata'];
 
-function blankLeg(over = {}) {
-  return Object.assign({
-    id: uid++, phase: '', name: '', vorId: '', vorFreq: '', route: '',
-    alt: '', wdir: '', wvel: '', temp: '', cas: '', tas: '',
-    tc: '', dist: '', gph: '', varn: '', dev: '',
-    gsAct: '', ate: '', ata: '', remAct: ''
-  }, over);
+/* Header boxes that live on the form itself */
+let flight = { timeOff:'', gph:'', acN:'' };
+/* POH overrides — blank means "use the handbook figure" */
+let perfOv = { c1:{t:'',f:'',d:''}, c2:{t:'',f:'',d:''}, ds:{t:'',f:'',d:''} };
+let pages  = [];
+let pid = 1;
+let checkMode = false;
+
+function blankRow(over={}){
+  const r={phase:''};
+  [...GIVEN_KEYS,...ANS_KEYS,...ACT_KEYS].forEach(k=>r[k]='');
+  return Object.assign(r,over);
 }
+function newPage(){
+  return { id:pid++, notes:['','','','',''],
+    adv:{}, freq:{}, block:{in:'',out:'',log:''},
+    rows:Array.from({length:ROWS_PER_PAGE},()=>blankRow()) };
+}
+const allRows = () => pages.flatMap(p=>p.rows);
 
 /* ═══════════════════════════════════════════════════════════
-   PROFILE COMPUTATION
+   PROFILE
    ═══════════════════════════════════════════════════════════ */
-function computeProfile() {
-  const altimeter = num($('altimeter'), 29.92);
-  const useStep   = $('useStep').checked;
+function computeProfile(){
+  const altimeter=num($('altimeter'),29.92), useStep=$('useStep').checked;
+  const depElev=num($('depElev')), depOat=num($('depOat'),15);
+  const dstElev=num($('dstElev')), dstOat=num($('dstOat'),15);
+  const tpaAgl=num($('tpa'),1000), routeD=Math.max(1,num($('routeDist'),80));
+  const c1Alt=num($('c1Alt')), c1Oat=num($('c1Oat')), c1Rpm=num($('c1Rpm'),2300);
+  const c1W={d:num($('c1Wdir')),v:num($('c1Wvel'))};
+  const c2Alt=num($('c2Alt')), c2Oat=num($('c2Oat')), c2Rpm=num($('c2Rpm'),2300);
+  const c2W={d:num($('c2Wdir')),v:num($('c2Wvel'))};
+  const c2StartNM=clamp(num($('c2Start')),0,routeD);
 
-  const depElev = num($('depElev')), depOat = num($('depOat'), 15);
-  const dstElev = num($('dstElev')), dstOat = num($('dstOat'), 15);
-  const tpaAgl  = num($('tpa'), 1000);
-  const routeD  = Math.max(1, num($('routeDist'), 80));
+  const paDep=pressureAlt(depElev,altimeter), paC1=pressureAlt(c1Alt,altimeter);
+  const paC2=pressureAlt(c2Alt,altimeter), paDst=pressureAlt(dstElev,altimeter);
+  const tpaMsl=dstElev+tpaAgl, paTpa=pressureAlt(tpaMsl,altimeter);
 
-  const c1Alt = num($('c1Alt')), c1Oat = num($('c1Oat')), c1Rpm = num($('c1Rpm'), 2300);
-  const c1W   = { d: num($('c1Wdir')), v: num($('c1Wvel')) };
-  const c2Alt = num($('c2Alt')), c2Oat = num($('c2Oat')), c2Rpm = num($('c2Rpm'), 2300);
-  const c2W   = { d: num($('c2Wdir')), v: num($('c2Wvel')) };
-  const c2StartNM = clamp(num($('c2Start')), 0, routeD);
+  const isaDep=depOat-isaTempC(paDep), isaC1=c1Oat-isaTempC(paC1);
+  const isaC2=c2Oat-isaTempC(paC2), isaDst=dstOat-isaTempC(paDst);
 
-  /* Pressure altitudes */
-  const paDep = pressureAlt(depElev, altimeter);
-  const paC1  = pressureAlt(c1Alt,   altimeter);
-  const paC2  = pressureAlt(c2Alt,   altimeter);
-  const paDst = pressureAlt(dstElev, altimeter);
-  const tpaMsl = dstElev + tpaAgl;
-  const paTpa  = pressureAlt(tpaMsl, altimeter);
+  const climb1=climbSegment(paDep,paC1,(isaDep+isaC1)/2);
+  climb1.pa={from:paDep,to:paC1}; climb1.isaDev=(isaDep+isaC1)/2;
+  applyOverride(climb1, perfOv.c1);
 
-  /* ISA deviations */
-  const isaDep = depOat - isaTempC(paDep);
-  const isaC1  = c1Oat  - isaTempC(paC1);
-  const isaC2  = c2Oat  - isaTempC(paC2);
-  const isaDst = dstOat - isaTempC(paDst);
+  const cr1=cruisePerf(paC1,c1Rpm,isaC1);
+  cr1.pa=paC1; cr1.isaDev=isaC1; cr1.da=densityAlt(paC1,c1Oat);
+  cr1.casImplied=cr1.ktas*Math.sqrt(sigma(paC1,c1Oat));
 
-  /* ── CLIMB 1 ── */
-  const climb1  = climbSegment(paDep, paC1, (isaDep + isaC1) / 2);
-  climb1.pa     = { from: paDep, to: paC1 };
-  climb1.isaDev = (isaDep + isaC1) / 2;
-
-  /* ── CRUISE 1 ── */
-  const cr1 = cruisePerf(paC1, c1Rpm, isaC1);
-  cr1.pa = paC1; cr1.isaDev = isaC1; cr1.da = densityAlt(paC1, c1Oat);
-  /* Back out the CAS the POH KTAS implies — seeds the nav log's CAS column */
-  cr1.casImplied = cr1.ktas * Math.sqrt(sigma(paC1, c1Oat));
-
-  /* ── CLIMB 2 / CRUISE 2 ── */
-  let climb2 = null, cr2 = null;
-  if (useStep) {
-    climb2 = climbSegment(paC1, paC2, (isaC1 + isaC2) / 2);
-    climb2.pa = { from: paC1, to: paC2 };
-    climb2.isaDev = (isaC1 + isaC2) / 2;
-    cr2 = cruisePerf(paC2, c2Rpm, isaC2);
-    cr2.pa = paC2; cr2.isaDev = isaC2; cr2.da = densityAlt(paC2, c2Oat);
-    cr2.casImplied = cr2.ktas * Math.sqrt(sigma(paC2, c2Oat));
+  let climb2=null,cr2=null;
+  if(useStep){
+    climb2=climbSegment(paC1,paC2,(isaC1+isaC2)/2);
+    climb2.pa={from:paC1,to:paC2}; climb2.isaDev=(isaC1+isaC2)/2;
+    applyOverride(climb2, perfOv.c2);
+    cr2=cruisePerf(paC2,c2Rpm,isaC2);
+    cr2.pa=paC2; cr2.isaDev=isaC2; cr2.da=densityAlt(paC2,c2Oat);
+    cr2.casImplied=cr2.ktas*Math.sqrt(sigma(paC2,c2Oat));
   }
 
-  /* ── DESCENT ── */
-  const topAlt   = useStep ? c2Alt : c1Alt;
-  const paTop    = useStep ? paC2  : paC1;
-  const descRate = Math.max(50, num($('descRate'), 500));
-  const descKias = num($('descKias'), 90);
-  const descGph  = num($('descGph'), 4.5);
-  const descOatMid = (( useStep ? c2Oat : c1Oat ) + dstOat) / 2;
-  const paDescMid  = (paTop + paTpa) / 2;
-  const descKcas   = iasToCas(descKias);
-  const descKtas   = casToTas(descKcas, paDescMid, descOatMid);
-  const descTimeMin = Math.max(0, (topAlt - tpaMsl) / descRate);
-  const descW      = useStep ? c2W : c1W;
-  const desc = {
-    rate: descRate, kias: descKias, kcas: descKcas, ktas: descKtas,
-    time: descTimeMin, fuel: descGph * descTimeMin / 60, gph: descGph,
-    fromAlt: topAlt, toAlt: tpaMsl, wind: descW, paMid: paDescMid, oatMid: descOatMid
+  /* ── DESCENT — power unchanged, so fuel flow stays at the cruise figure ── */
+  const topAlt=useStep?c2Alt:c1Alt, paTop=useStep?paC2:paC1;
+  const descRate=Math.max(50,num($('descRate'),500)), descKias=num($('descKias'),90);
+  const descGph=(useStep?cr2:cr1).gph;
+  const descOatMid=((useStep?c2Oat:c1Oat)+dstOat)/2, paDescMid=(paTop+paTpa)/2;
+  const descKcas=iasToCas(descKias), descKtas=casToTas(descKcas,paDescMid,descOatMid);
+  const ftToLose=Math.max(0,topAlt-tpaMsl);
+  const desc={
+    rate:descRate, kias:descKias, kcas:descKcas, ktas:descKtas, gph:descGph,
+    rawTime:ftToLose/descRate, ftToLose,
+    rule31:3*(ftToLose/1000),                 /* 3 NM per 1,000 ft */
+    fromAlt:topAlt, toAlt:tpaMsl, wind:useStep?c2W:c1W, paMid:paDescMid, oatMid:descOatMid
   };
+  desc.time=desc.rawTime;
+  desc.rawDist=desc.time/60*desc.ktas;
+  desc.dist=desc.rawDist;
+  desc.rawFuel=descGph*desc.rawTime/60;
+  desc.fuel=desc.rawFuel;
+  applyOverride(desc, perfOv.ds);
 
-  return {
-    altimeter, useStep, routeD,
-    dep:  { id: $('depId').value || 'DEP', elev: depElev, oat: depOat, pa: paDep, isa: isaDep, da: densityAlt(paDep, depOat) },
-    dst:  { id: $('dstId').value || 'DEST', elev: dstElev, oat: dstOat, pa: paDst, isa: isaDst, da: densityAlt(paDst, dstOat), tpaMsl },
-    c1:   { alt: c1Alt, oat: c1Oat, rpm: c1Rpm, wind: c1W, perf: cr1 },
-    c2:   useStep ? { alt: c2Alt, oat: c2Oat, rpm: c2Rpm, wind: c2W, perf: cr2, startNM: c2StartNM } : null,
-    climb1, climb2, desc
-  };
+  return{ altimeter, useStep, routeD,
+    dep:{id:$('depId').value||'DEP',elev:depElev,oat:depOat,pa:paDep,isa:isaDep,da:densityAlt(paDep,depOat)},
+    dst:{id:$('dstId').value||'DEST',elev:dstElev,oat:dstOat,pa:paDst,isa:isaDst,da:densityAlt(paDst,dstOat),tpaMsl},
+    c1:{alt:c1Alt,oat:c1Oat,rpm:c1Rpm,wind:c1W,perf:cr1},
+    c2:useStep?{alt:c2Alt,oat:c2Oat,rpm:c2Rpm,wind:c2W,perf:cr2,startNM:c2StartNM}:null,
+    climb1, climb2, desc };
 }
 
-/*
- * Ground distance covered by a time-driven segment (climb or descent).
- * These take a fixed number of minutes no matter what the wind does, so the
- * distance is time × GS. Until the pilot enters a true course the wind triangle
- * can't be run, so it falls back to the POH zero-wind figure.
- */
-function segGroundDist(zeroWindNM, timeMin, ktas, wind, course) {
-  const tc = parseFloat(course);
-  if (!isFinite(tc) || !(ktas > 0) || !(timeMin > 0)) return zeroWindNM;
-  const w = windTriangle(tc, ktas, wind.d, wind.v);
-  return w.gs > 0 ? timeMin / 60 * w.gs : zeroWindNM;
+/* A typed override replaces the handbook figure; the POH value stays on .raw* */
+function applyOverride(seg,ov){
+  const t=pf(ov.t), f=pf(ov.f), d=pf(ov.d);
+  seg.pohTime=seg.time; seg.pohFuel=seg.fuel; seg.pohDist=seg.dist;
+  if(isFinite(t))seg.time=t;
+  if(isFinite(f))seg.fuel=f;
+  if(isFinite(d))seg.dist=d;
+  seg.ovT=isFinite(t); seg.ovF=isFinite(f); seg.ovD=isFinite(d);
 }
 
-/* True courses the pilot has typed, by phase, so the profile and nav log agree */
-function courseHints() {
-  const climbs = legs.filter(l => l.phase === 'CLIMB');
-  const desc   = legs.filter(l => l.phase === 'DESC').pop();
-  return { c1: climbs[0] && climbs[0].tc, c2: climbs[1] && climbs[1].tc, d: desc && desc.tc };
+function segGroundDist(zeroWindNM,timeMin,ktas,wind,course){
+  const tc=pf(course);
+  if(!isFinite(tc)||!(ktas>0)||!(timeMin>0))return zeroWindNM;
+  const w=windTriangle(tc,ktas,wind.d,wind.v);
+  return w.gs>0?timeMin/60*w.gs:zeroWindNM;
 }
-
-/*
- * Lay the profile out along the route, in NM from departure.
- * Climb and descent take the ground distance they physically need; cruise gets
- * the remainder — so the legs always add up to the charted route distance.
- */
-function layoutProfile(P, tc) {
-  tc = tc || courseHints();
-  const d0 = 0;
-  const climb1NM = segGroundDist(P.climb1.dist, P.climb1.time, P.climb1.ktas, P.c1.wind, tc.c1);
-  const descNM   = segGroundDist(P.desc.time / 60 * P.desc.ktas, P.desc.time, P.desc.ktas, P.desc.wind, tc.d);
-
-  const dTOC1 = clamp(climb1NM, 0, P.routeD);
-  const dTOD  = clamp(P.routeD - descNM, dTOC1, P.routeD);
-
-  let dClimb2Start = null, dTOC2 = null, climb2NM = 0;
-  if (P.c2) {
-    climb2NM     = segGroundDist(P.climb2.dist, P.climb2.time, P.climb2.ktas, P.c2.wind, tc.c2);
-    dClimb2Start = clamp(P.c2.startNM, dTOC1, dTOD);
-    dTOC2        = clamp(dClimb2Start + climb2NM, dClimb2Start, dTOD);
+function courseHints(){
+  const rows=allRows();
+  const climbs=rows.filter(r=>r.phase==='CLIMB'), d=rows.filter(r=>r.phase==='DESC').pop();
+  return{c1:climbs[0]&&climbs[0].tc, c2:climbs[1]&&climbs[1].tc, d:d&&d.tc};
+}
+/* Climb and descent take the ground distance they need; cruise gets the rest */
+function layoutProfile(P,tc){
+  tc=tc||courseHints();
+  const climb1NM=P.climb1.ovD?P.climb1.dist:segGroundDist(P.climb1.dist,P.climb1.time,P.climb1.ktas,P.c1.wind,tc.c1);
+  const descNM  =P.desc.ovD  ?P.desc.dist  :segGroundDist(P.desc.dist,P.desc.time,P.desc.ktas,P.desc.wind,tc.d);
+  const dTOC1=clamp(climb1NM,0,P.routeD), dTOD=clamp(P.routeD-descNM,dTOC1,P.routeD);
+  let dClimb2Start=null,dTOC2=null,climb2NM=0;
+  if(P.c2){
+    climb2NM=P.climb2.ovD?P.climb2.dist:segGroundDist(P.climb2.dist,P.climb2.time,P.climb2.ktas,P.c2.wind,tc.c2);
+    dClimb2Start=clamp(P.c2.startNM,dTOC1,dTOD);
+    dTOC2=clamp(dClimb2Start+climb2NM,dClimb2Start,dTOD);
   }
-
-  /* Cruise distances by subtraction — never negative */
-  const cruise1NM = Math.max(0, (P.c2 ? dClimb2Start : dTOD) - dTOC1);
-  const cruise2NM = P.c2 ? Math.max(0, dTOD - dTOC2) : 0;
-
-  /* Is the route long enough to contain the whole vertical profile? */
-  const needed   = climb1NM + climb2NM + descNM;
-  const tooShort = needed > P.routeD + 0.5;
-
-  return { d0, dTOC1, dClimb2Start, dTOC2, dTOD, dEnd: P.routeD,
-           climb1NM, climb2NM, descNM, cruise1NM, cruise2NM, needed, tooShort };
+  const cruise1NM=Math.max(0,(P.c2?dClimb2Start:dTOD)-dTOC1);
+  const cruise2NM=P.c2?Math.max(0,dTOD-dTOC2):0;
+  const needed=climb1NM+climb2NM+descNM;
+  return{dTOC1,dClimb2Start,dTOC2,dTOD,dEnd:P.routeD,climb1NM,climb2NM,descNM,
+    cruise1NM,cruise2NM,needed,tooShort:needed>P.routeD+0.5};
 }
 
 /* ═══════════════════════════════════════════════════════════
    PROFILE SVG
    ═══════════════════════════════════════════════════════════ */
-function drawProfile(P, L) {
-  const svg = $('profileSvg');
-  const W = 1000, H = 300;
-  const m = { l: 56, r: 20, t: 26, b: 44 };
-  const pw = W - m.l - m.r, ph = H - m.t - m.b;
-
-  const topAlt = Math.max(P.c1.alt, P.c2 ? P.c2.alt : 0, P.dep.elev, P.dst.elev);
-  const yMax = Math.max(1000, topAlt * 1.18);
-  const yMin = 0;
-  const X = nm  => m.l + (clamp(nm, 0, P.routeD) / P.routeD) * pw;
-  const Y = alt => m.t + ph - ((clamp(alt, yMin, yMax) - yMin) / (yMax - yMin)) * ph;
-
-  const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-  let s = '';
-
-  /* grid */
-  const step = yMax > 9000 ? 2000 : 1000;
-  for (let a = 0; a <= yMax; a += step) {
-    s += `<line x1="${m.l}" y1="${Y(a)}" x2="${W-m.r}" y2="${Y(a)}" stroke="#1a1a20" stroke-width="1"/>`;
-    s += `<text x="${m.l-8}" y="${Y(a)+3}" fill="#3a3a44" font-size="9" text-anchor="end" font-family="Courier New,monospace">${a.toLocaleString()}</text>`;
+function drawProfile(P,L){
+  const svg=$('profileSvg'), W=1000,H=300, m={l:56,r:20,t:26,b:44};
+  const pw=W-m.l-m.r, ph=H-m.t-m.b;
+  const topAlt=Math.max(P.c1.alt,P.c2?P.c2.alt:0,P.dep.elev,P.dst.elev);
+  const yMax=Math.max(1000,topAlt*1.18);
+  const X=nm=>m.l+(clamp(nm,0,P.routeD)/P.routeD)*pw;
+  const Y=a=>m.t+ph-(clamp(a,0,yMax)/yMax)*ph;
+  let s='';
+  const step=yMax>9000?2000:1000;
+  for(let a=0;a<=yMax;a+=step){
+    s+=`<line x1="${m.l}" y1="${Y(a)}" x2="${W-m.r}" y2="${Y(a)}" stroke="#1a1a20"/>`;
+    s+=`<text x="${m.l-8}" y="${Y(a)+3}" fill="#3a3a44" font-size="9" text-anchor="end" font-family="Courier New,monospace">${a.toLocaleString()}</text>`;
   }
-  for (let i = 0; i <= 4; i++) {
-    const nm = P.routeD * i / 4;
-    s += `<line x1="${X(nm)}" y1="${m.t}" x2="${X(nm)}" y2="${m.t+ph}" stroke="#141419" stroke-width="1"/>`;
-    s += `<text x="${X(nm)}" y="${m.t+ph+16}" fill="#3a3a44" font-size="9" text-anchor="middle" font-family="Courier New,monospace">${Math.round(nm)}</text>`;
+  for(let i=0;i<=4;i++){const nm=P.routeD*i/4;
+    s+=`<line x1="${X(nm)}" y1="${m.t}" x2="${X(nm)}" y2="${m.t+ph}" stroke="#141419"/>`;
+    s+=`<text x="${X(nm)}" y="${m.t+ph+16}" fill="#3a3a44" font-size="9" text-anchor="middle" font-family="Courier New,monospace">${Math.round(nm)}</text>`;}
+  s+=`<text x="${m.l+pw/2}" y="${H-8}" fill="#2e2e36" font-size="9" text-anchor="middle" letter-spacing="2" font-family="Courier New,monospace">DISTANCE — NM</text>`;
+  s+=`<line x1="${m.l}" y1="${Y(0)}" x2="${W-m.r}" y2="${Y(0)}" stroke="#2a2a32" stroke-width="1.5"/>`;
+
+  const pts=[{x:0,y:P.dep.elev,k:'dep'},{x:L.dTOC1,y:P.c1.alt,k:'toc1'}];
+  if(P.c2){pts.push({x:L.dClimb2Start,y:P.c1.alt,k:'boc2'});pts.push({x:L.dTOC2,y:P.c2.alt,k:'toc2'});}
+  pts.push({x:L.dTOD,y:P.c2?P.c2.alt:P.c1.alt,k:'tod'});
+  pts.push({x:L.dEnd,y:P.dst.tpaMsl,k:'dst'});
+  const poly=pts.map(p=>`${X(p.x)},${Y(p.y)}`).join(' ');
+  s+=`<polygon points="${X(0)},${Y(0)} ${poly} ${X(P.routeD)},${Y(0)}" fill="#33ddcc" opacity="0.05"/>`;
+  for(let i=0;i<pts.length-1;i++){
+    const a=pts[i],b=pts[i+1];
+    let col='#33ddcc';
+    if(b.k==='toc1'||b.k==='toc2')col='#4aaaff';
+    if(b.k==='dst')col='#b58cff';
+    s+=`<line x1="${X(a.x)}" y1="${Y(a.y)}" x2="${X(b.x)}" y2="${Y(b.y)}" stroke="${col}" stroke-width="2.5" stroke-linecap="round"${b.k==='dst'?' stroke-dasharray="6 3"':''}/>`;
   }
-  s += `<text x="${m.l+pw/2}" y="${H-8}" fill="#2e2e36" font-size="9" text-anchor="middle" letter-spacing="2" font-family="Courier New,monospace">DISTANCE — NM</text>`;
-
-  /* terrain baseline */
-  s += `<line x1="${m.l}" y1="${Y(0)}" x2="${W-m.r}" y2="${Y(0)}" stroke="#2a2a32" stroke-width="1.5"/>`;
-
-  /* flight path nodes */
-  const pts = [ { x: L.d0, y: P.dep.elev, k: 'dep' }, { x: L.dTOC1, y: P.c1.alt, k: 'toc1' } ];
-  if (P.c2) {
-    pts.push({ x: L.dClimb2Start, y: P.c1.alt, k: 'boc2' });
-    pts.push({ x: L.dTOC2,        y: P.c2.alt, k: 'toc2' });
-  }
-  pts.push({ x: L.dTOD,  y: P.c2 ? P.c2.alt : P.c1.alt, k: 'tod' });
-  pts.push({ x: L.dEnd,  y: P.dst.tpaMsl, k: 'dst' });
-
-  const poly = pts.map(p => `${X(p.x)},${Y(p.y)}`).join(' ');
-  /* shaded area under path */
-  s += `<polygon points="${X(0)},${Y(0)} ${poly} ${X(P.routeD)},${Y(0)}" fill="#33ddcc" opacity="0.05"/>`;
-
-  /* colour each phase */
-  const seg = (a, b, col, dash) =>
-    `<line x1="${X(a.x)}" y1="${Y(a.y)}" x2="${X(b.x)}" y2="${Y(b.y)}" stroke="${col}" stroke-width="2.5"
-      stroke-linecap="round" ${dash ? `stroke-dasharray="${dash}"` : ''}/>`;
-  for (let i = 0; i < pts.length-1; i++) {
-    const a = pts[i], b = pts[i+1];
-    let col = '#33ddcc';
-    if (b.k === 'toc1' || b.k === 'toc2') col = '#4aaaff';
-    if (b.k === 'dst') col = '#b58cff';
-    s += seg(a, b, col, b.k === 'dst' ? '6 3' : null);
-  }
-
-  /* Wind arrow badge — hung below the cruise line, where there is always room.
-     Above it would collide with the KTAS/GPH readout near the top of the chart. */
-  function windBadge(x, cruiseY, dir, vel, label) {
-    const r = 11;
-    const y = Math.min(cruiseY + 30, Y(0) - 26);
-    const rad = (dir + 180) * Math.PI / 180;     /* arrow points downwind */
-    const ax = Math.sin(rad) * r, ay = -Math.cos(rad) * r;
-    return `<g transform="translate(${x},${y})">
-      <circle r="${r}" fill="#0a0a0d" stroke="#2a2a34" stroke-width="1"/>
+  function windBadge(x,cruiseY,dir,vel,label){
+    const r=11, y=Math.min(cruiseY+30,Y(0)-26);
+    const rad=(dir+180)*Math.PI/180, ax=Math.sin(rad)*r, ay=-Math.cos(rad)*r;
+    return`<g transform="translate(${x},${y})"><circle r="${r}" fill="#0a0a0d" stroke="#2a2a34"/>
       <line x1="${-ax}" y1="${-ay}" x2="${ax}" y2="${ay}" stroke="#33ddcc" stroke-width="1.4"/>
       <circle cx="${ax}" cy="${ay}" r="2.2" fill="#33ddcc"/>
-      <text y="${r+11}" fill="#6a6a78" font-size="8.5" text-anchor="middle" font-family="Courier New,monospace">${esc(label)}</text>
-    </g>`;
+      <text y="${r+11}" fill="#6a6a78" font-size="8.5" text-anchor="middle" font-family="Courier New,monospace">${esc(label)}</text></g>`;
   }
-
-  /* node markers + labels */
-  /* Label block sits entirely above the node when there is room below it on the
-     chart, otherwise entirely below — never straddling the flight path. */
-  function marker(p, title, lines, col, anchor) {
-    const x = X(p.x), y = Y(p.y);
-    const n = lines.length;
-    const up = y > m.t + 16 + (n + 1) * 11;
-    const titleY = up ? y - 15 - n * 10 : y + 22;
-    let g = `<line x1="${x}" y1="${y}" x2="${x}" y2="${Y(0)}" stroke="#1e1e26" stroke-width="1" stroke-dasharray="2 3"/>`;
-    g += `<circle cx="${x}" cy="${y}" r="4" fill="${col}" stroke="#08080a" stroke-width="1.5"/>`;
-    g += `<text x="${x}" y="${titleY}" fill="${col}" font-size="9.5" text-anchor="${anchor}" letter-spacing="1" font-family="Courier New,monospace">${esc(title)}</text>`;
-    lines.forEach((ln, i) => {
-      g += `<text x="${x}" y="${titleY + 11 + i*10}" fill="#7a7a88" font-size="8.5" text-anchor="${anchor}" font-family="Courier New,monospace">${esc(ln)}</text>`;
-    });
+  function marker(p,title,lines,col,anchor){
+    const x=X(p.x),y=Y(p.y),n=lines.length;
+    const up=y>m.t+16+(n+1)*11, ty=up?y-15-n*10:y+22;
+    let g=`<line x1="${x}" y1="${y}" x2="${x}" y2="${Y(0)}" stroke="#1e1e26" stroke-dasharray="2 3"/>`;
+    g+=`<circle cx="${x}" cy="${y}" r="4" fill="${col}" stroke="#08080a" stroke-width="1.5"/>`;
+    g+=`<text x="${x}" y="${ty}" fill="${col}" font-size="9.5" text-anchor="${anchor}" letter-spacing="1" font-family="Courier New,monospace">${esc(title)}</text>`;
+    lines.forEach((ln,i)=>{g+=`<text x="${x}" y="${ty+11+i*10}" fill="#7a7a88" font-size="8.5" text-anchor="${anchor}" font-family="Courier New,monospace">${esc(ln)}</text>`;});
     return g;
   }
-
-  s += marker(pts[0], P.dep.id, [
-    `${f0(P.dep.elev)} ft · ${f0(P.dep.oat)}°C`,
-    `PA ${f0(P.dep.pa)} · DA ${f0(P.dep.da)}`
-  ], '#9aa', 'start');
-
-  s += marker(pts[1], 'TOC', [
-    `${f0(P.c1.alt)} ft · ${f0(P.c1.oat)}°C`,
-    `${f0(L.dTOC1)} NM · ${f0(P.climb1.time)} min · ${f1(P.climb1.fuel)} gal`
-  ], '#4aaaff', 'middle');
-
-  const cruise1X = P.c2 ? (L.dTOC1 + L.dClimb2Start)/2 : (L.dTOC1 + L.dTOD)/2;
-  s += `<text x="${X(cruise1X)}" y="${Y(P.c1.alt)-9}" fill="#33ddcc" font-size="9" text-anchor="middle" letter-spacing="1" font-family="Courier New,monospace">${f0(P.c1.perf.ktas)} KTAS · ${f1(P.c1.perf.gph)} GPH · ${f0(P.c1.perf.bhp)}%</text>`;
-  s += windBadge(X(cruise1X), Y(P.c1.alt), P.c1.wind.d, P.c1.wind.v, `${fDeg(P.c1.wind.d)}/${f0(P.c1.wind.v)}`);
-
-  if (P.c2) {
-    s += marker(pts[2], 'CLIMB 2', [`${f0(L.dClimb2Start)} NM`], '#4aaaff', 'middle');
-    s += marker(pts[3], 'TOC 2', [
-      `${f0(P.c2.alt)} ft · ${f0(P.c2.oat)}°C`,
-      `+${f0(P.climb2.time)} min · +${f1(P.climb2.fuel)} gal`
-    ], '#4aaaff', 'middle');
-    const cruise2X = (L.dTOC2 + L.dTOD)/2;
-    s += `<text x="${X(cruise2X)}" y="${Y(P.c2.alt)-9}" fill="#33ddcc" font-size="9" text-anchor="middle" letter-spacing="1" font-family="Courier New,monospace">${f0(P.c2.perf.ktas)} KTAS · ${f1(P.c2.perf.gph)} GPH · ${f0(P.c2.perf.bhp)}%</text>`;
-    s += windBadge(X(cruise2X), Y(P.c2.alt), P.c2.wind.d, P.c2.wind.v, `${fDeg(P.c2.wind.d)}/${f0(P.c2.wind.v)}`);
+  s+=marker(pts[0],P.dep.id,[`${f0(P.dep.elev)} ft · ${f0(P.dep.oat)}°C`,`PA ${f0(P.dep.pa)} · DA ${f0(P.dep.da)}`],'#9aa','start');
+  s+=marker(pts[1],'TOC',[`${f0(P.c1.alt)} ft · ${f0(P.c1.oat)}°C`,
+    `${f1(L.climb1NM)} NM · ${f0(P.climb1.time)} min · ${f1(P.climb1.fuel)} gal`],'#4aaaff','middle');
+  const c1X=P.c2?(L.dTOC1+L.dClimb2Start)/2:(L.dTOC1+L.dTOD)/2;
+  s+=`<text x="${X(c1X)}" y="${Y(P.c1.alt)-9}" fill="#33ddcc" font-size="9" text-anchor="middle" letter-spacing="1" font-family="Courier New,monospace">${f0(P.c1.perf.ktas)} KTAS · ${f1(P.c1.perf.gph)} GPH · ${f0(P.c1.perf.bhp)}%</text>`;
+  s+=windBadge(X(c1X),Y(P.c1.alt),P.c1.wind.d,P.c1.wind.v,`${fDeg(P.c1.wind.d)}/${f0(P.c1.wind.v)}`);
+  if(P.c2){
+    s+=marker(pts[2],'CLIMB 2',[`${f0(L.dClimb2Start)} NM`],'#4aaaff','middle');
+    s+=marker(pts[3],'TOC 2',[`${f0(P.c2.alt)} ft · ${f0(P.c2.oat)}°C`,
+      `+${f0(P.climb2.time)} min · +${f1(P.climb2.fuel)} gal`],'#4aaaff','middle');
+    const c2X=(L.dTOC2+L.dTOD)/2;
+    s+=`<text x="${X(c2X)}" y="${Y(P.c2.alt)-9}" fill="#33ddcc" font-size="9" text-anchor="middle" letter-spacing="1" font-family="Courier New,monospace">${f0(P.c2.perf.ktas)} KTAS · ${f1(P.c2.perf.gph)} GPH · ${f0(P.c2.perf.bhp)}%</text>`;
+    s+=windBadge(X(c2X),Y(P.c2.alt),P.c2.wind.d,P.c2.wind.v,`${fDeg(P.c2.wind.d)}/${f0(P.c2.wind.v)}`);
   }
-
-  s += marker(pts[pts.length-2], 'TOD', [
-    `${f0(L.dTOD)} NM`,
-    `${f0(P.desc.rate)} fpm · ${f0(P.desc.time)} min`
-  ], '#b58cff', 'middle');
-
-  s += marker(pts[pts.length-1], P.dst.id, [
-    `TPA ${f0(P.dst.tpaMsl)} ft`,
-    `fld ${f0(P.dst.elev)} · DA ${f0(P.dst.da)}`
-  ], '#b58cff', 'end');
-
-  svg.innerHTML = s;
+  s+=marker(pts[pts.length-2],'TOD',[`${f0(L.dTOD)} NM`,`${f0(P.desc.rate)} fpm · ${f0(P.desc.time)} min`],'#b58cff','middle');
+  s+=marker(pts[pts.length-1],P.dst.id,[`TPA ${f0(P.dst.tpaMsl)} ft`,`fld ${f0(P.dst.elev)} · DA ${f0(P.dst.da)}`],'#b58cff','end');
+  svg.innerHTML=s;
 }
 
 /* ═══════════════════════════════════════════════════════════
-   PERFORMANCE READOUTS
+   PERFORMANCE CARDS
    ═══════════════════════════════════════════════════════════ */
-function row(label, val, cls = '') { return `<div class="rrow ${cls}"><span>${label}</span><span>${val}</span></div>`; }
+const row=(l,v,c='')=>`<div class="rrow ${c}"><span>${l}</span><span>${v}</span></div>`;
+const ovRow=(label,seg,slot,key,fmt,unit)=>`
+  <div class="orow">
+    <label>${label}</label>
+    <input data-ov="${slot}" data-ovk="${key}" type="number" step="${key==='f'?'0.1':'1'}"
+           value="${esc(perfOv[slot][key])}" placeholder="${fmt}">
+    <span class="unit">${unit}</span>
+  </div>`;
 
-function drawPerf(P, L) {
-  const cards = [];
-
-  /* ── CLIMB 1 ── */
-  const c = P.climb1;
+function drawPerf(P,L){
+  const cards=[];
+  const c=P.climb1;
   cards.push(`<div class="rcard">
     <h5>CLIMB 1 <span class="tag climb">FIG 5-6</span></h5>
-    ${row('Pressure alt', `${f0(c.pa.from)} → ${f0(c.pa.to)} ft`)}
-    ${row('ISA deviation', `${fSign(c.isaDev)} °C`)}
-    ${row('Climb speed', `${f0(c.kias)} KIAS / ${f0(c.kcas)} KCAS`)}
-    ${row('Avg TAS in climb', `${f0(c.ktas)} kt`)}
-    ${row('Avg rate', `${f0(c.roc)} fpm`)}
+    ${row('Pressure alt',`${f0(c.pa.from)} → ${f0(c.pa.to)} ft`)}
+    ${row('ISA deviation',`${fSign(c.isaDev)} °C`)}
+    ${row('Climb speed',`${f0(c.kias)} KIAS / ${f0(c.kcas)} KCAS`)}
+    ${row('Avg TAS / rate',`${f0(c.ktas)} kt · ${f0(c.roc)} fpm`)}
+    ${row('POH raw (std temp)',`${f0(c.rawTime)} min · ${f1(c.rawFuel)} gal · ${f0(c.rawDist)} NM`)}
+    ${row('Temp factor',`×${c.factor.toFixed(2)}`)}
     <div class="rsep"></div>
-    ${row('POH raw (std temp)', `${f0(c.rawTime)} min · ${f1(c.rawFuel)} gal · ${f0(c.rawDist)} NM`, 'dim')}
-    ${row('Temp factor', `×${c.factor.toFixed(2)}`)}
-    <div class="rsep"></div>
-    ${row('TIME', `${f0(c.time)} min`, 'big')}
-    ${row('FUEL', `${f1(c.fuel)} gal`, 'big')}
-    ${row('DIST (zero wind)', `${f0(c.dist)} NM`, 'big')}
-    ${c.capped ? `<div class="rrow note">⚠ Above 12,000 ft PA the climb table ends — values clamped.</div>` : ''}
-    <div class="rrow note">POH distance is zero wind. The nav log applies your leg's true course and wind to get ground distance.</div>
+    ${ovRow('TIME',c,'c1','t',f0(c.pohTime),'min')}
+    ${ovRow('FUEL',c,'c1','f',f1(c.pohFuel),'gal')}
+    ${ovRow('DIST',c,'c1','d',f0(c.pohDist),'NM')}
+    ${row('Ground dist (wind)',`${f1(L.climb1NM)} NM`,'hi')}
+    ${c.capped?`<div class="rrow note">⚠ Climb table ends at 12,000 ft PA — clamped.</div>`:''}
+    <div class="rrow note">Boxes hold the POH figure until you type your own. Ground distance applies your leg's course and wind to the zero-wind handbook distance.</div>
   </div>`);
 
-  /* ── CRUISE 1 ── */
-  const p1 = P.c1.perf;
+  const p1=P.c1.perf;
   cards.push(`<div class="rcard">
     <h5>CRUISE 1 <span class="tag cruise">FIG 5-7</span></h5>
-    ${row('Altitude', `${f0(P.c1.alt)} ft`)}
-    ${row('Pressure alt', `${f0(p1.pa)} ft`)}
-    ${row('Density alt', `${f0(p1.da)} ft`)}
-    ${row('OAT / ISA', `${f0(P.c1.oat)}°C / ${fSign(p1.isaDev)}°C`)}
-    ${row('RPM', `${f0(P.c1.rpm)}`)}
-    ${row('Table bracket', `${p1.bracket[0].toLocaleString()} – ${p1.bracket[1].toLocaleString()} ft`, 'dim')}
+    ${row('Altitude / PA',`${f0(P.c1.alt)} / ${f0(p1.pa)} ft`)}
+    ${row('Density alt',`${f0(p1.da)} ft`)}
+    ${row('OAT / ISA',`${f0(P.c1.oat)}°C / ${fSign(p1.isaDev)}°C`)}
+    ${row('RPM',`${f0(P.c1.rpm)}`)}
+    ${row('Table bracket',`${p1.bracket[0].toLocaleString()} – ${p1.bracket[1].toLocaleString()} ft`)}
     <div class="rsep"></div>
-    ${row('% BHP', `${f0(p1.bhp)} %`, 'big')}
-    ${row('TAS', `${f0(p1.ktas)} kt`, 'big')}
-    ${row('FUEL FLOW', `${f1(p1.gph)} gph`, 'big')}
-    ${row('Implied CAS', `${f0(p1.casImplied)} kt`, 'dim')}
-    ${p1.rpmLimited ? `<div class="rrow note">⚠ ${f0(P.c1.rpm)} RPM is above the table at this temperature — used ${f0(p1.rpmLimited)} RPM.</div>` : ''}
-    ${p1.altClamped ? `<div class="rrow note">⚠ Cruise table spans 2,000–12,000 ft PA — clamped to ${p1.altClamped.toLocaleString()} ft.</div>` : ''}
+    ${row('% BHP',`${f0(p1.bhp)} %`,'big')}
+    ${row('TAS',`${f0(p1.ktas)} kt`,'big')}
+    ${row('FUEL FLOW',`${f1(p1.gph)} gph`,'big')}
+    ${row('Implied CAS',`${f0(p1.casImplied)} kt`)}
+    ${p1.rpmLimited?`<div class="rrow note">⚠ ${f0(P.c1.rpm)} RPM is above the table at this temperature — used ${f0(p1.rpmLimited)} RPM.</div>`:''}
+    ${p1.altClamped?`<div class="rrow note">⚠ Cruise table spans 2,000–12,000 ft PA — clamped to ${p1.altClamped.toLocaleString()} ft.</div>`:''}
   </div>`);
 
-  /* ── CLIMB 2 / CRUISE 2 ── */
-  if (P.c2) {
-    const c2 = P.climb2, p2 = P.c2.perf;
+  if(P.c2){
+    const c2=P.climb2,p2=P.c2.perf;
     cards.push(`<div class="rcard">
       <h5>CLIMB 2 <span class="tag climb">FIG 5-6</span></h5>
-      ${row('Starts at', `${f0(P.c2.startNM)} NM`)}
-      ${row('Pressure alt', `${f0(c2.pa.from)} → ${f0(c2.pa.to)} ft`)}
-      ${row('ISA deviation', `${fSign(c2.isaDev)} °C`)}
-      ${row('Climb speed', `${f0(c2.kias)} KIAS / ${f0(c2.ktas)} KTAS`)}
-      ${row('Avg rate', `${f0(c2.roc)} fpm`)}
+      ${row('Starts at',`${f0(P.c2.startNM)} NM`)}
+      ${row('Pressure alt',`${f0(c2.pa.from)} → ${f0(c2.pa.to)} ft`)}
+      ${row('ISA deviation',`${fSign(c2.isaDev)} °C`)}
+      ${row('Speed / rate',`${f0(c2.kias)} KIAS · ${f0(c2.roc)} fpm`)}
       <div class="rsep"></div>
-      ${row('TIME', `${f0(c2.time)} min`, 'big')}
-      ${row('FUEL', `${f1(c2.fuel)} gal`, 'big')}
-      ${row('DIST (zero wind)', `${f0(c2.dist)} NM`, 'big')}
-      <div class="rrow note">Step climb = the same Fig 5-6 subtraction run between the two cruise altitudes.</div>
+      ${ovRow('TIME',c2,'c2','t',f0(c2.pohTime),'min')}
+      ${ovRow('FUEL',c2,'c2','f',f1(c2.pohFuel),'gal')}
+      ${ovRow('DIST',c2,'c2','d',f0(c2.pohDist),'NM')}
+      ${row('Ground dist (wind)',`${f1(L.climb2NM)} NM`,'hi')}
+      <div class="rrow note">A step climb is the same Fig 5-6 subtraction run between the two cruise altitudes.</div>
     </div>`);
-
     cards.push(`<div class="rcard">
       <h5>CRUISE 2 <span class="tag cruise">FIG 5-7</span></h5>
-      ${row('Altitude', `${f0(P.c2.alt)} ft`)}
-      ${row('Pressure alt', `${f0(p2.pa)} ft`)}
-      ${row('Density alt', `${f0(p2.da)} ft`)}
-      ${row('OAT / ISA', `${f0(P.c2.oat)}°C / ${fSign(p2.isaDev)}°C`)}
-      ${row('RPM', `${f0(P.c2.rpm)}`)}
+      ${row('Altitude / PA',`${f0(P.c2.alt)} / ${f0(p2.pa)} ft`)}
+      ${row('Density alt',`${f0(p2.da)} ft`)}
+      ${row('OAT / ISA',`${f0(P.c2.oat)}°C / ${fSign(p2.isaDev)}°C`)}
+      ${row('RPM',`${f0(P.c2.rpm)}`)}
       <div class="rsep"></div>
-      ${row('% BHP', `${f0(p2.bhp)} %`, 'big')}
-      ${row('TAS', `${f0(p2.ktas)} kt`, 'big')}
-      ${row('FUEL FLOW', `${f1(p2.gph)} gph`, 'big')}
-      ${p2.rpmLimited ? `<div class="rrow note">⚠ RPM above table at this temp — used ${f0(p2.rpmLimited)}.</div>` : ''}
-      ${p2.altClamped ? `<div class="rrow note">⚠ Clamped to ${p2.altClamped.toLocaleString()} ft PA.</div>` : ''}
+      ${row('% BHP',`${f0(p2.bhp)} %`,'big')}
+      ${row('TAS',`${f0(p2.ktas)} kt`,'big')}
+      ${row('FUEL FLOW',`${f1(p2.gph)} gph`,'big')}
+      ${p2.rpmLimited?`<div class="rrow note">⚠ RPM above table at this temp — used ${f0(p2.rpmLimited)}.</div>`:''}
     </div>`);
   }
 
-  /* ── DESCENT ── */
-  const d = P.desc;
+  const d=P.desc;
+  const agree=Math.abs(d.rawDist-d.rule31)<=Math.max(1,0.2*d.rule31);
   cards.push(`<div class="rcard">
     <h5>DESCENT <span class="tag desc">NOT POH</span></h5>
-    ${row('From / to', `${f0(d.fromAlt)} → ${f0(d.toAlt)} ft`)}
-    ${row('Rate', `${f0(d.rate)} fpm`)}
-    ${row('Speed', `${f0(d.kias)} KIAS / ${f0(d.kcas)} KCAS`)}
-    ${row('Avg TAS', `${f0(d.ktas)} kt`)}
+    ${row('From / to',`${f0(d.fromAlt)} → ${f0(d.toAlt)} ft`)}
+    ${row('To lose',`${f0(d.ftToLose)} ft`)}
+    ${row('Rate',`${f0(d.rate)} fpm`)}
+    ${row('Speed',`${f0(d.kias)} KIAS / ${f0(d.ktas)} KTAS`)}
+    ${row('Power',`unchanged — ${f1(d.gph)} gph`,'hi')}
     <div class="rsep"></div>
-    ${row('TIME', `${f0(d.time)} min`, 'big')}
-    ${row('FUEL', `${f1(d.fuel)} gal`, 'big')}
-    ${row('GROUND DIST', `${f1(L.descNM)} NM`, 'big')}
-    ${row('Top of descent', `${f0(L.dTOD)} NM out`, 'hi')}
-    <div class="rrow note">The 152 POH has no descent table. These come from the rate / speed / GPH you set on the Destination card.</div>
+    ${ovRow('TIME',d,'ds','t',f0(d.rawTime),'min')}
+    ${ovRow('FUEL',d,'ds','f',f1(d.rawFuel),'gal')}
+    ${ovRow('DIST',d,'ds','d',f0(d.rawDist),'NM')}
+    ${row('Ground dist (wind)',`${f1(L.descNM)} NM`,'hi')}
+    <div class="rsep"></div>
+    ${row('3-to-1 check',`${f1(d.rule31)} NM`,agree?'hi':'')}
+    ${row('Rate for 3° path',`${f0(d.ktas*5)} fpm ≈ GS × 5`)}
+    <div class="rrow note">3 NM per 1,000 ft to lose. ${agree?'The rate-based distance and the 3-to-1 distance agree.':'These two differ — check the rate, or use 3-to-1 and type the distance in.'} The 152 POH has no descent table, so every figure here comes from the rate and speed you set.</div>
   </div>`);
 
-  /* ── TRIP SUMMARY ── */
-  const hasTc = Object.values(courseHints()).some(v => isFinite(parseFloat(v)));
   cards.push(`<div class="rcard">
     <h5>PROFILE SUMMARY <span class="tag">${f0(P.routeD)} NM</span></h5>
-    ${row('Climb 1', `${f1(L.climb1NM)} NM  (0 → ${f0(L.dTOC1)})`)}
-    ${row('Cruise 1', `${f1(L.cruise1NM)} NM @ ${f0(P.c1.alt)} ft`)}
-    ${P.c2 ? row('Climb 2', `${f1(L.climb2NM)} NM  (${f0(L.dClimb2Start)} → ${f0(L.dTOC2)})`) : ''}
-    ${P.c2 ? row('Cruise 2', `${f1(L.cruise2NM)} NM @ ${f0(P.c2.alt)} ft`) : ''}
-    ${row('Descent', `${f1(L.descNM)} NM  (${f0(L.dTOD)} → ${f0(P.routeD)})`)}
+    ${row('Climb 1',`${f1(L.climb1NM)} NM  (0 → ${f0(L.dTOC1)})`)}
+    ${row('Cruise 1',`${f1(L.cruise1NM)} NM @ ${f0(P.c1.alt)} ft`)}
+    ${P.c2?row('Climb 2',`${f1(L.climb2NM)} NM  (${f0(L.dClimb2Start)} → ${f0(L.dTOC2)})`):''}
+    ${P.c2?row('Cruise 2',`${f1(L.cruise2NM)} NM @ ${f0(P.c2.alt)} ft`):''}
+    ${row('Descent',`${f1(L.descNM)} NM  (${f0(L.dTOD)} → ${f0(P.routeD)})`)}
     <div class="rsep"></div>
-    ${row('Start/taxi/T-O', `${f1(num($('taxiFuel'), 0.8))} gal`, 'dim')}
-    ${L.tooShort ? `<div class="rrow note" style="color:var(--warn)">⚠ Climb + descent need ${f0(L.needed)} NM but the route is only ${f0(P.routeD)} NM — there is no cruise segment. Lower the cruise altitude or check the route distance.</div>` : ''}
-    <div class="rrow note">Climb and descent take the ground distance they physically need; cruise gets the remainder, so the legs always total ${f0(P.routeD)} NM.${hasTc ? '' : ' Zero-wind distances until you enter true courses in the nav log — then press Build again to wind-correct them.'}</div>
+    ${row('Start/taxi/T-O',`${f1(num($('taxiFuel'),0.8))} gal`)}
+    ${L.tooShort?`<div class="rrow note" style="color:var(--warn)">⚠ Climb + descent need ${f0(L.needed)} NM but the route is only ${f0(P.routeD)} NM — there is no cruise segment.</div>`:''}
+    <div class="rrow note">Climb and descent take the ground distance they need; cruise gets the remainder, so the seeded legs total ${f0(P.routeD)} NM.</div>
   </div>`);
 
-  $('perfOut').innerHTML = cards.join('');
+  $('perfOut').innerHTML=cards.join('');
 }
 
 /* ═══════════════════════════════════════════════════════════
-   NAV LOG — SEED FROM PROFILE
+   SOLVER — computes the answer for every row
+   Each step uses the value NEXT TO IT (typed if present, else computed),
+   so a wrong entry shows up on its own box instead of reddening the row.
    ═══════════════════════════════════════════════════════════ */
-function buildLegs() {
-  const P = computeProfile(), L = layoutProfile(P);
-  const gph1 = P.c1.perf.gph.toFixed(1);
-  const seed = [];
+function solve(P){
+  const altimeter=num($('altimeter'),29.92);
+  const gVar=num($('magVar'),0), gDev=num($('magDev'),0);
+  const gGph=pf(flight.gph);
+  const off=parseClock(flight.timeOff);
+  const cap=num($('fuelCap'),24.5), taxi=num($('taxiFuel'),0.8);
 
-  /* Climb / descent distances come from layoutProfile, which wind-corrects them
-     once a true course exists. Cruise gets whatever is left of the route. */
-  const mkClimb = (name, c, wind, alt, distNM) => blankLeg({
-    phase: 'CLIMB', name, alt: f0(alt),
-    wdir: f0(wind.d), wvel: f0(wind.v), temp: f0(c.oatMid),
-    cas: f0(c.kcas), tas: f0(c.ktas),
-    dist: f1(distNM),
-    gph: (c.fuel > 0 && c.time > 0 ? (c.fuel / (c.time/60)) : 0).toFixed(1)
-  });
+  const rows=allRows();
+  const totalDist=rows.reduce((a,r)=>a+(pf(r.distLeg)||0),0);
 
-  seed.push(mkClimb(`TOC — ${P.c1.alt} ft`, P.climb1, P.c1.wind, P.c1.alt, L.climb1NM));
+  let cumDist=0, cumMin=0, cumFuel=0;
+  const out=[];
+  /* Climb and descent burn is handbook data, not a flat GPH — hand out the
+     right segment's fuel to each tagged row, in the order they appear. */
+  let climbSeen=0;
+  const segFuel=r=>{
+    if(!P)return NaN;
+    if(r.phase==='CLIMB')return (climbSeen++===0?P.climb1:(P.climb2||P.climb1)).fuel;
+    if(r.phase==='DESC') return P.desc.fuel;
+    return NaN;
+  };
 
-  seed.push(blankLeg({
-    phase: 'CRUISE', name: P.c2 ? 'CRUISE 1 — to step climb' : 'CRUISE 1',
-    alt: f0(P.c1.alt), wdir: f0(P.c1.wind.d), wvel: f0(P.c1.wind.v), temp: f0(P.c1.oat),
-    cas: f0(P.c1.perf.casImplied), tas: f0(P.c1.perf.ktas),
-    dist: f1(L.cruise1NM), gph: gph1
-  }));
+  rows.forEach(r=>{
+    const alt=pf(r.alt), temp=pf(r.temp), cas=pf(r.cas), tc=pf(r.tc);
+    const wd=pf(r.wdir), wv=pf(r.wvel), distLeg=pf(r.distLeg);
+    const pa=isFinite(alt)?pressureAlt(alt,altimeter):NaN;
 
-  if (P.c2) {
-    seed.push(mkClimb(`TOC 2 — ${P.c2.alt} ft`, P.climb2, P.c2.wind, P.c2.alt, L.climb2NM));
-    seed.push(blankLeg({
-      phase: 'CRUISE', name: 'CRUISE 2',
-      alt: f0(P.c2.alt), wdir: f0(P.c2.wind.d), wvel: f0(P.c2.wind.v), temp: f0(P.c2.oat),
-      cas: f0(P.c2.perf.casImplied), tas: f0(P.c2.perf.ktas),
-      dist: f1(L.cruise2NM), gph: P.c2.perf.gph.toFixed(1)
-    }));
-  }
+    /* TAS — typed, else from CAS by the density formula */
+    const tasCalc=(isFinite(cas)&&isFinite(pa)&&isFinite(temp))?casToTas(cas,pa,temp):NaN;
+    const tasEff=isFinite(pf(r.tas))?pf(r.tas):tasCalc;
 
-  seed.push(blankLeg({
-    phase: 'DESC', name: `${P.dst.id} — descent`,
-    alt: f0(P.dst.tpaMsl), wdir: f0(P.desc.wind.d), wvel: f0(P.desc.wind.v), temp: f0(P.desc.oatMid),
-    cas: f0(P.desc.kcas), tas: f0(P.desc.ktas),
-    dist: f1(L.descNM), gph: f1(P.desc.gph)
-  }));
+    /* Wind triangle from the course and wind alongside */
+    const w=(isFinite(tc)&&isFinite(tasEff)&&isFinite(wd)&&isFinite(wv))
+      ? windTriangle(tc,tasEff,wd,wv) : {wca:NaN,gs:NaN,valid:true};
 
-  /* Carry over any true courses / checkpoint names the pilot already typed */
-  seed.forEach((lg, i) => {
-    const old = legs[i];
-    if (old) {
-      if (old.tc)    lg.tc    = old.tc;
-      if (old.route) lg.route = old.route;
-      if (old.vorId) lg.vorId = old.vorId;
-      if (old.vorFreq) lg.vorFreq = old.vorFreq;
-      if (old.name && !/^(TOC|CRUISE|.* — descent)/.test(old.name)) lg.name = old.name;
-    }
-  });
+    const wcaEff=isFinite(pf(r.wca))?pf(r.wca):w.wca;
+    const thCalc=(isFinite(tc)&&isFinite(wcaEff))?norm360(tc+wcaEff):NaN;
+    const thEff=isFinite(pf(r.th))?pf(r.th):thCalc;
 
-  legs = seed;
-  renderLegs();
-  recompute();
-}
+    const varEff=isFinite(pf(r.varn))?pf(r.varn):gVar;
+    const mhCalc=isFinite(thEff)?norm360(thEff+varEff):NaN;
+    const mhEff=isFinite(pf(r.mh))?pf(r.mh):mhCalc;
 
-/*
- * Refill TAS from the POH, keeping everything else the pilot typed.
- * Cruise legs are re-read out of Fig 5-7 at their own altitude and temperature;
- * the first cruise leg uses the Cruise 1 RPM, any later one uses Cruise 2 RPM.
- * Climb / descent legs get TAS from CAS by the density formula.
- */
-function tasFromPoh() {
-  const altimeter = num($('altimeter'), 29.92);
-  let cruiseSeen = 0;
-  legs.forEach(lg => {
-    const alt  = parseFloat(lg.alt);
-    const temp = parseFloat(lg.temp);
-    const cas  = parseFloat(lg.cas);
-    if (!isFinite(alt) || !isFinite(temp)) return;
-    const pa = pressureAlt(alt, altimeter);
-    if (lg.phase === 'CRUISE') {
-      const rpm  = cruiseSeen++ === 0 ? num($('c1Rpm'), 2300) : num($('c2Rpm'), 2300);
-      const perf = cruisePerf(pa, rpm, temp - isaTempC(pa));
-      lg.tas = f0(perf.ktas);
-      lg.gph = f1(perf.gph);
-      lg.cas = f0(perf.ktas * Math.sqrt(sigma(pa, temp)));
-    } else if (isFinite(cas)) {
-      lg.tas = f0(casToTas(cas, pa, temp));
-    }
-  });
-  renderLegs();
-  recompute();
-}
+    const devEff=isFinite(pf(r.dev))?pf(r.dev):gDev;
+    const chCalc=isFinite(mhEff)?norm360(mhEff+devEff):NaN;
 
-/* ═══════════════════════════════════════════════════════════
-   NAV LOG — RENDER
-   ═══════════════════════════════════════════════════════════ */
-const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const inp = (id, key, extra = '') =>
-  `<input data-id="${id}" data-k="${key}" ${extra}>`;
+    const gsCalc=w.gs;
+    const gsEff=isFinite(pf(r.gsEst))?pf(r.gsEst):gsCalc;
 
-function renderLegs() {
-  const body = $('nlBody');
-  /* One <tbody> only — each leg is a pair of <tr>s sharing a data-id.
-     (Nesting <tbody> inside <tbody> is invalid and gets stripped by the parser.) */
-  body.innerHTML = legs.map((lg, i) => {
-    const p = 'p' + (i % 2);
-    return `
-    <tr class="${p}" data-id="${lg.id}">
-      <td rowspan="2" class="phase ${lg.phase}">${esc(lg.phase)}</td>
-      <td rowspan="2"><div class="namecell">
-        ${inp(lg.id,'name','class="name" placeholder="checkpoint"')}
-        <button class="rowbtn noprint" data-del="${lg.id}" title="remove leg">✕</button>
-      </div></td>
-      <td>${inp(lg.id,'vorId','placeholder="IDT"')}</td>
-      <td rowspan="2">${inp(lg.id,'route','placeholder="route"')}</td>
-      <td rowspan="2">${inp(lg.id,'alt','type="number" step="500"')}</td>
-      <td>${inp(lg.id,'wdir','type="number" step="5" placeholder="°T"')}</td>
-      <td>${inp(lg.id,'wvel','type="number" step="1" placeholder="kt"')}</td>
-      <td>${inp(lg.id,'cas','type="number" step="1"')}</td>
-      <td>${inp(lg.id,'tc','type="number" step="1" placeholder="°T"')}</td>
-      <td class="out" data-o="th">—</td>
-      <td class="out" data-o="mh">—</td>
-      <td rowspan="2" class="out acc" data-o="ch">—</td>
-      <td>${inp(lg.id,'dist','type="number" step="0.1"')}</td>
-      <td class="out" data-o="gs">—</td>
-      <td class="out" data-o="ete">—</td>
-      <td class="out" data-o="eta">—</td>
-      <td class="out" data-o="fuel">—</td>
-    </tr>
-    <tr class="${p}" data-id="${lg.id}">
-      <td>${inp(lg.id,'vorFreq','placeholder="freq"')}</td>
-      <td colspan="2">${inp(lg.id,'temp','type="number" step="1" placeholder="°C"')}</td>
-      <td>${inp(lg.id,'tas','type="number" step="1"')}</td>
-      <td class="out" data-o="wca">—</td>
-      <td>${inp(lg.id,'varn','type="number" step="0.5" placeholder="±"')}</td>
-      <td>${inp(lg.id,'dev','type="number" step="1" placeholder="±"')}</td>
-      <td class="out dim" data-o="rem">—</td>
-      <td class="act">${inp(lg.id,'gsAct','type="number" step="1"')}</td>
-      <td class="act">${inp(lg.id,'ate','placeholder="mm"')}</td>
-      <td class="act">${inp(lg.id,'ata','placeholder="hh:mm"')}</td>
-      <td class="act">${inp(lg.id,'remAct','type="number" step="0.1"')}</td>
-    </tr>`;
-  }).join('');
+    const eteCalc=(isFinite(distLeg)&&isFinite(gsEff)&&gsEff>0)?distLeg/gsEff*60:NaN;
+    const eteEff=isFinite(pf(r.ete))?pf(r.ete):eteCalc;
 
-  /* fill input values + wire */
-  body.querySelectorAll('input[data-id]').forEach(el => {
-    const lg = legs.find(l => l.id == el.dataset.id);
-    if (lg) el.value = lg[el.dataset.k] ?? '';
-    el.addEventListener('input', () => {
-      const g = legs.find(l => l.id == el.dataset.id);
-      if (g) { g[el.dataset.k] = el.value; recompute(); saveSoon(); }
+    /* Fuel: handbook figure for climb/descent legs, GPH × ETE for the rest */
+    const hint=segFuel(r);
+    const fuelCalc=isFinite(hint)?hint
+      :((isFinite(gGph)&&isFinite(eteEff))?gGph*eteEff/60:NaN);
+    const fuelEff=isFinite(pf(r.fuel))?pf(r.fuel):fuelCalc;
+
+    /* Cumulative — only advance on rows that actually carry a leg */
+    const active=isFinite(distLeg)||isFinite(eteEff);
+    if(isFinite(distLeg))cumDist+=distLeg;
+    if(isFinite(eteEff))cumMin+=eteEff;
+    if(isFinite(fuelEff))cumFuel+=fuelEff;
+
+    const distRemCalc=active&&totalDist>0?Math.max(0,totalDist-cumDist):NaN;
+    const etaCalc=(off!==null&&isFinite(eteEff))?fClock(off+cumMin):'';
+    const fuelRemCalc=active&&isFinite(fuelEff)?cap-taxi-cumFuel:NaN;
+
+    out.push({
+      tas:f0(tasCalc), wca:isFinite(w.wca)?fSign(w.wca):'', th:fDeg(thCalc), mh:fDeg(mhCalc),
+      ch:fDeg(chCalc), gsEst:f0(gsCalc), ete:f0(eteCalc), eta:etaCalc,
+      fuel:f1(fuelCalc), distRem:f0(distRemCalc), fuelRem:f1(fuelRemCalc),
+      _n:{tas:tasCalc,wca:w.wca,th:thCalc,mh:mhCalc,ch:chCalc,gsEst:gsCalc,
+          ete:eteCalc,fuel:fuelCalc,distRem:distRemCalc,fuelRem:fuelRemCalc},
+      blownAway:!w.valid, active
     });
   });
-  body.querySelectorAll('[data-del]').forEach(b => {
-    b.addEventListener('click', () => {
-      legs = legs.filter(l => l.id != b.dataset.del);
-      renderLegs(); recompute(); saveSoon();
+
+  return{ out, totalDist, cumMin, cumFuel, off, cap, taxi };
+}
+
+/* Tolerance for CHECK MY WORK, per column */
+const TOL={tas:2,wca:1,th:1,mh:1,ch:1,gsEst:1.5,ete:1,fuel:0.2,distRem:1,fuelRem:0.3};
+
+/* ═══════════════════════════════════════════════════════════
+   NAV LOG RENDER
+   ═══════════════════════════════════════════════════════════ */
+const ADV_ROWS=[['atis','ATIS Code'],['cig','Ceiling &amp; Visibility'],['wind','Wind'],
+  ['alt','Altimeter'],['app','Approach'],['rwy','Runway'],['tc','Time Check']];
+const FREQ_ROWS=[['atis','ATIS','ATIS'],['gnd','Ground','Approach'],['twr','Tower','Tower'],
+  ['dep','Departure','Ground'],['ctaf','CTAF','CTAF'],['fss','FSS','FSS'],
+  ['uni','UNICOM','UNICOM'],['elev','Field Elev','Field Elev']];
+
+function inp(pi,ri,k,cls,extra=''){
+  return `<input data-p="${pi}" data-r="${ri}" data-k="${k}" class="${cls}" ${extra}>`;
+}
+
+function renderSheets(){
+  $('sheets').innerHTML = pages.map((pg,pi)=>`
+  <div class="sheet" data-page="${pi}">
+    <div class="sheet-bar noprint">
+      <span class="sheet-no">PAGE ${pi+1} OF ${pages.length}</span>
+      <span>
+        <button class="btn sm" data-fill="${pi}">↓ FILL BLANK ROWS</button>
+        <button class="btn sm" data-addrow="${pi}">+ ROW</button>
+        ${pages.length>1?`<button class="btn sm danger" data-delpage="${pi}">✕ PAGE</button>`:''}
+      </span>
+    </div>
+    <div class="sheet-scroll"><div class="sheet-inner">
+      <div class="sheet-main">
+        <div class="form-title">VFR NAVIGATION LOG</div>
+        <table class="acblk">
+          <tr>
+            <td class="lbl">Aircraft Number</td>
+            <td style="width:130px"><input data-flight="acN" placeholder="N"></td>
+            <td class="lbl">Notes</td>
+            <td><input data-pn="${pi}" data-ni="0"></td>
+          </tr>
+          ${[1,2,3].map(i=>`<tr><td colspan="4"><input data-pn="${pi}" data-ni="${i}"></td></tr>`).join('')}
+        </table>
+        <table class="navlog">
+          <colgroup>
+            <col style="width:26px" class="noprint"><col style="width:118px"><col style="width:56px">
+            <col style="width:64px"><col style="width:60px"><col style="width:42px"><col style="width:42px">
+            <col style="width:46px"><col style="width:46px"><col style="width:46px"><col style="width:46px">
+            <col style="width:46px"><col style="width:48px"><col style="width:46px"><col style="width:48px">
+            <col style="width:52px"><col style="width:48px">
+          </colgroup>
+          <thead>
+            <tr>
+              <th rowspan="3" class="grp gut noprint"></th>
+              <th rowspan="3" class="grp">CHECK POINTS<span class="sub">(FIXES)</span></th>
+              <th class="grp">VOR</th>
+              <th rowspan="3" class="grp">COURSE<span class="sub">(ROUTE)</span></th>
+              <th rowspan="3" class="grp">ALTITUDE</th>
+              <th class="grp" colspan="2">WIND</th>
+              <th></th><th></th><th></th><th></th>
+              <th rowspan="3" class="grp">CH</th>
+              <th class="grp">DIST</th>
+              <th class="grp">GS</th>
+              <th class="grp hdrbox" colspan="2">TIME OFF<input data-flight="timeOff" placeholder="hh:mm"></th>
+              <th class="grp hdrbox">GPH<input data-flight="gph" type="number" step="0.1" placeholder="—"></th>
+            </tr>
+            <tr>
+              <th>IDENT</th><th>DIR</th><th>VEL</th><th>CAS</th><th>TC</th><th>TH</th><th>MH</th>
+              <th>LEG</th><th>EST</th><th>ETE</th><th>ETA</th><th>FUEL</th>
+            </tr>
+            <tr>
+              <th>FREQ</th><th colspan="2">TEMP °C</th><th>TAS</th>
+              <th>WCA<span class="sub">−L / +R</span></th><th>VAR<span class="sub">−E / +W</span></th>
+              <th>DEV<span class="sub">±</span></th>
+              <th>REM</th><th>ACT</th><th>ATE</th><th>ATA</th><th>REM</th>
+            </tr>
+          </thead>
+          ${pg.rows.map((r,ri)=>`
+          <tbody class="leg" data-phase="${esc(r.phase)}">
+            <tr class="p${ri%2}">
+              <td rowspan="2" class="gut noprint">
+                <button class="rowbtn" data-solverow="${pi}:${ri}" title="fill this row">=</button>
+                <button class="rowbtn del" data-delrow="${pi}:${ri}" title="clear this row">✕</button>
+              </td>
+              <td rowspan="2" class="cp">${inp(pi,ri,'name','giv name','placeholder="checkpoint"')}</td>
+              <td>${inp(pi,ri,'vorId','giv','placeholder="IDT"')}</td>
+              <td rowspan="2">${inp(pi,ri,'route','giv','placeholder="route"')}</td>
+              <td rowspan="2">${inp(pi,ri,'alt','giv','type="number" step="500"')}</td>
+              <td>${inp(pi,ri,'wdir','giv','type="number" step="5"')}</td>
+              <td>${inp(pi,ri,'wvel','giv','type="number" step="1"')}</td>
+              <td>${inp(pi,ri,'cas','giv','type="number" step="1"')}</td>
+              <td>${inp(pi,ri,'tc','giv','type="number" step="1"')}</td>
+              <td>${inp(pi,ri,'th','ans','type="number" step="1"')}</td>
+              <td>${inp(pi,ri,'mh','ans','type="number" step="1"')}</td>
+              <td rowspan="2">${inp(pi,ri,'ch','ans','type="number" step="1"')}</td>
+              <td>${inp(pi,ri,'distLeg','giv','type="number" step="0.1"')}</td>
+              <td>${inp(pi,ri,'gsEst','ans','type="number" step="1"')}</td>
+              <td>${inp(pi,ri,'ete','ans','type="number" step="1"')}</td>
+              <td>${inp(pi,ri,'eta','ans','placeholder=""')}</td>
+              <td>${inp(pi,ri,'fuel','ans','type="number" step="0.1"')}</td>
+            </tr>
+            <tr class="p${ri%2}">
+              <td>${inp(pi,ri,'vorFreq','giv','placeholder="freq"')}</td>
+              <td colspan="2">${inp(pi,ri,'temp','giv','type="number" step="1"')}</td>
+              <td>${inp(pi,ri,'tas','ans','type="number" step="1"')}</td>
+              <!-- WCA / VAR / DEV stay text: a number input silently drops a
+                   leading "+", and "+3" is exactly how these get written. -->
+              <td>${inp(pi,ri,'wca','ans','inputmode="text"')}</td>
+              <td>${inp(pi,ri,'varn','giv','inputmode="text"')}</td>
+              <td>${inp(pi,ri,'dev','giv','inputmode="text"')}</td>
+              <td>${inp(pi,ri,'distRem','ans','type="number" step="0.1"')}</td>
+              <td>${inp(pi,ri,'gsAct','act','type="number" step="1"')}</td>
+              <td>${inp(pi,ri,'ate','act','placeholder="mm"')}</td>
+              <td>${inp(pi,ri,'ata','act','placeholder="hh:mm"')}</td>
+              <td>${inp(pi,ri,'fuelRem','ans','type="number" step="0.1"')}</td>
+            </tr>
+          </tbody>`).join('')}
+          <tfoot>
+            ${pi>0?`<tr class="bf"><td class="noprint"></td><td class="lbl" colspan="11">BROUGHT FORWARD &raquo;</td>
+              <td data-bf="dist:${pi}"></td><td></td><td data-bf="ete:${pi}"></td>
+              <td data-bf="eta:${pi}"></td><td data-bf="fuel:${pi}"></td></tr>`:''}
+            <tr>
+              <td class="noprint"></td><td class="lbl" colspan="11">TOTALS &raquo;</td>
+              <td data-tot="dist:${pi}"></td><td></td><td data-tot="ete:${pi}"></td>
+              <td data-tot="eta:${pi}"></td><td data-tot="fuel:${pi}"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div class="sheet-side">
+        <table class="side">
+          <tr><th colspan="3">AIRPORT &amp; ATIS ADVISORIES</th></tr>
+          <tr><td class="lbl">DEPARTURE</td><td class="lbl"></td><td class="lbl">DESTINATION</td></tr>
+          ${ADV_ROWS.map(([k,l])=>`<tr>
+            <td>${advInp(pi,'d_'+k)}</td><td class="lbl">${l}</td><td>${advInp(pi,'a_'+k)}</td></tr>`).join('')}
+          <tr><th colspan="3">AIRPORT FREQUENCIES</th></tr>
+          <tr><td class="lbl" colspan="2">DEPARTURE</td><td class="lbl">DESTINATION</td></tr>
+          ${FREQ_ROWS.map(([k,ld,la])=>`<tr>
+            <td class="lbl l">${ld}</td>
+            <td>${freqInp(pi,'d_'+k)}</td>
+            <td>${la}<br>${freqInp(pi,'a_'+k)}</td></tr>`).join('')}
+          <tr><td class="lbl l">Block Out</td><td>${blkInp(pi,'out')}</td>
+              <td rowspan="2">Log Time<br>${blkInp(pi,'log')}</td></tr>
+          <tr><td class="lbl l">Block In</td><td>${blkInp(pi,'in')}</td></tr>
+        </table>
+      </div>
+    </div></div>
+  </div>`).join('');
+
+  /* load stored values into every input */
+  $('sheets').querySelectorAll('input[data-p]').forEach(el=>{
+    const r=pages[+el.dataset.p].rows[+el.dataset.r];
+    if(r)el.value=r[el.dataset.k]??'';
+  });
+  $('sheets').querySelectorAll('input[data-adv]').forEach(el=>{el.value=pages[+el.dataset.pg].adv[el.dataset.adv]??'';});
+  $('sheets').querySelectorAll('input[data-freq]').forEach(el=>{el.value=pages[+el.dataset.pg].freq[el.dataset.freq]??'';});
+  $('sheets').querySelectorAll('input[data-blk]').forEach(el=>{el.value=pages[+el.dataset.pg].block[el.dataset.blk]??'';});
+  $('sheets').querySelectorAll('input[data-pn]').forEach(el=>{el.value=pages[+el.dataset.pn].notes[+el.dataset.ni]??'';});
+  $('sheets').querySelectorAll('input[data-flight]').forEach(el=>{el.value=flight[el.dataset.flight]??'';});
+}
+const advInp =(pi,k)=>`<input data-pg="${pi}" data-adv="${k}">`;
+const freqInp=(pi,k)=>`<input data-pg="${pi}" data-freq="${k}">`;
+const blkInp =(pi,k)=>`<input data-pg="${pi}" data-blk="${k}">`;
+
+/* ═══════════════════════════════════════════════════════════
+   RECOMPUTE — placeholders, check marks, totals
+   ═══════════════════════════════════════════════════════════ */
+function recompute(){
+  const P=computeProfile(), L=layoutProfile(P);
+  drawProfile(P,L); drawPerf(P,L);
+
+  const S=solve(P);
+  let idx=0;
+  const pageTot=pages.map(()=>({dist:0,ete:0,fuel:0,eta:''}));
+  let runDist=0,runEte=0,runFuel=0;
+  const bf=pages.map(()=>({dist:0,ete:0,fuel:0}));
+
+  pages.forEach((pg,pi)=>{
+    bf[pi]={dist:runDist,ete:runEte,fuel:runFuel};
+    pg.rows.forEach((r,ri)=>{
+      const a=S.out[idx++];
+      ANS_KEYS.forEach(k=>{
+        const el=document.querySelector(`input[data-p="${pi}"][data-r="${ri}"][data-k="${k}"]`);
+        if(!el)return;
+        el.placeholder = a[k] || '';
+        el.classList.remove('right','wrong');
+        if(checkMode){
+          const typed=k==='eta'?null:pf(r[k]);
+          if(k==='eta'){
+            if(r.eta&&a.eta) el.classList.add(r.eta.replace(/^(\d):/,'0$1:')===a.eta?'right':'wrong');
+          }else if(isFinite(typed)&&isFinite(a._n[k])){
+            let diff=Math.abs(typed-a._n[k]);
+            if(k==='th'||k==='mh'||k==='ch')diff=Math.abs(((typed-a._n[k]+540)%360)-180);
+            el.classList.add(diff<=TOL[k]?'right':'wrong');
+          }
+        }
+      });
+      /* page + running totals from the effective values */
+      const dl=pf(r.distLeg); if(isFinite(dl)){pageTot[pi].dist+=dl;runDist+=dl;}
+      const et=isFinite(pf(r.ete))?pf(r.ete):a._n.ete; if(isFinite(et)){pageTot[pi].ete+=et;runEte+=et;}
+      const fu=isFinite(pf(r.fuel))?pf(r.fuel):a._n.fuel; if(isFinite(fu)){pageTot[pi].fuel+=fu;runFuel+=fu;}
     });
   });
+
+  pages.forEach((pg,pi)=>{
+    const set=(sel,v)=>{const el=document.querySelector(sel);if(el)el.textContent=v;};
+    set(`[data-tot="dist:${pi}"]`, pageTot[pi].dist?f1(pageTot[pi].dist):'');
+    set(`[data-tot="ete:${pi}"]`,  pageTot[pi].ete?fMin(pageTot[pi].ete):'');
+    set(`[data-tot="fuel:${pi}"]`, pageTot[pi].fuel?f1(pageTot[pi].fuel):'');
+    const upto=bf[pi].ete+pageTot[pi].ete;
+    set(`[data-tot="eta:${pi}"]`, (S.off!==null&&upto>0)?fClock(S.off+upto):'');
+    if(pi>0){
+      set(`[data-bf="dist:${pi}"]`, bf[pi].dist?f1(bf[pi].dist):'');
+      set(`[data-bf="ete:${pi}"]`,  bf[pi].ete?fMin(bf[pi].ete):'');
+      set(`[data-bf="fuel:${pi}"]`, bf[pi].fuel?f1(bf[pi].fuel):'');
+      set(`[data-bf="eta:${pi}"]`,  (S.off!==null&&bf[pi].ete>0)?fClock(S.off+bf[pi].ete):'');
+    }
+  });
+
+  /* ── fuel bar ── */
+  const cap=S.cap, taxi=S.taxi, burn=runFuel;
+  const resMin=num($('reserveMin'),30), cruiseGph=P.c1.perf.gph;
+  const resGal=cruiseGph*resMin/60, rem=cap-taxi-burn;
+  $('fbCap').textContent=f1(cap)+' gal';
+  $('fbTaxi').textContent=f1(taxi)+' gal';
+  $('fbBurn').textContent=burn>0?f1(burn)+' gal':'—';
+  $('fbRem').textContent=burn>0?f1(rem)+' gal':'—';
+  $('fbRes').textContent=f1(resGal)+' gal ('+f0(resMin)+' min @ '+f1(cruiseGph)+' gph)';
+  const pill=$('fbPill');
+  if(burn<=0){pill.textContent='FILL IN LEGS';pill.className='pill';}
+  else if(rem>=resGal){pill.textContent=`RESERVE OK — ${f0((rem-resGal)/cruiseGph*60)} MIN SPARE`;pill.className='pill ok';}
+  else{pill.textContent=`RESERVE SHORT BY ${f1(resGal-rem)} GAL`;pill.className='pill bad';}
+  $('fbRem').parentElement.className='item '+(burn<=0?'':rem>=resGal?'ok':'bad');
 }
 
 /* ═══════════════════════════════════════════════════════════
-   NAV LOG — LIVE CALC
+   FILL FROM PROFILE
    ═══════════════════════════════════════════════════════════ */
-function recompute() {
-  const P = computeProfile();
-  const L = layoutProfile(P);
-  drawProfile(P, L);
-  drawPerf(P, L);
+function buildLegs(){
+  const P=computeProfile(), L=layoutProfile(P);
+  const seeds=[];
+  const mkClimb=(name,c,wind,alt,distNM)=>({phase:'CLIMB',name,alt:f0(alt),
+    wdir:f0(wind.d),wvel:f0(wind.v),temp:f0(c.oatMid),cas:f0(c.kcas),
+    distLeg:f1(distNM)});
 
-  const gVar = num($('magVar'), 0);
-  const gDev = num($('magDev'), 0);
-  const off  = parseClock($('timeOff').value);
-
-  const totalDist = legs.reduce((a,l) => a + (parseFloat(l.dist) || 0), 0);
-  let remDist = totalDist, cumMin = 0, cumFuel = 0;
-
-  legs.forEach(lg => {
-    const cells = document.querySelectorAll(`#nlBody tr[data-id="${lg.id}"] [data-o]`);
-    if (!cells.length) return;
-    const map = {};
-    cells.forEach(td => { map[td.dataset.o] = td; });
-    const set = (k, v, cls) => {
-      const td = map[k];
-      if (!td) return;
-      td.textContent = v;
-      if (cls !== undefined) td.className = cls;
-    };
-
-    const tc   = parseFloat(lg.tc);
-    const tas  = parseFloat(lg.tas);
-    const wd   = parseFloat(lg.wdir);
-    const wv   = parseFloat(lg.wvel);
-    const dist = parseFloat(lg.dist);
-    const gph  = parseFloat(lg.gph);
-    const vr   = lg.varn !== '' && isFinite(parseFloat(lg.varn)) ? parseFloat(lg.varn) : gVar;
-    const dv   = lg.dev  !== '' && isFinite(parseFloat(lg.dev))  ? parseFloat(lg.dev)  : gDev;
-
-    let wca = NaN, gs = NaN, th = NaN, mh = NaN, ch = NaN, blownAway = false;
-    if (isFinite(tc) && isFinite(tas) && tas > 0 && isFinite(wd) && isFinite(wv)) {
-      const w = windTriangle(tc, tas, wd, wv);
-      blownAway = !w.valid;          /* crosswind exceeds TAS — course not holdable */
-      wca = w.wca; gs = w.gs;
-      th = norm360(tc + wca);
-      mh = norm360(th + vr);
-      ch = norm360(mh + dv);
-    }
-
-    set('wca', isFinite(wca) ? fSign(wca) + '°' : '—', blownAway ? 'out bad' : 'out');
-    set('th',  isFinite(th) ? fDeg(th) : '—', 'out');
-    set('mh',  isFinite(mh) ? fDeg(mh) : '—', 'out');
-    set('ch',  isFinite(ch) ? fDeg(ch) : '—', 'out acc');
-    set('gs',  !isFinite(gs) ? '—' : gs > 0 ? f0(gs) : '⚠',
-               (isFinite(gs) && gs <= 0) || blownAway ? 'out bad' : 'out');
-
-    /* leg time / fuel */
-    let ete = NaN, fuel = NaN;
-    if (isFinite(dist) && isFinite(gs) && gs > 0) {
-      ete = dist / gs * 60;
-      cumMin += ete;
-      if (isFinite(gph)) { fuel = gph * ete / 60; cumFuel += fuel; }
-    }
-    set('ete', isFinite(ete) ? f0(ete) : '—');
-    set('eta', (isFinite(ete) && off !== null) ? fClock(off + cumMin) : '—');
-    set('fuel', isFinite(fuel) ? f1(fuel) : '—');
-
-    if (isFinite(dist)) remDist -= dist;
-    set('rem', isFinite(dist) ? f0(Math.max(0, remDist)) : '—', 'out dim');
-  });
-
-  $('totDist').textContent = totalDist > 0 ? f0(totalDist) : '—';
-  $('totEte').textContent  = cumMin > 0 ? fMin(cumMin) : '—';
-  $('totEta').textContent  = (off !== null && cumMin > 0) ? fClock(off + cumMin) : '—';
-  $('totFuel').textContent = cumFuel > 0 ? f1(cumFuel) : '—';
-
-  /* ── FUEL BAR ── */
-  const cap  = num($('fuelCap'), 24.5);
-  const taxi = num($('taxiFuel'), 0.8);
-  const resMin = num($('reserveMin'), 30);
-  const cruiseGph = P.c1.perf.gph;
-  const resGal = cruiseGph * resMin / 60;
-  const rem    = cap - taxi - cumFuel;
-
-  $('fbCap').textContent  = f1(cap) + ' gal';
-  $('fbTaxi').textContent = f1(taxi) + ' gal';
-  $('fbBurn').textContent = cumFuel > 0 ? f1(cumFuel) + ' gal' : '—';
-  $('fbRem').textContent  = cumFuel > 0 ? f1(rem) + ' gal' : '—';
-  $('fbRes').textContent  = f1(resGal) + ' gal  (' + f0(resMin) + ' min @ ' + f1(cruiseGph) + ' gph)';
-
-  const pill = $('fbPill');
-  if (cumFuel <= 0) { pill.textContent = 'ADD LEGS'; pill.className = 'pill'; }
-  else if (rem >= resGal) {
-    pill.textContent = `RESERVE OK — ${f0((rem - resGal) / cruiseGph * 60)} MIN SPARE`;
-    pill.className = 'pill ok';
-  } else {
-    pill.textContent = `RESERVE SHORT BY ${f1(resGal - rem)} GAL`;
-    pill.className = 'pill bad';
+  seeds.push(mkClimb(`TOC — ${P.c1.alt} ft`,P.climb1,P.c1.wind,P.c1.alt,L.climb1NM));
+  seeds.push({phase:'CRUISE',name:P.c2?'CRUISE 1 — to step climb':'CRUISE 1',
+    alt:f0(P.c1.alt),wdir:f0(P.c1.wind.d),wvel:f0(P.c1.wind.v),temp:f0(P.c1.oat),
+    cas:f0(P.c1.perf.casImplied),distLeg:f1(L.cruise1NM)});
+  if(P.c2){
+    seeds.push(mkClimb(`TOC 2 — ${P.c2.alt} ft`,P.climb2,P.c2.wind,P.c2.alt,L.climb2NM));
+    seeds.push({phase:'CRUISE',name:'CRUISE 2',alt:f0(P.c2.alt),
+      wdir:f0(P.c2.wind.d),wvel:f0(P.c2.wind.v),temp:f0(P.c2.oat),
+      cas:f0(P.c2.perf.casImplied),distLeg:f1(L.cruise2NM)});
   }
+  seeds.push({phase:'DESC',name:`${P.dst.id} — descent`,alt:f0(P.dst.tpaMsl),
+    wdir:f0(P.desc.wind.d),wvel:f0(P.desc.wind.v),temp:f0(P.desc.oatMid),
+    cas:f0(P.desc.kcas),distLeg:f1(L.descNM)});
 
-  $('fbRem').parentElement.className = 'item ' + (cumFuel <= 0 ? '' : rem >= resGal ? 'ok' : 'bad');
+  /* Write into page 1, keeping anything already typed in those rows */
+  const pg=pages[0];
+  while(pg.rows.length<seeds.length)pg.rows.push(blankRow());
+  seeds.forEach((s,i)=>{
+    const r=pg.rows[i];
+    r.phase=s.phase;
+    Object.keys(s).forEach(k=>{ if(k!=='phase' && !r[k]) r[k]=s[k]; });
+    if(!r.name)r.name=s.name;
+  });
+  if(!flight.gph)flight.gph=f1(P.c1.perf.gph);
+  renderSheets(); recompute(); saveSoon();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SOLVE / CLEAR
+   ═══════════════════════════════════════════════════════════ */
+function fillAnswers(pageIdx=null,rowIdx=null){
+  const S=solve(computeProfile());
+  let i=0;
+  pages.forEach((pg,pi)=>pg.rows.forEach((r,ri)=>{
+    const a=S.out[i++];
+    if(pageIdx!==null&&pi!==pageIdx)return;
+    if(rowIdx!==null&&ri!==rowIdx)return;
+    if(!a.active)return;
+    ANS_KEYS.forEach(k=>{ if(!r[k]&&a[k])r[k]=a[k]; });
+  }));
+  renderSheets(); recompute(); saveSoon();
+}
+function clearAnswers(){
+  pages.forEach(pg=>pg.rows.forEach(r=>ANS_KEYS.forEach(k=>r[k]='')));
+  renderSheets(); recompute(); saveSoon();
 }
 
 /* ═══════════════════════════════════════════════════════════
    PERSISTENCE
    ═══════════════════════════════════════════════════════════ */
-const KEY = 'navlog-c152-v1';
-let saveTimer = null;
-function saveSoon() { clearTimeout(saveTimer); saveTimer = setTimeout(save, 400); }
-
-function save() {
-  const setup = {};
-  SETUP_IDS.forEach(id => { const el = $(id); if (el) setup[id] = el.value; });
-  setup.useStep = $('useStep').checked;
-  try { localStorage.setItem(KEY, JSON.stringify({ setup, legs, uid })); } catch (e) {}
+const KEY='navlog-c152-v2';
+let saveTimer=null;
+const saveSoon=()=>{clearTimeout(saveTimer);saveTimer=setTimeout(save,400);};
+function save(){
+  const setup={};
+  SETUP_IDS.forEach(id=>{const el=$(id);if(el)setup[id]=el.value;});
+  setup.useStep=$('useStep').checked;
+  try{localStorage.setItem(KEY,JSON.stringify({setup,pages,flight,perfOv,pid}));}catch(e){}
 }
-function load() {
-  let d = null;
-  try { d = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
-  if (!d) return false;
-  if (d.setup) {
-    SETUP_IDS.forEach(id => { const el = $(id); if (el && d.setup[id] !== undefined) el.value = d.setup[id]; });
-    $('useStep').checked = !!d.setup.useStep;
+function load(){
+  let d=null;
+  try{d=JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){}
+  if(!d)return false;
+  if(d.setup){
+    SETUP_IDS.forEach(id=>{const el=$(id);if(el&&d.setup[id]!==undefined)el.value=d.setup[id];});
+    $('useStep').checked=!!d.setup.useStep;
   }
-  if (Array.isArray(d.legs) && d.legs.length) {
-    legs = d.legs;
-    uid  = Math.max(d.uid || 0, ...legs.map(l => (+l.id || 0))) + 1;
+  if(Array.isArray(d.pages)&&d.pages.length){
+    pages=d.pages.map(p=>({id:p.id,notes:p.notes||['','','','',''],adv:p.adv||{},freq:p.freq||{},
+      block:p.block||{in:'',out:'',log:''},rows:(p.rows||[]).map(r=>blankRow(r))}));
+    pid=(d.pid||pages.length)+1;
   }
+  if(d.flight)flight=Object.assign(flight,d.flight);
+  if(d.perfOv)perfOv=Object.assign(perfOv,d.perfOv);
   return true;
 }
 
 /* ═══════════════════════════════════════════════════════════
    WIRE UP
    ═══════════════════════════════════════════════════════════ */
-function syncStepVisibility() {
-  $('c2Card').style.display = $('useStep').checked ? '' : 'none';
-}
+document.addEventListener('DOMContentLoaded',()=>{
+  const had=load();
+  if(!pages.length)pages=[newPage()];
+  $('c2Card').style.display=$('useStep').checked?'':'none';
 
-document.addEventListener('DOMContentLoaded', () => {
-  const had = load();
-  syncStepVisibility();
+  SETUP_IDS.forEach(id=>{const el=$(id);if(el)el.addEventListener('input',()=>{recompute();saveSoon();});});
+  $('useStep').addEventListener('change',()=>{
+    $('c2Card').style.display=$('useStep').checked?'':'none';recompute();saveSoon();});
 
-  SETUP_IDS.forEach(id => {
-    const el = $(id);
-    if (el) el.addEventListener('input', () => { recompute(); saveSoon(); });
-  });
-  $('useStep').addEventListener('change', () => { syncStepVisibility(); recompute(); saveSoon(); });
-
-  $('btnBuild').addEventListener('click', buildLegs);
-  $('btnTasPoh').addEventListener('click', tasFromPoh);
-  $('btnAddRow').addEventListener('click', () => {
-    legs.push(blankLeg({ phase: 'CRUISE' }));
-    renderLegs(); recompute(); saveSoon();
-  });
-  $('btnSave').addEventListener('click', () => {
-    save();
-    const b = $('btnSave'); const t = b.textContent;
-    b.textContent = '✓ SAVED'; setTimeout(() => b.textContent = t, 1200);
-  });
-  $('btnPrint').addEventListener('click', () => window.print());
-  $('btnClear').addEventListener('click', () => {
-    if (!confirm('Clear this flight plan and all nav log rows?')) return;
-    localStorage.removeItem(KEY);
-    location.reload();
+  /* POH override boxes (delegated — the cards are re-rendered on every recompute) */
+  $('perfOut').addEventListener('input',e=>{
+    const el=e.target;
+    if(!el.dataset.ov)return;
+    perfOv[el.dataset.ov][el.dataset.ovk]=el.value;
+    const focus={ov:el.dataset.ov,k:el.dataset.ovk,pos:el.selectionStart};
+    recompute();saveSoon();
+    const again=document.querySelector(`[data-ov="${focus.ov}"][data-ovk="${focus.k}"]`);
+    if(again){again.focus();try{again.setSelectionRange(focus.pos,focus.pos);}catch(_){}}
   });
 
-  if (!$('acDate').value) $('acDate').valueAsDate = new Date();
+  /* nav log inputs (delegated) */
+  $('sheets').addEventListener('input',e=>{
+    const el=e.target;
+    if(el.dataset.p!==undefined){pages[+el.dataset.p].rows[+el.dataset.r][el.dataset.k]=el.value;}
+    else if(el.dataset.adv!==undefined){pages[+el.dataset.pg].adv[el.dataset.adv]=el.value;}
+    else if(el.dataset.freq!==undefined){pages[+el.dataset.pg].freq[el.dataset.freq]=el.value;}
+    else if(el.dataset.blk!==undefined){pages[+el.dataset.pg].block[el.dataset.blk]=el.value;}
+    else if(el.dataset.pn!==undefined){pages[+el.dataset.pn].notes[+el.dataset.ni]=el.value;}
+    else if(el.dataset.flight!==undefined){
+      flight[el.dataset.flight]=el.value;
+      document.querySelectorAll(`input[data-flight="${el.dataset.flight}"]`).forEach(o=>{if(o!==el)o.value=el.value;});
+    } else return;
+    recompute();saveSoon();
+  });
 
-  if (!had || !legs.length) buildLegs();
-  else { renderLegs(); recompute(); }
+  $('sheets').addEventListener('click',e=>{
+    const b=e.target.closest('button');if(!b)return;
+    if(b.dataset.solverow){const[p,r]=b.dataset.solverow.split(':').map(Number);fillAnswers(p,r);}
+    else if(b.dataset.delrow){
+      const[p,r]=b.dataset.delrow.split(':').map(Number);
+      pages[p].rows[r]=blankRow();renderSheets();recompute();saveSoon();}
+    else if(b.dataset.fill){fillAnswers(+b.dataset.fill);}
+    else if(b.dataset.addrow){pages[+b.dataset.addrow].rows.push(blankRow());renderSheets();recompute();saveSoon();}
+    else if(b.dataset.delpage){
+      if(!confirm(`Remove page ${+b.dataset.delpage+1} and everything on it?`))return;
+      pages.splice(+b.dataset.delpage,1);renderSheets();recompute();saveSoon();}
+  });
+
+  $('btnBuild').addEventListener('click',buildLegs);
+  $('btnSolve').addEventListener('click',()=>fillAnswers());
+  $('btnUnsolve').addEventListener('click',()=>{
+    if(confirm('Clear every worked answer? Chart entries — courses, distances, winds — are kept.'))clearAnswers();});
+  $('btnAddPage').addEventListener('click',()=>{
+    pages.push(newPage());renderSheets();recompute();saveSoon();
+    document.querySelector(`.sheet[data-page="${pages.length-1}"]`).scrollIntoView({behavior:'smooth',block:'start'});});
+  $('btnCheck').addEventListener('click',()=>{
+    checkMode=!checkMode;$('btnCheck').classList.toggle('on',checkMode);
+    $('btnCheck').textContent=checkMode?'◉ CHECKING':'◉ CHECK MY WORK';recompute();});
+  $('btnSave').addEventListener('click',()=>{
+    save();const b=$('btnSave'),t=b.textContent;b.textContent='✓ SAVED';setTimeout(()=>b.textContent=t,1200);});
+  $('btnPrint').addEventListener('click',()=>window.print());
+  $('btnClear').addEventListener('click',()=>{
+    if(!confirm('Clear this flight plan and every nav log page?'))return;
+    localStorage.removeItem(KEY);location.reload();});
+
+  if(!$('acDate').value)$('acDate').valueAsDate=new Date();
+  renderSheets();
+  recompute();
 });
 </script>
 </body>
