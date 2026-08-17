@@ -630,13 +630,28 @@ climb dist = d(PA at TOC) − d(PA at field)</span>
 
       <div class="note-blk">
         <h4>7 · DESCENT — THE 3-TO-1 RULE</h4>
-        <p>The 152 POH publishes <b>no descent table</b>, so none of this is handbook data. It is the arithmetic every pilot does in their head:</p>
-        <span class="eq">distance = 3 × (feet to lose ÷ 1000)      NM
-time     = feet to lose ÷ descent rate   min
-rate     ≈ GS × 5                        fpm (3° path)</span>
+        <p>The 152 POH publishes <b>no descent table</b>, so none of this is handbook data. It is the arithmetic every pilot does in their head.</p>
+        <p><b>Which formula you use depends on what you fix first.</b> It is one triangle — distance, groundspeed, time — entered from different corners:</p>
+        <span class="eq">FIX THE RATE                     FIX THE DISTANCE (3 to 1)
+time = alt to lose ÷ rate        dist = 3 × (alt to lose ÷ 1000)
+dist = time × GS                 time = dist ÷ GS
+                                 rate = alt to lose ÷ time</span>
+        <p>An ordinary cruise leg is <b>distance-driven</b> — you measure it off the chart and get time from <code>dist ÷ GS</code>. A descent flown at a chosen rate is <b>time-driven</b> — the altitude and the rate fix the time, and distance falls out of it. Fly it by 3-to-1 instead and it flips back to distance-driven, which is the <code>dist ÷ GS = time</code> you already know.</p>
+        <p>Worked at 3,500 ft down to an 1,800 ft pattern altitude, 90 kt GS:</p>
+        <span class="eq">by rate:   1700 ÷ 500 fpm = 3.4 min → × 90 ÷ 60 = 5.1 NM
+by 3 to 1: 1.7 × 3 = 5.1 NM      → ÷ 90 × 60 = 3.4 min
+                                 → needs 499 fpm</span>
+        <p>They land in the same place here, which is the useful part: <b>500 fpm at 90 knots groundspeed is very nearly a 3-to-1 path.</b> That is why 500 fpm is the number everyone reaches for in a 152.</p>
+        <p>Two shortcuts get quoted for the rate, and they are <b>not the same slope</b> — worth knowing so you are not confused when they disagree:</p>
+        <span class="eq">GS × 5    →  2.8°   (450 fpm at 90 kt)
+GS × 5.3  →  3.0°   (477 fpm at 90 kt)
+GS × 5.5  →  3.1°   — this is 3-to-1 (499 fpm at 90 kt)</span>
+        <p>3-to-1 is 1,000 ft per 3 NM, which works out to 3.14°, slightly steeper than the 3° everyone calls it. GS × 5 is the easiest to do in your head and lands a bit shallow. Any of them will put you at pattern altitude on time; pick one and be consistent.</p>
         <p><b>3 to 1</b> means three miles for every thousand feet. Losing 3,500 ft takes about 10 NM, so start down 10 NM before you need to be level. It is a 3° path — close to what every airliner and every instrument approach flies, which is why it is worth having in your head.</p>
         <p>The reverse form gives the rate: multiply groundspeed by 5. At 90 kt GS that is 450 fpm, which is why 500 fpm is the number everyone actually uses in a 152.</p>
-        <p><b>Power does not change in the descent</b> — you trade the altitude for airspeed at cruise RPM. Fuel flow therefore stays at the cruise figure, and that is what this page uses. The descent card shows both the rate-based distance and the 3-to-1 distance so you can see them agree.</p>
+        <p><b>Power does not change in the descent</b> — you trade the altitude for airspeed at cruise RPM. Fuel flow therefore stays at the cruise figure, and that is what this page uses.</p>
+        <p><b>Can you just reuse the cruise groundspeed?</b> Nearly. Two things pull in opposite directions and mostly cancel: at constant power you pick up indicated airspeed going downhill, but you are descending into <i>denser</i> air, and the same indicated speed is a lower TAS down low. In the worked example above, cruise gives 93 kt GS and the descent 90 kt — a 3 kt difference worth about 0.2 NM over the whole descent. <b>Fine to reuse in your head; the page uses the real one,</b> computed at the mid-point of the descent, and shows you both so you can see the size of it.</p>
+        <p>The wind is usually different down low too — lighter and backed a little by surface friction — which is a bigger effect than the airspeed one on most days.</p>
       </div>
 
       <div class="note-blk">
@@ -1338,7 +1353,40 @@ function cruiseCard(title,leg,perf,slot){
   </div>`;
 }
 
-function drawPerf(P,L){
+/*
+ * Descent, worked both ways round. It is the same triangle either way — which
+ * corner you enter from depends on what you fix first:
+ *   fix the RATE      → time = altitude ÷ rate, then distance = time × GS
+ *   fix the DISTANCE  → 3 NM per 1,000 ft, then time = distance ÷ GS
+ * The second is the 3-to-1 rule, and it also hands you the rate you need.
+ */
+function descentWork(P,L,gs){
+  const d=P.desc, lose=d.ftToLose;
+  const haveGs=isFinite(gs)&&gs>0;
+  const gsTxt=haveGs?`${f0(gs)} kt`:'GS?';
+  const tRate=d.rawTime;
+  const dRate=haveGs?tRate/60*gs:NaN;
+  const dRule=d.rule31;
+  const tRule=haveGs?dRule/gs*60:NaN;
+  const needRate=isFinite(tRule)&&tRule>0?lose/tRule:NaN;
+  return `<table class="subtab">
+    <tr><th>DESCENT</th><th></th><th></th></tr>
+    <tr><td>cruise altitude</td><td></td><td>${f0(d.fromAlt)} ft</td></tr>
+    <tr><td>level off (TPA)</td><td></td><td>${f0(d.toAlt)} ft</td></tr>
+    <tr class="res"><td>to lose</td><td></td><td>${f0(lose)} ft</td></tr>
+    <tr><th>BY RATE</th><th></th><th></th></tr>
+    <tr class="sub"><td>${f0(lose)} ÷ ${f0(d.rate)} fpm</td><td>time</td><td>${f1(tRate)} min</td></tr>
+    <tr class="sub"><td>× ${gsTxt} ÷ 60</td><td>dist</td><td>${isFinite(dRate)?f1(dRate)+' NM':'—'}</td></tr>
+    <tr><th>BY 3 TO 1</th><th></th><th></th></tr>
+    <tr class="sub"><td>${(lose/1000).toFixed(1)} × 3</td><td>dist</td><td>${f1(dRule)} NM</td></tr>
+    <tr class="sub"><td>÷ ${gsTxt} × 60</td><td>time</td><td>${isFinite(tRule)?f1(tRule)+' min':'—'}</td></tr>
+    <tr class="res"><td>needs a rate of</td><td></td><td>${isFinite(needRate)?f0(needRate)+' fpm':'—'}</td></tr>
+  </table>
+  ${haveGs?'':'<div class="rrow note" style="padding-top:0">Enter a true course on the descent row of the nav log and the groundspeed fills in here.</div>'}`;
+}
+
+function drawPerf(P,L,SEG){
+  SEG=SEG||{};
   const cards=[];
   const c=P.climb1;
   cards.push(`<div class="rcard">
@@ -1379,23 +1427,26 @@ function drawPerf(P,L){
   }
 
   const d=P.desc;
+  const dGs=SEG.desc&&isFinite(SEG.desc.gs)?SEG.desc.gs:NaN;
+  const cGs=SEG.cruise1&&isFinite(SEG.cruise1.gs)?SEG.cruise1.gs:NaN;
   const agree=Math.abs(d.rawDist-d.rule31)<=Math.max(1,0.2*d.rule31);
   cards.push(`<div class="rcard">
     <h5>DESCENT <span class="tag desc">NOT POH</span></h5>
-    ${row('From / to',`${f0(d.fromAlt)} → ${f0(d.toAlt)} ft`)}
-    ${row('To lose',`${f0(d.ftToLose)} ft`)}
-    ${row('Rate',`${f0(d.rate)} fpm`)}
-    ${row('Speed',`${f0(d.kias)} KIAS / ${f0(d.ktas)} KTAS`)}
     ${row('Power',`unchanged — ${f1(d.gph)} gph`,'hi')}
-    <div class="rsep"></div>
-    ${ovRow('TIME',d,'ds','t',f0(d.rawTime),'min')}
+    ${row('Speed',`${f0(d.kias)} KIAS = ${f0(d.kcas)} KCAS`)}
+    ${row('TAS at mid-descent',`${f0(d.ktas)} kt`,'hi')}
+    ${isFinite(dGs)?row('GS in the descent',`${f0(dGs)} kt`,'hi'):''}
+    ${isFinite(cGs)?row('GS in the cruise',`${f0(cGs)} kt`):''}
+    ${descentWork(P,L,dGs)}
+    ${ovRow('TIME',d,'ds','t',f1(d.rawTime),'min')}
     ${ovRow('FUEL',d,'ds','f',f1(d.rawFuel),'gal')}
-    ${ovRow('DIST',d,'ds','d',f0(d.rawDist),'NM')}
+    ${ovRow('DIST',d,'ds','d',f1(d.rawDist),'NM')}
     ${row('Ground dist (wind)',`${f1(L.descNM)} NM`,'hi')}
-    <div class="rsep"></div>
-    ${row('3-to-1 check',`${f1(d.rule31)} NM`,agree?'hi':'')}
-    ${row('Rate for 3° path',`${f0(d.ktas*5)} fpm ≈ GS × 5`)}
-    <div class="rrow note">3 NM per 1,000 ft to lose. ${agree?'The rate-based distance and the 3-to-1 distance agree.':'These two differ — check the rate, or use 3-to-1 and type the distance in.'} The 152 POH has no descent table, so every figure here comes from the rate and speed you set.</div>
+    ${isFinite(dGs)?row('Mental shortcut',`GS × 5 = ${f0(dGs*5)} fpm`):''}
+    <div class="rrow note">${agree?'The rate-based and 3-to-1 distances agree at this groundspeed.':'The two methods disagree — either change the rate, or take the 3-to-1 distance and type it in.'}
+      The two shortcuts are not quite the same slope: <b>GS × 5</b> flies about <b>2.8°</b>, while <b>3-to-1</b> is a little steeper at <b>3.1°</b> and wants GS × 5.5. Either is fine; just don't expect them to match to the foot.</div>
+    ${(isFinite(dGs)&&isFinite(cGs))?`<div class="rrow note">Descent GS is <b>${f1(Math.abs(dGs-cGs))} kt</b> off the cruise figure. Same power, but you are descending into denser air, so the same indicated speed is a lower TAS — usually enough to cancel out the extra knots you pick up. Close enough to reuse cruise GS in your head; the page uses the real one.</div>`:''}
+    <div class="rrow note">The 152 POH has no descent table, so every figure here comes from the rate and speed you set.</div>
   </div>`);
 
   cards.push(`<div class="rcard">
@@ -1701,8 +1752,9 @@ function segmentInfo(S){
 function recompute(){
   const P=computeProfile(), L=layoutProfile(P);
   const S=solve(P);
-  drawProfile(P,L,segmentInfo(S));
-  drawPerf(P,L);
+  const SEG=segmentInfo(S);
+  drawProfile(P,L,SEG);
+  drawPerf(P,L,SEG);
   drawNodeOuts(P);
 
   let idx=0;
