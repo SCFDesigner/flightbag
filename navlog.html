@@ -10,45 +10,53 @@
 /* ═══════════════════════════════════════════════════════════
    DESIGN TOKENS
    ═══════════════════════════════════════════════════════════ */
+/* NOTE — this page deliberately breaks the site's Courier New convention.
+   It is a working document read under a cockpit light and over a student's
+   shoulder, so legibility wins: a UI sans for labels, a real mono only where
+   digits must line up in columns. */
 :root {
-  --bg0:#08080a; --bg1:#0d0d10; --bg2:#111116; --bg3:#16161c; --field:#0a0a0d;
-  --bdr:#1e1e22; --bdr2:#252528; --bdr3:#33333a;
-  --text:#ccc; --text-hi:#fff; --text-dim:#888; --text-dim2:#555; --text-dim3:#333;
+  --bg0:#0a0a0d; --bg1:#111116; --bg2:#16161d; --bg3:#1d1d26; --field:#0d0d12;
+  --bdr:#2a2a34; --bdr2:#343440; --bdr3:#43434f;
+  --text:#e9e9ef; --text-hi:#ffffff; --text-dim:#b2b2c0; --text-dim2:#8a8a9a; --text-dim3:#6a6a7a;
 
-  --acc:#33ddcc;          /* tool accent */
-  --acc-dim:#1a6b64;
-  --acc-bg:#08201e;
-  --ghost:#2f8f86;        /* calculated-answer ghost text */
-  --given:#3a3a44;        /* placeholder for cells you fill from the chart */
-  --calc:#ffaa33;         /* derived readouts in the performance cards */
-  --warn:#ff5566;
-  --ok:#66dd77;
-  --climb:#4aaaff; --cruise:#33ddcc; --desc:#b58cff;
+  --acc:#3fe0cd;          /* tool accent */
+  --acc-dim:#2a8f85;
+  --acc-bg:#0b2c28;
+  --ghost:#5ec8bc;        /* the worked answer, shown in an empty box */
+  --given:#6a6a7a;        /* placeholder for cells you fill from the chart */
+  --calc:#ffb84d;         /* derived readouts in the performance cards */
+  --warn:#ff6b7a;
+  --ok:#7ce68d;
+  --climb:#5cb3ff; --cruise:#3fe0cd; --desc:#c39cff;
 
-  --font:'Courier New',Courier,monospace;
-  --fs-xs:9px; --fs-sm:10px; --fs-md:11px; --fs-lg:13px;
-  --fs-title:clamp(18px,4vw,30px);
+  --font:system-ui,-apple-system,'SF Pro Text','Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,'SF Mono','JetBrains Mono',Menlo,Consolas,'Courier New',monospace;
+  --fs-xs:11px; --fs-sm:12px; --fs-md:13px; --fs-lg:15px; --fs-xl:17px;
+  --fs-title:clamp(20px,4vw,30px);
 
   --r-sm:4px; --r-md:6px; --r-lg:10px;
   --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:20px; --sp-6:28px;
-  --ls-1:1px; --ls-2:2px; --ls-3:3px; --ls-4:4px;
+  --ls-1:.3px; --ls-2:.8px; --ls-3:1.4px; --ls-4:2px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg0);min-height:100vh;font-family:var(--font);color:var(--text);
-  font-size:var(--fs-md);padding:var(--sp-4) var(--sp-4) 60px;-webkit-text-size-adjust:100%}
-.wrap{max-width:1560px;margin:0 auto}
+  font-size:var(--fs-md);line-height:1.45;padding:var(--sp-4) var(--sp-4) 60px;
+  -webkit-text-size-adjust:100%;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1680px;margin:0 auto}
+/* digits line up in columns wherever they are compared */
+input,select,td,th,.rrow span:last-child,.orow input,.fuelbar b{font-variant-numeric:tabular-nums}
 
 /* ── HEADER ── */
 header{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);
   padding-bottom:var(--sp-4);border-bottom:1px solid var(--bdr);margin-bottom:var(--sp-5);flex-wrap:wrap}
-.hd-l h1{font-size:var(--fs-title);letter-spacing:var(--ls-4);color:var(--text-hi);font-weight:normal}
-.hd-l p{font-size:var(--fs-sm);letter-spacing:var(--ls-2);color:var(--text-dim3);margin-top:var(--sp-1)}
+.hd-l h1{font-size:var(--fs-title);letter-spacing:var(--ls-3);color:var(--text-hi);font-weight:600}
+.hd-l p{font-size:var(--fs-md);letter-spacing:var(--ls-2);color:var(--text-dim2);margin-top:var(--sp-1)}
 .hd-r{display:flex;gap:var(--sp-2);flex-wrap:wrap}
 
 /* ── BUTTONS ── */
-.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:var(--field);
-  border:1px solid var(--bdr2);border-radius:var(--r-md);color:var(--text-dim);text-decoration:none;
-  font-family:var(--font);font-size:var(--fs-md);letter-spacing:var(--ls-1);cursor:pointer;
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 15px;background:var(--field);
+  border:1px solid var(--bdr2);border-radius:var(--r-md);color:var(--text);text-decoration:none;
+  font-family:var(--font);font-size:var(--fs-md);font-weight:600;letter-spacing:var(--ls-1);cursor:pointer;
   transition:border-color .15s,background .15s,color .15s;white-space:nowrap}
 .btn:hover{border-color:var(--acc);background:var(--acc-bg);color:var(--text-hi)}
 .btn.primary{border-color:var(--acc-dim);color:var(--acc)}
@@ -61,18 +69,18 @@ header{display:flex;align-items:center;justify-content:space-between;gap:var(--s
   margin-bottom:var(--sp-5);overflow:hidden}
 .panel-hd{padding:var(--sp-3) var(--sp-4);border-bottom:1px solid var(--bdr);display:flex;
   align-items:center;justify-content:space-between;gap:var(--sp-3);flex-wrap:wrap}
-.panel-title{font-size:var(--fs-lg);letter-spacing:var(--ls-3);color:var(--text-hi)}
-.panel-title small{display:block;font-size:var(--fs-xs);letter-spacing:var(--ls-1);
-  color:var(--text-dim3);margin-top:3px}
+.panel-title{font-size:var(--fs-xl);font-weight:600;letter-spacing:var(--ls-2);color:var(--text-hi)}
+.panel-title small{display:block;font-size:var(--fs-sm);font-weight:400;letter-spacing:var(--ls-1);
+  color:var(--text-dim2);margin-top:4px}
 .panel-body{padding:var(--sp-4)}
 
 /* ── FIELDS ── */
 .grid{display:grid;gap:var(--sp-3);grid-template-columns:repeat(auto-fit,minmax(132px,1fr))}
 .fld{display:flex;flex-direction:column;gap:5px;min-width:0}
-.fld label{font-size:var(--fs-xs);letter-spacing:var(--ls-1);color:var(--text-dim2);
+.fld label{font-size:var(--fs-xs);letter-spacing:var(--ls-2);color:var(--text-dim);font-weight:600;
   text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 input,select{background:var(--field);border:1px solid var(--bdr2);border-radius:var(--r-sm);
-  color:var(--text-hi);font-family:var(--font);font-size:var(--fs-md);padding:7px 8px;
+  color:var(--text-hi);font-family:var(--mono);font-size:var(--fs-md);padding:8px 9px;
   width:100%;min-width:0;transition:border-color .15s}
 input:focus,select:focus{outline:none;border-color:var(--acc)}
 input::placeholder{color:var(--given)}
@@ -86,39 +94,39 @@ input[type=number]{-moz-appearance:textfield}
 #profileSvg{width:100%;height:auto;display:block;background:var(--field);
   border:1px solid var(--bdr);border-radius:var(--r-md)}
 .node-cards{display:grid;gap:var(--sp-3);
-  grid-template-columns:repeat(auto-fit,minmax(232px,1fr));margin-top:var(--sp-4)}
+  grid-template-columns:repeat(auto-fit,minmax(290px,1fr));margin-top:var(--sp-4)}
 .node-card{background:var(--bg2);border:1px solid var(--bdr2);border-left:3px solid var(--bdr3);
   border-radius:var(--r-md);padding:var(--sp-3)}
 .node-card.dep{border-left-color:var(--text-dim)}
 .node-card.climb{border-left-color:var(--climb)}
 .node-card.cruise{border-left-color:var(--cruise)}
 .node-card.dest{border-left-color:var(--desc)}
-.node-card h4{font-size:var(--fs-sm);letter-spacing:var(--ls-2);color:var(--text-hi);
-  font-weight:normal;margin-bottom:var(--sp-3);display:flex;align-items:center;
+.node-card h4{font-size:var(--fs-md);letter-spacing:var(--ls-2);color:var(--text-hi);
+  font-weight:600;margin-bottom:var(--sp-3);display:flex;align-items:center;
   justify-content:space-between;gap:var(--sp-2)}
 .node-card .grid{grid-template-columns:repeat(auto-fit,minmax(84px,1fr));gap:var(--sp-2)}
 
 /* ── PERF CARDS ── */
-.readouts{display:grid;gap:var(--sp-3);grid-template-columns:repeat(auto-fit,minmax(224px,1fr))}
+.readouts{display:grid;gap:var(--sp-3);grid-template-columns:repeat(auto-fit,minmax(268px,1fr))}
 .rcard{background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--r-md);padding:var(--sp-3)}
-.rcard h5{font-size:var(--fs-sm);letter-spacing:var(--ls-2);font-weight:normal;color:var(--text-hi);
+.rcard h5{font-size:var(--fs-md);letter-spacing:var(--ls-2);font-weight:600;color:var(--text-hi);
   padding-bottom:var(--sp-2);margin-bottom:var(--sp-2);border-bottom:1px solid var(--bdr);
   display:flex;justify-content:space-between;gap:var(--sp-2)}
 .rcard h5 .tag{font-size:var(--fs-xs);letter-spacing:var(--ls-1)}
 .tag.climb{color:var(--climb)} .tag.cruise{color:var(--cruise)} .tag.desc{color:var(--desc)}
 .rrow{display:flex;justify-content:space-between;gap:var(--sp-2);font-size:var(--fs-sm);
-  padding:3px 0;line-height:1.5;align-items:center}
-.rrow span:first-child{color:var(--text-dim2)}
+  padding:4px 0;line-height:1.5;align-items:center}
+.rrow span:first-child{color:var(--text-dim)}
 .rrow span:last-child{color:var(--text);text-align:right}
 .rrow.big span:last-child{color:var(--calc);font-size:var(--fs-md)}
 .rrow.hi span:last-child{color:var(--acc)}
-.rrow.note{color:var(--text-dim3);font-size:var(--fs-xs);display:block;padding-top:var(--sp-2);line-height:1.6}
+.rrow.note{color:var(--text-dim2);font-size:var(--fs-xs);display:block;padding-top:var(--sp-2);line-height:1.65}
 .rsep{height:1px;background:var(--bdr);margin:var(--sp-2) 0}
 /* editable POH override rows */
-.orow{display:grid;grid-template-columns:1fr 68px 30px;gap:6px;align-items:center;
-  font-size:var(--fs-sm);padding:2px 0}
-.orow label{color:var(--text-dim2)}
-.orow input{padding:4px 6px;text-align:right;font-size:var(--fs-sm);height:24px}
+.orow{display:grid;grid-template-columns:1fr 76px 34px;gap:7px;align-items:center;
+  font-size:var(--fs-sm);padding:3px 0}
+.orow label{color:var(--text-dim);font-weight:600}
+.orow input{padding:5px 7px;text-align:right;font-size:var(--fs-md);height:28px}
 .orow input::placeholder{color:var(--ghost)}
 .orow .unit{color:var(--text-dim3);font-size:var(--fs-xs)}
 
@@ -127,29 +135,55 @@ input[type=number]{-moz-appearance:textfield}
   margin-bottom:var(--sp-5);overflow:hidden}
 .sheet-bar{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);
   padding:var(--sp-2) var(--sp-3);background:var(--bg3);border-bottom:1px solid var(--bdr2);flex-wrap:wrap}
-.sheet-no{font-size:var(--fs-sm);letter-spacing:var(--ls-2);color:var(--acc)}
+.sheet-no{font-size:var(--fs-md);font-weight:600;letter-spacing:var(--ls-2);color:var(--acc)}
 .sheet-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.sheet-inner{display:flex;align-items:stretch;min-width:1660px}
+.sheet-inner{display:flex;align-items:stretch;min-width:1900px}
 .sheet-main{flex:1;min-width:0;display:flex;flex-direction:column}
-.sheet-side{width:330px;flex:0 0 330px;border-left:2px solid var(--bdr3)}
+.sheet-side{width:370px;flex:0 0 370px;border-left:2px solid var(--bdr3)}
 
 /* form title + aircraft/notes block */
-.form-title{background:#1b1b22;color:var(--text-hi);text-align:center;font-size:var(--fs-md);
-  letter-spacing:var(--ls-4);padding:5px;border-bottom:1px solid var(--bdr2)}
-table.acblk{border-collapse:collapse;width:100%;font-size:var(--fs-sm)}
+.form-title{background:var(--bg3);color:var(--text-hi);text-align:center;font-size:var(--fs-lg);
+  font-weight:600;letter-spacing:var(--ls-4);padding:8px;border-bottom:1px solid var(--bdr2)}
+table.acblk{border-collapse:collapse;width:100%;font-size:var(--fs-md)}
 table.acblk td{border:1px solid var(--bdr2);padding:0}
-table.acblk td.lbl{padding:4px 7px;color:var(--text-dim2);white-space:nowrap;width:1%;background:var(--bg3)}
+table.acblk td.lbl{padding:6px 9px;color:var(--text-dim);white-space:nowrap;width:1%;background:var(--bg2)}
 
 /* the log table */
-table.navlog{border-collapse:collapse;width:100%;font-size:var(--fs-sm);table-layout:fixed}
+table.navlog{border-collapse:collapse;width:100%;font-size:var(--fs-md);table-layout:fixed}
 table.navlog th,table.navlog td{border:1px solid var(--bdr2);padding:0;text-align:center;vertical-align:middle}
-table.navlog thead th{background:var(--bg3);color:var(--text-hi);font-weight:normal;
-  font-size:var(--fs-xs);letter-spacing:var(--ls-1);padding:4px 2px;line-height:1.3}
+table.navlog thead th{background:var(--bg3);color:var(--text-hi);font-weight:600;
+  font-size:var(--fs-sm);letter-spacing:var(--ls-1);padding:6px 3px;line-height:1.3}
 table.navlog thead th.grp{background:#1b1b22;letter-spacing:var(--ls-2)}
-table.navlog thead th .sub{display:block;color:var(--text-dim2);font-size:8px;letter-spacing:0;margin-top:1px}
+table.navlog thead th .sub{display:block;color:var(--text-dim2);font-size:10px;font-weight:400;letter-spacing:0;margin-top:2px}
 table.navlog thead th.hdrbox{padding:2px}
-table.navlog thead th.hdrbox input{height:22px;font-size:var(--fs-sm);text-align:center;
-  background:var(--field);border:1px solid var(--bdr2)}
+table.navlog thead th.hdrbox input{height:26px;font-size:var(--fs-md);text-align:center;
+  background:var(--field);border:1px solid var(--bdr2);margin-top:3px}
+
+/* ── node card readouts + METAR box ── */
+.node-out{margin-top:var(--sp-3);padding-top:var(--sp-2);border-top:1px solid var(--bdr)}
+.node-out .rrow{font-size:var(--fs-sm);padding:3px 0}
+.node-out .rrow span:last-child{color:var(--calc);font-family:var(--mono)}
+.node-out .rrow.q span:last-child{color:var(--acc)}
+.wxbox{margin-top:var(--sp-3)}
+.wxbox label{display:block;font-size:var(--fs-xs);letter-spacing:var(--ls-2);color:var(--text-dim);
+  font-weight:600;text-transform:uppercase;margin-bottom:5px}
+.wxbox textarea{width:100%;background:var(--field);border:1px solid var(--bdr2);border-radius:var(--r-sm);
+  color:var(--text-hi);font-family:var(--mono);font-size:var(--fs-sm);line-height:1.55;padding:8px 9px;
+  min-height:74px;resize:vertical}
+.wxbox textarea:focus{outline:none;border-color:var(--acc)}
+.wxbox textarea::placeholder{color:var(--text-dim3)}
+
+/* ── the climb subtraction worked out longhand ── */
+table.subtab{border-collapse:collapse;width:100%;font-size:var(--fs-sm);
+  font-family:var(--mono);margin:var(--sp-2) 0}
+table.subtab td,table.subtab th{padding:4px 5px;text-align:right;border-bottom:1px solid var(--bdr)}
+table.subtab th{color:var(--text-dim2);font-weight:600;font-size:var(--fs-xs);
+  text-align:right;letter-spacing:var(--ls-1)}
+table.subtab td:first-child,table.subtab th:first-child{text-align:left;color:var(--text-dim);
+  font-family:var(--font);white-space:nowrap}
+table.subtab tr.sub td{color:var(--text-dim)}
+table.subtab tr.res td{color:var(--calc);border-top:1px solid var(--bdr3);border-bottom:none}
+table.subtab tr.res td:first-child{color:var(--text-hi);font-weight:600}
 
 table.navlog tbody tr.p0 td{background:#0b0b0e}
 table.navlog tbody tr.p1 td{background:#0e0e12}
@@ -159,8 +193,9 @@ tbody[data-phase="CRUISE"] td.cp{border-left-color:var(--cruise)}
 tbody[data-phase="DESC"]   td.cp{border-left-color:var(--desc)}
 
 /* every cell is an input */
-table.navlog input{border:none;background:transparent;border-radius:0;padding:4px 2px;
-  text-align:center;font-size:var(--fs-sm);color:var(--text-hi);height:25px}
+table.navlog input{border:none;background:transparent;border-radius:0;padding:5px 3px;
+  text-align:center;font-size:var(--fs-md);color:var(--text-hi);height:30px;font-family:var(--mono)}
+table.navlog input.name{font-family:var(--font)}
 table.navlog input:focus{background:var(--acc-bg);outline:1px solid var(--acc);outline-offset:-1px}
 table.navlog input.name{text-align:left;padding-left:5px}
 /* ghost = the answer, shown only while the cell is empty */
@@ -171,7 +206,7 @@ table.navlog input.act{color:var(--ok)}
 table.navlog input.right{box-shadow:inset 2px 0 0 var(--ok)}
 table.navlog input.wrong{box-shadow:inset 2px 0 0 var(--warn);color:var(--warn)}
 
-table.navlog tfoot td{background:var(--bg3)!important;color:var(--calc);padding:5px 2px;font-size:var(--fs-sm)}
+table.navlog tfoot td{background:var(--bg3)!important;color:var(--calc);padding:7px 3px;font-size:var(--fs-md);font-family:var(--mono)}
 table.navlog tfoot td.lbl{color:var(--text-dim);text-align:right;padding-right:8px;letter-spacing:var(--ls-1)}
 table.navlog tfoot tr.bf td{color:var(--text-dim2);background:#101015!important}
 
@@ -182,28 +217,28 @@ table.navlog tfoot tr.bf td{color:var(--text-dim2);background:#101015!important}
 .rowbtn.del:hover{color:var(--warn)}
 
 /* side panel */
-table.side{border-collapse:collapse;width:100%;font-size:var(--fs-xs);height:100%}
+table.side{border-collapse:collapse;width:100%;font-size:var(--fs-sm);height:100%}
 table.side th,table.side td{border:1px solid var(--bdr2);padding:0;text-align:center}
-table.side th{background:#1b1b22;color:var(--text-hi);font-weight:normal;letter-spacing:var(--ls-2);padding:4px}
-table.side td.lbl{background:var(--bg3);color:var(--text-dim);padding:3px 6px;text-align:center;white-space:nowrap}
+table.side th{background:var(--bg3);color:var(--text-hi);font-weight:600;letter-spacing:var(--ls-2);padding:6px}
+table.side td.lbl{background:var(--bg2);color:var(--text-dim);padding:5px 7px;text-align:center;white-space:nowrap}
 table.side td.lbl.l{text-align:left}
-table.side input{border:none;background:transparent;height:22px;padding:3px 5px;
-  font-size:var(--fs-xs);text-align:center;color:var(--text-hi);border-radius:0}
+table.side input{border:none;background:transparent;height:26px;padding:4px 6px;
+  font-size:var(--fs-sm);text-align:center;color:var(--text-hi);border-radius:0}
 table.side input:focus{background:var(--acc-bg);outline:1px solid var(--acc);outline-offset:-1px}
 
 /* ── FUEL BAR ── */
 .fuelbar{display:flex;align-items:center;gap:var(--sp-3);flex-wrap:wrap;margin-top:var(--sp-4);
   padding:var(--sp-3);background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--r-md)}
-.fuelbar .item{font-size:var(--fs-sm);color:var(--text-dim2)}
+.fuelbar .item{font-size:var(--fs-md);color:var(--text-dim)}
 .fuelbar .item b{color:var(--calc);font-weight:normal;margin-left:5px}
 .fuelbar .item.ok b{color:var(--ok)} .fuelbar .item.bad b{color:var(--warn)}
-.pill{font-size:var(--fs-xs);letter-spacing:var(--ls-1);padding:3px 8px;border-radius:20px;
-  border:1px solid var(--bdr3);color:var(--text-dim2)}
+.pill{font-size:var(--fs-sm);font-weight:600;letter-spacing:var(--ls-1);padding:5px 11px;border-radius:20px;
+  border:1px solid var(--bdr3);color:var(--text-dim)}
 .pill.ok{border-color:var(--ok);color:var(--ok)}
 .pill.bad{border-color:var(--warn);color:var(--warn)}
 
-.legend{display:flex;gap:var(--sp-4);flex-wrap:wrap;font-size:var(--fs-xs);
-  color:var(--text-dim2);margin-bottom:var(--sp-3);letter-spacing:var(--ls-1)}
+.legend{display:flex;gap:var(--sp-4);flex-wrap:wrap;font-size:var(--fs-sm);
+  color:var(--text-dim);margin-bottom:var(--sp-3);letter-spacing:var(--ls-1)}
 .legend b{font-weight:normal}
 .sw{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
 
@@ -211,23 +246,23 @@ table.side input:focus{background:var(--acc-bg);outline:1px solid var(--acc);out
 .notes{columns:2;column-gap:var(--sp-6)}
 @media (max-width:900px){.notes{columns:1}}
 .note-blk{break-inside:avoid;margin-bottom:var(--sp-5)}
-.note-blk h4{font-size:var(--fs-md);letter-spacing:var(--ls-2);color:var(--acc);
-  font-weight:normal;margin-bottom:var(--sp-2)}
-.note-blk p,.note-blk li{font-size:var(--fs-sm);line-height:1.75;color:var(--text-dim);margin-bottom:6px}
+.note-blk h4{font-size:var(--fs-lg);letter-spacing:var(--ls-1);color:var(--acc);
+  font-weight:600;margin-bottom:var(--sp-2)}
+.note-blk p,.note-blk li{font-size:var(--fs-md);line-height:1.75;color:var(--text-dim);margin-bottom:8px}
 .note-blk ul,.note-blk ol{padding-left:18px}
 .note-blk code{background:var(--field);border:1px solid var(--bdr2);border-radius:var(--r-sm);
   padding:1px 5px;color:var(--calc);font-size:var(--fs-sm)}
 .note-blk .eq{display:block;background:var(--field);border:1px solid var(--bdr2);
-  border-left:2px solid var(--acc-dim);border-radius:var(--r-sm);padding:8px 10px;margin:8px 0;
-  color:var(--calc);font-size:var(--fs-sm);line-height:1.7;overflow-x:auto;white-space:pre}
+  border-left:3px solid var(--acc-dim);border-radius:var(--r-sm);padding:10px 12px;margin:10px 0;
+  color:var(--calc);font-family:var(--mono);font-size:var(--fs-sm);line-height:1.75;overflow-x:auto;white-space:pre}
 .chain{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:var(--sp-2) 0 var(--sp-3)}
-.chain .step{border:1px solid var(--bdr3);border-radius:var(--r-sm);padding:5px 9px;
-  font-size:var(--fs-sm);color:var(--text-hi)}
+.chain .step{border:1px solid var(--bdr3);border-radius:var(--r-sm);padding:6px 11px;
+  font-size:var(--fs-md);font-weight:600;color:var(--text-hi)}
 .chain .op{color:var(--acc);font-size:var(--fs-sm)}
-table.mini{border-collapse:collapse;width:100%;font-size:var(--fs-xs);margin-top:var(--sp-2)}
+table.mini{border-collapse:collapse;width:100%;font-size:var(--fs-sm);font-family:var(--mono);margin-top:var(--sp-2)}
 table.mini th,table.mini td{border:1px solid var(--bdr2);padding:4px 3px;text-align:center;color:var(--text-dim)}
 table.mini th{background:var(--bg3);color:var(--text);font-weight:normal}
-.src{font-size:var(--fs-xs);color:var(--text-dim3);letter-spacing:var(--ls-1);line-height:1.7}
+.src{font-size:var(--fs-xs);color:var(--text-dim2);letter-spacing:var(--ls-1);line-height:1.75}
 
 @media (max-width:700px){
   body{padding:var(--sp-3) var(--sp-3) 48px}
@@ -286,7 +321,6 @@ table.mini th{background:var(--bg3);color:var(--text);font-weight:normal}
   <div class="panel-body">
     <div class="grid">
       <div class="fld"><label>Date</label><input id="acDate" type="date"></div>
-      <div class="fld"><label>Altimeter (in Hg)</label><input id="altimeter" type="number" step="0.01" value="29.92"></div>
       <div class="fld"><label>Mag Var (− E / + W)</label><input id="magVar" inputmode="text" value="0"></div>
       <div class="fld"><label>Compass Dev (±)</label><input id="magDev" inputmode="text" value="0"></div>
       <div class="fld"><label>Usable Fuel (gal)</label>
@@ -308,47 +342,65 @@ table.mini th{background:var(--bg3);color:var(--text);font-weight:normal}
     </div>
   </div>
   <div class="panel-body">
-    <svg id="profileSvg" viewBox="0 0 1000 300" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Vertical flight profile"></svg>
+    <svg id="profileSvg" viewBox="0 0 1000 470" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Vertical flight profile"></svg>
     <div class="node-cards">
-      <div class="node-card dep">
-        <h4>DEPARTURE</h4>
+      <div class="node-card climb">
+        <h4><span id="depTitle">DEPARTURE / CLIMB</span> <span class="tag climb">FIG 5-6</span></h4>
         <div class="grid">
           <div class="fld"><label>Ident</label><input id="depId" placeholder="KXXX"></div>
           <div class="fld"><label>Field Elev</label><input id="depElev" type="number" step="10" value="600"></div>
+          <div class="fld"><label>Altimeter</label><input id="depAltim" type="number" step="0.01" value="29.92"></div>
           <div class="fld"><label>OAT °C</label><input id="depOat" type="number" step="1" value="15"></div>
+          <div class="fld"><label>Climb to (ft)</label><input id="climbTo1" type="number" step="500" value="4500"></div>
         </div>
+        <div class="wxbox">
+          <label>Departure METAR / TAF</label>
+          <textarea id="depWx" placeholder="KDTO 162153Z 18008KT 10SM FEW045 32/21 A2996 RMK AO2 SLP139"></textarea>
+        </div>
+        <div class="node-out" id="depOut"></div>
       </div>
       <div class="node-card cruise">
-        <h4>CRUISE 1 <span class="tag cruise">TOC</span></h4>
+        <h4>CRUISE 1 <span class="tag cruise">FIG 5-7</span></h4>
         <div class="grid">
           <div class="fld"><label>Altitude</label><input id="c1Alt" type="number" step="500" value="4500"></div>
+          <div class="fld"><label>Altimeter</label><input id="c1Altim" type="number" step="0.01" value="29.92"></div>
           <div class="fld"><label>OAT °C</label><input id="c1Oat" type="number" step="1" value="7"></div>
           <div class="fld"><label>Wind °T</label><input id="c1Wdir" type="number" step="5" value="270"></div>
           <div class="fld"><label>Wind kt</label><input id="c1Wvel" type="number" step="1" value="15"></div>
           <div class="fld"><label>RPM</label><input id="c1Rpm" type="number" step="50" value="2300"></div>
         </div>
+        <div class="node-out" id="c1Out"></div>
       </div>
-      <div class="node-card cruise" id="c2Card" style="display:none">
-        <h4>CRUISE 2 <span class="tag cruise">TOC 2</span></h4>
+      <div class="node-card climb" id="c2Card" style="display:none">
+        <h4>CLIMB 2 / CRUISE 2 <span class="tag cruise">TOC 2</span></h4>
         <div class="grid">
           <div class="fld"><label>Climb @NM</label><input id="c2Start" type="number" step="1" value="35"></div>
+          <div class="fld"><label>Climb to (ft)</label><input id="climbTo2" type="number" step="500" value="6500"></div>
           <div class="fld"><label>Altitude</label><input id="c2Alt" type="number" step="500" value="6500"></div>
+          <div class="fld"><label>Altimeter</label><input id="c2Altim" type="number" step="0.01" value="29.92"></div>
           <div class="fld"><label>OAT °C</label><input id="c2Oat" type="number" step="1" value="3"></div>
           <div class="fld"><label>Wind °T</label><input id="c2Wdir" type="number" step="5" value="280"></div>
           <div class="fld"><label>Wind kt</label><input id="c2Wvel" type="number" step="1" value="20"></div>
           <div class="fld"><label>RPM</label><input id="c2Rpm" type="number" step="50" value="2300"></div>
         </div>
+        <div class="node-out" id="c2Out"></div>
       </div>
       <div class="node-card dest">
-        <h4>DESTINATION &amp; DESCENT</h4>
+        <h4>DESTINATION / DESCENT <span class="tag desc">3 : 1</span></h4>
         <div class="grid">
           <div class="fld"><label>Ident</label><input id="dstId" placeholder="KYYY"></div>
           <div class="fld"><label>Field Elev</label><input id="dstElev" type="number" step="10" value="800"></div>
+          <div class="fld"><label>Altimeter</label><input id="dstAltim" type="number" step="0.01" value="29.92"></div>
           <div class="fld"><label>OAT °C</label><input id="dstOat" type="number" step="1" value="15"></div>
           <div class="fld"><label>TPA AGL</label><input id="tpa" type="number" step="100" value="1000"></div>
           <div class="fld"><label>Desc FPM</label><input id="descRate" type="number" step="50" value="500"></div>
           <div class="fld"><label>Desc KIAS</label><input id="descKias" type="number" step="5" value="90"></div>
         </div>
+        <div class="wxbox">
+          <label>Destination METAR / TAF</label>
+          <textarea id="dstWx" placeholder="KADS 162153Z 17010G16KT 10SM SCT050 33/20 A2994"></textarea>
+        </div>
+        <div class="node-out" id="dstOut"></div>
       </div>
     </div>
   </div>
@@ -367,7 +419,7 @@ table.mini th{background:var(--bg3);color:var(--text);font-weight:normal}
 </div>
 
 <!-- ═══════════ NAV LOG ═══════════ -->
-<div class="panel">
+<div class="panel" id="navlog">
   <div class="panel-hd">
     <div class="panel-title">VFR NAVIGATION LOG
       <small>EVERY BOX IS HAND-FILLABLE — THE DIM FIGURE IN AN EMPTY BOX IS WHAT THE MATH GIVES</small></div>
@@ -458,6 +510,7 @@ GS  = TAS × cos(WCA) − HW</span>
         <span class="eq">PA  = indicated alt + (29.92 − altimeter) × 1000
 ISA = 15 − 2 × (PA ÷ 1000)      °C
 DA  = PA + 118.8 × (OAT − ISA)</span>
+        <p><b>Field elevation is not pressure altitude.</b> Field elevation is a surveyed number off the chart and never changes. Pressure altitude is what the altimeter would read with 29.92 in the window, so it moves with the weather — and the altimeter setting comes off the METAR or ATIS. On a 29.85 day a 600 ft field sits at 670 ft PA; on a 30.42 day the same field is at 100 ft PA. That is why each card here has its own altimeter box next to the METAR: <b>you cannot get pressure altitude without the weather.</b></p>
         <p>Every POH performance table is entered with <b>pressure altitude</b>, never indicated. Density altitude is shown for situational awareness — it drives what the airplane actually feels like, but the 152 tables are indexed on PA and temperature separately.</p>
         <p>ISA deviation (OAT − ISA) picks the column in the cruise table: 20 °C below standard, standard, or 20 °C above. This page interpolates between those columns rather than rounding to the nearest.</p>
       </div>
@@ -474,7 +527,9 @@ climb dist = d(PA at TOC) − d(PA at field)</span>
           <li><b>+ 10% to time, fuel and distance for each 10 °C above standard.</b> No credit is taken below standard; the POH does not offer one.</li>
           <li>POH climb distances are <b>zero wind</b>. The page also computes a wind-corrected ground distance using average climb TAS through the wind triangle.</li>
         </ul>
+        <p>Because the table is cumulative, <b>the bottom line is almost never zero</b> — a field at 670 ft PA sits between the sea level and 1,000 ft rows, so you interpolate to get 0.7 min, 0.13 gal and 1.3 NM and subtract that. The climb card shows both lookups and the subtraction so you can check your own reading of the chart against it.</p>
         <p>A step climb is the same subtraction run again between the two cruise altitudes. Every one of these figures is a box you can type over on the climb card.</p>
+        <p><b>Climb TAS is an average.</b> A climb leg's Altitude box holds the cruise altitude, because that is what you write on the form — but the airplane spends the climb well below it. The TAS this page shows for a climb leg is the average through the segment, taken at its mid altitude, which is a couple of knots slower than the same CAS worked at cruise altitude.</p>
       </div>
 
       <div class="note-blk">
@@ -624,7 +679,11 @@ function climbSegment(paFrom,paTo,isaDev){
   const paMid=(paFrom+paTo)/2, kias=climbAt(paMid).kias, kcas=iasToCas(kias);
   const oatMid=isaTempC(paMid)+isaDev, ktas=casToTas(kcas,paMid,oatMid);
   const time=rawTime*k;
+  /* `from`/`to` are the two table lookups the subtraction is made from — the card
+     shows them so the student can see the same two rows they'd read by hand. */
   return{rawTime,rawFuel,rawDist,factor:k,time,fuel:rawFuel*k,dist:rawDist*k,
+    from:{pa:paFrom,time:a.time,fuel:a.fuel,dist:a.dist},
+    to:{pa:paTo,time:b.time,fuel:b.fuel,dist:b.dist},
     kias,kcas,ktas,oatMid,paMid,roc:(paTo-paFrom)>0&&time>0?(paTo-paFrom)/time:0,capped:a.capped||b.capped};
 }
 
@@ -676,9 +735,14 @@ const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&g
    STATE
    ═══════════════════════════════════════════════════════════ */
 const ROWS_PER_PAGE = 11;
-const SETUP_IDS=['acDate','altimeter','magVar','magDev','fuelCap','taxiFuel','reserveMin','routeDist',
-  'depId','depElev','depOat','c1Alt','c1Oat','c1Wdir','c1Wvel','c1Rpm',
-  'c2Start','c2Alt','c2Oat','c2Wdir','c2Wvel','c2Rpm','dstId','dstElev','dstOat','tpa','descRate','descKias'];
+const SETUP_IDS=['acDate','magVar','magDev','fuelCap','taxiFuel','reserveMin','routeDist',
+  'depId','depElev','depAltim','depOat','depWx','climbTo1',
+  'c1Alt','c1Altim','c1Oat','c1Wdir','c1Wvel','c1Rpm',
+  'c2Start','climbTo2','c2Alt','c2Altim','c2Oat','c2Wdir','c2Wvel','c2Rpm',
+  'dstId','dstElev','dstAltim','dstOat','dstWx','tpa','descRate','descKias'];
+/* Two boxes, one value: "Climb to" on the climb card is the same number as the
+   cruise altitude, so entering it in either place keeps the pair in step. */
+const MIRRORS=[['climbTo1','c1Alt'],['climbTo2','c2Alt']];
 
 /* Values you write in from chart / forecast / handbook.
    There is no per-row GPH: the Jeppesen form carries one GPH box for the flight,
@@ -713,7 +777,11 @@ const allRows = () => pages.flatMap(p=>p.rows);
    PROFILE
    ═══════════════════════════════════════════════════════════ */
 function computeProfile(){
-  const altimeter=num($('altimeter'),29.92), useStep=$('useStep').checked;
+  const useStep=$('useStep').checked;
+  /* One altimeter setting per point — that is where pressure altitude actually
+     comes from, and each one is read off that location's METAR / ATIS. */
+  const depAltim=num($('depAltim'),29.92), dstAltim=num($('dstAltim'),29.92);
+  const c1Altim=num($('c1Altim'),29.92),   c2Altim=num($('c2Altim'),29.92);
   const depElev=num($('depElev')), depOat=num($('depOat'),15);
   const dstElev=num($('dstElev')), dstOat=num($('dstOat'),15);
   const tpaAgl=num($('tpa'),1000), routeD=Math.max(1,num($('routeDist'),80));
@@ -723,9 +791,9 @@ function computeProfile(){
   const c2W={d:num($('c2Wdir')),v:num($('c2Wvel'))};
   const c2StartNM=clamp(num($('c2Start')),0,routeD);
 
-  const paDep=pressureAlt(depElev,altimeter), paC1=pressureAlt(c1Alt,altimeter);
-  const paC2=pressureAlt(c2Alt,altimeter), paDst=pressureAlt(dstElev,altimeter);
-  const tpaMsl=dstElev+tpaAgl, paTpa=pressureAlt(tpaMsl,altimeter);
+  const paDep=pressureAlt(depElev,depAltim), paC1=pressureAlt(c1Alt,c1Altim);
+  const paC2=pressureAlt(c2Alt,c2Altim),     paDst=pressureAlt(dstElev,dstAltim);
+  const tpaMsl=dstElev+tpaAgl, paTpa=pressureAlt(tpaMsl,dstAltim);
 
   const isaDep=depOat-isaTempC(paDep), isaC1=c1Oat-isaTempC(paC1);
   const isaC2=c2Oat-isaTempC(paC2), isaDst=dstOat-isaTempC(paDst);
@@ -768,11 +836,13 @@ function computeProfile(){
   desc.fuel=desc.rawFuel;
   applyOverride(desc, perfOv.ds);
 
-  return{ altimeter, useStep, routeD,
-    dep:{id:$('depId').value||'DEP',elev:depElev,oat:depOat,pa:paDep,isa:isaDep,da:densityAlt(paDep,depOat)},
-    dst:{id:$('dstId').value||'DEST',elev:dstElev,oat:dstOat,pa:paDst,isa:isaDst,da:densityAlt(paDst,dstOat),tpaMsl},
-    c1:{alt:c1Alt,oat:c1Oat,rpm:c1Rpm,wind:c1W,perf:cr1},
-    c2:useStep?{alt:c2Alt,oat:c2Oat,rpm:c2Rpm,wind:c2W,perf:cr2,startNM:c2StartNM}:null,
+  return{ altimeter:depAltim, useStep, routeD,
+    dep:{id:$('depId').value||'DEP',elev:depElev,oat:depOat,pa:paDep,isa:isaDep,
+         da:densityAlt(paDep,depOat),altim:depAltim},
+    dst:{id:$('dstId').value||'DEST',elev:dstElev,oat:dstOat,pa:paDst,isa:isaDst,
+         da:densityAlt(paDst,dstOat),tpaMsl,paTpa,altim:dstAltim},
+    c1:{alt:c1Alt,oat:c1Oat,rpm:c1Rpm,wind:c1W,perf:cr1,altim:c1Altim},
+    c2:useStep?{alt:c2Alt,oat:c2Oat,rpm:c2Rpm,wind:c2W,perf:cr2,startNM:c2StartNM,altim:c2Altim}:null,
     climb1, climb2, desc };
 }
 
@@ -819,71 +889,139 @@ function layoutProfile(P,tc){
 /* ═══════════════════════════════════════════════════════════
    PROFILE SVG
    ═══════════════════════════════════════════════════════════ */
-function drawProfile(P,L){
-  const svg=$('profileSvg'), W=1000,H=300, m={l:56,r:20,t:26,b:44};
+const SVGF="system-ui,-apple-system,'SF Pro Text','Segoe UI',Roboto,Helvetica,Arial,sans-serif";
+
+/*
+ * Vertical profile. Each segment carries its own block of figures:
+ *   climb / descent  → below the flight path, starting right of the segment
+ *   cruise           → above the flight path, centred on the segment
+ * The numbers come from the nav log rows (SEG) where the pilot has entered a
+ * course, so the picture and the log always say the same thing.
+ */
+function drawProfile(P,L,SEG){
+  SEG=SEG||{};
+  const svg=$('profileSvg'), W=1000,H=470, m={l:74,r:28,t:36,b:56};
   const pw=W-m.l-m.r, ph=H-m.t-m.b;
   const topAlt=Math.max(P.c1.alt,P.c2?P.c2.alt:0,P.dep.elev,P.dst.elev);
-  const yMax=Math.max(1000,topAlt*1.18);
+  /* 1.62 leaves room above the top cruise line for that segment's block */
+  const yMax=Math.max(1500,topAlt*1.62);
   const X=nm=>m.l+(clamp(nm,0,P.routeD)/P.routeD)*pw;
   const Y=a=>m.t+ph-(clamp(a,0,yMax)/yMax)*ph;
   let s='';
-  const step=yMax>9000?2000:1000;
+
+  /* ── grid ── */
+  const step=yMax>12000?2000:yMax>6000?1000:500;
   for(let a=0;a<=yMax;a+=step){
-    s+=`<line x1="${m.l}" y1="${Y(a)}" x2="${W-m.r}" y2="${Y(a)}" stroke="#1a1a20"/>`;
-    s+=`<text x="${m.l-8}" y="${Y(a)+3}" fill="#3a3a44" font-size="9" text-anchor="end" font-family="Courier New,monospace">${a.toLocaleString()}</text>`;
+    s+=`<line x1="${m.l}" y1="${Y(a)}" x2="${W-m.r}" y2="${Y(a)}" stroke="#20202a"/>`;
+    s+=`<text x="${m.l-10}" y="${Y(a)+4}" fill="#6a6a7a" font-size="11" text-anchor="end" font-family="${SVGF}">${a.toLocaleString()}</text>`;
   }
   for(let i=0;i<=4;i++){const nm=P.routeD*i/4;
-    s+=`<line x1="${X(nm)}" y1="${m.t}" x2="${X(nm)}" y2="${m.t+ph}" stroke="#141419"/>`;
-    s+=`<text x="${X(nm)}" y="${m.t+ph+16}" fill="#3a3a44" font-size="9" text-anchor="middle" font-family="Courier New,monospace">${Math.round(nm)}</text>`;}
-  s+=`<text x="${m.l+pw/2}" y="${H-8}" fill="#2e2e36" font-size="9" text-anchor="middle" letter-spacing="2" font-family="Courier New,monospace">DISTANCE — NM</text>`;
-  s+=`<line x1="${m.l}" y1="${Y(0)}" x2="${W-m.r}" y2="${Y(0)}" stroke="#2a2a32" stroke-width="1.5"/>`;
+    s+=`<line x1="${X(nm)}" y1="${m.t}" x2="${X(nm)}" y2="${m.t+ph}" stroke="#191922"/>`;
+    s+=`<text x="${X(nm)}" y="${m.t+ph+20}" fill="#6a6a7a" font-size="11" text-anchor="middle" font-family="${SVGF}">${Math.round(nm)}</text>`;}
+  s+=`<text x="${m.l+pw/2}" y="${H-12}" fill="#5a5a6a" font-size="11" text-anchor="middle" letter-spacing="1.5" font-family="${SVGF}">DISTANCE — NM</text>`;
+  s+=`<text x="18" y="${m.t+ph/2}" fill="#5a5a6a" font-size="11" text-anchor="middle" letter-spacing="1.5" font-family="${SVGF}" transform="rotate(-90 18 ${m.t+ph/2})">ALTITUDE — FT</text>`;
+  s+=`<line x1="${m.l}" y1="${Y(0)}" x2="${W-m.r}" y2="${Y(0)}" stroke="#3a3a46" stroke-width="1.5"/>`;
 
+  /* ── flight path ── */
   const pts=[{x:0,y:P.dep.elev,k:'dep'},{x:L.dTOC1,y:P.c1.alt,k:'toc1'}];
   if(P.c2){pts.push({x:L.dClimb2Start,y:P.c1.alt,k:'boc2'});pts.push({x:L.dTOC2,y:P.c2.alt,k:'toc2'});}
   pts.push({x:L.dTOD,y:P.c2?P.c2.alt:P.c1.alt,k:'tod'});
   pts.push({x:L.dEnd,y:P.dst.tpaMsl,k:'dst'});
   const poly=pts.map(p=>`${X(p.x)},${Y(p.y)}`).join(' ');
-  s+=`<polygon points="${X(0)},${Y(0)} ${poly} ${X(P.routeD)},${Y(0)}" fill="#33ddcc" opacity="0.05"/>`;
+  s+=`<polygon points="${X(0)},${Y(0)} ${poly} ${X(P.routeD)},${Y(0)}" fill="#3fe0cd" opacity="0.045"/>`;
   for(let i=0;i<pts.length-1;i++){
     const a=pts[i],b=pts[i+1];
-    let col='#33ddcc';
-    if(b.k==='toc1'||b.k==='toc2')col='#4aaaff';
-    if(b.k==='dst')col='#b58cff';
-    s+=`<line x1="${X(a.x)}" y1="${Y(a.y)}" x2="${X(b.x)}" y2="${Y(b.y)}" stroke="${col}" stroke-width="2.5" stroke-linecap="round"${b.k==='dst'?' stroke-dasharray="6 3"':''}/>`;
+    let col='#3fe0cd';
+    if(b.k==='toc1'||b.k==='toc2')col='#5cb3ff';
+    if(b.k==='dst')col='#c39cff';
+    s+=`<line x1="${X(a.x)}" y1="${Y(a.y)}" x2="${X(b.x)}" y2="${Y(b.y)}" stroke="${col}" stroke-width="3" stroke-linecap="round"${b.k==='dst'?' stroke-dasharray="7 4"':''}/>`;
   }
-  function windBadge(x,cruiseY,dir,vel,label){
-    const r=11, y=Math.min(cruiseY+30,Y(0)-26);
-    const rad=(dir+180)*Math.PI/180, ax=Math.sin(rad)*r, ay=-Math.cos(rad)*r;
-    return`<g transform="translate(${x},${y})"><circle r="${r}" fill="#0a0a0d" stroke="#2a2a34"/>
-      <line x1="${-ax}" y1="${-ay}" x2="${ax}" y2="${ay}" stroke="#33ddcc" stroke-width="1.4"/>
-      <circle cx="${ax}" cy="${ay}" r="2.2" fill="#33ddcc"/>
-      <text y="${r+11}" fill="#6a6a78" font-size="8.5" text-anchor="middle" font-family="Courier New,monospace">${esc(label)}</text></g>`;
-  }
-  function marker(p,title,lines,col,anchor){
-    const x=X(p.x),y=Y(p.y),n=lines.length;
-    const up=y>m.t+16+(n+1)*11, ty=up?y-15-n*10:y+22;
-    let g=`<line x1="${x}" y1="${y}" x2="${x}" y2="${Y(0)}" stroke="#1e1e26" stroke-dasharray="2 3"/>`;
-    g+=`<circle cx="${x}" cy="${y}" r="4" fill="${col}" stroke="#08080a" stroke-width="1.5"/>`;
-    g+=`<text x="${x}" y="${ty}" fill="${col}" font-size="9.5" text-anchor="${anchor}" letter-spacing="1" font-family="Courier New,monospace">${esc(title)}</text>`;
-    lines.forEach((ln,i)=>{g+=`<text x="${x}" y="${ty+11+i*10}" fill="#7a7a88" font-size="8.5" text-anchor="${anchor}" font-family="Courier New,monospace">${esc(ln)}</text>`;});
+
+  /* ── node dots + short labels ── */
+  function node(p,title,sub,col,anchor,above){
+    const x=X(p.x),y=Y(p.y);
+    let g=`<line x1="${x}" y1="${y}" x2="${x}" y2="${Y(0)}" stroke="#26262f" stroke-dasharray="2 4"/>`;
+    g+=`<circle cx="${x}" cy="${y}" r="5" fill="${col}" stroke="#0a0a0d" stroke-width="2"/>`;
+    const ty=above?y-24:y+20;
+    g+=`<text x="${x}" y="${ty}" fill="${col}" font-size="12.5" font-weight="600" text-anchor="${anchor}" letter-spacing="1" font-family="${SVGF}">${esc(title)}</text>`;
+    if(sub)g+=`<text x="${x}" y="${ty+14}" fill="#a0a0b0" font-size="11" text-anchor="${anchor}" font-family="${SVGF}">${esc(sub)}</text>`;
     return g;
   }
-  s+=marker(pts[0],P.dep.id,[`${f0(P.dep.elev)} ft · ${f0(P.dep.oat)}°C`,`PA ${f0(P.dep.pa)} · DA ${f0(P.dep.da)}`],'#9aa','start');
-  s+=marker(pts[1],'TOC',[`${f0(P.c1.alt)} ft · ${f0(P.c1.oat)}°C`,
-    `${f1(L.climb1NM)} NM · ${f0(P.climb1.time)} min · ${f1(P.climb1.fuel)} gal`],'#4aaaff','middle');
-  const c1X=P.c2?(L.dTOC1+L.dClimb2Start)/2:(L.dTOC1+L.dTOD)/2;
-  s+=`<text x="${X(c1X)}" y="${Y(P.c1.alt)-9}" fill="#33ddcc" font-size="9" text-anchor="middle" letter-spacing="1" font-family="Courier New,monospace">${f0(P.c1.perf.ktas)} KTAS · ${f1(P.c1.perf.gph)} GPH · ${f0(P.c1.perf.bhp)}%</text>`;
-  s+=windBadge(X(c1X),Y(P.c1.alt),P.c1.wind.d,P.c1.wind.v,`${fDeg(P.c1.wind.d)}/${f0(P.c1.wind.v)}`);
-  if(P.c2){
-    s+=marker(pts[2],'CLIMB 2',[`${f0(L.dClimb2Start)} NM`],'#4aaaff','middle');
-    s+=marker(pts[3],'TOC 2',[`${f0(P.c2.alt)} ft · ${f0(P.c2.oat)}°C`,
-      `+${f0(P.climb2.time)} min · +${f1(P.climb2.fuel)} gal`],'#4aaaff','middle');
-    const c2X=(L.dTOC2+L.dTOD)/2;
-    s+=`<text x="${X(c2X)}" y="${Y(P.c2.alt)-9}" fill="#33ddcc" font-size="9" text-anchor="middle" letter-spacing="1" font-family="Courier New,monospace">${f0(P.c2.perf.ktas)} KTAS · ${f1(P.c2.perf.gph)} GPH · ${f0(P.c2.perf.bhp)}%</text>`;
-    s+=windBadge(X(c2X),Y(P.c2.alt),P.c2.wind.d,P.c2.wind.v,`${fDeg(P.c2.wind.d)}/${f0(P.c2.wind.v)}`);
+
+  /* ── a block of label / value rows, panelled so it stays readable ── */
+  function block(cx,topY,align,title,rows,col,bw){
+    const w=bw||188, lh=15, padX=10, padY=8, titleH=17;
+    const h=padY*2+titleH+rows.length*lh;
+    let x0=align==='center'?cx-w/2:cx;
+    x0=clamp(x0,m.l+2,W-m.r-w-2);
+    const y0=clamp(topY,m.t+2,m.t+ph-h-2);
+    let g=`<rect x="${x0}" y="${y0}" width="${w}" height="${h}" rx="6"
+      fill="#101016" fill-opacity="0.93" stroke="${col}" stroke-opacity="0.55"/>`;
+    g+=`<text x="${x0+padX}" y="${y0+padY+12}" fill="${col}" font-size="11.5" font-weight="600"
+      letter-spacing="1.2" font-family="${SVGF}">${esc(title)}</text>`;
+    rows.forEach((r,i)=>{
+      const y=y0+padY+titleH+lh*i+11;
+      g+=`<text x="${x0+padX}" y="${y}" fill="#9494a4" font-size="11" font-family="${SVGF}">${esc(r[0])}</text>`;
+      g+=`<text x="${x0+w-padX}" y="${y}" fill="#e9e9ef" font-size="11.5" text-anchor="end" font-family="${SVGF}">${esc(r[1])}</text>`;
+    });
+    return {svg:g,h,w};
   }
-  s+=marker(pts[pts.length-2],'TOD',[`${f0(L.dTOD)} NM`,`${f0(P.desc.rate)} fpm · ${f0(P.desc.time)} min`],'#b58cff','middle');
-  s+=marker(pts[pts.length-1],P.dst.id,[`TPA ${f0(P.dst.tpaMsl)} ft`,`fld ${f0(P.dst.elev)} · DA ${f0(P.dst.da)}`],'#b58cff','end');
+  const blockH=n=>8*2+17+n*15;
+  const dash='—';
+  const or=(v,f)=>isFinite(v)?f(v):dash;
+
+  /* climb / descent: figures for the leg, hung below the path just past the segment */
+  function climbRows(seg,gndNM,info){
+    return [['TIME',`${f0(seg.time)} min`],
+            ['FUEL',`${f1(seg.fuel)} gal`],
+            ['DIST',`${f1(gndNM)} NM`],
+            ['GS',info&&isFinite(info.gs)?`${f0(info.gs)} kt`:`${f0(seg.ktas)} KTAS`],
+            ['ROC / IAS',`${f0(seg.roc)} fpm · ${f0(seg.kias)} kt`]];
+  }
+  /* cruise: the wind-triangle and power picture for that leg */
+  function cruiseRows(alt,oat,wind,perf,distNM,info){
+    return [['WIND / OAT',`${fDeg(wind.d)}/${f0(wind.v)} · ${f0(oat)}°C`],
+            ['CAS / TAS',`${or(info&&info.cas,f0)} / ${f0(perf.ktas)} kt`],
+            ['GS',or(info&&info.gs,v=>f0(v)+' kt')],
+            ['TC / WCA / TH',`${or(info&&info.tc,fDeg)} / ${or(info&&info.wca,fSign)} / ${or(info&&info.th,fDeg)}`],
+            ['POWER',`${f1(perf.gph)} gph · ${f0(perf.bhp)}%`],
+            ['DIST / TIME',`${f1(distNM)} NM · ${or(info&&info.ete,f0)} min`]];
+  }
+
+  /* ── nodes ── */
+  s+=node(pts[0],P.dep.id,`${f0(P.dep.elev)} ft · PA ${f0(P.dep.pa)}`,'#a8a8b8','start',true);
+  s+=node(pts[1],'TOC',`${f0(P.c1.alt)} ft · ${f1(L.dTOC1)} NM`,'#5cb3ff','middle',false);
+  if(P.c2){
+    s+=node(pts[2],'CLIMB 2',`${f0(L.dClimb2Start)} NM`,'#5cb3ff','middle',false);
+    s+=node(pts[3],'TOC 2',`${f0(P.c2.alt)} ft · ${f1(L.dTOC2)} NM`,'#5cb3ff','middle',false);
+  }
+  s+=node(pts[pts.length-2],'TOD',`${f1(L.dTOD)} NM`,'#c39cff','middle',true);
+  s+=node(pts[pts.length-1],P.dst.id,`TPA ${f0(P.dst.tpaMsl)} ft`,'#c39cff','end',false);
+
+  /* ── segment blocks, drawn last so they read over the grid ── */
+  const yTopLine=Y(P.c2?P.c2.alt:P.c1.alt);
+
+  s+=block(X(L.dTOC1)+14, Y(P.c1.alt)+54,'left', P.c2?'CLIMB 1':'CLIMB',
+      climbRows(P.climb1,L.climb1NM,SEG.climb1),'#5cb3ff',180).svg;
+
+  const c1mid=P.c2?(L.dTOC1+L.dClimb2Start)/2:(L.dTOC1+L.dTOD)/2;
+  s+=block(X(c1mid), Y(P.c1.alt)-18-blockH(6),'center','CRUISE 1',
+      cruiseRows(P.c1.alt,P.c1.oat,P.c1.wind,P.c1.perf,L.cruise1NM,SEG.cruise1),'#3fe0cd',214).svg;
+
+  if(P.c2){
+    s+=block(X(L.dTOC2)+14, Y(P.c2.alt)+54,'left','CLIMB 2',
+        climbRows(P.climb2,L.climb2NM,SEG.climb2),'#5cb3ff',180).svg;
+    s+=block(X((L.dTOC2+L.dTOD)/2), Y(P.c2.alt)-18-blockH(6),'center','CRUISE 2',
+        cruiseRows(P.c2.alt,P.c2.oat,P.c2.wind,P.c2.perf,L.cruise2NM,SEG.cruise2),'#3fe0cd',214).svg;
+  }
+
+  s+=block(X(L.dTOD)+14, yTopLine+30,'left','DESCENT',
+      [['RATE',`${f0(P.desc.rate)} fpm`],
+       ['TIME',`${f0(P.desc.time)} min`],
+       ['FUEL',`${f1(P.desc.fuel)} gal`],
+       ['DIST',`${f1(L.descNM)} NM`],
+       ['3 : 1 CHECK',`${f1(P.desc.rule31)} NM`]],'#c39cff',180).svg;
+
   svg.innerHTML=s;
 }
 
@@ -891,6 +1029,42 @@ function drawProfile(P,L){
    PERFORMANCE CARDS
    ═══════════════════════════════════════════════════════════ */
 const row=(l,v,c='')=>`<div class="rrow ${c}"><span>${l}</span><span>${v}</span></div>`;
+
+/* Pressure and density altitude shown on the card where the altimeter is entered,
+   so the link between the METAR setting and PA is visible rather than implied. */
+function drawNodeOuts(P){
+  const pa=(elev,altim)=>`${f0(elev)} ${(29.92-altim)>=0?'+':'−'} ${Math.abs(Math.round((29.92-altim)*1000))} = ${f0(pressureAlt(elev,altim))} ft`;
+  const set=(id,html)=>{const el=$(id);if(el)el.innerHTML=html;};
+
+  set('depOut',
+    row('Pressure alt',pa(P.dep.elev,P.dep.altim),'q')+
+    row('Density alt',`${f0(P.dep.da)} ft`)+
+    row('ISA / deviation',`${f0(isaTempC(P.dep.pa))}°C · ${fSign(P.dep.isa)}°`)+
+    row('Climb to',`${f0(P.c1.alt)} ft  (PA ${f0(P.c1.perf.pa)})`)+
+    `<div class="rrow note">PA = field elevation + (29.92 − altimeter) × 1000. The setting comes off the METAR, which is why field elevation alone isn't enough.</div>`);
+
+  set('c1Out',
+    row('Pressure alt',pa(P.c1.alt,P.c1.altim),'q')+
+    row('Density alt',`${f0(P.c1.perf.da)} ft`)+
+    row('ISA / deviation',`${f0(isaTempC(P.c1.perf.pa))}°C · ${fSign(P.c1.perf.isaDev)}°`)+
+    row('TAS / GPH',`${f0(P.c1.perf.ktas)} kt · ${f1(P.c1.perf.gph)} gph`));
+
+  if(P.c2)set('c2Out',
+    row('Pressure alt',pa(P.c2.alt,P.c2.altim),'q')+
+    row('Density alt',`${f0(P.c2.perf.da)} ft`)+
+    row('ISA / deviation',`${f0(isaTempC(P.c2.perf.pa))}°C · ${fSign(P.c2.perf.isaDev)}°`)+
+    row('TAS / GPH',`${f0(P.c2.perf.ktas)} kt · ${f1(P.c2.perf.gph)} gph`));
+
+  set('dstOut',
+    row('Pressure alt',pa(P.dst.elev,P.dst.altim),'q')+
+    row('Density alt',`${f0(P.dst.da)} ft`)+
+    row('TPA (MSL)',`${f0(P.dst.tpaMsl)} ft  (PA ${f0(P.dst.paTpa)})`)+
+    row('Altitude to lose',`${f0(P.desc.ftToLose)} ft`)+
+    row('3 : 1 distance',`${f1(P.desc.rule31)} NM`,'q'));
+
+  const t=$('depTitle');
+  if(t)t.textContent=P.c2?'DEPARTURE / CLIMB 1':'DEPARTURE / CLIMB';
+}
 const ovRow=(label,seg,slot,key,fmt,unit)=>`
   <div class="orow">
     <label>${label}</label>
@@ -899,24 +1073,43 @@ const ovRow=(label,seg,slot,key,fmt,unit)=>`
     <span class="unit">${unit}</span>
   </div>`;
 
+/* The two Fig 5-6 lookups and the subtraction between them, written out the way
+   a student works it on paper. The table is cumulative from sea level, so the
+   climb is always "value at the top minus value at the field". */
+function climbWork(c,label){
+  return `<table class="subtab">
+    <tr><th>${esc(label)}</th><th>TIME</th><th>FUEL</th><th>DIST</th></tr>
+    <tr><td>at ${f0(c.to.pa)} ft PA</td><td>${c.to.time.toFixed(1)}</td>
+        <td>${c.to.fuel.toFixed(2)}</td><td>${c.to.dist.toFixed(1)}</td></tr>
+    <tr class="sub"><td>− at ${f0(c.from.pa)} ft PA</td><td>${c.from.time.toFixed(1)}</td>
+        <td>${c.from.fuel.toFixed(2)}</td><td>${c.from.dist.toFixed(1)}</td></tr>
+    <tr><td>difference</td><td>${c.rawTime.toFixed(1)}</td>
+        <td>${c.rawFuel.toFixed(2)}</td><td>${c.rawDist.toFixed(1)}</td></tr>
+    <tr class="res"><td>× ${c.factor.toFixed(2)} (ISA ${fSign(c.isaDev)}°)</td>
+        <td>${f0(c.pohTime)}</td><td>${f1(c.pohFuel)}</td><td>${f1(c.pohDist)}</td></tr>
+  </table>
+  <div class="rrow note" style="padding-top:0">min · gal · NM. Both rows are interpolated between the
+  published 1,000 ft lines — a field at ${f0(c.from.pa)} ft sits between two of them, which is why
+  the bottom figure isn't zero.</div>`;
+}
+
 function drawPerf(P,L){
   const cards=[];
   const c=P.climb1;
   cards.push(`<div class="rcard">
-    <h5>CLIMB 1 <span class="tag climb">FIG 5-6</span></h5>
-    ${row('Pressure alt',`${f0(c.pa.from)} → ${f0(c.pa.to)} ft`)}
+    <h5>CLIMB ${P.c2?'1':''} <span class="tag climb">FIG 5-6</span></h5>
+    ${row('Climb from → to',`${f0(P.dep.elev)} → ${f0(P.c1.alt)} ft`)}
+    ${row('As pressure alt',`${f0(c.pa.from)} → ${f0(c.pa.to)} ft`)}
     ${row('ISA deviation',`${fSign(c.isaDev)} °C`)}
     ${row('Climb speed',`${f0(c.kias)} KIAS / ${f0(c.kcas)} KCAS`)}
     ${row('Avg TAS / rate',`${f0(c.ktas)} kt · ${f0(c.roc)} fpm`)}
-    ${row('POH raw (std temp)',`${f0(c.rawTime)} min · ${f1(c.rawFuel)} gal · ${f0(c.rawDist)} NM`)}
-    ${row('Temp factor',`×${c.factor.toFixed(2)}`)}
-    <div class="rsep"></div>
+    ${climbWork(c,'FIG 5-6')}
     ${ovRow('TIME',c,'c1','t',f0(c.pohTime),'min')}
     ${ovRow('FUEL',c,'c1','f',f1(c.pohFuel),'gal')}
-    ${ovRow('DIST',c,'c1','d',f0(c.pohDist),'NM')}
+    ${ovRow('DIST',c,'c1','d',f1(c.pohDist),'NM')}
     ${row('Ground dist (wind)',`${f1(L.climb1NM)} NM`,'hi')}
     ${c.capped?`<div class="rrow note">⚠ Climb table ends at 12,000 ft PA — clamped.</div>`:''}
-    <div class="rrow note">Boxes hold the POH figure until you type your own. Ground distance applies your leg's course and wind to the zero-wind handbook distance.</div>
+    <div class="rrow note">The three boxes hold the handbook figure until you type your own. Ground distance applies your leg's course and wind to the zero-wind handbook distance.</div>
   </div>`);
 
   const p1=P.c1.perf;
@@ -941,13 +1134,14 @@ function drawPerf(P,L){
     cards.push(`<div class="rcard">
       <h5>CLIMB 2 <span class="tag climb">FIG 5-6</span></h5>
       ${row('Starts at',`${f0(P.c2.startNM)} NM`)}
-      ${row('Pressure alt',`${f0(c2.pa.from)} → ${f0(c2.pa.to)} ft`)}
+      ${row('Climb from → to',`${f0(P.c1.alt)} → ${f0(P.c2.alt)} ft`)}
+      ${row('As pressure alt',`${f0(c2.pa.from)} → ${f0(c2.pa.to)} ft`)}
       ${row('ISA deviation',`${fSign(c2.isaDev)} °C`)}
       ${row('Speed / rate',`${f0(c2.kias)} KIAS · ${f0(c2.roc)} fpm`)}
-      <div class="rsep"></div>
+      ${climbWork(c2,'FIG 5-6')}
       ${ovRow('TIME',c2,'c2','t',f0(c2.pohTime),'min')}
       ${ovRow('FUEL',c2,'c2','f',f1(c2.pohFuel),'gal')}
-      ${ovRow('DIST',c2,'c2','d',f0(c2.pohDist),'NM')}
+      ${ovRow('DIST',c2,'c2','d',f1(c2.pohDist),'NM')}
       ${row('Ground dist (wind)',`${f1(L.climb2NM)} NM`,'hi')}
       <div class="rrow note">A step climb is the same Fig 5-6 subtraction run between the two cruise altitudes.</div>
     </div>`);
@@ -1007,7 +1201,9 @@ function drawPerf(P,L){
    so a wrong entry shows up on its own box instead of reddening the row.
    ═══════════════════════════════════════════════════════════ */
 function solve(P){
-  const altimeter=num($('altimeter'),29.92);
+  /* Enroute rows use the departure setting — that is the one you actually have
+     when planning; per-point settings live on the profile cards. */
+  const altimeter=P?P.altimeter:num($('depAltim'),29.92);
   const gVar=num($('magVar'),0), gDev=num($('magDev'),0);
   const gGph=pf(flight.gph);
   const off=parseClock(flight.timeOff);
@@ -1018,14 +1214,20 @@ function solve(P){
 
   let cumDist=0, cumMin=0, cumFuel=0;
   const out=[];
-  /* Climb and descent burn is handbook data, not a flat GPH — hand out the
-     right segment's fuel to each tagged row, in the order they appear. */
+  /*
+   * Climb and descent legs are handbook segments, not ordinary cruise legs:
+   *  - fuel is the POH figure for that climb, not a flat GPH × time
+   *  - TAS is the AVERAGE through the segment, taken at its mid altitude.
+   * The Altitude column holds the cruise altitude (what you'd write on the form),
+   * so deriving TAS from that altitude would read several knots fast.
+   */
   let climbSeen=0;
-  const segFuel=r=>{
-    if(!P)return NaN;
-    if(r.phase==='CLIMB')return (climbSeen++===0?P.climb1:(P.climb2||P.climb1)).fuel;
-    if(r.phase==='DESC') return P.desc.fuel;
-    return NaN;
+  const segHint=r=>{
+    if(!P)return null;
+    if(r.phase==='CLIMB'){const c=(climbSeen++===0?P.climb1:(P.climb2||P.climb1));
+      return {fuel:c.fuel,tas:c.ktas};}
+    if(r.phase==='DESC') return {fuel:P.desc.fuel,tas:P.desc.ktas};
+    return null;
   };
 
   rows.forEach(r=>{
@@ -1033,8 +1235,10 @@ function solve(P){
     const wd=pf(r.wdir), wv=pf(r.wvel), distLeg=pf(r.distLeg);
     const pa=isFinite(alt)?pressureAlt(alt,altimeter):NaN;
 
-    /* TAS — typed, else from CAS by the density formula */
-    const tasCalc=(isFinite(cas)&&isFinite(pa)&&isFinite(temp))?casToTas(cas,pa,temp):NaN;
+    const hint=segHint(r);
+    /* TAS — typed, else the segment average for climb/descent, else from CAS */
+    const tasCalc=hint&&isFinite(hint.tas)?hint.tas
+      :((isFinite(cas)&&isFinite(pa)&&isFinite(temp))?casToTas(cas,pa,temp):NaN);
     const tasEff=isFinite(pf(r.tas))?pf(r.tas):tasCalc;
 
     /* Wind triangle from the course and wind alongside */
@@ -1059,8 +1263,7 @@ function solve(P){
     const eteEff=isFinite(pf(r.ete))?pf(r.ete):eteCalc;
 
     /* Fuel: handbook figure for climb/descent legs, GPH × ETE for the rest */
-    const hint=segFuel(r);
-    const fuelCalc=isFinite(hint)?hint
+    const fuelCalc=hint&&isFinite(hint.fuel)?hint.fuel
       :((isFinite(gGph)&&isFinite(eteEff))?gGph*eteEff/60:NaN);
     const fuelEff=isFinite(pf(r.fuel))?pf(r.fuel):fuelCalc;
 
@@ -1251,11 +1454,32 @@ const blkInp =(pi,k)=>`<input data-pg="${pi}" data-blk="${k}">`;
 /* ═══════════════════════════════════════════════════════════
    RECOMPUTE — placeholders, check marks, totals
    ═══════════════════════════════════════════════════════════ */
+/* Pull each profile segment's worked figures out of the nav log, so the picture
+   and the log can never disagree. Rows are matched by phase, in order. */
+function segmentInfo(S){
+  const rows=allRows(), seg={};
+  const eff=(typed,calc)=>isFinite(pf(typed))?pf(typed):calc;
+  let nClimb=0,nCruise=0;
+  rows.forEach((r,i)=>{
+    const a=S.out[i]; if(!a||!a.active)return;
+    const key=r.phase==='CLIMB'?(nClimb++===0?'climb1':'climb2')
+             :r.phase==='CRUISE'?(nCruise++===0?'cruise1':'cruise2')
+             :r.phase==='DESC'?'desc':null;
+    if(!key||seg[key])return;
+    seg[key]={ tc:pf(r.tc), cas:pf(r.cas),
+      tas:eff(r.tas,a._n.tas), wca:eff(r.wca,a._n.wca), th:eff(r.th,a._n.th),
+      gs:eff(r.gsEst,a._n.gsEst), ete:eff(r.ete,a._n.ete), fuel:eff(r.fuel,a._n.fuel) };
+  });
+  return seg;
+}
+
 function recompute(){
   const P=computeProfile(), L=layoutProfile(P);
-  drawProfile(P,L); drawPerf(P,L);
-
   const S=solve(P);
+  drawProfile(P,L,segmentInfo(S));
+  drawPerf(P,L);
+  drawNodeOuts(P);
+
   let idx=0;
   const pageTot=pages.map(()=>({dist:0,ete:0,fuel:0,eta:''}));
   let runDist=0,runEte=0,runFuel=0;
@@ -1415,6 +1639,14 @@ document.addEventListener('DOMContentLoaded',()=>{
   $('c2Card').style.display=$('useStep').checked?'':'none';
 
   SETUP_IDS.forEach(id=>{const el=$(id);if(el)el.addEventListener('input',()=>{recompute();saveSoon();});});
+
+  /* Keep each "Climb to" box and its cruise-altitude twin showing one value */
+  MIRRORS.forEach(([a,b])=>{
+    const ea=$(a), eb=$(b); if(!ea||!eb)return;
+    if(eb.value)ea.value=eb.value;
+    ea.addEventListener('input',()=>{eb.value=ea.value;recompute();saveSoon();});
+    eb.addEventListener('input',()=>{ea.value=eb.value;recompute();saveSoon();});
+  });
   $('useStep').addEventListener('change',()=>{
     $('c2Card').style.display=$('useStep').checked?'':'none';recompute();saveSoon();});
 
