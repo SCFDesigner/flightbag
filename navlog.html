@@ -544,6 +544,22 @@ GS  = TAS × cos(WCA) − HW</span>
         </table>
         <p>So at <b>3,500 ft the 3,000 line is close enough</b> — you are 500 ft off a level and the error is smaller than the forecast's own accuracy. At <b>4,500 ft you are dead between two levels</b> and interpolating is worth the thirty seconds. The cruise card does it for you and tells you which case you are in, including the worst-case groundspeed the shortcut would cost.</p>
         <p>Two things to watch. Interpolate direction <b>the short way round the compass</b> — between 350° and 020° the answer is 005°, not 185°. And FB gives <b>no temperature at 3,000 ft</b>, nor at any level within 2,500 ft of the station elevation, so that box may simply be empty.</p>
+
+        <h4 style="margin-top:18px">IS INTERPOLATING JUST TAKING A PERCENTAGE?</h4>
+        <p><b>Yes — that is exactly what it is.</b> Work out how far up you are between the two levels and move every figure that same fraction:</p>
+        <span class="eq">fraction = (your alt − lower) ÷ (upper − lower)
+value    = lower + fraction × (upper − lower)</span>
+        <p>At 8,000 ft between 6,000 and 9,000 you are two thirds of the way, so you take two thirds of each change. At 7,500 ft you are exactly half way, and "just average them" is not a shortcut — it <i>is</i> the right answer, because half is the fraction.</p>
+        <p><b>But there is a more accurate method, and here is where it bites.</b> Doing direction and speed separately is what the whiz wheel does, and it quietly assumes the two are independent. They are not — wind is a vector. Take 6,000 at 240° / 30 kt and 9,000 at 300° / 30 kt:</p>
+        <table class="mini">
+          <tr><th>Method</th><th>At 8,000 ft</th></tr>
+          <tr><td>each number separately</td><td>280° / 30 kt</td></tr>
+          <tr><td>as vectors</td><td>281° / 26 kt</td></tr>
+        </table>
+        <p>Both levels are 30 knots, so interpolating the speed column can only ever give 30. But two 30-kt winds 60° apart <b>partly cancel</b> when you blend them — the honest answer is 26 kt. Break each wind into its north/south and east/west parts, take the fraction of each, and put them back together.</p>
+        <p>The physics is on the vector method's side: in a layer with a steady temperature gradient it is the wind <i>vector</i> that changes linearly with height, not the direction and speed separately. That is the thermal wind relationship.</p>
+        <p>How much does it matter? It scales with how far the wind veers across the layer. Under about 20° of veer the two methods agree within half a knot and it is not worth the trouble. Past about 50° they part company by several knots, and the cruise card will say so and offer the vector answer. Most days you will never see the note.</p>
+        <p>And keep it all in perspective: the real wind between two forecast levels is not a straight line anyway — shear layers and jets live in there. Every method here is an estimate on top of a forecast.</p>
       </div>
 
       <div class="note-blk">
@@ -1136,13 +1152,14 @@ const lerpDir=(a,b,t)=>{
   return norm360(a+d*t);
 };
 
+/* A wind as east/north components of the vector it blows TOWARD */
+function windXY(d,v){const r=(d+180)*Math.PI/180;return[v*Math.sin(r),v*Math.cos(r)];}
+
 /* Vector difference of two winds = the largest groundspeed error they can
    produce, which happens when that difference lies along your course. */
 function windGap(d1,v1,d2,v2){
-  const rad=d=>(d+180)*Math.PI/180;
-  const x=v1*Math.sin(rad(d1))-v2*Math.sin(rad(d2));
-  const y=v1*Math.cos(rad(d1))-v2*Math.cos(rad(d2));
-  return Math.hypot(x,y);
+  const [x1,y1]=windXY(d1,v1), [x2,y2]=windXY(d2,v2);
+  return Math.hypot(x1-x2,y1-y2);
 }
 
 function fbInterp(pfx,cruiseAlt){
@@ -1157,11 +1174,28 @@ function fbInterp(pfx,cruiseAlt){
   if(A.alt===B.alt)return{mode:'single',dir:A.dir,vel:A.vel,tmp:A.tmp,near:A,t:0};
 
   const t=clamp((cruiseAlt-A.alt)/(B.alt-A.alt),0,1);
+
+  /* Scalar: interpolate the two printed numbers separately. This is what a whiz
+     wheel does and what gets taught, and it is what these boxes show first. */
   const dir=lerpDir(A.dir,B.dir,t), vel=A.vel+t*(B.vel-A.vel);
+
+  /* Vector: break both winds into north/south and east/west, interpolate those,
+     and put them back together. Wind is a vector, and in a layer with a steady
+     temperature gradient the wind VECTOR is what varies linearly with height
+     (thermal wind), so this is the more physically defensible blend. It only
+     parts company with the scalar answer when the wind veers a lot across the
+     layer — two 30 kt winds 60° apart average to 26 kt, not 30. */
+  const [ax,ay]=windXY(A.dir,A.vel), [bx,by]=windXY(B.dir,B.vel);
+  const vx=ax+t*(bx-ax), vy=ay+t*(by-ay);
+  const vDir=norm360(Math.atan2(vx,vy)*180/Math.PI-180), vVel=Math.hypot(vx,vy);
+
   const tmp=(isFinite(A.tmp)&&isFinite(B.tmp))?A.tmp+t*(B.tmp-A.tmp)
            :(isFinite(A.tmp)?A.tmp:(isFinite(B.tmp)?B.tmp:NaN));
   const near=t<=0.5?A:B;
-  return{mode:'interp',dir,vel,tmp,t,A,B,near,
+  const veer=Math.abs((((B.dir-A.dir)%360)+540)%360-180);
+  return{mode:'interp',dir,vel,tmp,t,A,B,near,veer,
+    vec:{dir:vDir,vel:vVel},
+    methodGap:windGap(dir,vel,vDir,vVel),
     gap:windGap(dir,vel,near.dir,near.vel),
     outside:cruiseAlt<Math.min(A.alt,B.alt)||cruiseAlt>Math.max(A.alt,B.alt)};
 }
@@ -1175,16 +1209,25 @@ function drawFbOut(pfx,alt,outId){
   if(r.mode==='interp'){
     const pct=(r.t*100).toFixed(0);
     const closeEnough=r.gap<1.5;
-    note=`<div class="fb-note">${f0(alt)} ft is <b>${pct}%</b> of the way from ${f0(r.A.alt)} to ${f0(r.B.alt)} ft.
+    note=`<div class="fb-note">${f0(alt)} ft is <b>${pct}%</b> of the way from ${f0(r.A.alt)} to ${f0(r.B.alt)} ft,
+      so each figure moves ${pct}% of the way too.
       Taking the ${f0(r.near.alt)} ft line alone instead would change groundspeed by at most
       <b>${r.gap.toFixed(1)} kt</b> — ${closeEnough?'close enough to just use it.':'worth interpolating.'}</div>`;
+    /* Only raise the vector method when it actually disagrees */
+    if(r.methodGap>=1){
+      note+=`<div class="fb-note">The wind veers <b>${f0(r.veer)}°</b> across this layer, so blending the two
+        numbers separately overstates it. Treating the winds as vectors gives
+        <b>${fDeg(r.vec.dir)}° / ${f0(r.vec.vel)} kt</b> — a difference of <b>${r.methodGap.toFixed(1)} kt</b>.
+        That is the more physically correct blend; the figure above is what a whiz wheel gives.
+        <button class="btn sm noprint" style="margin-top:6px" data-fbuse="${pfx}" data-fbmode="v">USE VECTOR</button></div>`;
+    }
     if(r.outside)note+=`<div class="fb-note" style="color:var(--warn)">⚠ ${f0(alt)} ft is outside both levels — clamped to the nearer one.</div>`;
   }else{
     note=`<div class="fb-note">Only one level entered — using it as-is. Add the other bracketing level to interpolate.</div>`;
   }
   if(!isFinite(r.tmp))note+=`<div class="fb-note">No temperature: FB omits it at 3,000 ft and within 2,500 ft of station elevation. Type the OAT above.</div>`;
   el.innerHTML=`<div class="fb-res"><span>→ ${fDeg(r.dir)}° / ${f0(r.vel)} kt${tmpTxt} at ${f0(alt)} ft</span>
-    <button class="btn sm noprint" data-fbuse="${pfx}">USE</button></div>${note}`;
+    <button class="btn sm noprint" data-fbuse="${pfx}" data-fbmode="s">USE</button></div>${note}`;
 }
 
 /* Pressure and density altitude shown on the card where the altimeter is entered,
@@ -1884,8 +1927,9 @@ document.addEventListener('DOMContentLoaded',()=>{
     const b=e.target.closest('[data-fbuse]'); if(!b)return;
     const pfx=b.dataset.fbuse, r=fbInterp(pfx,num($(pfx+'Alt')));
     if(!r)return;
-    $(pfx+'Wdir').value=fDeg(r.dir);
-    $(pfx+'Wvel').value=f0(r.vel);
+    const w=(b.dataset.fbmode==='v'&&r.vec)?r.vec:r;
+    $(pfx+'Wdir').value=fDeg(w.dir);
+    $(pfx+'Wvel').value=f0(w.vel);
     if(isFinite(r.tmp))$(pfx+'Oat').value=f0(r.tmp);
     recompute();saveSoon();
   });
