@@ -173,6 +173,21 @@ table.navlog thead th.hdrbox input{height:26px;font-size:var(--fs-md);text-align
 .wxbox textarea:focus{outline:none;border-color:var(--acc)}
 .wxbox textarea::placeholder{color:var(--text-dim3)}
 
+/* ── winds aloft (FB) bracketing levels ── */
+.fb{margin-top:var(--sp-3);padding-top:var(--sp-2);border-top:1px solid var(--bdr)}
+.fb-hd{font-size:var(--fs-xs);letter-spacing:var(--ls-2);color:var(--text-dim);
+  font-weight:600;text-transform:uppercase;margin-bottom:6px}
+.fb-grid{display:grid;grid-template-columns:42px repeat(4,1fr);gap:5px;align-items:center}
+.fb-grid .hd{font-size:10px;color:var(--text-dim2);text-align:center;letter-spacing:var(--ls-1)}
+.fb-grid .rl{font-size:10px;color:var(--text-dim2)}
+.fb-grid input{padding:5px 3px;text-align:center;font-size:var(--fs-sm);height:28px}
+.fb-out{margin-top:8px}
+.fb-res{display:flex;align-items:center;justify-content:space-between;gap:8px;
+  font-size:var(--fs-sm);color:var(--acc);font-family:var(--mono)}
+.fb-res button{flex:0 0 auto}
+.fb-note{font-size:var(--fs-xs);color:var(--text-dim2);line-height:1.6;margin-top:6px}
+.fb-note b{color:var(--calc);font-weight:400}
+
 /* ── the climb subtraction worked out longhand ── */
 table.subtab{border-collapse:collapse;width:100%;font-size:var(--fs-sm);
   font-family:var(--mono);margin:var(--sp-2) 0}
@@ -368,9 +383,22 @@ table.mini th{background:var(--bg3);color:var(--text);font-weight:normal}
           <div class="fld"><label>Wind kt</label><input id="c1Wvel" type="number" step="1" value="15"></div>
           <div class="fld"><label>RPM</label><input id="c1Rpm" type="number" step="50" value="2300"></div>
         </div>
-        <div class="wxbox">
-          <label>Winds Aloft — Cruise 1</label>
-          <textarea id="c1Wx" placeholder="3,000   28°C (ISA+19)   192° at 13 kt&#10;6,000   21°C (ISA+18)   210° at 18 kt"></textarea>
+        <div class="fb">
+          <div class="fb-hd">Winds Aloft (FB) — bracketing levels</div>
+          <div class="fb-grid">
+            <span class="rl"></span><span class="hd">ALT</span><span class="hd">DIR °T</span><span class="hd">KT</span><span class="hd">°C</span>
+            <span class="rl">Lower</span>
+            <input id="c1Fb1Alt" type="number" step="1000" placeholder="3000">
+            <input id="c1Fb1Dir" type="number" step="5" placeholder="192">
+            <input id="c1Fb1Vel" type="number" step="1" placeholder="13">
+            <input id="c1Fb1Tmp" type="number" step="1" placeholder="28">
+            <span class="rl">Upper</span>
+            <input id="c1Fb2Alt" type="number" step="1000" placeholder="6000">
+            <input id="c1Fb2Dir" type="number" step="5" placeholder="210">
+            <input id="c1Fb2Vel" type="number" step="1" placeholder="18">
+            <input id="c1Fb2Tmp" type="number" step="1" placeholder="21">
+          </div>
+          <div class="fb-out" id="c1FbOut"></div>
         </div>
         <div class="node-out" id="c1Out"></div>
       </div>
@@ -385,9 +413,22 @@ table.mini th{background:var(--bg3);color:var(--text);font-weight:normal}
           <div class="fld"><label>Wind kt</label><input id="c2Wvel" type="number" step="1" value="20"></div>
           <div class="fld"><label>RPM</label><input id="c2Rpm" type="number" step="50" value="2300"></div>
         </div>
-        <div class="wxbox">
-          <label>Winds Aloft — Cruise 2</label>
-          <textarea id="c2Wx" placeholder="9,000   15°C (ISA+18)   225° at 22 kt"></textarea>
+        <div class="fb">
+          <div class="fb-hd">Winds Aloft (FB) — bracketing levels</div>
+          <div class="fb-grid">
+            <span class="rl"></span><span class="hd">ALT</span><span class="hd">DIR °T</span><span class="hd">KT</span><span class="hd">°C</span>
+            <span class="rl">Lower</span>
+            <input id="c2Fb1Alt" type="number" step="1000" placeholder="3000">
+            <input id="c2Fb1Dir" type="number" step="5" placeholder="192">
+            <input id="c2Fb1Vel" type="number" step="1" placeholder="13">
+            <input id="c2Fb1Tmp" type="number" step="1" placeholder="28">
+            <span class="rl">Upper</span>
+            <input id="c2Fb2Alt" type="number" step="1000" placeholder="6000">
+            <input id="c2Fb2Dir" type="number" step="5" placeholder="210">
+            <input id="c2Fb2Vel" type="number" step="1" placeholder="18">
+            <input id="c2Fb2Tmp" type="number" step="1" placeholder="21">
+          </div>
+          <div class="fb-out" id="c2FbOut"></div>
         </div>
         <div class="node-out" id="c2Out"></div>
       </div>
@@ -418,7 +459,8 @@ table.mini th{background:var(--bg3);color:var(--text);font-weight:normal}
     <div class="panel-title">POH PERFORMANCE
       <small>FIG 5-6 CLIMB · FIG 5-7 CRUISE · FIG 5-1 CALIBRATION — TYPE OVER ANY VALUE TO USE YOUR OWN</small></div>
     <div class="hd-r noprint">
-      <button class="btn primary" id="btnBuild">↻ FILL NAV LOG FROM PROFILE</button>
+      <button class="btn primary" id="btnBuild"
+        title="Rewrites altitude, temp, CAS, wind and leg distance on the seeded rows from the profile above. Your checkpoints, courses and worked answers are left alone.">↻ FILL / REFRESH NAV LOG FROM PROFILE</button>
     </div>
   </div>
   <div class="panel-body"><div class="readouts" id="perfOut"></div></div>
@@ -491,6 +533,17 @@ WCA = arcsin( XW ÷ TAS )     (+ = crab right)
 GS  = TAS × cos(WCA) − HW</span>
         <p>Turn into the wind: wind from the right gives a <b>positive (right) WCA</b>, added to true course. Same answer a whiz wheel gives, and the same thing your ASA calculator's wind function does.</p>
         <p>Rough check: a direct headwind subtracts its full value from TAS; a direct crosswind barely changes GS at all.</p>
+
+        <h4 style="margin-top:18px">WHICH WINDS ALOFT LEVEL DO YOU USE?</h4>
+        <p>FB forecasts come at fixed levels — <b>3,000 / 6,000 / 9,000 / 12,000 / 18,000</b> ft MSL — and you almost never cruise at one of them. The book answer is to interpolate between the two that bracket you. The practical answer is that it depends how far off a level you are, and the difference is measurable:</p>
+        <p>With 3,000 = 192° / 13 kt and 6,000 = 210° / 18 kt, at 95 KTAS:</p>
+        <table class="mini">
+          <tr><th>Cruise</th><th>Position</th><th>Interpolated</th><th>Worst GS error if you just use 3,000</th></tr>
+          <tr><td>3,500</td><td>17% up</td><td>195° / 14</td><td>1.1 kt  (½ min over 60 NM)</td></tr>
+          <tr><td>4,500</td><td>50% up</td><td>201° / 16</td><td>3.4 kt  (1¾ min over 60 NM)</td></tr>
+        </table>
+        <p>So at <b>3,500 ft the 3,000 line is close enough</b> — you are 500 ft off a level and the error is smaller than the forecast's own accuracy. At <b>4,500 ft you are dead between two levels</b> and interpolating is worth the thirty seconds. The cruise card does it for you and tells you which case you are in, including the worst-case groundspeed the shortcut would cost.</p>
+        <p>Two things to watch. Interpolate direction <b>the short way round the compass</b> — between 350° and 020° the answer is 005°, not 185°. And FB gives <b>no temperature at 3,000 ft</b>, nor at any level within 2,500 ft of the station elevation, so that box may simply be empty.</p>
       </div>
 
       <div class="note-blk">
@@ -759,8 +812,10 @@ const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&g
 const ROWS_PER_PAGE = 11;
 const SETUP_IDS=['acDate','magVar','magDev','fuelCap','taxiFuel','reserveMin','routeDist',
   'depId','depElev','depAltim','depOat','depWx','climbTo1',
-  'c1Alt','c1Oat','c1Wdir','c1Wvel','c1Rpm','c1Wx',
-  'c2Start','climbTo2','c2Alt','c2Oat','c2Wdir','c2Wvel','c2Rpm','c2Wx',
+  'c1Alt','c1Oat','c1Wdir','c1Wvel','c1Rpm',
+  'c1Fb1Alt','c1Fb1Dir','c1Fb1Vel','c1Fb1Tmp','c1Fb2Alt','c1Fb2Dir','c1Fb2Vel','c1Fb2Tmp',
+  'c2Start','climbTo2','c2Alt','c2Oat','c2Wdir','c2Wvel','c2Rpm',
+  'c2Fb1Alt','c2Fb1Dir','c2Fb1Vel','c2Fb1Tmp','c2Fb2Alt','c2Fb2Dir','c2Fb2Vel','c2Fb2Tmp',
   'dstId','dstElev','dstAltim','dstOat','dstWx','tpa','descRate','descKias'];
 /* Two boxes, one value: "Climb to" on the climb card is the same number as the
    cruise altitude, so entering it in either place keeps the pair in step. */
@@ -1070,9 +1125,73 @@ function drawProfile(P,L,SEG){
    ═══════════════════════════════════════════════════════════ */
 const row=(l,v,c='')=>`<div class="rrow ${c}"><span>${l}</span><span>${v}</span></div>`;
 
+/*
+ * Winds aloft (FB) are forecast only at 3,000 / 6,000 / 9,000 / 12,000 ... MSL.
+ * Interpolate between the two levels that bracket your cruise altitude —
+ * direction the short way round the compass, not straight through the numbers.
+ */
+const lerpDir=(a,b,t)=>{
+  let d=(((b-a)%360)+540)%360-180;   /* shortest signed arc */
+  if(d===-180)d=180;                 /* exactly opposite: both ways are equal, pick clockwise */
+  return norm360(a+d*t);
+};
+
+/* Vector difference of two winds = the largest groundspeed error they can
+   produce, which happens when that difference lies along your course. */
+function windGap(d1,v1,d2,v2){
+  const rad=d=>(d+180)*Math.PI/180;
+  const x=v1*Math.sin(rad(d1))-v2*Math.sin(rad(d2));
+  const y=v1*Math.cos(rad(d1))-v2*Math.cos(rad(d2));
+  return Math.hypot(x,y);
+}
+
+function fbInterp(pfx,cruiseAlt){
+  const g=k=>pf($(pfx+k)&&$(pfx+k).value);
+  const A={alt:g('Fb1Alt'),dir:g('Fb1Dir'),vel:g('Fb1Vel'),tmp:g('Fb1Tmp')};
+  const B={alt:g('Fb2Alt'),dir:g('Fb2Dir'),vel:g('Fb2Vel'),tmp:g('Fb2Tmp')};
+  const okA=isFinite(A.alt)&&isFinite(A.dir)&&isFinite(A.vel);
+  const okB=isFinite(B.alt)&&isFinite(B.dir)&&isFinite(B.vel);
+  if(!okA&&!okB)return null;
+  if(okA&&!okB)return{mode:'single',dir:A.dir,vel:A.vel,tmp:A.tmp,near:A,t:0};
+  if(!okA&&okB)return{mode:'single',dir:B.dir,vel:B.vel,tmp:B.tmp,near:B,t:1};
+  if(A.alt===B.alt)return{mode:'single',dir:A.dir,vel:A.vel,tmp:A.tmp,near:A,t:0};
+
+  const t=clamp((cruiseAlt-A.alt)/(B.alt-A.alt),0,1);
+  const dir=lerpDir(A.dir,B.dir,t), vel=A.vel+t*(B.vel-A.vel);
+  const tmp=(isFinite(A.tmp)&&isFinite(B.tmp))?A.tmp+t*(B.tmp-A.tmp)
+           :(isFinite(A.tmp)?A.tmp:(isFinite(B.tmp)?B.tmp:NaN));
+  const near=t<=0.5?A:B;
+  return{mode:'interp',dir,vel,tmp,t,A,B,near,
+    gap:windGap(dir,vel,near.dir,near.vel),
+    outside:cruiseAlt<Math.min(A.alt,B.alt)||cruiseAlt>Math.max(A.alt,B.alt)};
+}
+
+function drawFbOut(pfx,alt,outId){
+  const el=$(outId); if(!el)return;
+  const r=fbInterp(pfx,alt);
+  if(!r){el.innerHTML=`<div class="fb-note">Enter the two forecast levels that bracket ${f0(alt)} ft to interpolate wind and temperature.</div>`;return;}
+  const tmpTxt=isFinite(r.tmp)?` · ${f0(r.tmp)}°C`:'';
+  let note='';
+  if(r.mode==='interp'){
+    const pct=(r.t*100).toFixed(0);
+    const closeEnough=r.gap<1.5;
+    note=`<div class="fb-note">${f0(alt)} ft is <b>${pct}%</b> of the way from ${f0(r.A.alt)} to ${f0(r.B.alt)} ft.
+      Taking the ${f0(r.near.alt)} ft line alone instead would change groundspeed by at most
+      <b>${r.gap.toFixed(1)} kt</b> — ${closeEnough?'close enough to just use it.':'worth interpolating.'}</div>`;
+    if(r.outside)note+=`<div class="fb-note" style="color:var(--warn)">⚠ ${f0(alt)} ft is outside both levels — clamped to the nearer one.</div>`;
+  }else{
+    note=`<div class="fb-note">Only one level entered — using it as-is. Add the other bracketing level to interpolate.</div>`;
+  }
+  if(!isFinite(r.tmp))note+=`<div class="fb-note">No temperature: FB omits it at 3,000 ft and within 2,500 ft of station elevation. Type the OAT above.</div>`;
+  el.innerHTML=`<div class="fb-res"><span>→ ${fDeg(r.dir)}° / ${f0(r.vel)} kt${tmpTxt} at ${f0(alt)} ft</span>
+    <button class="btn sm noprint" data-fbuse="${pfx}">USE</button></div>${note}`;
+}
+
 /* Pressure and density altitude shown on the card where the altimeter is entered,
    so the link between the METAR setting and PA is visible rather than implied. */
 function drawNodeOuts(P){
+  drawFbOut('c1',num($('c1Alt')),'c1FbOut');
+  if($('useStep').checked)drawFbOut('c2',num($('c2Alt')),'c2FbOut');
   const pa=(elev,altim)=>`${f0(elev)} ${(29.92-altim)>=0?'+':'−'} ${Math.abs(Math.round((29.92-altim)*1000))} = ${f0(pressureAlt(elev,altim))} ft`;
   const set=(id,html)=>{const el=$(id);if(el)el.innerHTML=html;};
 
@@ -1630,14 +1749,22 @@ function buildLegs(){
     wdir:f0(P.desc.wind.d),wvel:f0(P.desc.wind.v),temp:f0(P.desc.oatMid),
     cas:f0(P.desc.kcas),distLeg:f1(L.descNM)});
 
-  /* Write into page 1, keeping anything already typed in those rows */
+  /*
+   * Refresh page 1's seeded rows. These six columns come from the profile, so
+   * they are rewritten every time — otherwise changing a cruise altitude would
+   * leave the old figure sitting in the log looking current.
+   * Everything the pilot owns is left alone: route, VOR, true course, every
+   * worked answer and every actual. A renamed checkpoint keeps its name.
+   */
+  const PROFILE_FIELDS=['alt','temp','cas','distLeg','wdir','wvel'];
   const pg=pages[0];
   while(pg.rows.length<seeds.length)pg.rows.push(blankRow());
   seeds.forEach((s,i)=>{
     const r=pg.rows[i];
     r.phase=s.phase;
-    Object.keys(s).forEach(k=>{ if(k!=='phase' && !r[k]) r[k]=s[k]; });
-    if(!r.name)r.name=s.name;
+    PROFILE_FIELDS.forEach(k=>{ if(s[k]!==undefined)r[k]=s[k]; });
+    if(!r.name||r.name===r.seedName)r.name=s.name;
+    r.seedName=s.name;
   });
   if(!flight.gph)flight.gph=f1(P.c1.perf.gph);
   renderSheets(); recompute(); saveSoon();
@@ -1750,6 +1877,17 @@ document.addEventListener('DOMContentLoaded',()=>{
     else if(b.dataset.delpage){
       if(!confirm(`Remove page ${+b.dataset.delpage+1} and everything on it?`))return;
       pages.splice(+b.dataset.delpage,1);renderSheets();recompute();saveSoon();}
+  });
+
+  /* "USE" copies the interpolated wind and temperature into the cruise fields */
+  document.addEventListener('click',e=>{
+    const b=e.target.closest('[data-fbuse]'); if(!b)return;
+    const pfx=b.dataset.fbuse, r=fbInterp(pfx,num($(pfx+'Alt')));
+    if(!r)return;
+    $(pfx+'Wdir').value=fDeg(r.dir);
+    $(pfx+'Wvel').value=f0(r.vel);
+    if(isFinite(r.tmp))$(pfx+'Oat').value=f0(r.tmp);
+    recompute();saveSoon();
   });
 
   $('btnBuild').addEventListener('click',buildLegs);
