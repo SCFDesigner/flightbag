@@ -188,6 +188,11 @@ table.navlog thead th.hdrbox input{height:26px;font-size:var(--fs-md);text-align
 .fb-note{font-size:var(--fs-xs);color:var(--text-dim2);line-height:1.6;margin-top:6px}
 .fb-note b{color:var(--calc);font-weight:400}
 
+/* ── inline formula shown under the value it produced ── */
+.fx{font-family:var(--mono);font-size:var(--fs-xs);color:var(--ghost);
+  background:var(--field);border-left:2px solid var(--acc-dim);border-radius:3px;
+  padding:5px 8px;margin:3px 0 7px;line-height:1.6;overflow-x:auto;white-space:pre}
+
 /* ── the climb subtraction worked out longhand ── */
 table.subtab{border-collapse:collapse;width:100%;font-size:var(--fs-sm);
   font-family:var(--mono);margin:var(--sp-2) 0}
@@ -256,6 +261,31 @@ table.side input:focus{background:var(--acc-bg);outline:1px solid var(--acc);out
   color:var(--text-dim);margin-bottom:var(--sp-3);letter-spacing:var(--ls-1)}
 .legend b{font-weight:normal}
 .sw{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+
+/* ── POH FIGURES ── */
+.tag.fig{cursor:pointer;text-decoration:underline;text-underline-offset:2px;
+  text-decoration-style:dotted}
+.tag.fig:hover{color:var(--text-hi)}
+.figs{display:grid;gap:var(--sp-4);grid-template-columns:repeat(auto-fit,minmax(330px,1fr))}
+.figcard{background:#fff;border:1px solid var(--bdr2);border-radius:var(--r-md);overflow:hidden}
+.figcard-hd{background:var(--bg3);color:var(--text-hi);font-size:var(--fs-sm);font-weight:600;
+  letter-spacing:var(--ls-2);padding:7px 10px;display:flex;justify-content:space-between;gap:8px}
+.figcard-hd span:last-child{color:var(--text-dim2);font-weight:400;letter-spacing:0}
+.figcard img{display:block;width:100%;height:auto;cursor:zoom-in}
+
+/* modal */
+#figModal{position:fixed;inset:0;background:rgba(4,4,6,.9);z-index:50;
+  display:none;align-items:center;justify-content:center;padding:2vh 2vw}
+#figModal.on{display:flex}
+#figModal .box{background:#fff;border-radius:var(--r-md);max-width:min(1030px,96vw);
+  max-height:96vh;overflow:auto;position:relative}
+#figModal img{display:block;width:100%;height:auto}
+#figClose{position:absolute;top:8px;right:8px;width:34px;height:34px;border-radius:50%;
+  background:rgba(10,10,13,.86);color:#fff;border:1px solid #444;cursor:pointer;
+  font-family:var(--font);font-size:17px;line-height:1;z-index:2}
+#figClose:hover{background:var(--warn);border-color:var(--warn)}
+#figCap{position:absolute;top:10px;left:12px;background:rgba(10,10,13,.86);color:#fff;
+  font-size:var(--fs-sm);letter-spacing:var(--ls-2);padding:5px 10px;border-radius:var(--r-sm)}
 
 /* ── NOTES ── */
 .notes{columns:2;column-gap:var(--sp-6)}
@@ -360,7 +390,7 @@ table.mini th{background:var(--bg3);color:var(--text);font-weight:normal}
     <svg id="profileSvg" viewBox="0 0 1000 470" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Vertical flight profile"></svg>
     <div class="node-cards">
       <div class="node-card climb">
-        <h4><span id="depTitle">DEPARTURE / CLIMB</span> <span class="tag climb">FIG 5-6</span></h4>
+        <h4><span id="depTitle">DEPARTURE / CLIMB</span> <span class="tag climb fig" data-figkey="5-6" title="show Figure 5-6">FIG 5-6</span></h4>
         <div class="grid">
           <div class="fld"><label>Ident</label><input id="depId" placeholder="KXXX"></div>
           <div class="fld"><label>Field Elev</label><input id="depElev" type="number" step="10" value="600"></div>
@@ -375,7 +405,7 @@ table.mini th{background:var(--bg3);color:var(--text);font-weight:normal}
         <div class="node-out" id="depOut"></div>
       </div>
       <div class="node-card cruise">
-        <h4>CRUISE 1 <span class="tag cruise">FIG 5-7</span></h4>
+        <h4>CRUISE 1 <span class="tag cruise fig" data-figkey="5-7" title="show Figure 5-7">FIG 5-7</span></h4>
         <div class="grid">
           <div class="fld"><label>Altitude</label><input id="c1Alt" type="number" step="500" value="4500"></div>
           <div class="fld"><label>OAT °C</label><input id="c1Oat" type="number" step="1" value="7"></div>
@@ -496,6 +526,39 @@ table.mini th{background:var(--bg3);color:var(--text);font-weight:normal}
       <span class="item">RESERVE REQ <b id="fbRes">—</b></span>
       <span class="pill" id="fbPill">—</span>
     </div>
+  </div>
+</div>
+
+<!-- ═══════════ POH FIGURES ═══════════ -->
+<div class="panel noprint" id="figures">
+  <div class="panel-hd">
+    <div class="panel-title">THE CHARTS THEMSELVES
+      <small>CESSNA 1979 MODEL 152 INFORMATION MANUAL, SECTION 5 — CLICK ANY FIGURE TO ENLARGE</small></div>
+  </div>
+  <div class="panel-body">
+    <div class="figs">
+      <div class="figcard">
+        <div class="figcard-hd"><span>FIG 5-6 — TIME, FUEL &amp; DISTANCE TO CLIMB</span><span>p 5-13</span></div>
+        <img src="img/c152-fig5-6.png" alt="Cessna 152 POH Figure 5-6, Time Fuel and Distance to Climb"
+             data-fig="img/c152-fig5-6.png" data-figcap="FIG 5-6 — TIME, FUEL AND DISTANCE TO CLIMB (p 5-13)" loading="lazy">
+      </div>
+      <div class="figcard">
+        <div class="figcard-hd"><span>FIG 5-7 — CRUISE PERFORMANCE</span><span>p 5-14</span></div>
+        <img src="img/c152-fig5-7.png" alt="Cessna 152 POH Figure 5-7, Cruise Performance"
+             data-fig="img/c152-fig5-7.png" data-figcap="FIG 5-7 — CRUISE PERFORMANCE (p 5-14, Rev 1 · 31 Mar 1983)" loading="lazy">
+      </div>
+      <div class="figcard">
+        <div class="figcard-hd"><span>FIG 5-1 — AIRSPEED CALIBRATION</span><span>p 5-8</span></div>
+        <img src="img/c152-fig5-1.png" alt="Cessna 152 POH Figure 5-1, Airspeed Calibration"
+             data-fig="img/c152-fig5-1.png" data-figcap="FIG 5-1 — AIRSPEED CALIBRATION (p 5-8)" loading="lazy">
+      </div>
+    </div>
+    <p class="src" style="margin-top:var(--sp-4)">
+      Reproduced from the owner's copy of the Cessna 1979 Model 152 Information Manual for training
+      reference. Fig 5-7 applies to the Lycoming O-235-L2C engine only. Every number this page
+      computes is read from these three charts — if a figure here disagrees with the POH in your
+      aircraft, the POH in your aircraft wins.
+    </p>
   </div>
 </div>
 
@@ -687,6 +750,14 @@ GS × 5.5  →  3.1°   — this is 3-to-1 (499 fpm at 90 kt)</span>
 </div>
 
 </div><!-- /wrap -->
+
+<div id="figModal" class="noprint" role="dialog" aria-modal="true" aria-label="POH figure">
+  <div class="box">
+    <span id="figCap"></span>
+    <button id="figClose" title="close (Esc)">✕</button>
+    <img id="figImg" alt="">
+  </div>
+</div>
 
 <script>
 /* ═══════════════════════════════════════════════════════════
@@ -1156,6 +1227,21 @@ function drawProfile(P,L,SEG){
    ═══════════════════════════════════════════════════════════ */
 const row=(l,v,c='')=>`<div class="rrow ${c}"><span>${l}</span><span>${v}</span></div>`;
 
+/* Card headers link straight to the chart the numbers came off */
+const FIGS={
+  '5-1':{src:'img/c152-fig5-1.png',cap:'FIG 5-1 — AIRSPEED CALIBRATION (p 5-8)'},
+  '5-6':{src:'img/c152-fig5-6.png',cap:'FIG 5-6 — TIME, FUEL AND DISTANCE TO CLIMB (p 5-13)'},
+  '5-7':{src:'img/c152-fig5-7.png',cap:'FIG 5-7 — CRUISE PERFORMANCE (p 5-14, Rev 1 · 31 Mar 1983)'}
+};
+const figTag=(n,cls)=>`<span class="tag ${cls} fig" data-figkey="${n}" title="show Figure ${n}">FIG ${n}</span>`;
+
+function openFig(src,cap){
+  $('figImg').src=src; $('figImg').alt=cap;
+  $('figCap').textContent=cap;
+  $('figModal').classList.add('on');
+}
+const closeFig=()=>{$('figModal').classList.remove('on');};
+
 /*
  * Winds aloft (FB) are forecast only at 3,000 / 6,000 / 9,000 / 12,000 ... MSL.
  * Interpolate between the two levels that bracket your cruise altitude —
@@ -1334,19 +1420,29 @@ function cruiseWork(perf,rpm){
 
 /* One card per cruise level: the lookup, the work, and boxes to type your own */
 function cruiseCard(title,leg,perf,slot){
+  const P0=num($('depAltim'),29.92);
   return `<div class="rcard">
-    <h5>${title} <span class="tag cruise">FIG 5-7</span></h5>
+    <h5>${title} ${figTag('5-7','cruise')}</h5>
     ${row('Altitude (indicated)',`${f0(leg.alt)} ft`)}
     ${row('Pressure alt',`${f0(perf.pa)} ft`,'hi')}
     ${row('Density alt',`${f0(perf.da)} ft`)}
     ${row('OAT / ISA dev',`${f0(leg.oat)}°C / ${fSign(perf.isaDev)}°C`)}
+    <div class="fx">PA  = ${f0(leg.alt)} + (29.92 − ${P0.toFixed(2)}) × 1000 = ${f0(perf.pa)} ft
+ISA = 15 − 2 × (${f0(perf.pa)} ÷ 1000) = ${f1(isaTempC(perf.pa))}°C
+dev = ${f0(leg.oat)} − ${f1(isaTempC(perf.pa))} = ${fSign(perf.isaDev)}°C
+DA  = ${f0(perf.pa)} + 118.8 × ${fSign(perf.isaDev)} = ${f0(perf.da)} ft</div>
     ${row('Wind',`${fDeg(leg.wind.d)} at ${f0(leg.wind.v)} kt`)}
     ${row('RPM',`${f0(leg.rpm)}`)}
     ${cruiseWork(perf,leg.rpm)}
     ${ovRow('% BHP',perf,slot,'b',f0(perf.pohBhp),'%')}
     ${ovRow('KTAS',perf,slot,'k',f0(perf.pohKtas),'kt')}
     ${ovRow('GPH',perf,slot,'g',f1(perf.pohGph),'gph')}
-    ${row('Implied CAS',`${f0(perf.ktas*Math.sqrt(sigma(perf.pa,leg.oat)))} kt`)}
+    ${row('CAS to expect',`${f0(perf.ktas*Math.sqrt(sigma(perf.pa,leg.oat)))} kt`)}
+    <div class="fx">Fig 5-7 gives TAS directly — this is TAS run backwards,
+only to fill the CAS box on the form and tell you
+what the ASI should read. It is not handbook data.
+  σ = (1 − 6.87535e-6 × ${f0(perf.pa)})^5.2559 ÷ ((${f0(leg.oat)}+273.15) ÷ 288.15) = ${sigma(perf.pa,leg.oat).toFixed(3)}
+  CAS = TAS × √σ = ${f1(perf.ktas)} × ${Math.sqrt(sigma(perf.pa,leg.oat)).toFixed(3)} = ${f1(perf.ktas*Math.sqrt(sigma(perf.pa,leg.oat)))} kt</div>
     ${perf.rpmLimited?`<div class="rrow note">⚠ ${f0(leg.rpm)} RPM is above the table at this temperature — used ${f0(perf.rpmLimited)} RPM.</div>`:''}
     ${perf.altClamped?`<div class="rrow note">⚠ Cruise table spans 2,000–12,000 ft PA — clamped to ${perf.altClamped.toLocaleString()} ft.</div>`:''}
     <div class="rrow note">The three boxes hold the interpolated handbook figures until you type your own reading off the chart.</div>
@@ -1390,12 +1486,16 @@ function drawPerf(P,L,SEG){
   const cards=[];
   const c=P.climb1;
   cards.push(`<div class="rcard">
-    <h5>CLIMB ${P.c2?'1':''} <span class="tag climb">FIG 5-6</span></h5>
+    <h5>CLIMB ${P.c2?'1':''} ${figTag('5-6','climb')}</h5>
     ${row('Climb from → to',`${f0(P.dep.elev)} → ${f0(P.c1.alt)} ft`)}
     ${row('As pressure alt',`${f0(c.pa.from)} → ${f0(c.pa.to)} ft`)}
     ${row('ISA deviation',`${fSign(c.isaDev)} °C`)}
     ${row('Climb speed',`${f0(c.kias)} KIAS / ${f0(c.kcas)} KCAS`)}
     ${row('Avg TAS / rate',`${f0(c.ktas)} kt · ${f0(c.roc)} fpm`)}
+    <div class="fx">TAS at mid-climb (${f0(c.paMid)} ft PA, ${f0(c.oatMid)}°C)
+  ${f0(c.kias)} KIAS → ${f0(c.kcas)} KCAS  (Fig 5-1)
+  ${f0(c.kcas)} ÷ √${sigma(c.paMid,c.oatMid).toFixed(3)} = ${f1(c.ktas)} KTAS
+rate = (${f0(c.pa.to)} − ${f0(c.pa.from)}) ÷ ${f1(c.time)} min = ${f0(c.roc)} fpm</div>
     ${climbWork(c,'FIG 5-6')}
     ${ovRow('TIME',c,'c1','t',f0(c.pohTime),'min')}
     ${ovRow('FUEL',c,'c1','f',f1(c.pohFuel),'gal')}
@@ -1410,7 +1510,7 @@ function drawPerf(P,L,SEG){
   if(P.c2){
     const c2=P.climb2,p2=P.c2.perf;
     cards.push(`<div class="rcard">
-      <h5>CLIMB 2 <span class="tag climb">FIG 5-6</span></h5>
+      <h5>CLIMB 2 ${figTag('5-6','climb')}</h5>
       ${row('Starts at',`${f0(P.c2.startNM)} NM`)}
       ${row('Climb from → to',`${f0(P.c1.alt)} → ${f0(P.c2.alt)} ft`)}
       ${row('As pressure alt',`${f0(c2.pa.from)} → ${f0(c2.pa.to)} ft`)}
@@ -1435,6 +1535,9 @@ function drawPerf(P,L,SEG){
     ${row('Power',`unchanged — ${f1(d.gph)} gph`,'hi')}
     ${row('Speed',`${f0(d.kias)} KIAS = ${f0(d.kcas)} KCAS`)}
     ${row('TAS at mid-descent',`${f0(d.ktas)} kt`,'hi')}
+    <div class="fx">${f0(d.kias)} KIAS → ${f0(d.kcas)} KCAS  (Fig 5-1)
+mid-descent ${f0(d.paMid)} ft PA, ${f0(d.oatMid)}°C → σ = ${sigma(d.paMid,d.oatMid).toFixed(3)}
+TAS = ${f0(d.kcas)} ÷ √${sigma(d.paMid,d.oatMid).toFixed(3)} = ${f1(d.ktas)} kt</div>
     ${isFinite(dGs)?row('GS in the descent',`${f0(dGs)} kt`,'hi'):''}
     ${isFinite(cGs)?row('GS in the cruise',`${f0(cGs)} kt`):''}
     ${descentWork(P,L,dGs)}
@@ -1985,6 +2088,16 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(isFinite(r.tmp))$(pfx+'Oat').value=f0(r.tmp);
     recompute();saveSoon();
   });
+
+  /* figure viewer: card tags, the always-open panel, Esc and backdrop close */
+  document.addEventListener('click',e=>{
+    const tag=e.target.closest('[data-figkey]');
+    if(tag){const f=FIGS[tag.dataset.figkey];if(f)openFig(f.src,f.cap);return;}
+    const img=e.target.closest('img[data-fig]');
+    if(img){openFig(img.dataset.fig,img.dataset.figcap||'');return;}
+    if(e.target.id==='figClose'||e.target.id==='figModal')closeFig();
+  });
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeFig();});
 
   $('btnBuild').addEventListener('click',buildLegs);
   $('btnSolve').addEventListener('click',()=>fillAnswers());
