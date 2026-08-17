@@ -363,11 +363,14 @@ table.mini th{background:var(--bg3);color:var(--text);font-weight:normal}
         <h4>CRUISE 1 <span class="tag cruise">FIG 5-7</span></h4>
         <div class="grid">
           <div class="fld"><label>Altitude</label><input id="c1Alt" type="number" step="500" value="4500"></div>
-          <div class="fld"><label>Altimeter</label><input id="c1Altim" type="number" step="0.01" value="29.92"></div>
           <div class="fld"><label>OAT °C</label><input id="c1Oat" type="number" step="1" value="7"></div>
           <div class="fld"><label>Wind °T</label><input id="c1Wdir" type="number" step="5" value="270"></div>
           <div class="fld"><label>Wind kt</label><input id="c1Wvel" type="number" step="1" value="15"></div>
           <div class="fld"><label>RPM</label><input id="c1Rpm" type="number" step="50" value="2300"></div>
+        </div>
+        <div class="wxbox">
+          <label>Winds Aloft — Cruise 1</label>
+          <textarea id="c1Wx" placeholder="3,000   28°C (ISA+19)   192° at 13 kt&#10;6,000   21°C (ISA+18)   210° at 18 kt"></textarea>
         </div>
         <div class="node-out" id="c1Out"></div>
       </div>
@@ -377,11 +380,14 @@ table.mini th{background:var(--bg3);color:var(--text);font-weight:normal}
           <div class="fld"><label>Climb @NM</label><input id="c2Start" type="number" step="1" value="35"></div>
           <div class="fld"><label>Climb to (ft)</label><input id="climbTo2" type="number" step="500" value="6500"></div>
           <div class="fld"><label>Altitude</label><input id="c2Alt" type="number" step="500" value="6500"></div>
-          <div class="fld"><label>Altimeter</label><input id="c2Altim" type="number" step="0.01" value="29.92"></div>
           <div class="fld"><label>OAT °C</label><input id="c2Oat" type="number" step="1" value="3"></div>
           <div class="fld"><label>Wind °T</label><input id="c2Wdir" type="number" step="5" value="280"></div>
           <div class="fld"><label>Wind kt</label><input id="c2Wvel" type="number" step="1" value="20"></div>
           <div class="fld"><label>RPM</label><input id="c2Rpm" type="number" step="50" value="2300"></div>
+        </div>
+        <div class="wxbox">
+          <label>Winds Aloft — Cruise 2</label>
+          <textarea id="c2Wx" placeholder="9,000   15°C (ISA+18)   225° at 22 kt"></textarea>
         </div>
         <div class="node-out" id="c2Out"></div>
       </div>
@@ -513,6 +519,20 @@ DA  = PA + 118.8 × (OAT − ISA)</span>
         <p><b>Field elevation is not pressure altitude.</b> Field elevation is a surveyed number off the chart and never changes. Pressure altitude is what the altimeter would read with 29.92 in the window, so it moves with the weather — and the altimeter setting comes off the METAR or ATIS. On a 29.85 day a 600 ft field sits at 670 ft PA; on a 30.42 day the same field is at 100 ft PA. That is why each card here has its own altimeter box next to the METAR: <b>you cannot get pressure altitude without the weather.</b></p>
         <p>Every POH performance table is entered with <b>pressure altitude</b>, never indicated. Density altitude is shown for situational awareness — it drives what the airplane actually feels like, but the 152 tables are indexed on PA and temperature separately.</p>
         <p>ISA deviation (OAT − ISA) picks the column in the cruise table: 20 °C below standard, standard, or 20 °C above. This page interpolates between those columns rather than rounding to the nearest.</p>
+
+        <h4 style="margin-top:18px">DO YOU PLAN A TRUE ALTITUDE OR A PRESSURE ALTITUDE?</h4>
+        <p><b>You plan and fly an indicated altitude.</b> 3,500 ft on the altimeter with the local setting in the window — that is what the VFR hemispheric rule means, what ATC assigns, and what keeps you off other traffic. Pressure altitude is only a <i>lookup key</i>: you convert to it to enter the performance tables, and then you go back to flying the indicated number.</p>
+        <p>Which setting? Legally you fly the setting of a station within 100 NM (91.121), so en route it changes as you go. For planning, use the one you actually have — departure. This page does exactly that: the departure altimeter converts every cruise level, and each cruise card shows the result.</p>
+        <p><b>Are you overthinking it? For cruise, yes — and here is the size of it.</b> Cruising 3,500 ft at 2300 RPM, sweeping the setting across a <i>full inch</i> of mercury (30.42 down to 29.42, which is 1,000 ft of pressure altitude):</p>
+        <table class="mini">
+          <tr><th>Setting</th><th>PA</th><th>%BHP</th><th>KTAS</th><th>GPH</th></tr>
+          <tr><td>30.42</td><td>3,000</td><td>64.0</td><td>95.4</td><td>5.21</td></tr>
+          <tr><td>29.92</td><td>3,500</td><td>63.1</td><td>95.2</td><td>5.13</td></tr>
+          <tr><td>29.42</td><td>4,000</td><td>62.3</td><td>95.0</td><td>5.05</td></tr>
+        </table>
+        <p>A whole inch moves true airspeed <b>0.4 kt</b> and fuel flow <b>0.16 gph</b>. A realistic error of a tenth of an inch moves them by essentially nothing. The climb is even less sensitive, because both ends of the subtraction shift together and it very nearly cancels.</p>
+        <p>So the setting is a rounding error <i>on this nav log</i>. Where pressure altitude genuinely bites is takeoff and landing distance, and density altitude on a hot day — the numbers that decide whether you clear the trees, not the ones that decide your ETA.</p>
+        <p>What <b>does</b> move the answer, in order: <b>RPM</b> (2000 vs 2400 RPM is 80 vs 101 kt — a fifth of your groundspeed), <b>wind</b> (tens of knots), and <b>temperature</b>, which barely touches KTAS but swings fuel flow about 9% across 40 °C. Spend your attention there.</p>
       </div>
 
       <div class="note-blk">
@@ -713,6 +733,8 @@ function cruisePerf(pa,rpm,isaDev){
   const t=hi===lo?0:(p-lo)/(hi-lo);
   const limitRpm=lerp(rLo.limitRpm,rHi.limitRpm,t);
   return{bhp:lerp(rLo.bhp,rHi.bhp,t),ktas:lerp(rLo.ktas,rHi.ktas,t),gph:lerp(rLo.gph,rHi.gph,t),
+    ends:{lo:{alt:lo,bhp:rLo.bhp,ktas:rLo.ktas,gph:rLo.gph},
+          hi:{alt:hi,bhp:rHi.bhp,ktas:rHi.ktas,gph:rHi.gph},t},
     rpmLimited:rpm>limitRpm?limitRpm:null,
     altClamped:pa<CRUISE_ALTS[0]?CRUISE_ALTS[0]:pa>CRUISE_ALTS[CRUISE_ALTS.length-1]?CRUISE_ALTS[CRUISE_ALTS.length-1]:null,
     bracket:[lo,hi]};
@@ -737,8 +759,8 @@ const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&g
 const ROWS_PER_PAGE = 11;
 const SETUP_IDS=['acDate','magVar','magDev','fuelCap','taxiFuel','reserveMin','routeDist',
   'depId','depElev','depAltim','depOat','depWx','climbTo1',
-  'c1Alt','c1Altim','c1Oat','c1Wdir','c1Wvel','c1Rpm',
-  'c2Start','climbTo2','c2Alt','c2Altim','c2Oat','c2Wdir','c2Wvel','c2Rpm',
+  'c1Alt','c1Oat','c1Wdir','c1Wvel','c1Rpm','c1Wx',
+  'c2Start','climbTo2','c2Alt','c2Oat','c2Wdir','c2Wvel','c2Rpm','c2Wx',
   'dstId','dstElev','dstAltim','dstOat','dstWx','tpa','descRate','descKias'];
 /* Two boxes, one value: "Climb to" on the climb card is the same number as the
    cruise altitude, so entering it in either place keeps the pair in step. */
@@ -756,7 +778,8 @@ const ACT_KEYS   = ['gsAct','ate','ata'];
 /* Header boxes that live on the form itself */
 let flight = { timeOff:'', gph:'', acN:'' };
 /* POH overrides — blank means "use the handbook figure" */
-let perfOv = { c1:{t:'',f:'',d:''}, c2:{t:'',f:'',d:''}, ds:{t:'',f:'',d:''} };
+let perfOv = { c1:{t:'',f:'',d:''}, c2:{t:'',f:'',d:''}, ds:{t:'',f:'',d:''},
+               cr1:{b:'',k:'',g:''}, cr2:{b:'',k:'',g:''} };
 let pages  = [];
 let pid = 1;
 let checkMode = false;
@@ -781,7 +804,11 @@ function computeProfile(){
   /* One altimeter setting per point — that is where pressure altitude actually
      comes from, and each one is read off that location's METAR / ATIS. */
   const depAltim=num($('depAltim'),29.92), dstAltim=num($('dstAltim'),29.92);
-  const c1Altim=num($('c1Altim'),29.92),   c2Altim=num($('c2Altim'),29.92);
+  /* Cruise levels use the departure setting. You fly an INDICATED altitude and
+     convert it to pressure altitude to enter the table; across a whole inch of
+     mercury that conversion moves the 152's cruise answer by under half a knot,
+     so a single planning setting is plenty. See note 4. */
+  const c1Altim=depAltim, c2Altim=depAltim;
   const depElev=num($('depElev')), depOat=num($('depOat'),15);
   const dstElev=num($('dstElev')), dstOat=num($('dstOat'),15);
   const tpaAgl=num($('tpa'),1000), routeD=Math.max(1,num($('routeDist'),80));
@@ -804,6 +831,7 @@ function computeProfile(){
 
   const cr1=cruisePerf(paC1,c1Rpm,isaC1);
   cr1.pa=paC1; cr1.isaDev=isaC1; cr1.da=densityAlt(paC1,c1Oat);
+  applyCruiseOverride(cr1,perfOv.cr1);
   cr1.casImplied=cr1.ktas*Math.sqrt(sigma(paC1,c1Oat));
 
   let climb2=null,cr2=null;
@@ -813,6 +841,7 @@ function computeProfile(){
     applyOverride(climb2, perfOv.c2);
     cr2=cruisePerf(paC2,c2Rpm,isaC2);
     cr2.pa=paC2; cr2.isaDev=isaC2; cr2.da=densityAlt(paC2,c2Oat);
+    applyCruiseOverride(cr2,perfOv.cr2);
     cr2.casImplied=cr2.ktas*Math.sqrt(sigma(paC2,c2Oat));
   }
 
@@ -844,6 +873,15 @@ function computeProfile(){
     c1:{alt:c1Alt,oat:c1Oat,rpm:c1Rpm,wind:c1W,perf:cr1,altim:c1Altim},
     c2:useStep?{alt:c2Alt,oat:c2Oat,rpm:c2Rpm,wind:c2W,perf:cr2,startNM:c2StartNM,altim:c2Altim}:null,
     climb1, climb2, desc };
+}
+
+/* Same idea as applyOverride, for the three figures you read off Fig 5-7 */
+function applyCruiseOverride(perf,ov){
+  const b=pf(ov.b), k=pf(ov.k), g=pf(ov.g);
+  perf.pohBhp=perf.bhp; perf.pohKtas=perf.ktas; perf.pohGph=perf.gph;
+  if(isFinite(b))perf.bhp=b;
+  if(isFinite(k))perf.ktas=k;
+  if(isFinite(g))perf.gph=g;
 }
 
 /* A typed override replaces the handbook figure; the POH value stays on .raw* */
@@ -943,8 +981,10 @@ function drawProfile(P,L,SEG){
     let g=`<line x1="${x}" y1="${y}" x2="${x}" y2="${Y(0)}" stroke="#26262f" stroke-dasharray="2 4"/>`;
     g+=`<circle cx="${x}" cy="${y}" r="5" fill="${col}" stroke="#0a0a0d" stroke-width="2"/>`;
     const ty=above?y-24:y+20;
-    g+=`<text x="${x}" y="${ty}" fill="${col}" font-size="12.5" font-weight="600" text-anchor="${anchor}" letter-spacing="1" font-family="${SVGF}">${esc(title)}</text>`;
-    if(sub)g+=`<text x="${x}" y="${ty+14}" fill="#a0a0b0" font-size="11" text-anchor="${anchor}" font-family="${SVGF}">${esc(sub)}</text>`;
+    /* nudge end-anchored labels clear of the axis lines they sit against */
+    const tx=x+(anchor==='start'?6:anchor==='end'?-6:0);
+    g+=`<text x="${tx}" y="${ty}" fill="${col}" font-size="12.5" font-weight="600" text-anchor="${anchor}" letter-spacing="1" font-family="${SVGF}">${esc(title)}</text>`;
+    if(sub)g+=`<text x="${tx}" y="${ty+14}" fill="#a0a0b0" font-size="11" text-anchor="${anchor}" font-family="${SVGF}">${esc(sub)}</text>`;
     return g;
   }
 
@@ -1044,13 +1084,14 @@ function drawNodeOuts(P){
     `<div class="rrow note">PA = field elevation + (29.92 − altimeter) × 1000. The setting comes off the METAR, which is why field elevation alone isn't enough.</div>`);
 
   set('c1Out',
-    row('Pressure alt',pa(P.c1.alt,P.c1.altim),'q')+
+    row('Pressure alt',pa(P.c1.alt,P.c1.altim)+` (on ${P.dep.altim.toFixed(2)})`,'q')+
     row('Density alt',`${f0(P.c1.perf.da)} ft`)+
     row('ISA / deviation',`${f0(isaTempC(P.c1.perf.pa))}°C · ${fSign(P.c1.perf.isaDev)}°`)+
-    row('TAS / GPH',`${f0(P.c1.perf.ktas)} kt · ${f1(P.c1.perf.gph)} gph`));
+    row('TAS / GPH',`${f0(P.c1.perf.ktas)} kt · ${f1(P.c1.perf.gph)} gph`)+
+    `<div class="rrow note">You fly the indicated altitude; PA is only to enter Fig 5-7. Across a whole inch of mercury that shifts the 152's KTAS by under half a knot.</div>`);
 
   if(P.c2)set('c2Out',
-    row('Pressure alt',pa(P.c2.alt,P.c2.altim),'q')+
+    row('Pressure alt',pa(P.c2.alt,P.c2.altim)+` (on ${P.dep.altim.toFixed(2)})`,'q')+
     row('Density alt',`${f0(P.c2.perf.da)} ft`)+
     row('ISA / deviation',`${f0(isaTempC(P.c2.perf.pa))}°C · ${fSign(P.c2.perf.isaDev)}°`)+
     row('TAS / GPH',`${f0(P.c2.perf.ktas)} kt · ${f1(P.c2.perf.gph)} gph`));
@@ -1093,6 +1134,48 @@ function climbWork(c,label){
   the bottom figure isn't zero.</div>`;
 }
 
+/*
+ * Fig 5-7 interpolation shown the way it is read: the table is published every
+ * 2,000 ft, so you read your RPM row in both bracketing blocks and interpolate
+ * between them. (The temperature columns are blended the same way first.)
+ */
+function cruiseWork(perf,rpm){
+  const e=perf.ends; if(!e)return '';
+  const line=(lbl,v,cls='')=>`<tr class="${cls}"><td>${lbl}</td><td>${f0(v.bhp)}</td>
+    <td>${v.ktas.toFixed(1)}</td><td>${v.gph.toFixed(2)}</td></tr>`;
+  return `<table class="subtab">
+    <tr><th>FIG 5-7 @ ${f0(rpm)} RPM</th><th>%BHP</th><th>KTAS</th><th>GPH</th></tr>
+    ${line(`at ${e.lo.alt.toLocaleString()} ft PA`,e.lo)}
+    ${line(`at ${e.hi.alt.toLocaleString()} ft PA`,e.hi)}
+    <tr class="res"><td>→ ${f0(perf.pa)} ft PA</td><td>${f0(perf.pohBhp)}</td>
+      <td>${perf.pohKtas.toFixed(1)}</td><td>${perf.pohGph.toFixed(2)}</td></tr>
+  </table>
+  <div class="rrow note" style="padding-top:0">Both rows are already blended between the
+  20 °C-below / standard / 20 °C-above columns for ISA ${fSign(perf.isaDev)}°, then interpolated
+  on altitude — ${(e.t*100).toFixed(0)}% of the way from ${e.lo.alt.toLocaleString()} to ${e.hi.alt.toLocaleString()} ft.</div>`;
+}
+
+/* One card per cruise level: the lookup, the work, and boxes to type your own */
+function cruiseCard(title,leg,perf,slot){
+  return `<div class="rcard">
+    <h5>${title} <span class="tag cruise">FIG 5-7</span></h5>
+    ${row('Altitude (indicated)',`${f0(leg.alt)} ft`)}
+    ${row('Pressure alt',`${f0(perf.pa)} ft`,'hi')}
+    ${row('Density alt',`${f0(perf.da)} ft`)}
+    ${row('OAT / ISA dev',`${f0(leg.oat)}°C / ${fSign(perf.isaDev)}°C`)}
+    ${row('Wind',`${fDeg(leg.wind.d)} at ${f0(leg.wind.v)} kt`)}
+    ${row('RPM',`${f0(leg.rpm)}`)}
+    ${cruiseWork(perf,leg.rpm)}
+    ${ovRow('% BHP',perf,slot,'b',f0(perf.pohBhp),'%')}
+    ${ovRow('KTAS',perf,slot,'k',f0(perf.pohKtas),'kt')}
+    ${ovRow('GPH',perf,slot,'g',f1(perf.pohGph),'gph')}
+    ${row('Implied CAS',`${f0(perf.ktas*Math.sqrt(sigma(perf.pa,leg.oat)))} kt`)}
+    ${perf.rpmLimited?`<div class="rrow note">⚠ ${f0(leg.rpm)} RPM is above the table at this temperature — used ${f0(perf.rpmLimited)} RPM.</div>`:''}
+    ${perf.altClamped?`<div class="rrow note">⚠ Cruise table spans 2,000–12,000 ft PA — clamped to ${perf.altClamped.toLocaleString()} ft.</div>`:''}
+    <div class="rrow note">The three boxes hold the interpolated handbook figures until you type your own reading off the chart.</div>
+  </div>`;
+}
+
 function drawPerf(P,L){
   const cards=[];
   const c=P.climb1;
@@ -1112,22 +1195,7 @@ function drawPerf(P,L){
     <div class="rrow note">The three boxes hold the handbook figure until you type your own. Ground distance applies your leg's course and wind to the zero-wind handbook distance.</div>
   </div>`);
 
-  const p1=P.c1.perf;
-  cards.push(`<div class="rcard">
-    <h5>CRUISE 1 <span class="tag cruise">FIG 5-7</span></h5>
-    ${row('Altitude / PA',`${f0(P.c1.alt)} / ${f0(p1.pa)} ft`)}
-    ${row('Density alt',`${f0(p1.da)} ft`)}
-    ${row('OAT / ISA',`${f0(P.c1.oat)}°C / ${fSign(p1.isaDev)}°C`)}
-    ${row('RPM',`${f0(P.c1.rpm)}`)}
-    ${row('Table bracket',`${p1.bracket[0].toLocaleString()} – ${p1.bracket[1].toLocaleString()} ft`)}
-    <div class="rsep"></div>
-    ${row('% BHP',`${f0(p1.bhp)} %`,'big')}
-    ${row('TAS',`${f0(p1.ktas)} kt`,'big')}
-    ${row('FUEL FLOW',`${f1(p1.gph)} gph`,'big')}
-    ${row('Implied CAS',`${f0(p1.casImplied)} kt`)}
-    ${p1.rpmLimited?`<div class="rrow note">⚠ ${f0(P.c1.rpm)} RPM is above the table at this temperature — used ${f0(p1.rpmLimited)} RPM.</div>`:''}
-    ${p1.altClamped?`<div class="rrow note">⚠ Cruise table spans 2,000–12,000 ft PA — clamped to ${p1.altClamped.toLocaleString()} ft.</div>`:''}
-  </div>`);
+  cards.push(cruiseCard('CRUISE 1',P.c1,P.c1.perf,'cr1'));
 
   if(P.c2){
     const c2=P.climb2,p2=P.c2.perf;
@@ -1145,18 +1213,7 @@ function drawPerf(P,L){
       ${row('Ground dist (wind)',`${f1(L.climb2NM)} NM`,'hi')}
       <div class="rrow note">A step climb is the same Fig 5-6 subtraction run between the two cruise altitudes.</div>
     </div>`);
-    cards.push(`<div class="rcard">
-      <h5>CRUISE 2 <span class="tag cruise">FIG 5-7</span></h5>
-      ${row('Altitude / PA',`${f0(P.c2.alt)} / ${f0(p2.pa)} ft`)}
-      ${row('Density alt',`${f0(p2.da)} ft`)}
-      ${row('OAT / ISA',`${f0(P.c2.oat)}°C / ${fSign(p2.isaDev)}°C`)}
-      ${row('RPM',`${f0(P.c2.rpm)}`)}
-      <div class="rsep"></div>
-      ${row('% BHP',`${f0(p2.bhp)} %`,'big')}
-      ${row('TAS',`${f0(p2.ktas)} kt`,'big')}
-      ${row('FUEL FLOW',`${f1(p2.gph)} gph`,'big')}
-      ${p2.rpmLimited?`<div class="rrow note">⚠ RPM above table at this temp — used ${f0(p2.rpmLimited)}.</div>`:''}
-    </div>`);
+    cards.push(cruiseCard('CRUISE 2',P.c2,p2,'cr2'));
   }
 
   const d=P.desc;
@@ -1221,12 +1278,16 @@ function solve(P){
    * The Altitude column holds the cruise altitude (what you'd write on the form),
    * so deriving TAS from that altitude would read several knots fast.
    */
-  let climbSeen=0;
+  let climbSeen=0, cruiseSeen=0;
   const segHint=r=>{
     if(!P)return null;
     if(r.phase==='CLIMB'){const c=(climbSeen++===0?P.climb1:(P.climb2||P.climb1));
       return {fuel:c.fuel,tas:c.ktas};}
     if(r.phase==='DESC') return {fuel:P.desc.fuel,tas:P.desc.ktas};
+    /* Cruise TAS is read off Fig 5-7, not worked up from CAS, and each level
+       has its own fuel flow — one GPH box can't serve two power settings. */
+    if(r.phase==='CRUISE'){const cc=(cruiseSeen++===0?P.c1:(P.c2||P.c1));
+      return {gph:cc.perf.gph,tas:cc.perf.ktas};}
     return null;
   };
 
@@ -1262,9 +1323,11 @@ function solve(P){
     const eteCalc=(isFinite(distLeg)&&isFinite(gsEff)&&gsEff>0)?distLeg/gsEff*60:NaN;
     const eteEff=isFinite(pf(r.ete))?pf(r.ete):eteCalc;
 
-    /* Fuel: handbook figure for climb/descent legs, GPH × ETE for the rest */
+    /* Fuel: fixed handbook figure for climb/descent, otherwise GPH × ETE —
+       using that leg's own flow if it has one, else the form's GPH box. */
+    const flow=hint&&isFinite(hint.gph)?hint.gph:gGph;
     const fuelCalc=hint&&isFinite(hint.fuel)?hint.fuel
-      :((isFinite(gGph)&&isFinite(eteEff))?gGph*eteEff/60:NaN);
+      :((isFinite(flow)&&isFinite(eteEff))?flow*eteEff/60:NaN);
     const fuelEff=isFinite(pf(r.fuel))?pf(r.fuel):fuelCalc;
 
     /* Cumulative — only advance on rows that actually carry a leg */
