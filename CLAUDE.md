@@ -6,7 +6,10 @@ A static multi-page site of flight-training tools, hosted on GitHub Pages. `inde
 ## Data Accuracy Rule (non-negotiable)
 All values — airspeeds, weight limits, CG envelopes, checklists, procedures — must come from:
 - Aircraft POH / AFM (P2006T, C-152, C-172)
-- School-specific maneuvers guide
+- School-specific maneuvers guide — **US Aviation Academy SEL Maneuvers Guide, Revision 2 (3/16/2025)**,
+  source PDF `~/Downloads/USAA-SEL-Maneuvers-Guide-Rev-2-3.16.2025-2.pdf`.
+  Transcribed into `maneuvers-data.js`, which carries per-maneuver page numbers so any
+  value can be checked against the PDF. Edit that file only against the source.
 - School-specific normal and emergency checklists
 
 Never estimate, approximate, or invent values. If a number is in this tool, it has a source document.
@@ -33,5 +36,7 @@ Never estimate, approximate, or invent values. If a number is in this tool, it h
 | `mnemonics.html` | Mnemonics reference |
 | `general_knowledge.html` | Regs / airspace knowledge |
 | `written-exams.html` | FOI + FIA written exam prep |
-| `p2006t_chairfly.html` | Chairfly trainer with G1000 simulation |
+| `p2006t_chairfly.html` | Chairfly trainer with G1000 simulation. Requires landscape orientation. |
+| `maneuvers.html` | SEL maneuvers study & test — reference, flashcards, step-ordering test, ACS limits test, speed/power tables. Aircraft selector (C-152 default / C-172) substitutes V-speeds into procedure text; standard selector (Private / Commercial / CFI) filters maneuvers and picks the ACS column. |
+| `maneuvers-data.js` | Verbatim transcription of the SEL Maneuvers Guide Rev 2 — speeds, power tables, procedures, ACS standards. The single source of truth for `maneuvers.html`; every entry cites its guide page. |
 | `navlog.html` | C-152 cross-country planner — POH Fig 5-1/5-6/5-7 data baked in, vertical profile view, wind triangle, fillable Jeppesen VFR nav log. Descent figures are user-set, not POH. |

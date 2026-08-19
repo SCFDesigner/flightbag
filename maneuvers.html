@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>SEL Maneuvers — Study &amp; Test</title>
+<style>
+:root {
+  /* ── surfaces ── */
+  --bg0:#08080a; --bg1:#0d0d10; --bg2:#121217; --bg3:#17171d;
+  --bdr:#1e1e22; --bdr2:#252528; --bdr3:#31313a;
+  /* ── text ── */
+  --tx1:#ddd; --tx2:#999; --tx3:#666; --tx4:#444; --tx5:#333;
+  /* ── accents ── */
+  --acc:#8f6; --acc-bg:#0c1a08; --acc-dim:#4a7a34;
+  --ok:#8f6; --ok-bg:#0c1a08;
+  --bad:#ff5a5a; --bad-bg:#1e0a0a;
+  --warn:#fc6; --info:#4af;
+  /* ── geometry ── */
+  --r1:5px; --r2:8px; --r3:12px;
+  --sp1:6px; --sp2:10px; --sp3:14px; --sp4:20px; --sp5:28px; --sp6:40px;
+  /* ── type ── */
+  --f0:9px; --f1:10px; --f2:11px; --f3:12px; --f4:13px; --f5:15px; --f6:18px; --f7:24px;
+  --ls1:1px; --ls2:2px; --ls3:3px; --ls4:4px;
+  --mono:'Courier New', Courier, monospace;
+}
+
+* { box-sizing:border-box; margin:0; padding:0; }
+html, body { background:var(--bg0); }
+body {
+  min-height:100vh; font-family:var(--mono); color:var(--tx1);
+  font-size:var(--f3); line-height:1.6;
+  padding-bottom:var(--sp6);
+  -webkit-text-size-adjust:100%;
+}
+sub { font-size:0.72em; }
+::selection { background:var(--acc); color:#000; }
+
+/* ══════════ HEADER ══════════ */
+header {
+  position:sticky; top:0; z-index:40;
+  background:var(--bg0); border-bottom:1px solid var(--bdr);
+  padding:var(--sp3) var(--sp4) 0;
+}
+.hdr-top { display:flex; align-items:center; gap:var(--sp3); flex-wrap:wrap; margin-bottom:var(--sp3); }
+.home {
+  color:var(--tx4); text-decoration:none; font-size:var(--f5);
+  padding:2px 8px; border:1px solid var(--bdr2); border-radius:var(--r1);
+  transition:color .15s, border-color .15s;
+}
+.home:hover { color:var(--acc); border-color:var(--acc); }
+h1 { font-size:var(--f4); letter-spacing:var(--ls4); color:#fff; font-weight:normal; }
+h1 span { color:var(--tx4); letter-spacing:var(--ls2); font-size:var(--f1); display:block; margin-top:3px; }
+.hdr-spacer { flex:1; }
+
+/* selects */
+.sel-group { display:flex; align-items:center; gap:var(--sp1); }
+.sel-label { font-size:var(--f0); letter-spacing:var(--ls2); color:var(--tx5); }
+select {
+  font-family:var(--mono); font-size:var(--f2); letter-spacing:var(--ls1);
+  background:var(--bg2); color:var(--tx1); border:1px solid var(--bdr2);
+  border-radius:var(--r1); padding:5px 8px; cursor:pointer; outline:none;
+}
+select:focus { border-color:var(--acc); }
+
+/* mode tabs */
+#modes { display:flex; gap:2px; overflow-x:auto; scrollbar-width:none; }
+#modes::-webkit-scrollbar { display:none; }
+.mode-btn {
+  font-family:var(--mono); font-size:var(--f2); letter-spacing:var(--ls2);
+  background:none; border:none; border-bottom:2px solid transparent;
+  color:var(--tx4); padding:var(--sp2) var(--sp3); cursor:pointer; white-space:nowrap;
+  transition:color .15s, border-color .15s;
+}
+.mode-btn:hover { color:var(--tx2); }
+.mode-btn.on { color:var(--acc); border-bottom-color:var(--acc); }
+
+/* ══════════ LAYOUT ══════════ */
+main { max-width:1180px; margin:0 auto; padding:var(--sp4); }
+.panel { display:none; }
+.panel.on { display:block; }
+
+/* filter chips */
+#filters { display:flex; gap:var(--sp1); flex-wrap:wrap; margin-bottom:var(--sp4); align-items:center; }
+.chip {
+  font-family:var(--mono); font-size:var(--f1); letter-spacing:var(--ls1);
+  background:var(--bg1); border:1px solid var(--bdr2); color:var(--tx3);
+  border-radius:99px; padding:4px 11px; cursor:pointer; transition:all .15s;
+}
+.chip:hover { color:var(--tx1); border-color:var(--bdr3); }
+.chip.on { color:#000; font-weight:bold; }
+.chip-all { margin-right:var(--sp2); }
+
+/* ══════════ REFERENCE ══════════ */
+#ref-wrap { display:grid; grid-template-columns:280px 1fr; gap:var(--sp4); align-items:start; }
+#ref-list {
+  background:var(--bg1); border:1px solid var(--bdr); border-radius:var(--r2);
+  overflow:hidden; position:sticky; top:118px; max-height:calc(100vh - 140px); overflow-y:auto;
+}
+.ref-cat { font-size:var(--f0); letter-spacing:var(--ls2); color:var(--tx5); padding:var(--sp3) var(--sp3) var(--sp1); }
+.ref-item {
+  display:block; width:100%; text-align:left; font-family:var(--mono);
+  font-size:var(--f2); letter-spacing:var(--ls1); color:var(--tx2);
+  background:none; border:none; border-left:2px solid transparent;
+  padding:7px var(--sp3); cursor:pointer; transition:all .12s;
+}
+.ref-item:hover { background:var(--bg2); color:var(--tx1); }
+.ref-item.on { background:var(--bg2); color:#fff; }
+
+#ref-detail { background:var(--bg1); border:1px solid var(--bdr); border-radius:var(--r2); padding:var(--sp5); }
+.m-title { font-size:var(--f6); letter-spacing:var(--ls3); color:#fff; font-weight:normal; }
+.m-sub { font-size:var(--f2); color:var(--tx3); letter-spacing:var(--ls1); margin-top:4px; }
+.m-badges { display:flex; gap:var(--sp1); flex-wrap:wrap; margin:var(--sp3) 0 var(--sp4); }
+.badge {
+  font-size:var(--f0); letter-spacing:var(--ls1); padding:3px 9px;
+  border-radius:99px; border:1px solid var(--bdr2); color:var(--tx3);
+}
+.badge.lvl { border-color:var(--acc-dim); color:var(--acc); }
+.badge.src { border-color:var(--bdr2); color:var(--tx4); }
+
+.sect { margin-top:var(--sp5); }
+.sect-h {
+  font-size:var(--f1); letter-spacing:var(--ls3); color:var(--acc);
+  border-bottom:1px solid var(--bdr); padding-bottom:var(--sp1); margin-bottom:var(--sp3);
+}
+.sect p { color:var(--tx2); }
+.sect ol { margin:0; padding-left:0; list-style:none; counter-reset:st; }
+.sect ol li {
+  counter-increment:st; position:relative; padding-left:34px;
+  margin-bottom:var(--sp2); color:var(--tx2);
+}
+.sect ol li::before {
+  content:counter(st); position:absolute; left:0; top:0;
+  width:22px; text-align:right; color:var(--tx5); font-size:var(--f2);
+}
+.sect ul { margin:0; padding-left:18px; }
+.sect ul li { color:var(--tx2); margin-bottom:5px; }
+.sect ul li::marker { color:var(--tx5); }
+.notebox {
+  background:var(--bg2); border-left:2px solid var(--warn); border-radius:0 var(--r1) var(--r1) 0;
+  padding:var(--sp2) var(--sp3); margin-bottom:var(--sp2); color:var(--tx2); font-size:var(--f2);
+}
+.memaid { background:var(--acc-bg); border-left:2px solid var(--acc); color:var(--acc); }
+
+/* speed inline pill */
+.spd {
+  color:var(--info); background:#0a1420; border:1px solid #1d3550;
+  border-radius:3px; padding:0 5px; font-size:0.88em; white-space:nowrap;
+}
+
+/* tables */
+table { width:100%; border-collapse:collapse; font-size:var(--f2); }
+th, td { text-align:left; padding:var(--sp2) var(--sp3); border-bottom:1px solid var(--bdr); vertical-align:top; }
+th { color:var(--tx5); font-weight:normal; font-size:var(--f0); letter-spacing:var(--ls2); }
+td:first-child { color:var(--tx3); white-space:nowrap; width:1%; padding-right:var(--sp4); }
+td { color:var(--tx1); }
+tr:last-child td { border-bottom:none; }
+.tbl-wrap { overflow-x:auto; }
+
+/* ══════════ FLASHCARDS ══════════ */
+#fc-stage { max-width:760px; margin:0 auto; }
+.card {
+  background:var(--bg1); border:1px solid var(--bdr2); border-radius:var(--r3);
+  min-height:340px; padding:var(--sp5); cursor:pointer;
+  display:flex; flex-direction:column; position:relative;
+  transition:border-color .15s;
+}
+.card:hover { border-color:var(--bdr3); }
+.card-kind { font-size:var(--f0); letter-spacing:var(--ls3); color:var(--tx5); margin-bottom:var(--sp3); }
+.card-front { flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; }
+.card-q { font-size:var(--f7); letter-spacing:var(--ls2); color:#fff; line-height:1.4; }
+.card-prompt { font-size:var(--f2); letter-spacing:var(--ls1); color:var(--tx3); margin-top:var(--sp3); }
+.card-back { flex:1; }
+.card-hint {
+  position:absolute; bottom:var(--sp3); left:0; right:0; text-align:center;
+  font-size:var(--f0); letter-spacing:var(--ls2); color:var(--tx3);
+}
+.fc-bar { display:flex; align-items:center; gap:var(--sp3); margin-top:var(--sp3); flex-wrap:wrap; }
+.fc-count { font-size:var(--f1); letter-spacing:var(--ls1); color:var(--tx4); }
+
+/* ══════════ BUTTONS ══════════ */
+.btn {
+  font-family:var(--mono); font-size:var(--f2); letter-spacing:var(--ls2);
+  background:var(--bg2); border:1px solid var(--bdr2); color:var(--tx2);
+  border-radius:var(--r1); padding:9px var(--sp4); cursor:pointer; transition:all .15s;
+}
+.btn:hover:not(:disabled) { border-color:var(--acc); color:var(--acc); background:var(--acc-bg); }
+.btn:disabled { opacity:.32; cursor:not-allowed; }
+.btn.primary { border-color:var(--acc-dim); color:var(--acc); }
+.btn.primary:hover:not(:disabled) { background:var(--acc); color:#000; border-color:var(--acc); }
+.btn-row { display:flex; gap:var(--sp2); flex-wrap:wrap; align-items:center; }
+
+/* ══════════ TESTS ══════════ */
+.test-head { display:flex; align-items:center; gap:var(--sp3); flex-wrap:wrap; margin-bottom:var(--sp4); }
+.q-count { font-size:var(--f1); letter-spacing:var(--ls2); color:var(--tx4); }
+.score { font-size:var(--f1); letter-spacing:var(--ls2); color:var(--tx4); }
+.score b { color:var(--acc); font-weight:normal; }
+.progress { height:2px; background:var(--bdr); border-radius:2px; overflow:hidden; flex-basis:100%; }
+.progress i { display:block; height:100%; background:var(--acc); transition:width .3s; }
+
+.q-card { background:var(--bg1); border:1px solid var(--bdr); border-radius:var(--r2); padding:var(--sp5); }
+.q-maneuver { font-size:var(--f6); letter-spacing:var(--ls2); color:#fff; }
+.q-phase { font-size:var(--f1); letter-spacing:var(--ls3); color:var(--acc); margin-top:5px; }
+.q-ask { font-size:var(--f4); color:var(--tx2); margin-top:var(--sp3); }
+
+/* step ordering */
+.slots { margin:var(--sp4) 0; display:flex; flex-direction:column; gap:var(--sp1); }
+.slot {
+  display:flex; align-items:flex-start; gap:var(--sp3);
+  background:var(--bg2); border:1px solid var(--bdr); border-radius:var(--r1);
+  padding:var(--sp2) var(--sp3); min-height:40px;
+}
+.slot.empty { border-style:dashed; border-color:var(--bdr2); }
+.slot-n { color:var(--tx5); font-size:var(--f2); min-width:20px; text-align:right; padding-top:1px; }
+.slot-txt { flex:1; color:var(--tx1); font-size:var(--f2); cursor:pointer; }
+.slot.empty .slot-txt { color:var(--tx5); cursor:default; }
+.slot.right { border-color:var(--ok); background:var(--ok-bg); }
+.slot.wrong { border-color:var(--bad); background:var(--bad-bg); }
+.slot-fix { font-size:var(--f1); color:var(--ok); margin-top:5px; padding-left:2px; border-top:1px dashed #2a3a22; padding-top:5px; }
+.slot-fix b { color:var(--tx3); font-weight:normal; letter-spacing:var(--ls1); }
+.slot-mark { font-size:var(--f4); padding-top:1px; }
+
+.bank-h { font-size:var(--f0); letter-spacing:var(--ls2); color:var(--tx5); margin:var(--sp4) 0 var(--sp2); }
+.bank { display:flex; flex-direction:column; gap:var(--sp1); }
+.opt {
+  text-align:left; font-family:var(--mono); font-size:var(--f2); line-height:1.55;
+  background:var(--bg2); border:1px solid var(--bdr2); color:var(--tx2);
+  border-radius:var(--r1); padding:var(--sp2) var(--sp3); cursor:pointer; transition:all .12s;
+}
+.opt:hover:not(:disabled) { border-color:var(--acc); color:var(--tx1); background:var(--acc-bg); }
+.opt:disabled { opacity:.25; cursor:not-allowed; }
+
+/* multiple choice */
+.mc { display:flex; flex-direction:column; gap:var(--sp2); margin:var(--sp4) 0; }
+.mc .opt { font-size:var(--f4); padding:var(--sp3) var(--sp4); }
+.mc .opt.right { border-color:var(--ok); background:var(--ok-bg); color:var(--ok); }
+.mc .opt.wrong { border-color:var(--bad); background:var(--bad-bg); color:var(--bad); }
+.mc .opt.right:disabled, .mc .opt.wrong:disabled { opacity:1; }
+
+.verdict { font-size:var(--f2); letter-spacing:var(--ls1); margin-top:var(--sp3); }
+.verdict.ok { color:var(--ok); }
+.verdict.no { color:var(--bad); }
+.srcline { font-size:var(--f1); color:var(--tx3); margin-top:var(--sp2); letter-spacing:var(--ls1); }
+
+/* results */
+.results { text-align:center; padding:var(--sp6) var(--sp4); }
+.res-pct { font-size:56px; letter-spacing:var(--ls2); color:var(--acc); line-height:1; }
+.res-sub { font-size:var(--f2); letter-spacing:var(--ls2); color:var(--tx3); margin-top:var(--sp3); }
+.res-miss { text-align:left; max-width:640px; margin:var(--sp5) auto 0; }
+.res-miss-h { font-size:var(--f0); letter-spacing:var(--ls3); color:var(--tx5); margin-bottom:var(--sp2); }
+.res-row { border-bottom:1px solid var(--bdr); padding:var(--sp2) 0; font-size:var(--f2); color:var(--tx3); }
+.res-row b { color:var(--tx1); font-weight:normal; }
+
+/* ══════════ SPEEDS ══════════ */
+.cols { display:grid; grid-template-columns:repeat(auto-fit, minmax(320px,1fr)); gap:var(--sp4); align-items:start; }
+.box { background:var(--bg1); border:1px solid var(--bdr); border-radius:var(--r2); overflow:hidden; }
+.box-h {
+  font-size:var(--f1); letter-spacing:var(--ls3); color:var(--acc);
+  padding:var(--sp3) var(--sp4); border-bottom:1px solid var(--bdr); background:var(--bg2);
+}
+.box table td:first-child { color:var(--tx2); }
+.box .num { color:#fff; text-align:right; white-space:nowrap; }
+.box .num.dim { color:var(--tx3); }
+.box .num .alt { color:var(--tx4); font-size:var(--f1); }
+.box .sub { color:var(--tx4); font-size:var(--f0); }
+
+.empty-msg { color:var(--tx4); text-align:center; padding:var(--sp6) var(--sp4); font-size:var(--f2); letter-spacing:var(--ls1); }
+.footnote { color:var(--tx4); font-size:var(--f1); margin-top:var(--sp4); line-height:1.7; }
+
+/* ══════════ MOBILE ══════════ */
+@media (max-width:860px) {
+  #ref-wrap { grid-template-columns:1fr; }
+  #ref-list { position:static; max-height:300px; }
+  #ref-detail { padding:var(--sp4); }
+}
+@media (max-width:640px) {
+  header { padding:var(--sp2) var(--sp3) 0; }
+  main { padding:var(--sp3); }
+  h1 { font-size:var(--f3); letter-spacing:var(--ls2); }
+  .hdr-top { gap:var(--sp2); }
+  .sel-label { display:none; }
+  .card { min-height:280px; padding:var(--sp4); }
+  .card-q { font-size:var(--f6); }
+  .q-card { padding:var(--sp4); }
+  .q-maneuver { font-size:var(--f5); }
+  .res-pct { font-size:44px; }
+  .sect ol li { padding-left:26px; }
+  .sect ol li::before { width:16px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hdr-top">
+    <a class="home" href="index.html" title="Home">⌂</a>
+    <h1>SEL MANEUVERS<span>US AVIATION ACADEMY · SEL GUIDE REV 2</span></h1>
+    <div class="hdr-spacer"></div>
+    <div class="sel-group">
+      <span class="sel-label">AIRCRAFT</span>
+      <select id="ac-sel" aria-label="Aircraft"></select>
+    </div>
+    <div class="sel-group">
+      <span class="sel-label">STANDARD</span>
+      <select id="lvl-sel" aria-label="Certificate standard"></select>
+    </div>
+  </div>
+  <div id="modes"></div>
+</header>
+
+<main>
+  <div id="filters"></div>
+
+  <!-- ── REFERENCE ── -->
+  <section class="panel" id="p-ref">
+    <div id="ref-wrap">
+      <nav id="ref-list"></nav>
+      <div id="ref-detail"></div>
+    </div>
+  </section>
+
+  <!-- ── FLASHCARDS ── -->
+  <section class="panel" id="p-cards">
+    <div id="fc-stage"></div>
+  </section>
+
+  <!-- ── STEP TEST ── -->
+  <section class="panel" id="p-steps"></section>
+
+  <!-- ── LIMITS TEST ── -->
+  <section class="panel" id="p-limits"></section>
+
+  <!-- ── SPEEDS ── -->
+  <section class="panel" id="p-speeds"></section>
+</main>
+
+<script src="maneuvers-data.js"></script>
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   STATE
+   ══════════════════════════════════════════════════════════════════ */
+const LS = 'sel-maneuvers-v1';
+const state = Object.assign({
+  ac: 'C-152',        // Cessna 152 is the default aircraft
+  lvl: 'P',
+  mode: 'ref',
+  cats: [],           // empty = all categories
+  refId: null
+}, JSON.parse(localStorage.getItem(LS) || '{}'));
+
+function save() {
+  localStorage.setItem(LS, JSON.stringify({
+    ac: state.ac, lvl: state.lvl, mode: state.mode, cats: state.cats, refId: state.refId
+  }));
+}
+
+const MODES = [
+  { k:'ref',    label:'REFERENCE'  },
+  { k:'cards',  label:'FLASHCARDS' },
+  { k:'steps',  label:'STEP TEST'  },
+  { k:'limits', label:'LIMITS TEST'},
+  { k:'speeds', label:'SPEEDS'     }
+];
+
+/* ══════════════════════════════════════════════════════════════════
+   HELPERS
+   ══════════════════════════════════════════════════════════════════ */
+const $  = s => document.querySelector(s);
+const el = (t, c, h) => { const n = document.createElement(t); if (c) n.className = c; if (h != null) n.innerHTML = h; return n; };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const shuffle = a => { const r = a.slice(); for (let i = r.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; } return r; };
+const stripTags = s => String(s).replace(/<[^>]+>/g, '');
+
+/* Category colours are written in both #abc and #aabbcc form. Expand to six
+   digits before appending an alpha pair — "#6cf" + "cc" is not a valid colour
+   and silently falls back to the inherited one. */
+const hex6 = c => c.length === 4 ? '#' + c[1] + c[1] + c[2] + c[2] + c[3] + c[3] : c;
+const fade = (c, aa) => hex6(c) + aa;
+
+/* Substitute [VR] style tokens with the selected aircraft's speed. */
+function speedFor(key) {
+  const list = AIRCRAFT[state.ac].speeds;
+  return list.find(s => s.k === key) || null;
+}
+function subSpeeds(text) {
+  return String(text).replace(/\[([A-Z0-9]+)\]/g, (m, key) => {
+    const s = speedFor(key);
+    if (!s) return m;
+    return s.sym + ' <span class="spd">' + s.kts + ' kt</span>';
+  });
+}
+
+/* Maneuvers visible under the current standard + category filter. */
+function activeManeuvers() {
+  return MANEUVERS.filter(m =>
+    m.levels.includes(state.lvl) &&
+    (state.cats.length === 0 || state.cats.includes(m.cat))
+  );
+}
+/* ACS column for the selected level, falling back to the single published column. */
+function acsFor(m) {
+  return m.acs[state.lvl] || m.acs.C || m.acs.I || m.acs.P || null;
+}
+function acsLevelUsed(m) {
+  if (m.acs[state.lvl]) return state.lvl;
+  if (m.acs.C) return 'C';
+  if (m.acs.I) return 'I';
+  if (m.acs.P) return 'P';
+  return null;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   CHROME — selects, mode tabs, category chips
+   ══════════════════════════════════════════════════════════════════ */
+function buildChrome() {
+  const ac = $('#ac-sel');
+  ac.innerHTML = '';
+  Object.entries(AIRCRAFT).forEach(([k, v]) => {
+    const o = el('option'); o.value = k; o.textContent = v.label; ac.appendChild(o);
+  });
+  ac.value = state.ac;
+  ac.onchange = () => { state.ac = ac.value; save(); renderAll(); };
+
+  const lv = $('#lvl-sel');
+  lv.innerHTML = '';
+  Object.entries(LEVELS).forEach(([k, v]) => {
+    const o = el('option'); o.value = k; o.textContent = v.label; lv.appendChild(o);
+  });
+  lv.value = state.lvl;
+  lv.onchange = () => { state.lvl = lv.value; state.refId = null; save(); renderAll(); };
+
+  const mw = $('#modes'); mw.innerHTML = '';
+  MODES.forEach(m => {
+    const b = el('button', 'mode-btn' + (state.mode === m.k ? ' on' : ''), m.label);
+    b.onclick = () => { state.mode = m.k; save(); renderAll(); };
+    mw.appendChild(b);
+  });
+}
+
+function buildFilters() {
+  const f = $('#filters'); f.innerHTML = '';
+  // Category filtering has no meaning on the speeds reference.
+  f.style.display = state.mode === 'speeds' ? 'none' : 'flex';
+  if (state.mode === 'speeds') return;
+
+  const all = el('button', 'chip chip-all' + (state.cats.length === 0 ? ' on' : ''), 'ALL');
+  if (state.cats.length === 0) { all.style.background = '#fff'; all.style.borderColor = '#fff'; }
+  all.onclick = () => { state.cats = []; save(); renderAll(); };
+  f.appendChild(all);
+
+  // Only offer categories that actually contain maneuvers at this standard.
+  const avail = [...new Set(MANEUVERS.filter(m => m.levels.includes(state.lvl)).map(m => m.cat))];
+  Object.entries(CATEGORIES).forEach(([k, v]) => {
+    if (!avail.includes(k)) return;
+    const on = state.cats.includes(k);
+    const c = el('button', 'chip' + (on ? ' on' : ''), v.label.toUpperCase());
+    if (on) { c.style.background = v.color; c.style.borderColor = v.color; }
+    else    { c.style.borderColor = fade(v.color, '55'); c.style.color = v.color; }
+    c.onclick = () => {
+      state.cats = on ? state.cats.filter(x => x !== k) : state.cats.concat(k);
+      save(); renderAll();
+    };
+    f.appendChild(c);
+  });
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   PANEL 1 — REFERENCE
+   ══════════════════════════════════════════════════════════════════ */
+function renderRef() {
+  const list = $('#ref-list'), detail = $('#ref-detail');
+  const ms = activeManeuvers();
+  list.innerHTML = ''; detail.innerHTML = '';
+
+  if (!ms.length) {
+    detail.innerHTML = '<div class="empty-msg">No maneuvers match this standard and filter.</div>';
+    return;
+  }
+  if (!state.refId || !ms.find(m => m.id === state.refId)) state.refId = ms[0].id;
+
+  // grouped nav
+  Object.keys(CATEGORIES).forEach(cat => {
+    const inCat = ms.filter(m => m.cat === cat);
+    if (!inCat.length) return;
+    const h = el('div', 'ref-cat', CATEGORIES[cat].label.toUpperCase());
+    h.style.color = fade(CATEGORIES[cat].color, 'bb');
+    list.appendChild(h);
+    inCat.forEach(m => {
+      const b = el('button', 'ref-item' + (m.id === state.refId ? ' on' : ''), esc(m.name));
+      if (m.id === state.refId) b.style.borderLeftColor = CATEGORIES[cat].color;
+      b.onclick = () => { state.refId = m.id; save(); renderRef(); };
+      list.appendChild(b);
+    });
+  });
+
+  const m = ms.find(x => x.id === state.refId);
+  const col = CATEGORIES[m.cat].color;
+
+  const head = el('div');
+  head.appendChild(el('div', 'm-title', esc(m.name)));
+  if (m.subtitle) head.appendChild(el('div', 'm-sub', esc(m.subtitle)));
+
+  const badges = el('div', 'm-badges');
+  const cb = el('span', 'badge', CATEGORIES[m.cat].label.toUpperCase());
+  cb.style.borderColor = fade(col, '66'); cb.style.color = col;
+  badges.appendChild(cb);
+  m.levels.forEach(l => badges.appendChild(el('span', 'badge lvl', LEVELS[l].short)));
+  badges.appendChild(el('span', 'badge src', 'SEL GUIDE p. ' + m.page));
+  head.appendChild(badges);
+  detail.appendChild(head);
+
+  if (m.memoryAid) {
+    const s = el('div', 'sect');
+    s.appendChild(el('div', 'sect-h', 'MEMORY AID'));
+    s.appendChild(el('div', 'notebox memaid', esc(m.memoryAid)));
+    detail.appendChild(s);
+  }
+
+  const addText = (title, body) => {
+    if (!body) return;
+    const s = el('div', 'sect');
+    s.appendChild(el('div', 'sect-h', title));
+    s.appendChild(el('p', null, subSpeeds(body)));
+    detail.appendChild(s);
+  };
+  addText('REFERENCE', m.ref);
+  addText('DESCRIPTION', m.desc);
+  addText('OBJECTIVE', m.obj);
+
+  m.phases.forEach(ph => {
+    const s = el('div', 'sect');
+    s.appendChild(el('div', 'sect-h', ph.name));
+    const ol = el('ol');
+    ph.steps.forEach(st => ol.appendChild(el('li', null, subSpeeds(st))));
+    s.appendChild(ol);
+    detail.appendChild(s);
+  });
+
+  if (m.notes && m.notes.length) {
+    const s = el('div', 'sect');
+    s.appendChild(el('div', 'sect-h', 'NOTES'));
+    m.notes.forEach(n => s.appendChild(el('div', 'notebox', subSpeeds(n))));
+    detail.appendChild(s);
+  }
+
+  const acs = acsFor(m);
+  if (acs) {
+    const used = acsLevelUsed(m);
+    const s = el('div', 'sect');
+    s.appendChild(el('div', 'sect-h', 'AIRMAN CERTIFICATION STANDARDS — ' + LEVELS[used].label.toUpperCase() +
+      (used !== state.lvl ? ' (only column published)' : '')));
+    const wrap = el('div', 'tbl-wrap');
+    const t = el('table');
+    ['Airspeed','Altitude','Heading','Bank'].forEach(row => {
+      if (!acs[row]) return;
+      const tr = el('tr');
+      tr.appendChild(el('td', null, row));
+      tr.appendChild(el('td', null, acs[row]));
+      t.appendChild(tr);
+    });
+    (m.acsNotes || []).forEach(n => {
+      const tr = el('tr');
+      tr.appendChild(el('td', null, 'Note'));
+      tr.appendChild(el('td', null, n));
+      t.appendChild(tr);
+    });
+    wrap.appendChild(t); s.appendChild(wrap); detail.appendChild(s);
+  }
+
+  const addList = (title, arr) => {
+    if (!arr || !arr.length) return;
+    const s = el('div', 'sect');
+    s.appendChild(el('div', 'sect-h', title));
+    const ul = el('ul');
+    arr.forEach(x => ul.appendChild(el('li', null, subSpeeds(x))));
+    s.appendChild(ul); detail.appendChild(s);
+  };
+  addList('PLANNING AND ORIENTATION', m.planning);
+  addList('FAULTY TECHNIQUE', m.faults);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   PANEL 2 — FLASHCARDS
+   Cards are generated from the guide data, so nothing can drift
+   out of sync with the reference text.
+   ══════════════════════════════════════════════════════════════════ */
+function buildCards() {
+  const cards = [];
+  activeManeuvers().forEach(m => {
+    m.phases.forEach(ph => {
+      cards.push({
+        m, kind: ph.name,
+        front: m.name, prompt: 'Recall every step, in order.',
+        back: '<ol>' + ph.steps.map(s => '<li>' + subSpeeds(s) + '</li>').join('') + '</ol>'
+      });
+    });
+
+    const acs = acsFor(m);
+    if (acs) {
+      const used = acsLevelUsed(m);
+      let rows = ['Airspeed','Altitude','Heading','Bank']
+        .filter(r => acs[r]).map(r => '<tr><td>' + r + '</td><td>' + acs[r] + '</td></tr>').join('');
+      rows += (m.acsNotes || []).map(n => '<tr><td>Note</td><td>' + n + '</td></tr>').join('');
+      cards.push({
+        m, kind: 'ACS STANDARDS — ' + LEVELS[used].label.toUpperCase(),
+        front: m.name, prompt: 'What are the ACS tolerances?',
+        back: '<div class="tbl-wrap"><table>' + rows + '</table></div>'
+      });
+    }
+
+    if (m.desc) {
+      cards.push({
+        m, kind: 'IDENTIFY THE MANEUVER',
+        front: '“' + stripTags(m.desc) + '”', prompt: 'Which maneuver is this?', small: true,
+        back: '<div class="card-q" style="text-align:center">' + esc(m.name) + '</div>' +
+              '<p style="text-align:center;margin-top:14px;color:var(--tx3)">' + esc(m.ref) + '</p>'
+      });
+    }
+    if (m.faults && m.faults.length) {
+      cards.push({
+        m, kind: 'FAULTY TECHNIQUE',
+        front: m.name, prompt: 'What are the common errors?',
+        back: '<ul>' + m.faults.map(f => '<li>' + subSpeeds(f) + '</li>').join('') + '</ul>'
+      });
+    }
+    if (m.planning && m.planning.length) {
+      cards.push({
+        m, kind: 'PLANNING & ORIENTATION',
+        front: m.name, prompt: 'What must you consider before flying it?',
+        back: '<ul>' + m.planning.map(f => '<li>' + subSpeeds(f) + '</li>').join('') + '</ul>'
+      });
+    }
+  });
+  return cards;
+}
+
+const fc = { deck: [], i: 0, flipped: false };
+
+function renderCards() {
+  const stage = $('#fc-stage');
+  if (!fc.deck.length) {
+    fc.deck = shuffle(buildCards()); fc.i = 0; fc.flipped = false;
+  }
+  stage.innerHTML = '';
+  if (!fc.deck.length) {
+    stage.innerHTML = '<div class="empty-msg">No cards for this standard and filter.</div>';
+    return;
+  }
+
+  const c = fc.deck[fc.i];
+  const col = CATEGORIES[c.m.cat].color;
+  const card = el('div', 'card');
+  card.style.borderTop = '2px solid ' + col;
+
+  const kind = el('div', 'card-kind', esc(c.kind));
+  kind.style.color = col;
+  card.appendChild(kind);
+
+  if (!fc.flipped) {
+    const f = el('div', 'card-front');
+    const q = el('div', 'card-q', esc(c.front));
+    if (c.small) { q.style.fontSize = 'var(--f4)'; q.style.letterSpacing = 'var(--ls1)'; q.style.color = 'var(--tx1)'; q.style.lineHeight = '1.7'; }
+    f.appendChild(q);
+    f.appendChild(el('div', 'card-prompt', esc(c.prompt)));
+    card.appendChild(f);
+    card.appendChild(el('div', 'card-hint', 'TAP TO REVEAL'));
+  } else {
+    const b = el('div', 'card-back sect');
+    b.innerHTML = c.back;
+    card.appendChild(b);
+    card.appendChild(el('div', 'card-hint', 'TAP TO HIDE · SEL GUIDE p. ' + c.m.page));
+  }
+  card.onclick = () => { fc.flipped = !fc.flipped; renderCards(); };
+  stage.appendChild(card);
+
+  const bar = el('div', 'fc-bar');
+  const prev = el('button', 'btn', '‹ PREV');
+  prev.disabled = fc.i === 0;
+  prev.onclick = () => { fc.i--; fc.flipped = false; renderCards(); };
+  const next = el('button', 'btn primary', 'NEXT ›');
+  next.disabled = fc.i >= fc.deck.length - 1;
+  next.onclick = () => { fc.i++; fc.flipped = false; renderCards(); };
+  const cnt = el('span', 'fc-count', (fc.i + 1) + ' / ' + fc.deck.length);
+  const sh = el('button', 'btn', 'SHUFFLE');
+  sh.onclick = () => { fc.deck = shuffle(buildCards()); fc.i = 0; fc.flipped = false; renderCards(); };
+  bar.append(prev, next, cnt, el('div', null, ''), sh);
+  bar.children[3].style.flex = '1';
+  stage.appendChild(bar);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   PANEL 3 — STEP-BY-STEP ORDERING TEST
+   ══════════════════════════════════════════════════════════════════ */
+const stepT = { qs: [], i: 0, picked: [], checked: false, score: 0, missed: [], running: false };
+
+function buildStepQuestions() {
+  const qs = [];
+  activeManeuvers().forEach(m => {
+    m.phases.forEach(ph => {
+      if (ph.steps.length < 3) return;   // nothing to order
+      // Bank order is fixed when the question is built so it does not
+      // reshuffle under the user on every tap.
+      qs.push({ m, phase: ph.name, steps: ph.steps, order: shuffle(ph.steps.map((_, i) => i)) });
+    });
+  });
+  return shuffle(qs);
+}
+
+function startStepTest() {
+  stepT.qs = buildStepQuestions();
+  stepT.i = 0; stepT.picked = []; stepT.checked = false;
+  stepT.score = 0; stepT.missed = []; stepT.running = true;
+  renderSteps();
+}
+
+function renderSteps() {
+  const p = $('#p-steps'); p.innerHTML = '';
+
+  if (!stepT.running) {
+    const n = buildStepQuestions().length;
+    p.appendChild(testIntro(
+      'STEP-BY-STEP TEST',
+      'Put each maneuver’s steps back into the order printed in the SEL Guide. Tap the steps from the bank in sequence; tap a placed step to send it back.',
+      n + ' sequence' + (n === 1 ? '' : 's') + ' in scope',
+      n ? startStepTest : null
+    ));
+    return;
+  }
+  if (stepT.i >= stepT.qs.length) { p.appendChild(results(stepT, startStepTest)); return; }
+
+  const q = stepT.qs[stepT.i];
+  const col = CATEGORIES[q.m.cat].color;
+
+  const head = el('div', 'test-head');
+  head.appendChild(el('span', 'q-count', 'SEQUENCE ' + (stepT.i + 1) + ' / ' + stepT.qs.length));
+  head.appendChild(el('span', 'score', 'CORRECT: <b>' + stepT.score + '</b>'));
+  const sp = el('div'); sp.style.flex = '1'; head.appendChild(sp);
+  const quit = el('button', 'btn', 'END');
+  quit.onclick = () => { stepT.qs = stepT.qs.slice(0, stepT.i); stepT.i = stepT.qs.length; renderSteps(); };
+  head.appendChild(quit);
+  const pr = el('div', 'progress', '<i style="width:' + (stepT.i / stepT.qs.length * 100) + '%"></i>');
+  head.appendChild(pr);
+  p.appendChild(head);
+
+  const card = el('div', 'q-card');
+  card.style.borderTop = '2px solid ' + col;
+  card.appendChild(el('div', 'q-maneuver', esc(q.m.name)));
+  card.appendChild(el('div', 'q-phase', esc(q.phase)));
+  card.appendChild(el('div', 'q-ask', 'Place all ' + q.steps.length + ' steps in the correct order.'));
+
+  // slots
+  const slots = el('div', 'slots');
+  for (let i = 0; i < q.steps.length; i++) {
+    const val = stepT.picked[i];
+    const s = el('div', 'slot' + (val == null ? ' empty' : ''));
+    s.appendChild(el('div', 'slot-n', (i + 1) + '.'));
+    const body = el('div'); body.style.flex = '1';
+    const txt = el('div', 'slot-txt', val == null ? '—' : subSpeeds(q.steps[val]));
+    body.appendChild(txt);
+
+    if (stepT.checked && val != null) {
+      const ok = q.steps[val] === q.steps[i];
+      s.classList.add(ok ? 'right' : 'wrong');
+      if (!ok) body.appendChild(el('div', 'slot-fix', '<b>CORRECT:</b> ' + subSpeeds(q.steps[i])));
+      s.appendChild(body);
+      const mk = el('div', 'slot-mark', ok ? '✓' : '✕');
+      mk.style.color = ok ? 'var(--ok)' : 'var(--bad)';
+      s.appendChild(mk);
+    } else {
+      s.appendChild(body);
+      if (val != null) txt.onclick = () => { stepT.picked[i] = null; compactPicks(); renderSteps(); };
+    }
+    slots.appendChild(s);
+  }
+  card.appendChild(slots);
+
+  // bank
+  if (!stepT.checked) {
+    card.appendChild(el('div', 'bank-h', 'STEPS — IN NO PARTICULAR ORDER'));
+    const bank = el('div', 'bank');
+    q.order.forEach(idx => {
+      const used = stepT.picked.includes(idx);
+      const b = el('button', 'opt', subSpeeds(q.steps[idx]));
+      b.disabled = used;
+      b.onclick = () => {
+        const slot = stepT.picked.findIndex(x => x == null);
+        const at = slot === -1 ? stepT.picked.length : slot;
+        if (at >= q.steps.length) return;
+        stepT.picked[at] = idx;
+        renderSteps();
+      };
+      bank.appendChild(b);
+    });
+    card.appendChild(bank);
+  }
+
+  const row = el('div', 'btn-row');
+  row.style.marginTop = 'var(--sp4)';
+  if (!stepT.checked) {
+    const check = el('button', 'btn primary', 'CHECK ORDER');
+    const filled = stepT.picked.filter(x => x != null).length;
+    check.disabled = filled < q.steps.length;
+    check.onclick = () => {
+      stepT.checked = true;
+      const allRight = q.steps.every((s, i) => q.steps[stepT.picked[i]] === s);
+      if (allRight) stepT.score++;
+      else stepT.missed.push({ label: q.m.name + ' — ' + q.phase, detail: 'sequence out of order' });
+      renderSteps();
+    };
+    const clr = el('button', 'btn', 'CLEAR');
+    clr.disabled = filled === 0;
+    clr.onclick = () => { stepT.picked = []; renderSteps(); };
+    row.append(check, clr);
+  } else {
+    const allRight = q.steps.every((s, i) => q.steps[stepT.picked[i]] === s);
+    const v = el('div', 'verdict ' + (allRight ? 'ok' : 'no'),
+      allRight ? '✓ CORRECT SEQUENCE' : '✕ CHECK THE HIGHLIGHTED STEPS');
+    card.appendChild(v);
+    card.appendChild(el('div', 'srcline', 'SEL Guide Rev 2, p. ' + q.m.page));
+    const nx = el('button', 'btn primary', stepT.i === stepT.qs.length - 1 ? 'SEE RESULTS ›' : 'NEXT SEQUENCE ›');
+    nx.onclick = () => { stepT.i++; stepT.picked = []; stepT.checked = false; renderSteps(); };
+    row.appendChild(nx);
+  }
+  card.appendChild(row);
+  p.appendChild(card);
+}
+function compactPicks() {
+  stepT.picked = stepT.picked.filter(x => x != null);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   PANEL 4 — LIMITATIONS TEST
+   Every option is a real tolerance printed somewhere in the guide —
+   no invented distractors.
+   ══════════════════════════════════════════════════════════════════ */
+const ROWS = ['Airspeed', 'Altitude', 'Heading', 'Bank'];
+
+/* A value is testable if it is short and carries a number. */
+function isTestable(v) {
+  if (!v) return false;
+  const t = stripTags(v).trim();
+  if (!t || t === 'NA') return false;
+  if (t.length > 70) return false;
+  return /\d/.test(t);
+}
+
+/* Pool of real tolerance values for a given ACS row, across every
+   maneuver and every published column. */
+function tolerancePool(row) {
+  const out = new Set();
+  MANEUVERS.forEach(m => {
+    Object.values(m.acs || {}).forEach(col => {
+      if (col && isTestable(col[row])) out.add(col[row]);
+    });
+  });
+  return [...out];
+}
+
+/* Minimum-altitude values, pulled from the ACS notes as printed. */
+function minAltPool() {
+  const out = new Set();
+  MANEUVERS.forEach(m => (m.acsNotes || []).forEach(n => {
+    const mm = stripTags(n).match(/no lower than ([\d,]+)\s*[’']?\s*AGL/i);
+    if (mm) out.add(mm[1] + '’ AGL');
+  }));
+  return [...out];
+}
+
+function buildLimitQuestions() {
+  const qs = [];
+  const pools = {}; ROWS.forEach(r => pools[r] = tolerancePool(r));
+  const altPool = minAltPool();
+
+  activeManeuvers().forEach(m => {
+    const acs = acsFor(m); if (!acs) return;
+    const used = acsLevelUsed(m);
+
+    ROWS.forEach(row => {
+      const correct = acs[row];
+      if (!isTestable(correct)) return;
+      const distract = shuffle(pools[row].filter(v => stripTags(v) !== stripTags(correct))).slice(0, 3);
+      if (distract.length < 2) return;   // not enough real alternatives to choose from
+      qs.push({
+        m, used,
+        ask: row.toUpperCase() + ' tolerance',
+        correct,
+        options: shuffle([correct, ...distract])
+      });
+    });
+
+    // minimum altitude question
+    for (const n of (m.acsNotes || [])) {
+      const mm = stripTags(n).match(/no lower than ([\d,]+)\s*[’']?\s*AGL/i);
+      if (!mm) continue;
+      const correct = mm[1] + '’ AGL';
+      const distract = shuffle(altPool.filter(v => v !== correct)).slice(0, 3);
+      if (distract.length < 2) break;
+      qs.push({
+        m, used,
+        ask: 'Completed no lower than',
+        correct,
+        options: shuffle([correct, ...distract])
+      });
+      break;
+    }
+  });
+  return shuffle(qs);
+}
+
+const limT = { qs: [], i: 0, answer: null, score: 0, missed: [], running: false };
+
+function startLimitTest() {
+  limT.qs = buildLimitQuestions();
+  limT.i = 0; limT.answer = null; limT.score = 0; limT.missed = []; limT.running = true;
+  renderLimits();
+}
+
+function renderLimits() {
+  const p = $('#p-limits'); p.innerHTML = '';
+
+  if (!limT.running) {
+    const n = buildLimitQuestions().length;
+    p.appendChild(testIntro(
+      'LIMITATIONS TEST',
+      'Pick the ACS tolerance for the selected certificate standard. Every option shown is a real tolerance printed in the SEL Guide — there are no invented answers.',
+      n + ' question' + (n === 1 ? '' : 's') + ' at ' + LEVELS[state.lvl].label + ' standard',
+      n ? startLimitTest : null
+    ));
+    return;
+  }
+  if (limT.i >= limT.qs.length) { p.appendChild(results(limT, startLimitTest)); return; }
+
+  const q = limT.qs[limT.i];
+  const col = CATEGORIES[q.m.cat].color;
+
+  const head = el('div', 'test-head');
+  head.appendChild(el('span', 'q-count', 'QUESTION ' + (limT.i + 1) + ' / ' + limT.qs.length));
+  const sc = el('span', 'score'); sc.innerHTML = 'CORRECT: <b>' + limT.score + '</b>'; head.appendChild(sc);
+  const sp = el('div'); sp.style.flex = '1'; head.appendChild(sp);
+  const quit = el('button', 'btn', 'END');
+  quit.onclick = () => { limT.qs = limT.qs.slice(0, limT.i); limT.i = limT.qs.length; renderLimits(); };
+  head.appendChild(quit);
+  head.appendChild(el('div', 'progress', '<i style="width:' + (limT.i / limT.qs.length * 100) + '%"></i>'));
+  p.appendChild(head);
+
+  const card = el('div', 'q-card');
+  card.style.borderTop = '2px solid ' + col;
+  card.appendChild(el('div', 'q-maneuver', esc(q.m.name)));
+  card.appendChild(el('div', 'q-phase', LEVELS[q.used].label.toUpperCase() + ' STANDARD' +
+    (q.used !== state.lvl ? ' — ONLY COLUMN PUBLISHED' : '')));
+  card.appendChild(el('div', 'q-ask', q.ask + '?'));
+
+  const mc = el('div', 'mc');
+  q.options.forEach(opt => {
+    const b = el('button', 'opt', opt);
+    if (limT.answer != null) {
+      b.disabled = true;
+      if (stripTags(opt) === stripTags(q.correct)) b.classList.add('right');
+      else if (stripTags(opt) === stripTags(limT.answer)) b.classList.add('wrong');
+    } else {
+      b.onclick = () => {
+        limT.answer = opt;
+        if (stripTags(opt) === stripTags(q.correct)) limT.score++;
+        else limT.missed.push({ label: q.m.name + ' — ' + q.ask, detail: stripTags(q.correct) });
+        renderLimits();
+      };
+    }
+    mc.appendChild(b);
+  });
+  card.appendChild(mc);
+
+  if (limT.answer != null) {
+    const ok = stripTags(limT.answer) === stripTags(q.correct);
+    card.appendChild(el('div', 'verdict ' + (ok ? 'ok' : 'no'),
+      ok ? '✓ CORRECT' : '✕ CORRECT ANSWER: ' + q.correct));
+    card.appendChild(el('div', 'srcline', 'SEL Guide Rev 2, p. ' + q.m.page));
+    const row = el('div', 'btn-row'); row.style.marginTop = 'var(--sp4)';
+    const nx = el('button', 'btn primary', limT.i === limT.qs.length - 1 ? 'SEE RESULTS ›' : 'NEXT ›');
+    nx.onclick = () => { limT.i++; limT.answer = null; renderLimits(); };
+    row.appendChild(nx); card.appendChild(row);
+  }
+  p.appendChild(card);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   SHARED TEST CHROME
+   ══════════════════════════════════════════════════════════════════ */
+function testIntro(title, blurb, count, start) {
+  const c = el('div', 'q-card');
+  c.style.textAlign = 'center'; c.style.maxWidth = '620px'; c.style.margin = '0 auto';
+  c.appendChild(el('div', 'q-maneuver', title));
+  const b = el('p', null, esc(blurb));
+  b.style.color = 'var(--tx3)'; b.style.margin = 'var(--sp3) 0'; b.style.fontSize = 'var(--f2)';
+  c.appendChild(b);
+  c.appendChild(el('div', 'q-phase', count));
+  const row = el('div', 'btn-row'); row.style.justifyContent = 'center'; row.style.marginTop = 'var(--sp4)';
+  const go = el('button', 'btn primary', 'START');
+  if (!start) { go.disabled = true; go.textContent = 'NOTHING IN SCOPE'; }
+  else go.onclick = start;
+  row.appendChild(go); c.appendChild(row);
+  return c;
+}
+
+function results(t, restart) {
+  const total = t.qs.length;
+  const pct = total ? Math.round(t.score / total * 100) : 0;
+  const c = el('div', 'q-card results');
+  const p = el('div', 'res-pct', pct + '%');
+  p.style.color = pct >= 80 ? 'var(--ok)' : pct >= 60 ? 'var(--warn)' : 'var(--bad)';
+  c.appendChild(p);
+  c.appendChild(el('div', 'res-sub', t.score + ' OF ' + total + ' CORRECT'));
+
+  if (t.missed.length) {
+    const box = el('div', 'res-miss');
+    box.appendChild(el('div', 'res-miss-h', 'REVIEW THESE'));
+    t.missed.forEach(m => {
+      box.appendChild(el('div', 'res-row', '<b>' + esc(m.label) + '</b><br>' + esc(m.detail)));
+    });
+    c.appendChild(box);
+  }
+  const row = el('div', 'btn-row');
+  row.style.justifyContent = 'center'; row.style.marginTop = 'var(--sp5)';
+  const again = el('button', 'btn primary', 'RUN AGAIN');
+  again.onclick = restart;
+  row.appendChild(again); c.appendChild(row);
+  return c;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   PANEL 5 — SPEEDS & POWER
+   ══════════════════════════════════════════════════════════════════ */
+function renderSpeeds() {
+  const p = $('#p-speeds'); p.innerHTML = '';
+  const a = AIRCRAFT[state.ac];
+  const cols = el('div', 'cols');
+
+  /* kts over mph in one right-aligned cell — the guide prints both, and a
+     third column overflows the box at narrow widths. */
+  const mk = (title, rows) => {
+    const b = el('div', 'box');
+    b.appendChild(el('div', 'box-h', title));
+    const w = el('div', 'tbl-wrap'); const t = el('table');
+    rows.forEach(r => {
+      const tr = el('tr');
+      tr.appendChild(el('td', null, r.label));
+      tr.appendChild(el('td', 'num', r.kts + ' kts<br><span class="alt">' + r.mph + ' mph</span>'));
+      t.appendChild(tr);
+    });
+    w.appendChild(t); b.appendChild(w); return b;
+  };
+
+  cols.appendChild(mk('V-SPEEDS — ' + a.label.toUpperCase(),
+    a.speeds.map(s => ({
+      label: s.sym + '<br><span class="sub">' + esc(s.name) + '</span>',
+      kts: s.kts, mph: s.mph
+    }))));
+
+  cols.appendChild(mk('PATTERN & APPROACH SPEEDS',
+    a.pattern.map(s => ({ label: esc(s.name), kts: s.kts, mph: s.mph }))));
+
+  const pw = el('div', 'box');
+  pw.appendChild(el('div', 'box-h', 'POWER TABLE — 0° FLAPS'));
+  let w = el('div', 'tbl-wrap'); let t = el('table');
+  t.appendChild(el('tr', null, '<th>Airspeed</th><th>Pitch</th><th>Power</th><th>VSI</th>'));
+  a.power0.forEach(r => t.appendChild(el('tr', null,
+    '<td>' + r.cfg + '</td><td class="num">' + r.pitch + '</td><td class="num">' + r.power + '</td><td class="num dim">' + r.vsi + '</td>')));
+  w.appendChild(t); pw.appendChild(w);
+  pw.appendChild(el('div', 'box-h', 'POWER TABLE — 10° FLAPS'));
+  w = el('div', 'tbl-wrap'); t = el('table');
+  t.appendChild(el('tr', null, '<th>Airspeed</th><th>Pitch</th><th>Power</th><th>VSI</th>'));
+  a.power10.forEach(r => t.appendChild(el('tr', null,
+    '<td>' + r.cfg + '</td><td class="num">' + r.pitch + '</td><td class="num">' + r.power + '</td><td class="num dim">' + r.vsi + '</td>')));
+  w.appendChild(t); pw.appendChild(w);
+  pw.appendChild(el('div', 'box-h', 'AIRSPEED & ALTITUDE CHANGE'));
+  w = el('div', 'tbl-wrap'); t = el('table');
+  a.rpmEffect.forEach(r => t.appendChild(el('tr', null, '<td>' + r.change + '</td><td class="num">' + r.effect + '</td>')));
+  w.appendChild(t); pw.appendChild(w);
+  cols.appendChild(pw);
+
+  p.appendChild(cols);
+
+  const fn = el('div', 'footnote');
+  fn.innerHTML =
+    'Source: US Aviation Academy SEL Maneuvers Guide, Revision 2 (3/16/2025), pp. ' + a.page + '.<br>' +
+    'The guide notes: all listed speeds are generic and have been rounded, and are for reference only. ' +
+    'The POH/AFM for the specific aircraft flown must be consulted to determine specific airspeeds to be flown ' +
+    'if necessary for safe operations. Power settings may vary with weather conditions and density altitude.<br>' +
+    AIRCRAFT_PENDING.map(x => esc(x.label) + ' — ' + esc(x.note)).join('<br>');
+  p.appendChild(fn);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   RENDER
+   ══════════════════════════════════════════════════════════════════ */
+let lastScope = null;
+const scopeKey = () => [state.ac, state.lvl, state.cats.slice().sort().join('+')].join('|');
+
+function renderAll() {
+  buildChrome();
+  buildFilters();
+  document.querySelectorAll('.panel').forEach(x => x.classList.remove('on'));
+  $('#p-' + state.mode).classList.add('on');
+
+  // Aircraft / standard / category changes invalidate any generated deck or
+  // test run. Switching modes alone leaves work in progress intact.
+  const scope = scopeKey();
+  if (scope !== lastScope) {
+    lastScope = scope;
+    fc.deck = []; fc.i = 0; fc.flipped = false;
+    stepT.running = false; limT.running = false;
+  }
+
+  if (state.mode === 'ref')    renderRef();
+  if (state.mode === 'cards')  renderCards();
+  if (state.mode === 'steps')  renderSteps();
+  if (state.mode === 'limits') renderLimits();
+  if (state.mode === 'speeds') renderSpeeds();
+  window.scrollTo({ top: 0 });
+}
+
+renderAll();
+</script>
+</body>
+</html>

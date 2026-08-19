@@ -183,7 +183,10 @@ body { background: #111; width: 100vw; height: 100vh; overflow: hidden; position
 
 <div id="top-half">
   <canvas id="sky-canvas"></canvas>
-  <a href="index.html" style="position:absolute;top:12px;left:14px;z-index:10;background:rgba(0,0,0,0.55);border:1px solid #555;border-radius:4px;padding:4px 12px;font-size:12px;color:#aaa;text-decoration:none;letter-spacing:1px;" onmouseover="this.style.color='#fff';this.style.borderColor='#888'" onmouseout="this.style.color='#aaa';this.style.borderColor='#555'">← W&amp;B</a>
+  <div style="position:absolute;top:12px;left:14px;z-index:10;display:flex;gap:6px;">
+    <a href="index.html" style="background:rgba(0,0,0,0.55);border:1px solid #555;border-radius:4px;padding:4px 12px;font-size:12px;color:#aaa;text-decoration:none;letter-spacing:1px;" onmouseover="this.style.color='#fff';this.style.borderColor='#888'" onmouseout="this.style.color='#aaa';this.style.borderColor='#555'">← W&amp;B</a>
+    <a href="maneuvers.html" title="Study SEL maneuvers — steps, ACS limits, flashcards" style="background:rgba(0,0,0,0.55);border:1px solid #555;border-radius:4px;padding:4px 12px;font-size:12px;color:#aaa;text-decoration:none;letter-spacing:1px;" onmouseover="this.style.color='#8f6';this.style.borderColor='#8f6'" onmouseout="this.style.color='#aaa';this.style.borderColor='#555'">SEL MANEUVERS →</a>
+  </div>
   <div id="maneuver-title">SELECT A MANEUVER</div>
   <div id="rp-controls">
     <button class="btn" id="btn-play">▶</button>
