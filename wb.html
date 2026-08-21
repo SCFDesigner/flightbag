@@ -623,7 +623,7 @@
                 padding: 0;
                 height: 100vh;
                 overflow: hidden;
-                background-color: transparent !important;
+                background-color: #101013 !important;
             }
 
             /* Override desktop column widths on mobile */
@@ -634,7 +634,7 @@
                 height: calc(100vh - 80px);
                 overflow: hidden;
                 transition: transform 0.3s ease;
-                width: 90vw; /* Reduced to show background on sides */
+                width: 100vw; /* Fill the screen edge to edge */
                 position: relative;
                 margin: 0 auto; /* Center the layout */
                 left: 0; /* Remove conflicting offset */
@@ -646,7 +646,7 @@
             .settings-panel,
             .brain-panel {
                 display: none;
-                width: calc(100% - 40px); /* Responsive width with margins */
+                width: 100%; /* Edge to edge */
                 height: 100%;
                 position: absolute;
                 top: 0;
@@ -654,9 +654,9 @@
                 transform: translateX(-50%); /* Center the panel */
                 z-index: 5;
                 overflow-y: auto;
-                border-radius: 12px; /* Add rounded corners */
+                border-radius: 0;
                 margin: 0; /* Remove margin */
-                max-width: 95%; /* Ensure it doesn't exceed screen */
+                max-width: 100%;
                 box-sizing: border-box;
             }
 
@@ -851,14 +851,14 @@
                 left: 50%; /* Center horizontally */
                 transform: translateX(-50%); /* Center the panel */
                 z-index: 10;
-                width: calc(100% - 40px); /* Responsive width with margins */
+                width: 100%; /* Edge to edge */
                 height: 100%;
                 overflow-y: auto;
                 overflow-x: hidden;
                 padding: 10px;
                 box-sizing: border-box;
-                border-radius: 12px;
-                max-width: 95%; /* Ensure it doesn't exceed screen */
+                border-radius: 0;
+                max-width: 100%;
             }
 
             .desktop-layout.mobile-show-left .right-column,
@@ -873,14 +873,14 @@
                 left: 50%; /* Center horizontally */
                 transform: translateX(-50%); /* Center the panel */
                 z-index: 10;
-                width: calc(100% - 40px); /* Responsive width with margins */
+                width: 100%; /* Edge to edge */
                 height: 100%;
                 overflow-y: auto;
                 overflow-x: hidden;
                 padding: 10px;
                 box-sizing: border-box;
-                border-radius: 12px;
-                max-width: 95%; /* Ensure it doesn't exceed screen */
+                border-radius: 0;
+                max-width: 100%;
             }
 
             .desktop-layout.mobile-show-right .left-panel,
@@ -897,14 +897,14 @@
                 left: 50%; /* Center horizontally */
                 transform: translateX(-50%); /* Center the panel */
                 z-index: 10;
-                width: calc(100% - 40px); /* Responsive width with margins */
+                width: 100%; /* Edge to edge */
                 height: 100%;
                 overflow-y: auto;
                 overflow-x: hidden;
                 padding: 10px;
                 box-sizing: border-box;
-                border-radius: 12px;
-                max-width: 95%; /* Ensure it doesn't exceed screen */
+                border-radius: 0;
+                max-width: 100%;
             }
 
             .desktop-layout.mobile-show-settings .left-panel,
@@ -919,14 +919,14 @@
                 left: 50%; /* Center horizontally */
                 transform: translateX(-50%); /* Center the panel */
                 z-index: 10;
-                width: calc(100% - 40px); /* Responsive width with margins */
+                width: 100%; /* Edge to edge */
                 height: 100%;
                 overflow-y: auto;
                 overflow-x: hidden;
                 padding: 10px;
                 box-sizing: border-box;
-                border-radius: 12px;
-                max-width: 95%; /* Ensure it doesn't exceed screen */
+                border-radius: 0;
+                max-width: 100%;
             }
 
             .desktop-layout.mobile-show-brain .left-panel,
@@ -970,9 +970,10 @@
                 padding: 8px;
             }
 
-            /* Hide settings and brain toggles on mobile */
+            /* Hide floating desktop chips on mobile (mobile nav has its own Home/Settings) */
             .settings-toggle,
-            .brain-toggle {
+            .brain-toggle,
+            .home-chip {
                 display: none !important;
             }
 
