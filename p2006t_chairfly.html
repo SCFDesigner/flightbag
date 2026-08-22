@@ -1069,7 +1069,7 @@ function drawTopView(m,st,t,W,H){
   drawTrail(m,W,H);
   const p=getCanvasXY(m,st,W,H);
   trailPts.push({...p,t});
-  drawAirplaneTop(p.cx,p.cy,st.bank,st.eng,W,H);
+  drawAirplaneTop(p.cx,p.cy, m.square ? getHeadingAt(t) : st.bank, st.eng,W,H);
 }
 
 function catmullRomPath(ctx,pts,steps){
@@ -1123,12 +1123,14 @@ function drawAirplaneSide(cx,cy,pitch,bank,eng,W,H){
   skyX.restore();
 }
 
-function drawAirplaneTop(cx,cy,bank,eng,W,H){
-  // Top view PNG — assume roughly square
+function drawAirplaneTop(cx,cy,rot,eng,W,H){
+  // Top view PNG — assume roughly square. rot is the icon rotation in
+  // degrees: heading for simulated ground-ref maneuvers, bank-tilt for
+  // the legacy keyframed patterns.
   const s = Math.min(W,H) * 0.09;
   skyX.save();
   skyX.translate(cx, cy);
-  skyX.rotate(bank * Math.PI/180);
+  skyX.rotate(rot * Math.PI/180);
   if(topImg.complete && topImg.naturalWidth){
     const ar = topImg.naturalWidth / topImg.naturalHeight;
     const tw = s * ar, th = s;
@@ -1169,7 +1171,9 @@ function drawPFD(st,altFt,vsi,hdg){
 
 function drawAI_PFD(ctx,pitch,bank,eng,hdg,x,y,w,h){
   ctx.save(); ctx.beginPath(); ctx.rect(x,y,w,h); ctx.clip();
-  ctx.save(); ctx.translate(x+w/2,y+h/2); ctx.rotate(bank*Math.PI/180);
+  // Horizon card rotates opposite the roll: bank right -> horizon tilts
+  // counterclockwise, leaving the fixed aircraft symbol banked right.
+  ctx.save(); ctx.translate(x+w/2,y+h/2); ctx.rotate(-bank*Math.PI/180);
   const pxPerDeg=h/50; // tighter pitch ladder — ±25° visible range
   const pOff=pitch*pxPerDeg; // positive pitch → horizon moves DOWN (more sky visible)
   // Sky — G1000 blue
