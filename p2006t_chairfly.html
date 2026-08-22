@@ -169,6 +169,11 @@ body { background: #111; width: 100vw; height: 100vh; overflow: hidden; position
       <div class="ac-card-sub">TWIN · G1000</div>
       <div class="ac-card-tag">▶ SELECT</div>
     </div>
+    <div class="ac-card" onclick="selectAircraft('c152')">
+      <div class="ac-card-name">Cessna 152</div>
+      <div class="ac-card-sub">ASEL · STEAM GAUGES</div>
+      <div class="ac-card-tag">▶ SELECT</div>
+    </div>
   </div>
 </div>
 <div id="portrait-overlay">
@@ -228,7 +233,7 @@ body { background: #111; width: 100vw; height: 100vh; overflow: hidden; position
   <div class="bezel-unit" id="mfd">
     <div id="mfd-screen">
       <div id="mfd-header">
-        <span>G1000 — MFD</span>
+        <span id="mfd-title">G1000 — MFD</span>
         <span id="mfd-flap-eng" style="font-size:9px;color:#555;letter-spacing:1px;"></span>
       </div>
       <div id="mfd-tabs">
@@ -255,6 +260,13 @@ body { background: #111; width: 100vw; height: 100vh; overflow: hidden; position
 document.getElementById('app').style.display = 'none';
 
 function selectAircraft(id) {
+  ACTIVE_AC = (id === 'c152') ? 'c152' : 'p2006t';
+  MANEUVERS = ACTIVE_AC === 'c152' ? MANEUVERS_C152 : MANEUVERS_P2006T;
+  CL_NORMAL = ACTIVE_AC === 'c152' ? CL_NORMAL_C152 : CL_NORMAL_P2006T;
+  CL_EMERGENCY = ACTIVE_AC === 'c152' ? CL_EMERGENCY_C152 : CL_EMERGENCY_P2006T;
+  buildSidebar();
+  const mt = document.getElementById('mfd-title');
+  if(mt) mt.textContent = ACTIVE_AC==='c152' ? 'USAA 152 — CHECKLIST' : 'G1000 — MFD';
   document.getElementById('aircraft-select').style.display = 'none';
   document.getElementById('app').style.display = '';
   resize();
@@ -314,7 +326,7 @@ function updateFsBtn(){
 })();
 
 // ─── MANEUVER DATA ───────────────────────────────────────────
-const MANEUVERS = [
+const MANEUVERS_P2006T = [
 {name:"1. Normal Takeoff",view:"side",duration:60,keyframes:[
 {t:0,x:.05,alt:0,ias:0,pitch:2,bank:0,mp:25,gear:"DOWN",flaps:"TO",eng:"BOTH",callout:"On runway — MAX RPM, brakes hold"},
 {t:5,x:.15,alt:0,ias:45,pitch:2,bank:0,mp:25,gear:"DOWN",flaps:"TO",eng:"BOTH",callout:'"Airspeed Alive"'},
@@ -599,7 +611,7 @@ const MANEUVERS = [
 // maneuvers with tracks computed from constant TAS plus a north wind, so
 // the shape, the groundspeed changes, and the bank angles all stay
 // consistent with each other (steepest bank downwind, shallowest upwind).
-(function buildGroundRefPaths(){
+function applySimPaths(list, ac){
   const KTS2FPS = 1.68781;
 
   // March along a parametric path P(u) (screen fractions, square coords).
@@ -610,6 +622,7 @@ const MANEUVERS = [
     const WIND = (opts && opts.wind !== undefined) ? opts.wind : 18;
     const ALT = (opts && opts.alt) || .25;
     const MP = (opts && opts.mp) || 24;
+    const altFn = opts && opts.altFn, iasFn = opts && opts.iasFn, pitchFn = opts && opts.pitchFn;
     const gsFor = (tx,ty) => {
       const wAlong = WIND * ty, wCross = WIND * tx;
       return wAlong + Math.sqrt(Math.max(1, TAS*TAS - wCross*wCross));
@@ -657,18 +670,25 @@ const MANEUVERS = [
       const u = uAtLen(s/scale);
       if(t >= nextKF - 1e-9){
         const p = Pfn(u), d = dirAt(u), gs = gsFor(d.tx,d.ty);
-        kfs.push({t:+t.toFixed(1), x:p.x, y:p.y, u:u, alt:ALT, ias:TAS, pitch:0,
+        kfs.push({t:+t.toFixed(1), x:p.x, y:p.y, u:u,
+                  alt: altFn ? +altFn(u).toFixed(3) : ALT,
+                  ias: iasFn ? Math.round(iasFn(u)) : TAS,
+                  pitch: pitchFn ? +pitchFn(u).toFixed(1) : 0,
                   bank:+bankAt(u,gs).toFixed(1), mp:MP, gear:"UP", flaps:"UP",
                   eng:"BOTH", callout:""});
         nextKF += kfEvery;
       }
       const d = dirAt(u);
-      s += gsFor(d.tx,d.ty)*KTS2FPS*dt;
+      const spd = iasFn ? Math.max(40, iasFn(u)) : gsFor(d.tx,d.ty);
+      s += spd*KTS2FPS*dt;
       t += dt;
     }
     // close the path with a final keyframe at u=1
-    const pEnd=Pfn(1), dEnd=dirAt(1);
-    kfs.push({t:+t.toFixed(1), x:pEnd.x, y:pEnd.y, u:1, alt:ALT, ias:TAS, pitch:0,
+    const pEnd=Pfn(1);
+    kfs.push({t:+t.toFixed(1), x:pEnd.x, y:pEnd.y, u:1,
+              alt: altFn ? +altFn(1).toFixed(3) : ALT,
+              ias: iasFn ? Math.round(iasFn(1)) : TAS,
+              pitch: 0,
               bank:0, mp:MP, gear:"UP", flaps:"UP", eng:"BOTH", callout:""});
     // smooth banks (two passes) so roll-in/out isn't a step
     for(let pass=0;pass<2;pass++)
@@ -746,27 +766,120 @@ const MANEUVERS = [
     return {x:c2x+Math.min(s,SP_LEAD), y:y0};
   }
 
-  const M_STEEP = MANEUVERS.find(m=>m.name.includes('Steep Turns'));
+  const M_STEEP = list.find(m=>m.name.includes('Steep Turns'));
   if(M_STEEP){
-    // 50° bank at 110 KIAS -> turn radius ≈ 900 ft
-    M_STEEP.keyframes = march(steepPath, 900/SP_R, [
-      {u:0.00, text:'Clearing turns complete — 110 KIAS, Power 23-24"/2250'},
-      {u:0.09, text:'Roll into 50° LEFT bank — back pressure past 30°'},
-      {u:0.30, text:'50° bank — +2-3" MP, altitude ±100, airspeed ±10'},
-      {u:0.48, text:'Approaching entry heading — lead rollout by 25°'},
-      {u:0.525, text:'Wings level — immediately roll RIGHT'},
-      {u:0.60, text:'50° RIGHT bank — back pressure, +2-3" MP'},
-      {u:0.80, text:'360° right turn — altitude ±100'},
-      {u:0.94, text:'Lead the rollout — 25° before entry heading'},
-      {u:0.995, text:'Wings level on entry heading — both 360s complete'}
-    ], {tas:110, wind:0, alt:.5, mp:24});
+    if(ac === 'c152'){
+      // 45° bank (private; 50° commercial) at Va ~100 -> radius ≈ 890 ft
+      M_STEEP.keyframes = march(steepPath, 890/SP_R, [
+        {u:0.00, text:'Clearing turns done — Va 98-104, power 2300-2400 RPM'},
+        {u:0.09, text:'Roll into a coordinated 45° LEFT bank (50° commercial)'},
+        {u:0.30, text:'Add ~100-200 RPM — altitude ±100, bank ±5°'},
+        {u:0.48, text:'Approaching entry heading — lead the rollout'},
+        {u:0.525, text:'Wings level — immediately roll RIGHT'},
+        {u:0.60, text:'45° RIGHT bank — back pressure, hold altitude'},
+        {u:0.80, text:'360° right turn — altitude ±100'},
+        {u:0.94, text:'Lead the rollout before entry heading'},
+        {u:0.995, text:'Wings level on entry heading — level flight power'}
+      ], {tas:100, wind:0, alt:.5, mp:2350});
+    } else {
+      // 50° bank at 110 KIAS -> turn radius ≈ 900 ft
+      M_STEEP.keyframes = march(steepPath, 900/SP_R, [
+        {u:0.00, text:'Clearing turns complete — 110 KIAS, Power 23-24"/2250'},
+        {u:0.09, text:'Roll into 50° LEFT bank — back pressure past 30°'},
+        {u:0.30, text:'50° bank — +2-3" MP, altitude ±100, airspeed ±10'},
+        {u:0.48, text:'Approaching entry heading — lead rollout by 25°'},
+        {u:0.525, text:'Wings level — immediately roll RIGHT'},
+        {u:0.60, text:'50° RIGHT bank — back pressure, +2-3" MP'},
+        {u:0.80, text:'360° right turn — altitude ±100'},
+        {u:0.94, text:'Lead the rollout — 25° before entry heading'},
+        {u:0.995, text:'Wings level on entry heading — both 360s complete'}
+      ], {tas:110, wind:0, alt:.5, mp:24});
+    }
     M_STEEP.duration = M_STEEP.keyframes[M_STEEP.keyframes.length-1].t;
     M_STEEP.square = true; M_STEEP.initHdg = 90;
   }
 
-  const M_POINT = MANEUVERS.find(m=>m.name.includes('Turns Around'));
-  const M_STURN = MANEUVERS.find(m=>m.name.includes('S-Turns'));
-  const M_RECT  = MANEUVERS.find(m=>m.name.includes('Rectangular'));
+  // --- Commercial airwork (C-152 only; profiles from the SEL Airwork PDF) ---
+  const M_CHAN = list.find(m=>m.name.includes('Chandelles'));
+  if(M_CHAN){
+    const R=.20, lead=.18, arc=Math.PI*R, per=lead+arc+lead;
+    const chanPath = u => {
+      let s=u*per;
+      if(s<=lead) return {x:.20+s, y:.72};
+      s-=lead;
+      if(s<=arc) return {x:.38 + R*Math.sin(s/R), y:.52 + R*Math.cos(s/R)};   // left 180 about (.38,.52)
+      s-=arc;
+      return {x:.38-Math.min(s,lead), y:.32};
+    };
+    const fArc = u => { const s=u*per; return s<=lead ? 0 : (s-lead>=arc ? 1 : (s-lead)/arc); };
+    M_CHAN.keyframes = march(chanPath, 7400, [
+      {u:0.00, text:'Above 3000 AGL — power set for Va, reference point'},
+      {u:0.16, text:'Roll into 30° — FULL power, gradual pitch up'},
+      {u:0.42, text:'90° reference — max pitch, begin rollout'},
+      {u:0.62, text:'Rolling out — continual elevator and rudder pressure'},
+      {u:0.80, text:'180° reference — wings level just above stall'},
+      {u:0.95, text:'Lower the nose slowly — return to cruise speed'}
+    ], {tas:98, wind:0, mp:2400,
+        altFn: u=>.5 + .12*fArc(u),
+        iasFn: u=>98 - 36*fArc(u),
+        pitchFn: u=>{ const f=fArc(u); return f<.5 ? 28*f : 14 - 4*(f-.5); }});
+    M_CHAN.duration = M_CHAN.keyframes[M_CHAN.keyframes.length-1].t;
+    M_CHAN.square = true; M_CHAN.initHdg = 90;
+  }
+
+  const M_LAZY = list.find(m=>m.name.includes('Lazy Eight'));
+  if(M_LAZY){
+    const R=.17, lead=.10, arc=Math.PI*R, per=lead+2*arc+lead;
+    const half = u => u < .5 ? u*2 : (u-.5)*2;
+    M_LAZY.keyframes = march(sturnPath, 8700, [
+      {u:0.00, text:'Above 3000 AGL — power for Va, enter perpendicular to wind'},
+      {u:0.10, text:'Raise the nose — gradual bank, climbing turn'},
+      {u:0.22, text:'45° reference — highest pitch, ~15° bank'},
+      {u:0.30, text:'90° reference — zero pitch, max 30° bank, slowest'},
+      {u:0.40, text:'135° reference — max pitch DOWN, ~15° bank'},
+      {u:0.49, text:'180° reference — level, entry speed, reverse the roll'},
+      {u:0.60, text:'Second loop — climbing turn the other way'},
+      {u:0.72, text:'90° reference — zero pitch, max bank'},
+      {u:0.85, text:'Descending back — pitch down, bank shallowing'},
+      {u:0.99, text:'180° reference — wings level at entry speed and altitude'}
+    ], {tas:98, wind:0, mp:2300,
+        altFn: u=>.5 + .1*Math.sin(Math.PI*half(u)),
+        iasFn: u=>98 - 38*Math.sin(Math.PI*half(u)),
+        pitchFn: u=>14*Math.sin(2*Math.PI*half(u))});
+    M_LAZY.duration = M_LAZY.keyframes[M_LAZY.keyframes.length-1].t;
+    M_LAZY.square = true; M_LAZY.initHdg = 180;
+  }
+
+  const M_SPIRAL = list.find(m=>m.name.includes('Steep Spiral'));
+  if(M_SPIRAL){
+    const R=.13, lead=.16, circ=2*Math.PI*R, per=lead+3*circ+lead;
+    // clean version: circle tangent at entry, left turns
+    const sp = u => {
+      let s=u*per;
+      if(s<=lead) return {x:.20+s, y:.5};
+      s-=lead;
+      if(s<=3*circ){ const a=Math.PI/2 - s/R; return {x:.36 + R*Math.cos(a), y:(.5-R) + R*Math.sin(a)}; }
+      return {x:.36+Math.min(s-3*circ,lead), y:.5};
+    };
+    M_SPIRAL.keyframes = march(sp, 268/R, [
+      {u:0.00, text:'Above 3000 AGL — pick the point, establish wind, reduce power'},
+      {u:0.08, text:'¼ mile from the point — power IDLE, trim for Vg 60'},
+      {u:0.20, text:'Steep bank — hold a CONSTANT RADIUS on the point'},
+      {u:0.38, text:'Wind correction — steepest bank downwind'},
+      {u:0.45, text:'Clear the engine each turn'},
+      {u:0.62, text:'Second turn — radius constant, speed Vg'},
+      {u:0.78, text:'Clear the engine — third turn'},
+      {u:0.95, text:'Roll out on entry heading — recover or set up landing'}
+    ], {tas:60, wind:0, mp:800,
+        altFn: u=>.7 - .45*u,
+        iasFn: u=>60});
+    M_SPIRAL.duration = M_SPIRAL.keyframes[M_SPIRAL.keyframes.length-1].t;
+    M_SPIRAL.square = true; M_SPIRAL.initHdg = 90;
+  }
+
+  const M_POINT = list.find(m=>m.name.includes('Turns Around'));
+  const M_STURN = list.find(m=>m.name.includes('S-Turns'));
+  const M_RECT  = list.find(m=>m.name.includes('Rectangular'));
 
   if(M_POINT){
     M_POINT.keyframes = march(circlePath, 1300/PT_R, [
@@ -811,10 +924,10 @@ const MANEUVERS = [
     M_RECT.square = true; M_RECT.groundRef = 'rect'; M_RECT.initHdg = 180;
     M_RECT.field = {hw:RC_HW-.10, hh:RC_HH-.09};
   }
-})();
+}
 
 // ─── CHECKLIST DATA ──────────────────────────────────────────
-const CL_NORMAL = [
+const CL_NORMAL_P2006T = [
 {title:"Before Starting Engine",items:["Preflight – COMPLETE","Passenger Briefing – COMPLETE","Documents – ONBOARD","Seats/Belts/Doors – ADJUST and LOCK","Parking Brake – SET","Emergency Gear Levers – STOWED","All Switches – OFF","Field Switches – OFF","Prop Controls – FULL FWD","Throttles – IDLE","Fuel Selectors – RH→LEFT, LH→RIGHT","Fuel Quantities – CHECK","Circuit Breakers – IN","Battery Master – ON","Voltmeter – CHECK 12-14V"]},
 {title:"Starting Engines (one at a time)",items:["Gear Position – 3 GREEN","Fuel Pump – ON (engine being started)","Throttle – OPEN ¼\"","Ignition – BOTH ON","Prop – FULL FWD","Field – OFF","Starter – ENGAGE (15s max)","After start: Field – ON","Oil Pressure – CHECK GREEN","Fuel Pump – OFF after start"]},
 {title:"After Start",items:["Fuel Selectors – RH→LEFT; LH→RIGHT","Engine instruments – IN THE GREEN","Radios/Avionics – ON as required","Altimeter – SET","Heading Indicator – SET","Flight instruments – CHECK"]},
@@ -826,7 +939,7 @@ const CL_NORMAL = [
 {title:"After Landing",items:["Throttles – 1200 RPM","Flaps – UP","Fuel Pumps – OFF","Carb Heat – OFF (if used)","Transponder – STANDBY"]},
 {title:"Engine Shutdown",items:["Throttles – IDLE (1 min cool down)","Avionics – OFF","Fuel Pumps – OFF","Field Switches – OFF","Prop Controls – FEATHER","Throttles – IDLE","Ignitions – OFF","Fuel Selectors – OFF","Master – OFF"]}
 ];
-const CL_EMERGENCY = [
+const CL_EMERGENCY_P2006T = [
 {title:"Engine Failure – Takeoff Run",items:["Throttle – IDLE","Brakes – APPLY MAXIMUM","Directional Control – MAINTAIN"]},
 {title:"Engine Failure – After T/O (Gear Down)",items:["Airspeed – Pitch BLUE LINE (84 KIAS)","Throttles – FULL FORWARD","Propellers – FULL FORWARD","Directional Control – MAINTAIN","Throttles – RETARD for landing"]},
 {title:"Engine Failure – After T/O (Gear Up)",items:["Auto Pilot – OFF","Airspeed – Pitch BLUE LINE (84 KIAS)","Throttles – FULL FORWARD","Propellers – FULL FORWARD","Directional Control – MAINTAIN","Gear Up – VERIFIED","Flaps – VERIFIED","Fuel Pumps – ON","Feather Procedure (below 3,000' AGL)"]},
@@ -840,6 +953,290 @@ const CL_EMERGENCY = [
 {title:"Propeller Overspeed",items:["Throttle – IDLE","Airspeed – AT OR ABOVE 84 KIAS","Prop – REDUCE to low setting (above feather)","RPM – CHECK","Throttle – INCREASE SLOWLY until governor engages","Prop – INCREASE SLOWLY, check RPM","If continues – SECURE ENGINE","Terminate flight – ASAP"]},
 {title:"Alternator Failure",items:["Annunciation – VERIFY FAILURE","FIELD LH/RH – OFF","FIELD LH/RH – ON","If ALT Caution remains:","FIELD LH/RH – OFF","Avionic LH/RH – OFF","CROSS BUS LH/RH – OFF","Circuit Breakers – CHECK and RESET (once)","Ammeters – MONITOR","Terminate flight – AS SOON AS PRACTICAL"]}
 ];
+
+// ─── CESSNA 152 MANEUVER DATA ────────────────────────────────
+// SOURCES: USAA SEL Maneuvers Guide Rev 2 (3/16/2025) via maneuvers-data.js;
+// "Cessna 152 — SEL Maneuver Profiles (Airwork)" PDF; USAA 152 Trifold
+// Checklist Rev 3. Speeds: Vr 50, Vx 55, Vy 67, Vcc 80, Vg 60, Va 98-104,
+// Vfe 85, Vs 40, Vso 35. Pattern: dwn 85 / base 70 (20°) / final 60 (30°) /
+// short-field final 54. mp field carries RPM for this aircraft.
+const MANEUVERS_C152 = [
+{name:"1. Normal Takeoff",view:"side",duration:55,keyframes:[
+{t:0,x:.04,alt:0,ias:0,pitch:0,bank:0,mp:1000,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Line up — crosswind correction in, smoothly FULL power"},
+{t:5,x:.10,alt:0,ias:30,pitch:0,bank:0,mp:2400,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Engine green, airspeed alive — rudder only, NO brakes"},
+{t:9,x:.17,alt:0,ias:50,pitch:2,bank:0,mp:2400,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:'"50, rotate" — smooth back pressure, right rudder'},
+{t:13,x:.24,alt:.02,ias:60,pitch:8,bank:0,mp:2400,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Wings level — let it fly off, accelerate"},
+{t:20,x:.36,alt:.06,ias:67,pitch:7,bank:0,mp:2400,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Vy 67 — climb attitude"},
+{t:30,x:.52,alt:.14,ias:67,pitch:7,bank:0,mp:2400,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"200' AGL — climb flow check, runway aligned"},
+{t:42,x:.72,alt:.24,ias:67,pitch:7,bank:0,mp:2400,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Runway heading to 300' below TPA"},
+{t:55,x:.92,alt:.34,ias:80,pitch:5,bank:0,mp:2400,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Clear of pattern — cruise climb 80 (Vcc)"}
+]},
+{name:"2. Soft Field Takeoff",view:"side",duration:60,keyframes:[
+{t:0,x:.04,alt:0,ias:0,pitch:6,bank:0,mp:1000,gear:"FIXED",flaps:"10°",eng:"BOTH",callout:"Full aft yoke — rolling on, shallow turn, NO brakes"},
+{t:5,x:.10,alt:0,ias:25,pitch:8,bank:0,mp:2400,gear:"FIXED",flaps:"10°",eng:"BOTH",callout:"Smooth full power — hold back pressure, Vy attitude"},
+{t:10,x:.17,alt:.01,ias:40,pitch:9,bank:0,mp:2400,gear:"FIXED",flaps:"10°",eng:"BOTH",callout:"Lift off as soon as able — stay in ground effect"},
+{t:15,x:.25,alt:.015,ias:50,pitch:4,bank:0,mp:2400,gear:"FIXED",flaps:"10°",eng:"BOTH",callout:"Lower the nose — accelerate in ground effect"},
+{t:22,x:.36,alt:.02,ias:60,pitch:3,bank:0,mp:2400,gear:"FIXED",flaps:"10°",eng:"BOTH",callout:"Approaching Vx/Vy — ready to climb"},
+{t:28,x:.46,alt:.06,ias:67,pitch:7,bank:0,mp:2400,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Vy 67 — climb, flaps UP"},
+{t:40,x:.64,alt:.16,ias:67,pitch:7,bank:0,mp:2400,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"200' AGL — climb flow check"},
+{t:60,x:.92,alt:.32,ias:80,pitch:5,bank:0,mp:2400,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Cruise climb 80 — checklist"}
+]},
+{name:"3. Short Field Takeoff",view:"side",duration:58,keyframes:[
+{t:0,x:.03,alt:0,ias:0,pitch:0,bank:0,mp:1000,gear:"FIXED",flaps:"10°",eng:"BOTH",callout:"Max available runway — HOLD brakes, flaps set"},
+{t:4,x:.03,alt:0,ias:0,pitch:0,bank:0,mp:2400,gear:"FIXED",flaps:"10°",eng:"BOTH",callout:"Full power on brakes — engine green"},
+{t:7,x:.09,alt:0,ias:30,pitch:0,bank:0,mp:2400,gear:"FIXED",flaps:"10°",eng:"BOTH",callout:"Brakes RELEASED — centerline, rudder only"},
+{t:11,x:.16,alt:0,ias:50,pitch:2,bank:0,mp:2400,gear:"FIXED",flaps:"10°",eng:"BOTH",callout:'"50, rotate" — Vr short field'},
+{t:15,x:.23,alt:.03,ias:54,pitch:10,bank:0,mp:2400,gear:"FIXED",flaps:"10°",eng:"BOTH",callout:"Obstacle clearance 54 — hold it"},
+{t:21,x:.32,alt:.08,ias:55,pitch:9,bank:0,mp:2400,gear:"FIXED",flaps:"10°",eng:"BOTH",callout:"Through 50' — pitch for Vy, flaps retracting"},
+{t:28,x:.44,alt:.14,ias:67,pitch:7,bank:0,mp:2400,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Vy 67 — flaps UP verified"},
+{t:40,x:.64,alt:.24,ias:67,pitch:7,bank:0,mp:2400,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"200' AGL — climb flow check"},
+{t:58,x:.92,alt:.36,ias:80,pitch:5,bank:0,mp:2400,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Cruise climb 80"}
+]},
+{name:"4. Slow Flight (Dirty)",view:"side",duration:80,keyframes:[
+{t:0,x:.04,alt:.5,ias:100,pitch:0,bank:0,mp:2300,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"2000' AGL min — pre-maneuver check, pick a reference"},
+{t:8,x:.14,alt:.5,ias:85,pitch:2,bank:0,mp:1500,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Power 1500 RPM — hold altitude"},
+{t:16,x:.24,alt:.5,ias:80,pitch:4,bank:0,mp:1500,gear:"FIXED",flaps:"10°",eng:"BOTH",callout:"Below Vfe 85 — flaps 10, 20, FULL"},
+{t:24,x:.34,alt:.5,ias:60,pitch:6,bank:0,mp:1500,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:"Flaps FULL — slowing, maintain heading"},
+{t:34,x:.44,alt:.5,ias:45,pitch:10,bank:0,mp:1700,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:"Near stall speed — power 1700, pitch just above stall"},
+{t:48,x:.58,alt:.5,ias:43,pitch:10,bank:0,mp:1700,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:"Maneuvering in slow flight — altitude and heading"},
+{t:58,x:.68,alt:.5,ias:50,pitch:6,bank:0,mp:2400,gear:"FIXED",flaps:"20°",eng:"BOTH",callout:"Recover — FULL power, flaps 20 or T/O"},
+{t:66,x:.78,alt:.5,ias:55,pitch:5,bank:0,mp:2400,gear:"FIXED",flaps:"10°",eng:"BOTH",callout:"Vx 55 — flaps 10, allow airspeed to increase"},
+{t:73,x:.86,alt:.5,ias:67,pitch:2,bank:0,mp:2400,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Flaps UP — accelerating, hold altitude"},
+{t:80,x:.94,alt:.5,ias:95,pitch:0,bank:0,mp:2300,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Training cruise settings — complete"}
+]},
+{name:"5. Slow Flight (Clean)",view:"side",duration:70,keyframes:[
+{t:0,x:.05,alt:.5,ias:100,pitch:0,bank:0,mp:2300,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"2000' AGL min — pre-maneuver check, reference point"},
+{t:10,x:.18,alt:.5,ias:80,pitch:3,bank:0,mp:1500,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Power 1500 RPM — hold altitude as it slows"},
+{t:24,x:.36,alt:.5,ias:55,pitch:8,bank:0,mp:1800,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Near stall speed — power 1800, pitch just above stall"},
+{t:40,x:.56,alt:.5,ias:48,pitch:10,bank:0,mp:1800,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Slow flight clean — turns, climbs, descents as directed"},
+{t:52,x:.70,alt:.5,ias:55,pitch:5,bank:0,mp:2400,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Recover — FULL power, hold altitude"},
+{t:70,x:.92,alt:.5,ias:95,pitch:0,bank:0,mp:2300,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Training cruise settings — complete"}
+]},
+{name:"6. Power-Off Stall",view:"side",duration:75,keyframes:[
+{t:0,x:.04,alt:.6,ias:100,pitch:0,bank:0,mp:2300,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Above 2000' AGL — pre-maneuver check, reference point"},
+{t:8,x:.13,alt:.6,ias:85,pitch:2,bank:0,mp:1500,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Power 1500 RPM — below Vfe, flaps 10"},
+{t:14,x:.21,alt:.6,ias:75,pitch:3,bank:0,mp:1500,gear:"FIXED",flaps:"20°",eng:"BOTH",callout:"Flaps 20"},
+{t:20,x:.28,alt:.6,ias:65,pitch:3,bank:0,mp:1500,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:"Flaps FULL"},
+{t:26,x:.36,alt:.57,ias:60,pitch:-3,bank:0,mp:1500,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:"At 60 — descend 500 FPM to the hard deck"},
+{t:33,x:.44,alt:.52,ias:55,pitch:2,bank:0,mp:800,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:"Power IDLE — back pressure to stall attitude, stay coordinated"},
+{t:39,x:.50,alt:.50,ias:42,pitch:10,bank:0,mp:800,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:'"Horn, buffet, STALL" — reduce AOA to break'},
+{t:43,x:.55,alt:.49,ias:50,pitch:2,bank:0,mp:2400,gear:"FIXED",flaps:"20°",eng:"BOTH",callout:"FULL power — flaps 20 or T/O"},
+{t:49,x:.62,alt:.51,ias:55,pitch:8,bank:0,mp:2400,gear:"FIXED",flaps:"10°",eng:"BOTH",callout:"Positive rate — flaps 10, Vx 55"},
+{t:58,x:.72,alt:.56,ias:67,pitch:7,bank:0,mp:2400,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Flaps UP — accelerate to Vy 67"},
+{t:75,x:.94,alt:.62,ias:95,pitch:0,bank:0,mp:2300,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Level off — accelerate to cruise settings"}
+]},
+{name:"7. Power-On Stall",view:"side",duration:60,keyframes:[
+{t:0,x:.05,alt:.6,ias:100,pitch:0,bank:0,mp:2300,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"2000' AGL min — pre-maneuver check, reference point"},
+{t:10,x:.17,alt:.6,ias:75,pitch:3,bank:0,mp:1500,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Power 1500 RPM — slow, increase elevator, trim"},
+{t:20,x:.30,alt:.6,ias:50,pitch:5,bank:0,mp:1500,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"At 50 KIAS — FULL power, pitch for stall attitude"},
+{t:27,x:.40,alt:.63,ias:45,pitch:16,bank:0,mp:2400,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"High nose — maintain coordination, right rudder"},
+{t:33,x:.48,alt:.65,ias:40,pitch:18,bank:0,mp:2400,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:'"Horn, buffet, STALL" — reduce AOA to break'},
+{t:38,x:.56,alt:.64,ias:55,pitch:6,bank:0,mp:2400,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Nose to the horizon — accelerating"},
+{t:46,x:.68,alt:.67,ias:67,pitch:7,bank:0,mp:2400,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Climb at Vy 67"},
+{t:60,x:.92,alt:.72,ias:95,pitch:0,bank:0,mp:2300,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Level off — accelerate to cruise settings"}
+]},
+{name:"8. Accelerated Stall",view:"side",duration:55,keyframes:[
+{t:0,x:.05,alt:.6,ias:100,pitch:0,bank:0,mp:2300,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"2000' AGL min — cruise power, reference point"},
+{t:10,x:.20,alt:.6,ias:85,pitch:1,bank:0,mp:1500,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Power 1500 — hold heading, altitude, airspeed"},
+{t:20,x:.36,alt:.6,ias:60,pitch:2,bank:0,mp:1500,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Below Vg — establish 45° bank"},
+{t:26,x:.46,alt:.6,ias:55,pitch:4,bank:45,mp:1500,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"45° bank — increase elevator to induce the stall"},
+{t:31,x:.54,alt:.59,ias:50,pitch:6,bank:45,mp:1500,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:'"Horn, buffet" — stall indications'},
+{t:35,x:.60,alt:.58,ias:55,pitch:2,bank:15,mp:2400,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Recover — reduce bank and pitch, MAX power"},
+{t:42,x:.70,alt:.59,ias:65,pitch:2,bank:0,mp:2400,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Pitch for the horizon — straight and level"},
+{t:55,x:.92,alt:.6,ias:95,pitch:0,bank:0,mp:2300,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Cruise settings — complete"}
+]},
+{name:"9. Cross-Control Stall",view:"side",duration:70,keyframes:[
+{t:0,x:.05,alt:.65,ias:100,pitch:0,bank:0,mp:2300,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Above 3000' AGL — pre-maneuver check, reference point"},
+{t:8,x:.14,alt:.65,ias:85,pitch:2,bank:0,mp:1500,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Power 1500 — below Vfe, flaps FULL"},
+{t:16,x:.24,alt:.65,ias:65,pitch:3,bank:0,mp:1500,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:"Slow to Vg 60 — then power IDLE"},
+{t:24,x:.34,alt:.63,ias:60,pitch:2,bank:15,mp:800,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:"Roll into a medium bank — simulate base-to-final"},
+{t:32,x:.44,alt:.61,ias:55,pitch:4,bank:25,mp:800,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:"EXCESSIVE rudder — opposite aileron holds the bank"},
+{t:38,x:.52,alt:.60,ias:48,pitch:8,bank:25,mp:800,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:'"Stall!" — reduce AOA, roll wings level, remove rudder'},
+{t:44,x:.60,alt:.60,ias:55,pitch:2,bank:0,mp:2400,gear:"FIXED",flaps:"20°",eng:"BOTH",callout:"FULL power — flaps 20 or T/O, Vx 55"},
+{t:52,x:.70,alt:.63,ias:60,pitch:7,bank:0,mp:2400,gear:"FIXED",flaps:"10°",eng:"BOTH",callout:"Positive rate — flaps 10"},
+{t:60,x:.80,alt:.66,ias:67,pitch:6,bank:0,mp:2400,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Flaps UP — accelerate to Vy 67"},
+{t:70,x:.94,alt:.70,ias:95,pitch:0,bank:0,mp:2300,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Cruise settings — complete"}
+]},
+{name:"10. Elevator Trim Stall",view:"side",duration:65,keyframes:[
+{t:0,x:.05,alt:.65,ias:100,pitch:0,bank:0,mp:2300,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Above 3000' AGL — pre-maneuver check, reference point"},
+{t:8,x:.14,alt:.65,ias:85,pitch:1,bank:0,mp:1500,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Power 1500 — below Vfe, flaps FULL"},
+{t:16,x:.24,alt:.63,ias:70,pitch:0,bank:0,mp:1500,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:"Trim FULL AFT — simulating a go-around setup"},
+{t:24,x:.34,alt:.61,ias:60,pitch:2,bank:0,mp:1500,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:"At Vg — FULL power"},
+{t:30,x:.42,alt:.62,ias:52,pitch:14,bank:0,mp:2400,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:"Nose pitches UP hard — forward pressure!"},
+{t:36,x:.50,alt:.63,ias:48,pitch:16,bank:0,mp:2400,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:'"Stall indications" — reduce AOA to break'},
+{t:42,x:.58,alt:.63,ias:55,pitch:5,bank:0,mp:2400,gear:"FIXED",flaps:"20°",eng:"BOTH",callout:"Flaps 20 or T/O — Vx 55, re-trim"},
+{t:50,x:.68,alt:.66,ias:60,pitch:7,bank:0,mp:2400,gear:"FIXED",flaps:"10°",eng:"BOTH",callout:"Positive rate — flaps 10"},
+{t:57,x:.78,alt:.69,ias:67,pitch:6,bank:0,mp:2400,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Flaps UP — Vy 67"},
+{t:65,x:.92,alt:.72,ias:95,pitch:0,bank:0,mp:2300,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Level off — cruise settings"}
+]},
+{name:"11. Secondary Stall",view:"side",duration:70,keyframes:[
+{t:0,x:.04,alt:.65,ias:100,pitch:0,bank:0,mp:2300,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Above 3000' AGL — pre-maneuver check"},
+{t:8,x:.13,alt:.65,ias:85,pitch:2,bank:0,mp:1500,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Power 1500 — below Vfe, flaps FULL, trim"},
+{t:16,x:.22,alt:.63,ias:60,pitch:-2,bank:0,mp:1500,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:"At Vg 60 — descend 500 FPM to the hard deck"},
+{t:23,x:.31,alt:.58,ias:55,pitch:3,bank:0,mp:800,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:"Power IDLE — back pressure to induce the stall"},
+{t:29,x:.38,alt:.56,ias:42,pitch:10,bank:0,mp:800,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:'"Stall" — reduce AOA to break'},
+{t:34,x:.44,alt:.55,ias:48,pitch:4,bank:0,mp:800,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:"SECONDARY: pull too soon — elevator to induce again"},
+{t:39,x:.50,alt:.54,ias:42,pitch:9,bank:0,mp:800,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:'"Second stall!" — reduce AOA properly this time'},
+{t:44,x:.57,alt:.54,ias:52,pitch:2,bank:0,mp:2400,gear:"FIXED",flaps:"20°",eng:"BOTH",callout:"FULL power — flaps 20, Vx 55"},
+{t:52,x:.66,alt:.57,ias:60,pitch:7,bank:0,mp:2400,gear:"FIXED",flaps:"10°",eng:"BOTH",callout:"Positive rate — flaps 10"},
+{t:60,x:.76,alt:.61,ias:67,pitch:6,bank:0,mp:2400,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Flaps UP — Vy 67"},
+{t:70,x:.92,alt:.65,ias:95,pitch:0,bank:0,mp:2300,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Level off — cruise settings"}
+]},
+{name:"12. Steep Turns",view:"top",duration:70,keyframes:[]},
+{name:"13. Chandelles",view:"top",duration:60,keyframes:[]},
+{name:"14. Lazy Eight",view:"top",duration:80,keyframes:[]},
+{name:"15. Steep Spiral",view:"top",duration:90,keyframes:[]},
+{name:"16. Rectangular Course",view:"top",duration:80,keyframes:[]},
+{name:"17. Turns Around a Point",view:"top",duration:60,keyframes:[]},
+{name:"18. S-Turns",view:"top",duration:55,keyframes:[]},
+{name:"19. Normal Landing",view:"top",duration:80,keyframes:[
+{t:0,x:.60,y:.12,alt:.2,ias:95,pitch:0,bank:0,mp:2300,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"45° entry — before-landing flow and checklist"},
+{t:8,x:.85,y:.28,alt:.2,ias:85,pitch:0,bank:15,mp:2300,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Joining downwind — 85 KIAS"},
+{t:18,x:.86,y:.52,alt:.2,ias:85,pitch:0,bank:0,mp:2300,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Downwind — GUMPS, carb heat as required"},
+{t:26,x:.86,y:.66,alt:.19,ias:80,pitch:0,bank:0,mp:1500,gear:"FIXED",flaps:"10°",eng:"BOTH",callout:"Abeam the numbers — 1500 RPM, flaps 10, 80 KIAS"},
+{t:36,x:.82,y:.82,alt:.16,ias:75,pitch:-2,bank:20,mp:1500,gear:"FIXED",flaps:"10°",eng:"BOTH",callout:"Turning base — 45° from the numbers"},
+{t:44,x:.66,y:.88,alt:.13,ias:70,pitch:-3,bank:0,mp:1500,gear:"FIXED",flaps:"20°",eng:"BOTH",callout:"Base — flaps 20, 70 KIAS"},
+{t:52,x:.52,y:.84,alt:.10,ias:65,pitch:-3,bank:20,mp:1500,gear:"FIXED",flaps:"20°",eng:"BOTH",callout:"Turning final — plan for wind and traffic"},
+{t:60,x:.50,y:.70,alt:.08,ias:60,pitch:-3,bank:0,mp:1500,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:"Final — flaps FULL, 60 KIAS, GUMPS final"},
+{t:70,x:.50,y:.45,alt:.03,ias:60,pitch:-3,bank:0,mp:1200,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:"Ailerons for centerline, rudder for alignment"},
+{t:76,x:.50,y:.30,alt:.005,ias:50,pitch:4,bank:0,mp:800,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:"Ground effect — throttle idle, increase back pressure"},
+{t:80,x:.50,y:.22,alt:0,ias:40,pitch:6,bank:0,mp:800,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:"Mains first — hold it off, easy on the brakes"}
+]},
+{name:"20. Soft Field Landing",view:"top",duration:82,keyframes:[
+{t:0,x:.60,y:.12,alt:.2,ias:95,pitch:0,bank:0,mp:2300,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"45° entry — before-landing flow and checklist"},
+{t:8,x:.85,y:.28,alt:.2,ias:85,pitch:0,bank:15,mp:2300,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Joining downwind — 85 KIAS"},
+{t:20,x:.86,y:.56,alt:.2,ias:85,pitch:0,bank:0,mp:2300,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Downwind — GUMPS complete"},
+{t:28,x:.86,y:.68,alt:.19,ias:80,pitch:0,bank:0,mp:1500,gear:"FIXED",flaps:"10°",eng:"BOTH",callout:"Abeam — 1500 RPM, flaps 10, 80"},
+{t:38,x:.80,y:.83,alt:.15,ias:72,pitch:-2,bank:20,mp:1500,gear:"FIXED",flaps:"20°",eng:"BOTH",callout:"Base — flaps 20, 70"},
+{t:50,x:.55,y:.86,alt:.11,ias:65,pitch:-3,bank:18,mp:1500,gear:"FIXED",flaps:"20°",eng:"BOTH",callout:"Turning final"},
+{t:58,x:.50,y:.72,alt:.08,ias:60,pitch:-3,bank:0,mp:1500,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:"Final — flaps FULL, 60 KIAS (soft field)"},
+{t:68,x:.50,y:.48,alt:.03,ias:58,pitch:-2,bank:0,mp:1300,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:"Carry a touch of power into the flare"},
+{t:75,x:.50,y:.32,alt:.007,ias:50,pitch:5,bank:0,mp:1200,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:"Hold it off — softest possible touchdown, nose high"},
+{t:82,x:.50,y:.22,alt:0,ias:38,pitch:7,bank:0,mp:1100,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:"Full aft yoke — keep the nosewheel light, NO brakes"}
+]},
+{name:"21. Short Field Landing",view:"top",duration:80,keyframes:[
+{t:0,x:.60,y:.12,alt:.2,ias:95,pitch:0,bank:0,mp:2300,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"45° entry — before-landing flow and checklist"},
+{t:8,x:.85,y:.28,alt:.2,ias:85,pitch:0,bank:15,mp:2300,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Joining downwind — 85 KIAS"},
+{t:20,x:.86,y:.56,alt:.2,ias:85,pitch:0,bank:0,mp:2300,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Downwind — GUMPS, pick the touchdown point"},
+{t:28,x:.86,y:.68,alt:.19,ias:80,pitch:0,bank:0,mp:1500,gear:"FIXED",flaps:"10°",eng:"BOTH",callout:"Abeam — 1500 RPM, flaps 10"},
+{t:38,x:.80,y:.83,alt:.15,ias:70,pitch:-2,bank:20,mp:1500,gear:"FIXED",flaps:"20°",eng:"BOTH",callout:"Base — flaps 20, 70"},
+{t:50,x:.55,y:.86,alt:.11,ias:65,pitch:-3,bank:18,mp:1500,gear:"FIXED",flaps:"20°",eng:"BOTH",callout:"Turning final — stabilized"},
+{t:58,x:.50,y:.72,alt:.08,ias:54,pitch:-3,bank:0,mp:1500,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:"Final — flaps FULL, 54 KIAS short-field speed"},
+{t:68,x:.50,y:.48,alt:.03,ias:54,pitch:-3,bank:0,mp:1300,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:"Power and pitch to the aiming point — on speed"},
+{t:74,x:.50,y:.32,alt:.005,ias:48,pitch:3,bank:0,mp:800,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:"Over the threshold — power idle, minimal float"},
+{t:80,x:.50,y:.24,alt:0,ias:40,pitch:4,bank:0,mp:800,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:"Touchdown on the point — max braking, flaps up, aft yoke"}
+]},
+{name:"22. Forward Slip to Landing",view:"top",duration:78,keyframes:[
+{t:0,x:.60,y:.12,alt:.22,ias:95,pitch:0,bank:0,mp:2300,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"45° entry — before-landing flow and checklist"},
+{t:8,x:.85,y:.28,alt:.22,ias:85,pitch:0,bank:15,mp:2300,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Joining downwind — 85 KIAS"},
+{t:20,x:.86,y:.60,alt:.22,ias:80,pitch:0,bank:0,mp:1500,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Abeam — approach power, stay HIGH on purpose"},
+{t:30,x:.82,y:.80,alt:.20,ias:75,pitch:-2,bank:20,mp:1500,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Early base — keep the altitude"},
+{t:42,x:.58,y:.86,alt:.17,ias:70,pitch:-2,bank:18,mp:1500,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Turning final — high, flapless approach 65-70"},
+{t:50,x:.50,y:.72,alt:.15,ias:70,pitch:-3,bank:0,mp:800,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Power IDLE — establish the slip"},
+{t:58,x:.50,y:.58,alt:.10,ias:65,pitch:-5,bank:15,mp:800,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Aileron into wind, opposite rudder — nose off centerline"},
+{t:66,x:.50,y:.44,alt:.05,ias:65,pitch:-5,bank:12,mp:800,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Steep descent, speed steady — forward pressure as needed"},
+{t:72,x:.50,y:.32,alt:.015,ias:62,pitch:0,bank:0,mp:800,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Recover the slip — align, round out"},
+{t:78,x:.50,y:.24,alt:0,ias:50,pitch:5,bank:0,mp:800,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Normal touchdown — full aft yoke on rollout"}
+]},
+{name:"23. Power-Off 180",view:"top",duration:72,keyframes:[
+{t:0,x:.60,y:.12,alt:.2,ias:95,pitch:0,bank:0,mp:2300,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"45° entry — before-landing flow before midfield"},
+{t:8,x:.85,y:.28,alt:.2,ias:85,pitch:0,bank:15,mp:2300,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Joining downwind — 85 KIAS, 1000' AGL"},
+{t:18,x:.86,y:.56,alt:.2,ias:85,pitch:0,bank:0,mp:2300,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Midfield — GUMPS complete"},
+{t:24,x:.86,y:.66,alt:.2,ias:75,pitch:2,bank:0,mp:800,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"ABEAM the point — power IDLE, hold altitude to Vg"},
+{t:30,x:.85,y:.74,alt:.18,ias:60,pitch:-2,bank:0,mp:800,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Best glide 60 — trim, GUMPS"},
+{t:38,x:.80,y:.84,alt:.15,ias:60,pitch:-3,bank:25,mp:800,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Base turn — position by the wind, flaps as needed"},
+{t:48,x:.62,y:.88,alt:.11,ias:60,pitch:-3,bank:15,mp:800,gear:"FIXED",flaps:"10°",eng:"BOTH",callout:"Base — judging the energy, flaps when landing assured"},
+{t:56,x:.51,y:.80,alt:.07,ias:60,pitch:-3,bank:15,mp:800,gear:"FIXED",flaps:"20°",eng:"BOTH",callout:"Final turn — rolling out aligned"},
+{t:64,x:.50,y:.60,alt:.03,ias:60,pitch:-3,bank:0,mp:800,gear:"FIXED",flaps:"20°",eng:"BOTH",callout:"Aim short of the point — ground effect carries you"},
+{t:69,x:.50,y:.40,alt:.007,ias:52,pitch:4,bank:0,mp:800,gear:"FIXED",flaps:"20°",eng:"BOTH",callout:"Idle verified — back pressure, settle on the point"},
+{t:72,x:.50,y:.30,alt:0,ias:42,pitch:5,bank:0,mp:800,gear:"FIXED",flaps:"20°",eng:"BOTH",callout:"Touchdown — full aft elevator, easy brakes"}
+]},
+{name:"24. Go-Around",view:"side",duration:45,keyframes:[
+{t:0,x:.05,alt:.08,ias:60,pitch:-3,bank:0,mp:1500,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:"Final approach — 60 KIAS, flaps FULL"},
+{t:6,x:.15,alt:.05,ias:60,pitch:-3,bank:0,mp:1500,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:"Unstable / occupied runway — decision: GO AROUND"},
+{t:10,x:.24,alt:.045,ias:58,pitch:2,bank:0,mp:2400,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:"FULL power — carb heat off, wings level"},
+{t:14,x:.32,alt:.05,ias:56,pitch:6,bank:0,mp:2400,gear:"FIXED",flaps:"20°",eng:"BOTH",callout:"Flaps 20 — pitch Vx/Vy attitude"},
+{t:19,x:.42,alt:.07,ias:57,pitch:7,bank:0,mp:2400,gear:"FIXED",flaps:"20°",eng:"BOTH",callout:'"Going around" — advise traffic'},
+{t:25,x:.52,alt:.10,ias:60,pitch:7,bank:0,mp:2400,gear:"FIXED",flaps:"10°",eng:"BOTH",callout:"Positive rate — flaps 10"},
+{t:33,x:.66,alt:.15,ias:67,pitch:7,bank:0,mp:2400,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Vy 67 — flaps UP, trim"},
+{t:45,x:.90,alt:.24,ias:67,pitch:7,bank:0,mp:2400,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Climbing away — resume normal procedures"}
+]},
+{name:"25. Engine Failure After Liftoff",view:"side",duration:50,keyframes:[
+{t:0,x:.04,alt:0,ias:0,pitch:0,bank:0,mp:1000,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Full-length takeoff — brief the demo, no-flap landing assured"},
+{t:6,x:.12,alt:0,ias:45,pitch:0,bank:0,mp:2400,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Normal takeoff roll"},
+{t:10,x:.18,alt:.01,ias:55,pitch:7,bank:0,mp:2400,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Rotate, climb — do not attempt below 50' AGL"},
+{t:16,x:.28,alt:.04,ias:62,pitch:7,bank:0,mp:2400,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:'"Above 75 feet" — simulating engine failure'},
+{t:20,x:.36,alt:.05,ias:60,pitch:-2,bank:0,mp:800,gear:"FIXED",flaps:"UP",eng:"FAIL",callout:"Throttle IDLE, carb heat ON — pitch DOWN for Vg 60"},
+{t:26,x:.46,alt:.04,ias:60,pitch:-4,bank:0,mp:800,gear:"FIXED",flaps:"UP",eng:"FAIL",callout:"Nose low — hold 60, land straight ahead"},
+{t:34,x:.60,alt:.02,ias:60,pitch:-3,bank:0,mp:800,gear:"FIXED",flaps:"UP",eng:"FAIL",callout:"Flare height — round out"},
+{t:42,x:.74,alt:.004,ias:50,pitch:4,bank:0,mp:800,gear:"FIXED",flaps:"UP",eng:"FAIL",callout:"Touchdown — full stop"},
+{t:50,x:.88,alt:0,ias:20,pitch:0,bank:0,mp:800,gear:"FIXED",flaps:"UP",eng:"FAIL",callout:"Rollout complete — taxi back if runway allows"}
+]},
+{name:"26. Emergency Descent",view:"side",duration:55,keyframes:[
+{t:0,x:.05,alt:.7,ias:100,pitch:0,bank:0,mp:2300,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Pre-maneuver check — simulated fire / rapid descent needed"},
+{t:6,x:.14,alt:.68,ias:90,pitch:-2,bank:0,mp:800,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Throttle IDLE"},
+{t:12,x:.24,alt:.62,ias:82,pitch:-5,bank:30,mp:800,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:"Below Vfe — flaps FULL, bank 30-45° and turn"},
+{t:20,x:.36,alt:.50,ias:85,pitch:-8,bank:40,mp:800,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:"At or below Vfe 85 — clearing below in the turn"},
+{t:30,x:.50,alt:.36,ias:85,pitch:-8,bank:35,mp:800,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:"Rapid descent — keep the turn coming around"},
+{t:38,x:.62,alt:.26,ias:85,pitch:-6,bank:15,mp:800,gear:"FIXED",flaps:"FULL",eng:"BOTH",callout:"Lead level-off by 10% of VSI — wings level"},
+{t:45,x:.74,alt:.21,ias:80,pitch:0,bank:0,mp:2000,gear:"FIXED",flaps:"20°",eng:"BOTH",callout:"Throttle to cruise — flaps retracting gradually"},
+{t:55,x:.92,alt:.20,ias:95,pitch:0,bank:0,mp:2300,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Level — resume cruise or proceed with landing"}
+]},
+{name:"27. Emergency Approach & Landing",view:"top",duration:85,keyframes:[
+{t:0,x:.50,y:.10,alt:.7,ias:95,pitch:0,bank:0,mp:2300,gear:"FIXED",flaps:"UP",eng:"BOTH",callout:"Cruise — pre-maneuver check complete"},
+{t:6,x:.50,y:.18,alt:.66,ias:75,pitch:2,bank:0,mp:800,gear:"FIXED",flaps:"UP",eng:"FAIL",callout:"Engine failure! Throttle idle — pitch for Vg 60, TRIM"},
+{t:14,x:.52,y:.28,alt:.60,ias:60,pitch:-2,bank:10,mp:800,gear:"FIXED",flaps:"UP",eng:"FAIL",callout:"Best field selected — plan a rectangular course to it"},
+{t:22,x:.60,y:.38,alt:.53,ias:60,pitch:-2,bank:0,mp:800,gear:"FIXED",flaps:"UP",eng:"FAIL",callout:"Restart flow: mixture, carb heat, fuel, ignition, primer"},
+{t:32,x:.70,y:.50,alt:.44,ias:60,pitch:-2,bank:15,mp:800,gear:"FIXED",flaps:"UP",eng:"FAIL",callout:'Mayday on 121.5 — squawk 7700'},
+{t:42,x:.72,y:.64,alt:.35,ias:60,pitch:-2,bank:0,mp:800,gear:"FIXED",flaps:"UP",eng:"FAIL",callout:"Secure flow: mixture cutoff, fuel off, ignition off"},
+{t:52,x:.64,y:.76,alt:.27,ias:60,pitch:-2,bank:20,mp:800,gear:"FIXED",flaps:"UP",eng:"FAIL",callout:"Base to the field — flaps as required"},
+{t:62,x:.52,y:.80,alt:.18,ias:60,pitch:-3,bank:15,mp:800,gear:"FIXED",flaps:"10°",eng:"FAIL",callout:"Final — field made, flaps in stages"},
+{t:72,x:.50,y:.60,alt:.10,ias:60,pitch:-3,bank:0,mp:800,gear:"FIXED",flaps:"20°",eng:"FAIL",callout:"Committed — doors unlatched, brief touchdown"},
+{t:85,x:.50,y:.40,alt:.05,ias:60,pitch:-2,bank:0,mp:2400,gear:"FIXED",flaps:"20°",eng:"BOTH",callout:"500' AGL — BREAK OFF: full power, flaps 20, climb away"}
+]}
+];
+
+// ─── CESSNA 152 CHECKLISTS ───────────────────────────────────
+// SOURCE: USAA 152 Checklist (trifold), Revision 3, 3/1/2025.
+// Transcribed from 152-Trifold-Checklist-Rev-3-3.1.2025-2.pdf.
+const CL_NORMAL_C152 = [
+{title:"Before Starting Engine",items:["Preflight Inspection – COMPLETE","Passenger Briefing / Control Exchange – SAFETY – COMPLETE","Seats, Seat Belts & Shoulder Harnesses – ADJUST and LOCK","Brakes – TEST and SET","Fuel Shutoff Valve – ON","Circuit Breakers – CHECK IN","Electrical Equipment – OFF","Avionics Master – OFF","Flight Controls – FREE and CORRECT"]},
+{title:"Starting Engine",items:["Mixture – RICH","Throttle – OPEN 1/2 INCH","Carburetor Heat – OFF (IN)","Prime – AS REQUIRED (Warm: 1-2 strokes; Cold: 2-4)","Propeller Area – CLEAR","Master Switch – ON","Flashing Beacon – ON (“Clear Prop”)","Ignition Switch – START","Throttle – 1000 RPM","Oil Pressure – CHECK","Starter – CHECK DISENGAGED","Mixture – LEAN","Navigation Lights – ON (Night or IFR)"]},
+{title:"After Start",items:["Flaps – UP","Avionics Master – ON","Marker Beacon – TEST (if installed)","GPS – TEST and SET (if installed)","COM/NAV Radios – SET","Transponder/ADS-B – TEST and ALT","Altimeter / Heading Indicator – SET","Taxi / Landing Light – ON / AS REQUIRED","Brakes – TEST","Taxi – INSTRUMENTS within limits"]},
+{title:"Engine Run-Up",items:["Tower/CTAF – MONITOR","Brakes – HOLD","Seats, Belts, Shoulder Harnesses – SECURE","Flight Instruments – CHECK and SET","Oil Temperature – CHECK","Primer – IN and LOCKED","Mixture – RICH","Throttle – 1700 RPM","Magnetos – CHECK (Max 125 & 50)","Suction Gauge – CHECK","Engine Instruments & Ammeter – CHECK","Carb Heat – ON (OUT – CHECK RPM DROP)","Throttle – IDLE (smoothly reduce)","Carburetor Heat – OFF (IN)","Throttle – 1000 RPM","Throttle Friction Lock – ADJUST"]},
+{title:"Before Takeoff",items:["Takeoff/Emergency Briefing – COMPLETE","Elevator Trim – SET FOR TAKEOFF","Wing Flaps – SET (0-10)","Mixture – SET","Landing Light – ON","Strobe Lights – ON (if equipped)","Transponder and ADS-B – ALT and MATCH","Fuel Quantity / Return Time – CHECK / BRIEF","Flight & Engine Instruments – CHECK","Cabin Doors and Windows – CLOSED / LOCKED"]},
+{title:"Enroute Climb",items:["Airspeed – VY or VCC","Flaps – UP","Mixture – SET","Throttle – FULL OPEN","Engine Instruments – IN LIMITS"]},
+{title:"Cruise",items:["Power – AS REQUIRED / SET","Elevator Trim – ADJUST","Mixture – LEAN (above 3000')","Landing Light – OFF / AS REQUIRED","Engine Instruments – IN LIMITS"]},
+{title:"Descent",items:["Airspeed / Vertical Speed – AS REQUIRED","Power – AS DESIRED","Mixture – ADJUST","Carb Heat – ON (as required)","Engine Instruments – IN LIMITS","Approach Setup / Briefing – COMPLETE"]},
+{title:"Before Landing",items:["Seats, Belts, Shoulder Harnesses – SECURE","Mixture – RICH","Carb Heat – ON / AS REQUIRED","Landing / Taxi Lights – ON","Engine Instruments – IN LIMITS","Pre-Landing “GUMPS” – COMPLETE"]},
+{title:"After Landing & Clear of Runway",items:["Throttle – 1000 RPM","Carb Heat – OFF","Flaps – UP","Transponder – ALT - VFR","Mixture – LEAN","Lights – AS REQUIRED","Pitot Heat – OFF","Trim – SET (Take-Off)","Taxi Clearance – OBTAIN"]},
+{title:"Engine Shutdown",items:["Avionics Master – OFF","Throttle – IDLE","Magneto Ground Check – OFF then 1 click RIGHT","Mixture – IDLE CUTOFF","Ignition Switch – OFF (after prop stops)","Lights – OFF","Master Switch – OFF"]},
+{title:"Securing Aircraft",items:["Hobbs / Tach – RECORD","Control Lock – INSTALL","Cabin / Seats / Vents – CLEAN / SECURE","Chocks / Tie-Downs – SECURE","Pitot Cover – INSTALL","Postflight Walk Around – COMPLETE / SECURE"]}
+];
+const CL_EMERGENCY_C152 = [
+{title:"Engine Failure During Takeoff Run",items:["Throttle – IDLE","Brakes – APPLY","Flaps – RETRACT","Mixture – IDLE CUTOFF","Ignition Switch – OFF","Master Switch – OFF"]},
+{title:"Engine Failure Immediately After Takeoff",items:["Airspeed – 60 KIAS","Mixture – IDLE CUTOFF","Fuel Shutoff Valve – OFF","Ignition Switch – OFF","Flaps – AS REQUIRED","Master Switch – OFF"]},
+{title:"Engine Failure During Flight (Restart)",items:["Airspeed – 60 KIAS","Carburetor Heat – ON","Fuel Shutoff Valve – ON","Mixture – RICH","Throttle – AS REQUIRED","Ignition Switch – BOTH (or START if prop not spinning)","Primer – IN and LOCKED"]},
+{title:"Emergency Landing Without Engine Power",items:["Seats, Belts, Shoulder Harness – SECURE","Airspeed – 65 KIAS (Flaps UP) or 60 KIAS (Flaps DOWN)","Mixture – IDLE CUTOFF","Fuel Shutoff Valve – OFF","Ignition Switch – OFF","Wing Flaps – AS REQUIRED","Master Switch – OFF","Doors – UNLATCHED BEFORE TOUCHDOWN","Touchdown – SLIGHTLY TAIL LOW","Brakes – APPLY HEAVILY"]},
+{title:"Landing With Flat Main Tire",items:["Approach – NORMAL","Touchdown – GOOD MAIN TIRE FIRST, hold airplane off the flat tire as long as possible"]},
+{title:"Fire During Start on Ground",items:["Cranking – CONTINUE UNTIL ENGINE STARTS","After Start – 1700 RPM for 3 minutes","Engine – SHUTDOWN and INSPECT for damage","If engine does not start:","Throttle – FULL OPEN","Mixture – IDLE CUTOFF","Cranking – CONTINUE 2-3 MINUTES","Fire Extinguisher – OBTAIN","Engine – SECURE (Master OFF, Ignition OFF, Fuel Shutoff OFF)","Fire – EXTINGUISH","Fire Damage – INSPECT"]},
+{title:"Engine Fire In Flight",items:["Mixture – IDLE CUTOFF","Fuel Shutoff Valve – OFF","Master Switch – OFF","Cabin Heat and Air – OFF","Airspeed – 85 KIAS (or an airspeed that will put the fire OUT)","Forced Landing – EXECUTE"]},
+{title:"Electrical Fire In Flight",items:["Master Switch – OFF","Vents / Cabin Heat & Air – OFF","Avionics Master Switch – OFF","All Switches (Except Ignition) – OFF","Fire Extinguisher – ACTIVATE"]},
+{title:"Cabin Fire",items:["Master Switch – OFF","Vents / Cabin Air / Heat – CLOSED","Fire Extinguisher – ACTIVATE (if available)","Land as soon as possible"]},
+{title:"Rough Running Engine In Flight",items:["Throttle – FULL","Carb Heat – ON (wait 30 sec) — if fixed, skip to step 5","Mags – Leave on best power (Left, Right or Both)","Mixture – Leave on best power (Leaner or Richer)","Throttle – SET for optimal condition for phase of flight","Flight – TERMINATE soon as practical if not fixed; monitor engine instruments"]},
+{title:"Inadvertent Icing Encounter",items:["Pitot Heat – ON","Turn back or change altitude","Cabin Heat – ON (full out), open defrosters","Flight – DIVERT TO NEAREST AIRPORT","Approach – 65 to 75 KIAS (depending on ice accumulation)"]},
+{title:"Ammeter Shows Excessive Rate of Charge",items:["Battery / Alternator – OFF","Battery / Alternator – ON","If over-voltage light illuminates again:","Alternator Circuit Breaker – PULL","Nonessential Radio/Electrical Equipment – OFF","Flight – TERMINATE as soon as possible"]},
+{title:"Ammeter Shows Discharge",items:["Avionics Master Switch – OFF","Alternator Circuit Breaker – CHECK IN","Master Switch – OFF (both sides)","Master Switch – ON","Low Voltage Light – CHECK OFF","Avionics Master Switch – ON","Alternator – OFF","Nonessential Electrical Equipment – OFF","Flight – TERMINATE as soon as practical"]}
+];
+
+// ─── ACTIVE AIRCRAFT ─────────────────────────────────────────
+let ACTIVE_AC = 'p2006t';
+let MANEUVERS = MANEUVERS_P2006T;
+let CL_NORMAL = CL_NORMAL_P2006T;
+let CL_EMERGENCY = CL_EMERGENCY_P2006T;
+
+applySimPaths(MANEUVERS_P2006T, 'p2006t');
+applySimPaths(MANEUVERS_C152, 'c152');
 
 // ─── AIRPLANE IMAGES ─────────────────────────────────────────
 const PATH_D = `m17697 6399c-15-11-32-37-38-59-11-38-13-39-83-54-39-9-89-26-112-37-31-15-266-262-952-1003-975-1053-944-1022-1128-1114-168-84-425-154-674-182-52-5-1059-93-2238-195l-2143-185-257 18c-241 18-259 18-282 2-14-9-32-20-40-24-14-6-4 2 44 37 17 12 9 19-90 84-280 181-596 334-916 442-79 27-150 51-158 54-8 4-31 10-50 15-34 8-35 10-38 58l-3 49-437 244-437 244-175 23c-630 82-828 106-1005 123-681 67-1196 46-1437-58-24-10-114-81-208-166-165-146-165-147-335-230-380-186-682-403-880-633-48-56-77-81-92-82-54 0-915-61-1068-75-582-53-978-126-1357-252l-138-45v-44c0-44 0-44-35-44-31 0-35 3-35 26 0 24-3 26-35 22-20-2-35 0-35 7 0 5 6 75 14 155 52 527 55 1447 5 1738-11 64-38 110-57 98-46-28-89-378-113-911-11-250-7-928 7-1055l6-55-171-38c-255-56-482-123-504-148-38-46-16-79 81-125 132-61 291-125 447-179 83-29 149-56 148-61-6-36-35-347-44-469-17-254-23-929-10-1150 19-315 39-421 78-413 20 3 47 74 57 148 58 415 86 1067 67 1558-6 162-10 297-8 298 2 2 18 0 35-5 28-8 32-7 32 10 0 15 7 19 35 19h35v-48c0-109 160-418 319-614 34-42 99-143 145-223 80-139 87-149 143-183 131-80 325-157 463-185l65-13 16-79c11-50 23-83 35-92 32-24 151-10 182 21 9 9 16 31 16 50s3 33 6 31c5-3 339-55 354-55 3 0-1-17-8-37-10-30-18-37-34-35-17 2-23-4-30-30-7-27-6-34 9-40 17-6 16-13-13-98-25-75-33-90-47-85-25 8-45-57-22-72 11-7-26-12-129-17-340-17-592-75-721-167-76-54-106-133-78-206 22-60 117-137 222-181 89-37 270-82 283-71 7 6 15-5 24-34 20-69 49-117 104-175 160-170 426-173 592-8 33 34 67 81 85 120l30 64 77 6c462 41 753 178 702 331-41 126-381 251-810 298l-115 13 70 28c39 16 81 30 94 32 13 1 31 9 39 17 19 20 8 64-18 72-21 7-100 104-100 123 0 6-9 13-19 17-19 6-19 7-2 58 14 39 23 52 37 50 11-1 141-11 289-22 265-20 412-28 1005-53 382-16 1480-16 1868 1 167 7 305 11 308 9 2-3-6-32-18-65-22-60-23-61-67-67-24-3-67-6-95-6s-112-7-186-16c-407-47-703-168-774-318-18-38-21-102-7-139 28-74 166-175 308-227 103-37 234-69 290-72 39-1 40-2 73-77 66-146 224-272 379-301 184-34 354 19 485 153 40 41 81 94 94 122l23 51 137 17c253 32 449 83 600 156 84 41 173 114 198 163 18 35 18 101 0 136-81 153-459 284-976 338-85 8-156 17-158 19s9 38 24 79c33 88 11 80 244 96 85 6 911 82 1835 170s3008 286 4630 439c1623 154 2966 283 2986 286 33 4 38 2 43-19 3-14 18-38 32-55 33-40 83-43 119-7 46 46 50 87 46 419l-3 307h31 31v-104c0-57 3-118 6-135 5-24 3-31-10-31-14 0-16-18-16-143 0-176 3-182 87-181 33 0 267 46 553 108 547 118 622 137 683 167 83 42 77 16 77 358v306l483 1400c406 1177 486 1400 503 1403 73 11 104 35 104 81 0 31-47 81-76 81-8 0-25 6-37 14-21 14-134 28-607 77-113 11-305 23-428 26l-222 6-19 43c-29 65-68 80-114 43zm-12983-1947c9-18 14-32 11-32-9 0-55 103-54 120 0 8 6-1 14-21 7-20 20-50 29-67zm137-143c13-7 49-16 79-20l55-6-51-2c-58-1-115 29-174 95-31 34-29 33 16-7 27-26 61-52 75-60zm209-46c0-12-3-14-8-7-4 7-16 14-27 17-15 4-14 5 8 6 20 1 27-4 27-16zm-16-67c-3-21-8-35-11-32-2 2-1 20 3 40 3 21 8 35 11 32 2-2 1-20-3-40zm3641-66 20-25-22 19c-13 11-23 24-23 29 0 6 1 8 3 6 1-2 11-15 22-29zm-3670-55c-9-36-19-64-21-62-3 2 4 34 13 70 10 36 19 64 22 62 2-3-4-34-14-70zm3781-87c49-62 103-132 122-155 19-24 32-43 29-43s-45 51-93 113c-49 61-103 131-122 155-19 23-32 42-29 42s45-51 93-112zm-3463 65c-38-3-53-8-56-21-3-12-5-11-6 6-1 21 3 22 57 20l57-2zm255-10c-32-2-86-2-120 0-35 2-9 3 57 3s94-1 63-3zm270-10c-32-2-86-2-120 0-35 2-9 3 57 3s94-1 63-3zm270-10c-32-2-86-2-120 0-35 2-9 3 57 3s94-1 63-3zm270-10c-32-2-86-2-120 0-35 2-9 3 57 3s94-1 63-3zm-1134-47c-3-21-8-35-11-32-2 2-1 20 3 40 3 21 8 35 11 32 2-2 1-20-3-40zm1394 37c-32-2-86-2-120 0-35 2-9 3 57 3s94-1 63-3zm267-15 25-11v-332c0-244-3-334-12-343-8-8-42-11-97-10l-86 2 90 5 90 6 3 329c1 222-1 333-8 340-6 6-50 14-98 17l-87 6 77 1c42 1 89-3 103-10zm378-25c-7-2-19-2-25 0-7 3-2 5 12 5s19-2 13-5zm-70-13c-13-5-24-11-25-12-1-2-5-156-8-343l-6-340-2 330c-2 285 0 334 14 353 8 12 23 22 32 21 12 0 11-3-5-9zm500 3c-62-2-165-2-230 0-65 1-14 3 112 3 127 0 180-2 118-3zm385-10c-38-2-98-2-135 0-38 2-7 3 67 3s105-1 68-3zm-3188-138c-23-69-44-125-46-123-2 3 15 61 38 131 23 69 44 124 46 122s-15-61-38-130zm3308 128c-10-2-26-2-35 0-10 3-2 5 17 5s27-2 18-5zm55-10c-7-2-19-2-25 0-7 3-2 5 12 5s19-2 13-5zm-3046-35c-3-7-5-2-5 12s2 19 5 13c2-7 2-19 0-25zm3090 26c-3-3-12-4-19-1-8 3-5 6 6 6 11 1 17-2 13-5zm131-44c34-16 62-32 62-35s-19 4-42 16c-24 12-65 30-93 41-27 10-36 16-20 13 17-4 58-19 93-35zm-3234-44c-3-21-8-35-11-32-2 2-1 20 3 40 3 21 8 35 11 32 2-2 1-20-3-40zm-1211 7c-73-2-193-2-265 0-73 1-14 3 132 3s205-2 133-3zm144-285c-1-51-3-10-3 92s2 143 3 93c2-51 2-135 0-185zm4534 134c69-87 72-92 66-92-2 0-23 25-46 55-22 30-67 80-99 111-45 45-48 50-16 25 23-18 66-63 95-99zm-3487 54c-3-21-8-35-11-32-2 2-1 20 3 40 3 21 8 35 11 32 2-2 1-20-3-40zm3832-68c49-62 103-132 122-155 19-24 32-43 29-43s-45 51-93 113c-49 61-103 131-122 155-19 23-32 42-29 42s45-51 93-112zm-3849-10c-3-7-5-2-5 12s2 19 5 13c2-7 2-19 0-25zm-343-72c-9-26-18-45-20-43s3 25 12 51 18 45 20 43-3-25-12-51zm330 10c-3-21-8-35-11-32-2 2-1 20 3 40 3 21 8 35 11 32 2-2 1-20-3-40zm3616-46c12-16 19-30 16-30-2 0-14 14-26 30-12 17-19 30-16 30 2 0 14-13 26-30zm930 5c0-6-76-45-87-45-4 1 12 12 37 25 50 27 50 27 50 20zm-4565-49c-15-96 16-136 115-147l55-6-51-2c-63-1-114 29-127 76-9 30-2 123 9 123 3 0 2-20-1-44zm-351-30c-9-26-18-45-20-43s3 25 12 51 18 45 20 43-3-25-12-51zm4067-38c19-34 2-17-30 30-25 35-26 40-6 17 14-16 30-38 36-47zm739 63c-8-5-26-11-40-15-21-5-20-3 5 9 32 15 60 20 35 6zm-85-31c-11-5-27-9-35-9-9 0-8 4 5 9 11 5 27 9 35 9 9 0 8-4-5-9zm-5310-20c13-5 14-9 5-9-8 0-24 4-35 9-13 5-14 9-5 9 8 0 24-4 35-9zm5040-23 30-4-31-2c-21-1-37 6-50 22-19 22-19 22 1 5 11-9 34-18 50-21zm195 23c-14-4-36-8-50-8-22 0-22 1 5 8 17 4 39 8 50 8 16 0 15-2-5-8zm-5177-17c-7-2-19-2-25 0-7 3-2 5 12 5s19-2 13-5zm5085 0c-10-2-28-2-40 0-13 2-5 4 17 4 22 1 32-1 23-4zm-5025-10c-7-2-21-2-30 0-10 3-4 5 12 5 17 0 24-2 18-5zm65-10c-10-2-26-2-35 0-10 3-2 5 17 5s27-2 18-5zm382-3c0-5-5-10-11-10-5 0-7 5-4 10 3 6 8 10 11 10 2 0 4-4 4-10zm-267-7c-18-2-48-2-65 0-18 2-4 4 32 4s50-2 33-4zm4374-15c-3-8-6-5-6 6-1 11 2 17 5 13 3-3 4-12 1-19zm-4204 5c-18-2-48-2-65 0-18 2-4 4 32 4s50-2 33-4zm4207-37c0-8-7-16-15-20-12-4-13-2-2 14 14 24 17 25 17 6zm-3347-13c-35-2-91-2-125 0-35 2-7 3 62 3s97-1 63-3zm280-10c-35-2-91-2-125 0-35 2-7 3 62 3s97-1 63-3zm280-10c-35-2-91-2-125 0-35 2-7 3 62 3s97-1 63-3zm2737-2c-8-5-26-11-40-15-21-5-20-3 5 9 32 15 60 20 35 6zm-2457-8c-35-2-91-2-125 0-35 2-7 3 62 3s97-1 63-3zm275-10c-32-2-86-2-120 0-35 2-9 3 57 3s94-1 63-3zm2037-33c-11-5-27-9-35-9-9 0-8 4 5 9 11 5 27 9 35 9 9 0 8-4-5-9zm-58-16c-3-3-12-4-19-1-8 3-5 6 6 6 11 1 17-2 13-5zm-1413-43c-5-6-34 20-34 30 0 5 8 1 18-8 10-10 17-20 16-22zm1331 24c-27-7-63-13-80-13-18 0-6 5 30 13 78 16 114 16 50 0zm-132-22c-13-2-33-2-45 0-13 2-3 4 22 4s35-2 23-4zm-360-10c-149-2-397-2-550 0-153 1-30 2 272 2 303 0 428-1 278-2zm-5183-2023c13 0 70-82 70-100 0-16-136-80-156-73-6 2 3 42 20 93 22 63 35 89 44 85 8-3 17-5 22-5z`;
@@ -893,10 +1290,14 @@ const pfdX = pfdC.getContext('2d');
 
 // ─── SIDEBAR ─────────────────────────────────────────────────
 const sbar = document.getElementById('sidebar');
-MANEUVERS.forEach((m,i)=>{
-  const el=document.createElement('div'); el.className='sidebar-item'; el.textContent=m.name;
-  el.addEventListener('click',()=>selectManeuver(i)); sbar.appendChild(el);
-});
+function buildSidebar(){
+  sbar.innerHTML = '';
+  MANEUVERS.forEach((m,i)=>{
+    const el=document.createElement('div'); el.className='sidebar-item'; el.textContent=m.name;
+    el.addEventListener('click',()=>selectManeuver(i)); sbar.appendChild(el);
+  });
+}
+buildSidebar();
 
 function selectManeuver(i){
   document.querySelectorAll('.sidebar-item').forEach((e,j)=>e.classList.toggle('active',j===i));
@@ -1194,8 +1595,215 @@ function drawAirplaneTop(cx,cy,rot,eng,W,H){
   skyX.restore();
 }
 
+// ─── C-152 STEAM SIX-PACK ────────────────────────────────────
+// Round-dial panel for the Cessna 152: ASI, AI, ALT / TC, DG, VSI, with an
+// RPM + flap strip. ASI arcs from the 152 speed table (white 35-85, green
+// 40-111, yellow 111-149, redline 149).
+function spGauge(ctx,cx,cy,r){
+  ctx.fillStyle='#141311'; ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='#3c3a36'; ctx.lineWidth=2; ctx.stroke();
+  ctx.strokeStyle='#0a0a09'; ctx.lineWidth=4; ctx.beginPath(); ctx.arc(cx,cy,r+3,0,Math.PI*2); ctx.stroke();
+}
+function spNeedle(ctx,cx,cy,r,deg,color,w,tail){
+  const a=(deg-90)*Math.PI/180;
+  ctx.strokeStyle=color; ctx.lineWidth=w||2; ctx.lineCap='round';
+  ctx.beginPath();
+  ctx.moveTo(cx-Math.cos(a)*(tail||0.18)*r, cy-Math.sin(a)*(tail||0.18)*r);
+  ctx.lineTo(cx+Math.cos(a)*r*0.82, cy+Math.sin(a)*r*0.82);
+  ctx.stroke(); ctx.lineCap='butt';
+  ctx.fillStyle=color; ctx.beginPath(); ctx.arc(cx,cy,2.5,0,Math.PI*2); ctx.fill();
+}
+function spLabel(ctx,cx,y,txt,size,color){
+  ctx.fillStyle=color||'#7a786e'; ctx.font=(size||8)+'px Courier New';
+  ctx.textAlign='center'; ctx.fillText(txt,cx,y); ctx.textAlign='start';
+}
+function drawSixPack(st,altFt,vsi,hdg){
+  const W=pfdC.width,H=pfdC.height,ctx=pfdX;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#211f1d'; ctx.fillRect(0,0,W,H);
+  const stripH=Math.round(H*0.14);
+  const gw=W/3, gh=(H-stripH)/2;
+  const r=Math.min(gw,gh)*0.42;
+  const cxs=[gw/2, gw*1.5, gw*2.5], cys=[gh/2+4, gh*1.5];
+
+  // ── ASI (0-160, 300° sweep starting at 30° from top) ──
+  (function(){
+    const cx=cxs[0], cy=cys[0];
+    spGauge(ctx,cx,cy,r);
+    const sp2deg=v=>30+(v/160)*300;
+    const arc=(v0,v1,color,rr,wid)=>{
+      ctx.strokeStyle=color; ctx.lineWidth=wid;
+      ctx.beginPath();
+      ctx.arc(cx,cy,rr,(sp2deg(v0)-90)*Math.PI/180,(sp2deg(v1)-90)*Math.PI/180);
+      ctx.stroke();
+    };
+    arc(35,85,'#e8e6e0',r*0.86,2.5);      // white arc Vso-Vfe
+    arc(40,111,'#3f9e46',r*0.94,3);       // green arc Vs-Vno
+    arc(111,149,'#d9c33f',r*0.94,3);      // yellow arc
+    arc(148,150,'#d94040',r*0.94,4);      // redline Vne
+    for(let v=0;v<=160;v+=20){
+      const a=(sp2deg(v)-90)*Math.PI/180;
+      ctx.strokeStyle='#c9c7ba'; ctx.lineWidth=1.5;
+      ctx.beginPath();
+      ctx.moveTo(cx+Math.cos(a)*r*0.78,cy+Math.sin(a)*r*0.78);
+      ctx.lineTo(cx+Math.cos(a)*r*0.92,cy+Math.sin(a)*r*0.92);
+      ctx.stroke();
+      ctx.fillStyle='#c9c7ba'; ctx.font='7px Courier New'; ctx.textAlign='center';
+      ctx.fillText(v,cx+Math.cos(a)*r*0.62,cy+Math.sin(a)*r*0.62+2.5);
+    }
+    ctx.textAlign='start';
+    spNeedle(ctx,cx,cy,r,sp2deg(Math.max(0,Math.min(160,st.ias))),'#f0eee6',2.5);
+    spLabel(ctx,cx,cy+r*0.45,'AIRSPEED',7);
+    spLabel(ctx,cx,cy+r*0.62,'KNOTS',6);
+  })();
+
+  // ── Attitude Indicator ──
+  (function(){
+    const cx=cxs[1], cy=cys[0];
+    spGauge(ctx,cx,cy,r);
+    ctx.save();
+    ctx.beginPath(); ctx.arc(cx,cy,r*0.92,0,Math.PI*2); ctx.clip();
+    ctx.translate(cx,cy); ctx.rotate(-st.bank*Math.PI/180);
+    const pOff=st.pitch*(r/28);
+    ctx.fillStyle='#2c6fb0'; ctx.fillRect(-r*2,-r*2+pOff,r*4,r*2);
+    ctx.fillStyle='#7a5b28'; ctx.fillRect(-r*2,pOff,r*4,r*2);
+    ctx.strokeStyle='#f0eee6'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(-r,pOff); ctx.lineTo(r,pOff); ctx.stroke();
+    for(let p=-20;p<=20;p+=10){
+      if(p===0) continue;
+      const yy=pOff-p*(r/28);
+      ctx.strokeStyle='rgba(240,238,230,0.8)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(-r*0.22,yy); ctx.lineTo(r*0.22,yy); ctx.stroke();
+    }
+    ctx.restore();
+    // fixed symbol
+    ctx.strokeStyle='#f2a33c'; ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.moveTo(cx-r*0.55,cy); ctx.lineTo(cx-r*0.18,cy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx+r*0.55,cy); ctx.lineTo(cx+r*0.18,cy); ctx.stroke();
+    ctx.fillStyle='#f2a33c'; ctx.beginPath(); ctx.arc(cx,cy,2.5,0,Math.PI*2); ctx.fill();
+    // bank pointer (fixed scale, moving pointer)
+    const ba=(st.bank-90)*Math.PI/180;
+    ctx.fillStyle='#f0eee6';
+    ctx.beginPath();
+    ctx.moveTo(cx+Math.cos(ba)*r*0.86,cy+Math.sin(ba)*r*0.86);
+    ctx.lineTo(cx+Math.cos(ba-0.09)*r*0.72,cy+Math.sin(ba-0.09)*r*0.72);
+    ctx.lineTo(cx+Math.cos(ba+0.09)*r*0.72,cy+Math.sin(ba+0.09)*r*0.72);
+    ctx.closePath(); ctx.fill();
+  })();
+
+  // ── Altimeter ──
+  (function(){
+    const cx=cxs[2], cy=cys[0];
+    spGauge(ctx,cx,cy,r);
+    for(let i=0;i<10;i++){
+      const a=(i*36-90)*Math.PI/180;
+      ctx.strokeStyle='#c9c7ba'; ctx.lineWidth=1.5;
+      ctx.beginPath();
+      ctx.moveTo(cx+Math.cos(a)*r*0.78,cy+Math.sin(a)*r*0.78);
+      ctx.lineTo(cx+Math.cos(a)*r*0.92,cy+Math.sin(a)*r*0.92);
+      ctx.stroke();
+      ctx.fillStyle='#c9c7ba'; ctx.font='8px Courier New'; ctx.textAlign='center';
+      ctx.fillText(i,cx+Math.cos(a)*r*0.62,cy+Math.sin(a)*r*0.62+3);
+    }
+    ctx.textAlign='start';
+    spNeedle(ctx,cx,cy,r*0.55,(altFt%10000)/10000*360,'#f0eee6',3);       // thousands (short)
+    spNeedle(ctx,cx,cy,r*0.85,(altFt%1000)/1000*360,'#f0eee6',1.8);       // hundreds (long)
+    spLabel(ctx,cx,cy+r*0.5,'ALT',7);
+    spLabel(ctx,cx,cy+r*0.68,Math.round(altFt)+' FT',7,'#d9d7cd');
+  })();
+
+  // ── Turn Coordinator ──
+  (function(){
+    const cx=cxs[0], cy=cys[1];
+    spGauge(ctx,cx,cy,r);
+    // std-rate hash marks
+    [-25,25].forEach(d=>{
+      const a=(d+90-90)*Math.PI/180 + Math.PI/2*0;
+      const aa=(d)*Math.PI/180;
+      ctx.strokeStyle='#c9c7ba'; ctx.lineWidth=2;
+      ctx.beginPath();
+      ctx.moveTo(cx+Math.cos(aa)*r*0.75,cy+Math.sin(aa)*r*0.75);
+      ctx.lineTo(cx+Math.cos(aa)*r*0.9,cy+Math.sin(aa)*r*0.9);
+      ctx.stroke();
+    });
+    // miniature airplane banks with roll
+    const roll=Math.max(-40,Math.min(40,st.bank))*Math.PI/180;
+    ctx.save(); ctx.translate(cx,cy); ctx.rotate(roll);
+    ctx.strokeStyle='#f0eee6'; ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.moveTo(-r*0.66,0); ctx.lineTo(r*0.66,0); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0,-r*0.16); ctx.lineTo(0,0); ctx.stroke();
+    ctx.restore();
+    spLabel(ctx,cx,cy+r*0.5,'L        R',8,'#c9c7ba');
+    // inclinometer ball (centered)
+    ctx.strokeStyle='#3c3a36'; ctx.lineWidth=1;
+    ctx.strokeRect(cx-r*0.4,cy+r*0.62,r*0.8,r*0.2);
+    ctx.fillStyle='#dcdad0'; ctx.beginPath(); ctx.arc(cx,cy+r*0.72,r*0.08,0,Math.PI*2); ctx.fill();
+  })();
+
+  // ── Directional Gyro ──
+  (function(){
+    const cx=cxs[1], cy=cys[1];
+    spGauge(ctx,cx,cy,r);
+    ctx.save();
+    ctx.translate(cx,cy); ctx.rotate(-hdg*Math.PI/180);
+    const lbl={0:'N',90:'E',180:'S',270:'W'};
+    for(let d=0;d<360;d+=30){
+      const a=(d-90)*Math.PI/180;
+      ctx.strokeStyle='#c9c7ba'; ctx.lineWidth=1.5;
+      ctx.beginPath();
+      ctx.moveTo(Math.cos(a)*r*0.78,Math.sin(a)*r*0.78);
+      ctx.lineTo(Math.cos(a)*r*0.92,Math.sin(a)*r*0.92);
+      ctx.stroke();
+      ctx.save(); ctx.rotate(d*Math.PI/180); ctx.fillStyle='#c9c7ba'; ctx.font='8px Courier New'; ctx.textAlign='center';
+      ctx.fillText(lbl[d]!==undefined?lbl[d]:d/10, 0, -r*0.6); ctx.restore();
+    }
+    ctx.restore();
+    // fixed airplane + lubber
+    ctx.fillStyle='#f2a33c';
+    ctx.beginPath(); ctx.moveTo(cx,cy-r*0.3); ctx.lineTo(cx+4,cy+r*0.18); ctx.lineTo(cx-4,cy+r*0.18); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle='#f0eee6'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(cx,cy-r*0.98); ctx.lineTo(cx,cy-r*0.84); ctx.stroke();
+    spLabel(ctx,cx,cy+r*0.62,String(Math.round(((hdg%360)+360)%360)).padStart(3,'0')+'°',8,'#d9d7cd');
+  })();
+
+  // ── VSI ──
+  (function(){
+    const cx=cxs[2], cy=cys[1];
+    spGauge(ctx,cx,cy,r);
+    const v2deg=v=>270+(Math.max(-2000,Math.min(2000,v))/2000)*140;
+    [-2000,-1000,-500,0,500,1000,2000].forEach(v=>{
+      const a=(v2deg(v)-90)*Math.PI/180;
+      ctx.strokeStyle='#c9c7ba'; ctx.lineWidth=1.2;
+      ctx.beginPath();
+      ctx.moveTo(cx+Math.cos(a)*r*0.78,cy+Math.sin(a)*r*0.78);
+      ctx.lineTo(cx+Math.cos(a)*r*0.9,cy+Math.sin(a)*r*0.9);
+      ctx.stroke();
+      if(Math.abs(v)===2000||Math.abs(v)===1000||v===0){
+        ctx.fillStyle='#c9c7ba'; ctx.font='7px Courier New'; ctx.textAlign='center';
+        ctx.fillText(Math.abs(v)/1000||'0',cx+Math.cos(a)*r*0.6,cy+Math.sin(a)*r*0.6+2.5);
+      }
+    });
+    ctx.textAlign='start';
+    spNeedle(ctx,cx,cy,r,v2deg(vsi),'#f0eee6',2.5);
+    spLabel(ctx,cx,cy+r*0.5,'VSI',7);
+    spLabel(ctx,cx,cy+r*0.68,'100 FPM',6);
+  })();
+
+  // ── RPM + flap strip ──
+  const sy=H-stripH;
+  ctx.fillStyle='#161514'; ctx.fillRect(0,sy,W,stripH);
+  ctx.strokeStyle='#3c3a36'; ctx.lineWidth=1; ctx.strokeRect(0.5,sy+0.5,W-1,stripH-1);
+  ctx.fillStyle='#7fd97f'; ctx.font='bold '+Math.round(stripH*0.42)+'px Courier New';
+  ctx.fillText('RPM '+String(Math.round(st.mp)).padStart(4,' '), 10, sy+stripH*0.62);
+  ctx.fillStyle='#c9c7ba'; ctx.font=Math.round(stripH*0.34)+'px Courier New';
+  ctx.textAlign='right';
+  ctx.fillText('FLAPS '+st.flaps, W-10, sy+stripH*0.62);
+  ctx.textAlign='start';
+}
+
 // ─── G1000 PFD ───────────────────────────────────────────────
 function drawPFD(st,altFt,vsi,hdg){
+  if(ACTIVE_AC==='c152'){ drawSixPack(st,altFt,vsi,hdg); return; }
   const W=pfdC.width,H=pfdC.height;
   pfdX.clearRect(0,0,W,H);
   pfdX.fillStyle='#0a0a0a'; pfdX.fillRect(0,0,W,H);
@@ -1577,7 +2185,7 @@ function drawPFD_overlays(ctx,st,alt,vsi,W,H,TW,HH,aiX,aiW,aiH){
   if(st.eng==='FAIL'){ ctx.fillStyle='#f44'; ctx.fillText('S/E',sx+110,sy); }
   // MP readout top-right of AI
   ctx.fillStyle='#0f0'; ctx.font='11px Courier New';
-  ctx.fillText('MP '+st.mp.toFixed(0)+'"',aiX+aiW-70,18);
+  ctx.fillText(ACTIVE_AC==='c152' ? 'RPM '+st.mp.toFixed(0) : 'MP '+st.mp.toFixed(0)+'"', aiX+aiW-78, 18);
 }
 
 // ─── MFD ─────────────────────────────────────────────────────
