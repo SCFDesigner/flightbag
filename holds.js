@@ -57,20 +57,62 @@ function racetrack(dir){
     {a:dir*180}, {s:LEG}, {a:dir*180}, {s:LEG}
   ]);
 }
-function entryPath(entry, dir){
-  if(entry==='DIRECT')
-    return buildPath({x:FIX.x - dir*70, y:FIX.y + LEG + 40}, dir*25, [
-      {s:36}, {a:-dir*25}, {s:96}, {a:dir*180}, {s:LEG}, {a:dir*180}, {s:LEG}
-    ]);
-  if(entry==='TEARDROP')
-    return buildPath({x:FIX.x, y:FIX.y + LEG + 60}, 0, [
-      {s:LEG+60}, {a:dir*150}, {s:LEG*0.92}, {a:dir*210}, {s:LEG*0.95}
-    ]);
-  // PARALLEL: outbound on the non-holding side, then turn back through
-  // more than 180° to intercept the inbound course.
-  return buildPath({x:FIX.x, y:FIX.y + LEG + 60}, 0, [
-    {s:LEG+60}, {a:-dir*180, r:18}, {s:LEG*0.9}, {a:-dir*215, r:34}, {s:52}, {a:dir*32, r:30}, {s:30}
-  ]);
+function shortestTurn(from, to){ return ((to - from + 540)%360) - 180; }
+
+/* Fly from the current end of a path back to the fix: turn to parallel the
+   inbound course, cut toward the course line at 35°, then ride it in. */
+function closeToFix(segs, dir){
+  // build what we have so far to find the endpoint
+  const built = buildPath(segStart.pos, segStart.hdg, segs);
+  const end = built[built.length-1];
+  const addl = [];
+  let h = end.h;
+  // 1. turn (shortest) to inbound-course heading (0 in hold frame)
+  const d0 = shortestTurn(h, 0);
+  if(Math.abs(d0) > 2) addl.push({a:d0, r:30});
+  // recompute endpoint after that turn
+  const b2 = buildPath(segStart.pos, segStart.hdg, segs.concat(addl));
+  const e2 = b2[b2.length-1];
+  const dx = FIX.x - e2.x;
+  const dy = e2.y - FIX.y;   // must be positive (fix ahead/above)
+  if(Math.abs(dx) > 6 && dy > 30){
+    const icpt = 35 * Math.sign(dx);
+    const run = Math.min(Math.abs(dx)/Math.sin(rad(35)), Math.max(20, dy-30));
+    addl.push({a:icpt, r:24}, {s:run}, {a:-icpt, r:24});
+  }
+  const b3 = buildPath(segStart.pos, segStart.hdg, segs.concat(addl));
+  const e3 = b3[b3.length-1];
+  const rem = e3.y - FIX.y;
+  if(rem > 4) addl.push({s:rem});
+  return segs.concat(addl);
+}
+
+/* Entry path built FROM the aircraft's actual arrival direction.
+   rel = arrival heading relative to the inbound course (hold frame). */
+let segStart = {pos:{x:0,y:0}, hdg:0};
+function entryPathFrom(rel, entry, dir){
+  const APPROACH = 170;
+  segStart = {
+    pos: { x: FIX.x - Math.sin(rad(rel))*APPROACH,
+           y: FIX.y + Math.cos(rad(rel))*APPROACH },
+    hdg: rel
+  };
+  let segs;
+  if(entry==='DIRECT'){
+    // cross the fix and turn (in the pattern direction) onto the outbound leg
+    const turn = dir>0 ? norm(180 - rel) : -norm(rel - 180);
+    segs = [{s:APPROACH}, {a:turn}, {s:LEG}, {a:dir*180}, {s:LEG}];
+  } else if(entry==='TEARDROP'){
+    // cross the fix, take up the 30°-offset teardrop heading on the holding
+    // side, one minute out, then a pattern-direction turn back to intercept
+    const tdH = dir>0 ? 150 : 210;
+    segs = closeToFix([{s:APPROACH}, {a:shortestTurn(rel, tdH), r:26}, {s:LEG*1.1}, {a:dir*195, r:R}], dir);
+  } else {
+    // parallel: outbound on the reciprocal, then reverse toward the holding
+    // side through more than 180° and come back to the course
+    segs = closeToFix([{s:APPROACH}, {a:shortestTurn(rel, 180), r:26}, {s:LEG}, {a:-dir*205, r:34}], dir);
+  }
+  return buildPath(segStart.pos, segStart.hdg, segs);
 }
 
 /* ---------- Drawing ---------- */
@@ -198,15 +240,15 @@ const STEPS = [
  {title:'Direct entry',
   html:'<p>Arriving from the <em>direct sector</em> (the wide 180° side): cross the fix and simply <strong>turn to the outbound heading</strong> — you fall straight into the pattern.</p><p>This is the entry for roughly half of all arrivals.</p>',
   draw(){ sceneRacetrack(1, false); drawSectors(0, 1); },
-  anim(){ return entryPath('DIRECT', 1); }},
+  anim(){ return entryPathFrom(0, 'DIRECT', 1); }},
  {title:'Teardrop entry',
   html:'<p>Arriving within the narrow <em>70° teardrop sector</em>: cross the fix, fly <strong>outbound offset 30°</strong> toward the holding side for one minute, then turn toward the inbound course and intercept it back to the fix.</p>',
   draw(){ sceneRacetrack(1, false); drawSectors(0, 1); },
-  anim(){ return entryPath('TEARDROP', 1); }},
+  anim(){ return entryPathFrom(150, 'TEARDROP', 1); }},
  {title:'Parallel entry',
   html:'<p>Arriving from the <em>110° parallel sector</em>: cross the fix, <strong>parallel the course outbound</strong> on the non-holding side for one minute, then turn <em>through more than 180°</em> back toward the fix to intercept the inbound course.</p>',
   draw(){ sceneRacetrack(1, false); drawSectors(0, 1); },
-  anim(){ return entryPath('PARALLEL', 1); }},
+  anim(){ return entryPathFrom(230, 'PARALLEL', 1); }},
  {title:'The 70° rule',
   html:'<p>The sectors come from one line drawn through the fix at <strong>70° to the inbound course</strong>. It splits the "arriving from ahead" half into the <em>teardrop</em> (70°) and <em>parallel</em> (110°) sectors; everything else is <em>direct</em> (180°).</p><p>These are guides, not regulations — pick the entry that keeps you closest to the pattern.</p>',
   draw(){ sceneRacetrack(1, false); drawSectors(0, 1); drawSectorEdges(); },
@@ -288,7 +330,8 @@ window.setTurns = t => {
 };
 window.flyEntry = () => {
   const entry = entryFor(exHeading, exCourse, exDir);
-  const pts = entryPath(entry, exDir).map(p=>{
+  const rel = norm(exHeading - exCourse);
+  const pts = entryPathFrom(rel, entry, exDir).map(p=>{
     // rotate the hold-frame path to the actual course
     const dx=p.x-FIX.x, dy=p.y-FIX.y, a=rad(exCourse);
     return {x: FIX.x + dx*Math.cos(a) - dy*Math.sin(a),
@@ -362,7 +405,7 @@ window.answer = pick => {
     drawFix(quiz.vor);
     labelAt(FIX.x, 16, 'N', C.text3, 12);
   };
-  const pts = entryPath(quiz.answer, quiz.dir).map(p=>{
+  const pts = entryPathFrom(norm(quiz.heading - quiz.course), quiz.answer, quiz.dir).map(p=>{
     const dx=p.x-FIX.x, dy=p.y-FIX.y, a=rad(quiz.course);
     return {x: FIX.x + dx*Math.cos(a) - dy*Math.sin(a),
             y: FIX.y + dx*Math.sin(a) + dy*Math.cos(a),
