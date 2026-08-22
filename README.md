@@ -1,4 +1,4 @@
-# Student Pilot One-Stop Shop — Tecnam P2006T / G1000
+# Flightbag — Student Pilot One-Stop Shop (Tecnam P2006T / G1000)
 
 A web-based training tool for student pilots flying the **Tecnam P2006T** with a **Garmin G1000** glass cockpit. All information is sourced directly from the **POH/AFM** and **school-specific maneuvers guides and checklists** to ensure accuracy.
 
