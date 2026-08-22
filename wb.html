@@ -12,9 +12,9 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #101013;
-            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background-color: #262624;
+            color: #f0eee6;
             min-height: 100vh;
             display: flex;
             margin: 0;
@@ -42,18 +42,19 @@
         }
 
         .input-section {
-            background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%);
-            border-radius: 12px;
+            background: #30302e;
+            border: 1px solid #3d3b37;
+            border-radius: 10px;
             padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
             overflow: hidden; /* keep inputs inside the panel when columns are resized */
         }
 
         /* Time panel styling */
         .time-panel {
-            background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%);
-            border-radius: 12px;
+            background: #30302e;
+            border: 1px solid #3d3b37;
+            border-radius: 10px;
             padding: 15px;
             margin: 15px 0;
             box-sizing: border-box;
@@ -70,7 +71,7 @@
         }
 
         .time-item {
-            background-color: #4a4a4a;
+            background-color: #3b3a37;
             border-radius: 8px;
             padding: 10px;
             text-align: center;
@@ -79,16 +80,16 @@
 
         .time-label {
             font-size: 11px;
-            color: #ccc;
+            color: #b5b3a9;
             margin-bottom: 4px;
             font-weight: 500;
         }
 
         .time-value {
             font-size: 14px;
-            color: #4CAF50;
+            color: #d97757;
             font-weight: bold;
-            font-family: 'Courier New', monospace;
+            font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
         }
 
         .input-group {
@@ -107,16 +108,16 @@
         .input-label {
             font-size: 14px;
             font-weight: 500;
-            color: #e0e0e0;
+            color: #d9d7cd;
             min-width: 120px;
         }
 
         .input-field {
-            background-color: #4a4a4a;
-            border: 1px solid #555;
+            background-color: #3b3a37;
+            border: 1px solid #45433e;
             border-radius: 8px;
             padding: 8px 12px;
-            color: #ffffff;
+            color: #f0eee6;
             font-size: 14px;
             flex: 0 1 110px;   /* nominal 110px, shrinks with the column instead of overflowing */
             min-width: 60px;
@@ -135,10 +136,86 @@
 
         .input-field:focus {
             outline: none;
-            border-color: #007acc;
-            background-color: #505050;
-            box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.2);
+            border-color: #d97757;
+            background-color: #454340;
+            box-shadow: 0 0 0 2px rgba(217, 119, 87, 0.2);
         }
+
+
+
+        /* E6B Flight Computer column */
+        .e6b-column {
+            flex: 0 0 auto;
+            width: 330px;
+            min-width: 300px;
+            padding: 20px;
+            background-color: transparent;
+            overflow-y: auto;
+            overflow-x: hidden;
+            height: 100vh;
+            box-sizing: border-box;
+            display: none;
+        }
+        .desktop-layout.e6b-open .e6b-column { display: block; }
+        .e6b-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #918f84;
+            margin-bottom: 12px;
+        }
+        .e6b-hint { font-size: 11px; color: #918f84; margin-bottom: 10px; }
+        .e6b-out {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #383734;
+            border-radius: 6px;
+            padding: 7px 12px;
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+        .e6b-out span:first-child { color: #b5b3a9; }
+        .e6b-out span:last-child {
+            color: #f0eee6;
+            font-weight: 600;
+            font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+        }
+        .e6b-convrow {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+        .e6b-convrow .input-field { flex: 1 1 0; min-width: 0; max-width: none; width: auto; }
+        .e6b-convlbl { font-size: 11px; color: #918f84; min-width: 30px; }
+
+        /* Unified buttons */
+        .btn {
+            display: block;
+            width: 100%;
+            background: #3b3a37;
+            color: #f0eee6;
+            border: 1px solid #4a4844;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.15s ease, background 0.15s ease;
+        }
+        .btn:hover { border-color: #d97757; }
+        .btn-primary {
+            background: #d97757;
+            border-color: #d97757;
+            color: #1f1e1b;
+            font-weight: 600;
+        }
+        .btn-primary:hover { background: #e08663; border-color: #e08663; }
+        .btn-danger { color: #d96257; border-color: #5c443f; }
+        .btn-danger:hover { border-color: #d96257; background: rgba(217, 98, 87, 0.08); }
+        .btn-inline { display: inline-block; width: auto; }
 
         .input-field::placeholder {
             color: #888;
@@ -153,34 +230,34 @@
 
         .section-divider {
             height: 1px;
-            background-color: #555;
+            background-color: #45433e;
             margin: 15px 0;
         }
 
         .right-panel {
-            background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%);
-            border-radius: 12px;
+            background: #30302e;
+            border: 1px solid #3d3b37;
+            border-radius: 10px;
             padding: 20px;
             margin-bottom: 20px;
-            border: 1px solid #444;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
         .tail-number-display {
             text-align: center;
             font-size: 24px;
             font-weight: bold;
-            font-family: 'Courier New', monospace;
-            color: #ffffff;
+            font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+            color: #f0eee6;
             margin-bottom: 10px;
         }
 
         .calculator-title {
             text-align: center;
-            font-size: 18px;
-            font-weight: bold;
-            font-family: 'Courier New', monospace;
-            color: #4CAF50;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: #918f84;
             margin-bottom: 20px;
         }
 
@@ -191,33 +268,34 @@
         }
 
         .data-table th {
-            background-color: #4a4a4a;
-            color: #ffffff;
+            background-color: #3b3a37;
+            color: #f0eee6;
             padding: 8px 12px;
             text-align: left;
             font-weight: 600;
             font-size: 14px;
-            border: 1px solid #555;
+            border: 1px solid #45433e;
         }
 
         .data-table td {
-            background-color: #2a2a2a;
-            color: #e0e0e0;
+            background-color: #2b2a28;
+            color: #d9d7cd;
             padding: 8px 12px;
-            border: 1px solid #555;
+            border: 1px solid #45433e;
             font-size: 14px;
         }
 
         .data-table tr:nth-child(even) td {
-            background-color: #404040;
+            background-color: #383734;
         }
 
         .panel-title {
             text-align: center;
-            font-size: 16px;
-            font-weight: bold;
-            font-family: 'Courier New', monospace;
-            color: #4CAF50;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: #918f84;
             margin-bottom: 15px;
         }
 
@@ -232,19 +310,19 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background-color: #404040;
+            background-color: #383734;
             padding: 8px 12px;
             border-radius: 6px;
             font-size: 14px;
         }
 
         .info-label {
-            color: #e0e0e0;
+            color: #d9d7cd;
             font-weight: 500;
         }
 
         .info-value {
-            color: #ffffff;
+            color: #f0eee6;
             font-weight: 600;
         }
 
@@ -255,20 +333,20 @@
         }
 
         .airspeed-item {
-            background-color: #404040;
+            background-color: #383734;
             padding: 6px 8px;
             border-radius: 6px;
             text-align: center;
             font-size: 12px;
-            color: #e0e0e0;
+            color: #d9d7cd;
         }
 
         .time-panel {
-            background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%);
-            border-radius: 12px;
+            background: #30302e;
+            border: 1px solid #3d3b37;
+            border-radius: 10px;
             padding: 15px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
 
         .time-grid {
@@ -279,31 +357,31 @@
 
         .time-item {
             text-align: center;
-            background-color: #404040;
+            background-color: #383734;
             padding: 12px;
             border-radius: 8px;
         }
 
         .time-label {
             font-size: 12px;
-            color: #cccccc;
+            color: #b5b3a9;
             margin-bottom: 5px;
             font-weight: 500;
         }
 
         .time-value {
             font-size: 18px;
-            color: #ffffff;
+            color: #f0eee6;
             font-weight: 600;
-            font-family: 'Courier New', monospace;
+            font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
         }
 
         .select-field {
-            background-color: #4a4a4a;
-            border: 1px solid #555;
+            background-color: #3b3a37;
+            border: 1px solid #45433e;
             border-radius: 8px;
             padding: 8px 12px;
-            color: #ffffff;
+            color: #f0eee6;
             font-size: 14px;
             min-width: 110px;
             max-width: 110px;
@@ -320,7 +398,7 @@
         }
 
         .select-field:focus {
-            border-color: #007acc;
+            border-color: #d97757;
             box-shadow: 0 0 8px rgba(0, 122, 204, 0.3);
         }
 
@@ -330,21 +408,22 @@
             bottom: 20px;
             left: 20px;
             right: 20px;
-            background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%);
+            background: #30302e;
+            border: 1px solid #3d3b37;
             display: flex;
             justify-content: space-around;
             padding: 15px 10px;
             border-radius: 50px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
             z-index: 1000;
-            border: 1px solid #555;
+            border: 1px solid #45433e;
             backdrop-filter: blur(10px);
         }
 
         .nav-button {
             background: none;
             border: none;
-            color: #cccccc;
+            color: #b5b3a9;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -357,11 +436,11 @@
         }
 
         .nav-button:hover {
-            color: #4CAF50;
+            color: #d97757;
         }
 
         .nav-button.active {
-            color: #4CAF50;
+            color: #d97757;
         }
 
         .nav-icon {
@@ -387,9 +466,9 @@
         .performance-tooltip .tooltip-content {
             visibility: hidden;
             width: 300px;
-            background-color: #2a2a2a;
-            color: #ffffff;
-            border: 1px solid #555;
+            background-color: #2b2a28;
+            color: #f0eee6;
+            border: 1px solid #45433e;
             border-radius: 6px;
             padding: 12px;
             position: absolute;
@@ -422,22 +501,22 @@
         
         .tooltip-title {
             font-weight: bold;
-            color: #4CAF50;
+            color: #d97757;
             margin-bottom: 8px;
             font-size: 12px;
         }
         
         .tooltip-formula {
-            background-color: #1a1a1a;
+            background-color: #2b2a28;
             padding: 6px;
             border-radius: 4px;
             margin: 4px 0;
-            font-family: 'Courier New', monospace;
+            font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
             font-size: 10px;
         }
         
         .tooltip-note {
-            color: #cccccc;
+            color: #b5b3a9;
             font-style: italic;
             margin-top: 6px;
         }
@@ -459,7 +538,7 @@
             width: 100%;
             height: 0;
             padding-bottom: 62.5%; /* 16:10 aspect ratio (10/16 = 0.625) */
-            background-color: #1a1a1a;
+            background-color: #2b2a28;
             border-radius: 8px;
             overflow: hidden;
             border: 1px solid #333;
@@ -487,7 +566,7 @@
 
         .mnemonic-item {
             margin-bottom: 10px;
-            border: 1px solid #444;
+            border: 1px solid #3d3b37;
             border-radius: 6px;
             overflow: hidden;
             background-color: #333;
@@ -499,27 +578,28 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%);
-            color: #e0e0e0;
+            background: #30302e;
+            border: 1px solid #3d3b37;
+            color: #d9d7cd;
             font-weight: bold;
             transition: background-color 0.2s ease;
         }
 
         .mnemonic-title:hover {
-            background-color: rgba(76, 175, 80, 0.2);
+            background-color: rgba(217, 119, 87, 0.2);
         }
 
         .expand-icon {
             font-size: 18px;
             font-weight: bold;
-            color: #4CAF50;
+            color: #d97757;
         }
 
         .mnemonic-detail {
             padding: 15px;
-            background-color: #1a1a1a;
+            background-color: #2b2a28;
             border-top: 1px solid #444;
-            color: #ccc;
+            color: #b5b3a9;
             line-height: 1.6;
         }
 
@@ -528,7 +608,7 @@
         }
 
         .mnemonic-detail strong {
-            color: #4CAF50;
+            color: #d97757;
         }
 
         .mnemonic-detail hr {
@@ -572,7 +652,7 @@
             right: 20px;
             width: 50px;
             height: 50px;
-            background-color: #4CAF50;
+            background-color: #d97757;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -594,14 +674,14 @@
             font-weight: bold;
             text-align: center;
             padding: 20px;
-            border-radius: 12px;
+            border-radius: 10px;
             margin-top: 10px;
         }
 
         .grand-total.green {
-            background-color: rgba(76, 175, 80, 0.2);
-            color: #4CAF50;
-            border: 2px solid #4CAF50;
+            background-color: rgba(217, 119, 87, 0.2);
+            color: #d97757;
+            border: 2px solid #d97757;
         }
 
         .grand-total.yellow {
@@ -611,9 +691,9 @@
         }
 
         .grand-total.red {
-            background-color: rgba(244, 67, 54, 0.2);
-            color: #f44336;
-            border: 2px solid #f44336;
+            background-color: rgba(217, 98, 87, 0.2);
+            color: #d96257;
+            border: 2px solid #d96257;
         }
 
         /* Mobile Responsive Styles */
@@ -623,7 +703,7 @@
                 padding: 0;
                 height: 100vh;
                 overflow: hidden;
-                background-color: #101013 !important;
+                background-color: #262624 !important;
             }
 
             /* Override desktop column widths on mobile */
@@ -644,6 +724,7 @@
             .left-panel,
             .right-column,
             .settings-panel,
+            .e6b-column,
             .brain-panel {
                 display: none;
                 width: 100%; /* Edge to edge */
@@ -685,7 +766,7 @@
 
             .left-panel .panel-title,
             .right-column .panel-title {
-                font-size: 16px;
+                font-size: 11px;
                 margin-bottom: 8px;
             }
 
@@ -774,7 +855,7 @@
 
             .time-item {
                 padding: 8px 6px;
-                background-color: #4a4a4a;
+                background-color: #3b3a37;
                 border-radius: 6px;
                 text-align: center;
                 min-width: 0;
@@ -783,7 +864,7 @@
 
             .time-label {
                 font-size: 9px;
-                color: #ccc;
+                color: #b5b3a9;
                 margin-bottom: 2px;
                 white-space: nowrap;
                 overflow: hidden;
@@ -793,8 +874,8 @@
             .time-value {
                 font-size: 11px;
                 font-weight: bold;
-                color: #4CAF50;
-                font-family: 'Courier New', monospace;
+                color: #d97757;
+                font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
@@ -862,6 +943,7 @@
             }
 
             .desktop-layout.mobile-show-left .right-column,
+            .desktop-layout.mobile-show-left .e6b-column,
             .desktop-layout.mobile-show-left .settings-panel {
                 display: none !important;
             }
@@ -883,6 +965,7 @@
                 max-width: 100%;
             }
 
+            .desktop-layout.mobile-show-right .e6b-column,
             .desktop-layout.mobile-show-right .left-panel,
             .desktop-layout.mobile-show-right .settings-panel {
                 display: none !important;
@@ -907,6 +990,30 @@
                 max-width: 100%;
             }
 
+            .desktop-layout.mobile-show-e6b .e6b-column {
+                display: block !important;
+                position: absolute;
+                top: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 10;
+                width: 100%;
+                height: 100%;
+                overflow-y: auto;
+                overflow-x: hidden;
+                padding: 10px;
+                box-sizing: border-box;
+                border-radius: 0;
+                max-width: 100%;
+            }
+
+            .desktop-layout.mobile-show-e6b .left-panel,
+            .desktop-layout.mobile-show-e6b .right-column,
+            .desktop-layout.mobile-show-e6b .settings-panel {
+                display: none !important;
+            }
+
+            .desktop-layout.mobile-show-settings .e6b-column,
             .desktop-layout.mobile-show-settings .left-panel,
             .desktop-layout.mobile-show-settings .right-column {
                 display: none !important;
@@ -958,14 +1065,15 @@
                 bottom: 15px !important; /* Floating above bottom */
                 left: 15px !important;
                 right: 15px !important;
-                background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%);
+                background: #30302e;
+            border: 1px solid #3d3b37;
                 height: 70px;
                 z-index: 1000;
                 border-radius: 15px;
                 box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 
                            0 0 0 1px rgba(255, 255, 255, 0.1);
                 backdrop-filter: blur(10px);
-                border: 1px solid #444;
+                border: 1px solid #3d3b37;
                 gap: 8px;
                 padding: 8px;
             }
@@ -973,6 +1081,7 @@
             /* Hide floating desktop chips on mobile (mobile nav has its own Home/Settings) */
             .settings-toggle,
             .brain-toggle,
+            .e6b-toggle,
             .home-chip {
                 display: none !important;
             }
@@ -983,33 +1092,31 @@
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                background: linear-gradient(135deg, #404040 0%, #2a2a2a 100%);
-                border: 1px solid #555;
+                background: #30302e;
+                border: 1px solid #3d3b37;
                 border-radius: 10px;
-                color: #cccccc;
+                color: #918f84;
                 cursor: pointer;
                 padding: 8px 4px;
-                transition: all 0.3s ease;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+                transition: border-color 0.15s ease, color 0.15s ease;
             }
 
             .mobile-nav-btn.active {
-                background: rgba(76, 175, 80, 0.2);
-                color: white;
-                border: 2px solid #4CAF50;
-                box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+                background: rgba(217, 119, 87, 0.12);
+                color: #f0eee6;
+                border: 1px solid #d97757;
             }
 
             .mobile-nav-btn:hover {
-                background: rgba(76, 175, 80, 0.2);
-                color: white;
-                border: 2px solid #4CAF50;
-                transform: translateY(-1px);
-                box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+                color: #f0eee6;
+                border-color: #d97757;
             }
 
             .nav-icon {
-                font-size: 18px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 20px;
                 margin-bottom: 2px;
             }
             
@@ -1047,7 +1154,7 @@
 
             .column-resizer {
                 width: 6px;
-                background-color: #555;
+                background-color: #45433e;
                 cursor: col-resize;
                 position: relative;
                 flex-shrink: 0;
@@ -1148,6 +1255,7 @@
 
 
             /* Reset mobile classes for desktop */
+            .desktop-layout.mobile-show-left .e6b-column,
             .desktop-layout.mobile-show-left .left-panel,
             .desktop-layout.mobile-show-right .right-column,
             .desktop-layout.mobile-show-settings .settings-panel {
@@ -1268,14 +1376,14 @@
         <!-- Custom Aircraft Section -->
         <div class="input-section">
             <div class="input-group">
-                <button type="button" onclick="showCustomAircraftBuilder()" style="width: 100%; background: rgba(76, 175, 80, 0.2); color: white; border: 2px solid #4CAF50; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);" onmouseover="this.style.background='rgba(76, 175, 80, 0.3)'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(76, 175, 80, 0.3)';" onmouseout="this.style.background='rgba(76, 175, 80, 0.2)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(76, 175, 80, 0.2)';">🛠️ Custom Aircraft</button>
+                <button class="btn" type="button" onclick="showCustomAircraftBuilder()">Custom Aircraft</button>
             </div>
         </div>
 
         <!-- Section 1: Tail Number -->
         <div class="input-section">
             <div class="input-group">
-                <label class="input-label"><a href="https://app.flightschedulepro.com/" target="_blank" style="color: #2196F3; text-decoration: none;">Tail Number</a></label>
+                <label class="input-label"><a href="https://app.flightschedulepro.com/" target="_blank" style="color: #d97757; text-decoration: none;">Tail Number</a></label>
                 <input type="text" class="input-field" id="tailNumber" placeholder="">
             </div>
         </div>
@@ -1360,7 +1468,7 @@
         <!-- Section 4: Weather -->
         <div class="input-section">
             <div class="input-group">
-                <label class="input-label"><a href="https://www.1800wxbrief.com" target="_blank" style="color: #4CAF50; text-decoration: none;">Weather Observation</a></label>
+                <label class="input-label"><a href="https://www.1800wxbrief.com" target="_blank" style="color: #d97757; text-decoration: none;">Weather Observation</a></label>
                 <input type="text" inputmode="numeric" class="input-field" id="weatherObs" placeholder="">
             </div>
             <div class="input-group">
@@ -1473,7 +1581,7 @@
         <!-- Weight & Balance Calculator Panel -->
         <div class="right-panel">
             <div class="tail-number-display" id="tailNumberDisplay">N</div>
-            <div class="calculator-title">Weight & Balance Calculator - <span id="aircraftTypeDisplay" style="color: #cccccc;"></span></div>
+            <div class="calculator-title">Weight & Balance Calculator - <span id="aircraftTypeDisplay" style="color: #b5b3a9;"></span></div>
             
             <table class="data-table">
                 <thead>
@@ -1593,25 +1701,15 @@
             
             <!-- CG Envelope Toggle Button -->
             <div style="margin-top: 15px; text-align: center;">
-                <button id="cgEnvelopeToggle" onclick="toggleCGEnvelope()" style="
-                    background: linear-gradient(135deg, rgba(76, 175, 80, 0.3) 0%, rgba(76, 175, 80, 0.1) 100%);
-                    color: white;
-                    border: 1px solid #4CAF50;
-                    padding: 8px 16px;
-                    border-radius: 6px;
-                    cursor: pointer;
-                    font-size: 12px;
-                    font-weight: bold;
-                    box-shadow: 0 2px 4px rgba(76, 175, 80, 0.2);
-                ">Show CG Envelope</button>
+                <button class="btn" id="cgEnvelopeToggle" onclick="toggleCGEnvelope()">Show CG Envelope</button>
             </div>
             
             <!-- CG Chart Container (Initially Hidden) -->
             <div id="cgChartContainer" style="display: none; margin-top: 15px;">
                 <canvas id="cgChart" width="300" height="200" style="
-                    border: 1px solid #444;
+                    border: 1px solid #3d3b37;
                     border-radius: 4px;
-                    background-color: #1a1a1a;
+                    background-color: #2b2a28;
                     width: 100%;
                     height: auto;
                 "></canvas>
@@ -1620,7 +1718,7 @@
 
         <!-- METAR Panel -->
         <div class="right-panel" id="metarPanel">
-            <div id="metarDisplay" style="font-family: 'Courier New', monospace; font-size: 12px; color: #4CAF50; background-color: #1a1a1a; padding: 10px; border-radius: 6px; word-wrap: break-word; line-height: 1.4;">
+            <div id="metarDisplay" style="font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-size: 12px; color: #c9c7ba; background-color: #2b2a28; border: 1px solid #3d3b37; padding: 10px; border-radius: 6px; word-wrap: break-word; line-height: 1.4;">
                 No METAR data available
             </div>
         </div>
@@ -1628,10 +1726,10 @@
         <!-- Weather Panel -->
         <div class="right-panel">
             <div class="panel-title" style="display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap;">
-                <a href="https://aviationweather.gov/" target="_blank" rel="noopener" style="font-size:9px; padding:3px 7px; border:1px solid #555; border-radius:4px; color:#aaa; text-decoration:none; font-family:'Segoe UI',sans-serif; font-weight:normal; background:rgba(255,255,255,0.04); transition:all 0.2s; white-space:nowrap;" onmouseover="this.style.borderColor='#4CAF50';this.style.color='#4CAF50'" onmouseout="this.style.borderColor='#555';this.style.color='#aaa'">AviationWeather</a>
-                <a href="https://www.1800wxbrief.com/Website/#!/" target="_blank" rel="noopener" style="font-size:9px; padding:3px 7px; border:1px solid #555; border-radius:4px; color:#aaa; text-decoration:none; font-family:'Segoe UI',sans-serif; font-weight:normal; background:rgba(255,255,255,0.04); transition:all 0.2s; white-space:nowrap;" onmouseover="this.style.borderColor='#4CAF50';this.style.color='#4CAF50'" onmouseout="this.style.borderColor='#555';this.style.color='#aaa'">1800WxBrief</a>
-                <span style="color:#4CAF50;">Current Conditions</span>
-                <a href="https://plan.foreflight.com/map" target="_blank" rel="noopener" style="font-size:9px; padding:3px 7px; border:1px solid #555; border-radius:4px; color:#aaa; text-decoration:none; font-family:'Segoe UI',sans-serif; font-weight:normal; background:rgba(255,255,255,0.04); transition:all 0.2s; white-space:nowrap;" onmouseover="this.style.borderColor='#4CAF50';this.style.color='#4CAF50'" onmouseout="this.style.borderColor='#555';this.style.color='#aaa'">ForeFlight</a>
+                <a href="https://aviationweather.gov/" target="_blank" rel="noopener" style="font-size:9px; padding:3px 7px; border:1px solid #45433e; border-radius:4px; color:#aaa; text-decoration:none; font-family:'Segoe UI',sans-serif; font-weight:normal; background:rgba(255,255,255,0.04); transition:all 0.2s; white-space:nowrap;" onmouseover="this.style.borderColor='#d97757';this.style.color='#d97757'" onmouseout="this.style.borderColor='#45433e';this.style.color='#aaa'">AviationWeather</a>
+                <a href="https://www.1800wxbrief.com/Website/#!/" target="_blank" rel="noopener" style="font-size:9px; padding:3px 7px; border:1px solid #45433e; border-radius:4px; color:#aaa; text-decoration:none; font-family:'Segoe UI',sans-serif; font-weight:normal; background:rgba(255,255,255,0.04); transition:all 0.2s; white-space:nowrap;" onmouseover="this.style.borderColor='#d97757';this.style.color='#d97757'" onmouseout="this.style.borderColor='#45433e';this.style.color='#aaa'">1800WxBrief</a>
+                <span style="color:#d97757;">Current Conditions</span>
+                <a href="https://plan.foreflight.com/map" target="_blank" rel="noopener" style="font-size:9px; padding:3px 7px; border:1px solid #45433e; border-radius:4px; color:#aaa; text-decoration:none; font-family:'Segoe UI',sans-serif; font-weight:normal; background:rgba(255,255,255,0.04); transition:all 0.2s; white-space:nowrap;" onmouseover="this.style.borderColor='#d97757';this.style.color='#d97757'" onmouseout="this.style.borderColor='#45433e';this.style.color='#aaa'">ForeFlight</a>
             </div>
             <div class="info-grid">
                 <div class="info-item">
@@ -1830,13 +1928,89 @@
     <!-- Column Resizer between Right Column and Settings Panel -->
     <div class="column-resizer" data-resize="right-settings"></div>
 
+    <!-- E6B Flight Computer (Column) -->
+    <div class="e6b-column">
+        <div class="panel-title" style="margin-top: 4px;">E6B Flight Computer</div>
+
+        <!-- Wind -->
+        <div class="input-section">
+            <div class="e6b-section-title">Wind &amp; Groundspeed</div>
+            <div class="input-group"><label class="input-label">Course (°T)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bCourse" data-panel="wind" placeholder="360"></div>
+            <div class="input-group"><label class="input-label">TAS (kts)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bTas" data-panel="wind" placeholder="95"></div>
+            <div class="input-group"><label class="input-label">Wind Dir (°)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bWindDir" data-panel="wind" placeholder="270"></div>
+            <div class="input-group"><label class="input-label">Wind Speed (kts)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bWindSpd" data-panel="wind" placeholder="10"></div>
+            <button class="btn" type="button" onclick="e6bFillWind()" style="margin-bottom: 10px;">Use Current Weather</button>
+            <div class="e6b-out"><span>WCA</span><span id="e6bOutWca">—</span></div>
+            <div class="e6b-out"><span>Heading</span><span id="e6bOutHdg">—</span></div>
+            <div class="e6b-out"><span>Groundspeed</span><span id="e6bOutGs">—</span></div>
+            <div class="e6b-out"><span>Headwind</span><span id="e6bOutHw">—</span></div>
+            <div class="e6b-out"><span>Crosswind</span><span id="e6bOutXw">—</span></div>
+        </div>
+
+        <!-- Time / Speed / Distance -->
+        <div class="input-section">
+            <div class="e6b-section-title">Time · Speed · Distance</div>
+            <div class="e6b-hint">Enter any two — the third computes.</div>
+            <div class="input-group"><label class="input-label">GS (kts)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bTsdGs" data-panel="tsd" placeholder=""></div>
+            <div class="input-group"><label class="input-label">Distance (NM)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bTsdDist" data-panel="tsd" placeholder=""></div>
+            <div class="input-group"><label class="input-label">Time (min)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bTsdTime" data-panel="tsd" placeholder=""></div>
+            <div class="e6b-out"><span id="e6bTsdLabel">Result</span><span id="e6bTsdOut">—</span></div>
+        </div>
+
+        <!-- Fuel -->
+        <div class="input-section">
+            <div class="e6b-section-title">Fuel</div>
+            <div class="e6b-hint">Enter any two — the third computes.</div>
+            <div class="input-group"><label class="input-label">Burn (GPH)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bFuelRate" data-panel="fuel" placeholder=""></div>
+            <div class="input-group"><label class="input-label">Time (min)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bFuelTime" data-panel="fuel" placeholder=""></div>
+            <div class="input-group"><label class="input-label">Fuel (gal)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bFuelAmt" data-panel="fuel" placeholder=""></div>
+            <div class="e6b-out"><span id="e6bFuelLabel">Result</span><span id="e6bFuelOut">—</span></div>
+            <div class="e6b-out"><span>Weight</span><span id="e6bFuelLbs">—</span></div>
+        </div>
+
+        <!-- Descent -->
+        <div class="input-section">
+            <div class="e6b-section-title">Descent Planning</div>
+            <div class="input-group"><label class="input-label">Alt to Lose (ft)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bDesAlt" data-panel="descent" placeholder="3000"></div>
+            <div class="input-group"><label class="input-label">Distance (NM)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bDesDist" data-panel="descent" placeholder="10"></div>
+            <div class="input-group"><label class="input-label">GS (kts)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bDesGs" data-panel="descent" placeholder="90"></div>
+            <div class="e6b-out"><span>Gradient</span><span id="e6bOutGrad">—</span></div>
+            <div class="e6b-out"><span>Descent Rate</span><span id="e6bOutFpm">—</span></div>
+            <div class="e6b-out"><span>Time</span><span id="e6bOutDesTime">—</span></div>
+        </div>
+
+        <!-- Altitude / TAS -->
+        <div class="input-section">
+            <div class="e6b-section-title">Altitude &amp; TAS</div>
+            <div class="input-group"><label class="input-label">Altimeter (inHg)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bAltim" data-panel="alt" placeholder="29.92" step="0.01"></div>
+            <div class="input-group"><label class="input-label">Elevation (ft)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bElev" data-panel="alt" placeholder=""></div>
+            <div class="input-group"><label class="input-label">OAT (°C)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bOat" data-panel="alt" placeholder="15"></div>
+            <div class="input-group"><label class="input-label">CAS (kts)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bCas" data-panel="alt" placeholder=""></div>
+            <button class="btn" type="button" onclick="e6bFillAlt()" style="margin-bottom: 10px;">Use Current Weather</button>
+            <div class="e6b-out"><span>Pressure Alt</span><span id="e6bOutPa">—</span></div>
+            <div class="e6b-out"><span>Density Alt</span><span id="e6bOutDa">—</span></div>
+            <div class="e6b-out"><span>TAS (approx)</span><span id="e6bOutTas">—</span></div>
+        </div>
+
+        <!-- Conversions -->
+        <div class="input-section">
+            <div class="e6b-section-title">Conversions</div>
+            <div class="e6b-convrow"><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvKts" data-group="speed" data-unit="kts"><span class="e6b-convlbl">kts</span><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvMph" data-group="speed" data-unit="mph"><span class="e6b-convlbl">mph</span></div>
+            <div class="e6b-convrow"><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvNm" data-group="dist" data-unit="nm"><span class="e6b-convlbl">NM</span><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvSm" data-group="dist" data-unit="sm"><span class="e6b-convlbl">SM</span></div>
+            <div class="e6b-convrow"><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvGal" data-group="fuelw" data-unit="gal"><span class="e6b-convlbl">gal</span><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvLbs" data-group="fuelw" data-unit="lbs"><span class="e6b-convlbl">lbs</span></div>
+            <div class="e6b-convrow"><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvC" data-group="temp" data-unit="c"><span class="e6b-convlbl">°C</span><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvF" data-group="temp" data-unit="f"><span class="e6b-convlbl">°F</span></div>
+            <div class="e6b-convrow"><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvFt" data-group="len" data-unit="ft"><span class="e6b-convlbl">ft</span><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvM" data-group="len" data-unit="m"><span class="e6b-convlbl">m</span></div>
+            <div class="e6b-convrow"><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvHg" data-group="press" data-unit="hg" step="0.01"><span class="e6b-convlbl">inHg</span><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvMb" data-group="press" data-unit="mb"><span class="e6b-convlbl">mb</span></div>
+        </div>
+    </div>
+
     <!-- Settings Panel (Column D) -->
     <div class="settings-panel" style="padding: 20px; overflow-y: auto; height: 100vh;">
-        <h2 style="color: #4CAF50; margin-bottom: 20px; font-size: 18px;">Settings</h2>
+        <h2 style="color: #d97757; margin-bottom: 20px; font-size: 18px;">Settings</h2>
         
         <!-- User Profile Section -->
         <div class="input-section">
-            <h3 style="color: #e0e0e0; margin-bottom: 15px; font-size: 16px;">User Profile</h3>
+            <h3 style="color: #d9d7cd; margin-bottom: 15px; font-size: 16px;">User Profile</h3>
             <div class="input-group">
                 <label class="input-label">My Weight (lbs)</label>
                 <input type="number" class="input-field" id="userWeight" placeholder="Enter weight">
@@ -1856,9 +2030,9 @@
                 </select>
             </div>
             <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 15px;">
-                <button onclick="saveUserProfile()" style="background: rgba(76, 175, 80, 0.2); color: white; border: 2px solid #4CAF50; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-size: 14px; width: 100%; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);" onmouseover="this.style.background='rgba(76, 175, 80, 0.3)'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(76, 175, 80, 0.3)';" onmouseout="this.style.background='rgba(76, 175, 80, 0.2)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(76, 175, 80, 0.2)';">💾 Save Profile</button>
-                <button onclick="loadUserProfile()" style="background: rgba(33, 150, 243, 0.2); color: white; border: 2px solid #2196F3; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-size: 14px; width: 100%; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2);" onmouseover="this.style.background='rgba(33, 150, 243, 0.3)'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(33, 150, 243, 0.3)';" onmouseout="this.style.background='rgba(33, 150, 243, 0.2)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(33, 150, 243, 0.2)';">📂 Load Profile</button>
-                <button onclick="clearUserProfile()" style="background: rgba(244, 67, 54, 0.2); color: white; border: 2px solid #f44336; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-size: 14px; width: 100%; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(244, 67, 54, 0.2);" onmouseover="this.style.background='rgba(244, 67, 54, 0.3)'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(244, 67, 54, 0.3)';" onmouseout="this.style.background='rgba(244, 67, 54, 0.2)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(244, 67, 54, 0.2)';">🗑️ Clear Data</button>
+                <button class="btn btn-primary" onclick="saveUserProfile()">Save Profile</button>
+                <button class="btn" onclick="loadUserProfile()">Load Profile</button>
+                <button class="btn btn-danger" onclick="clearUserProfile()">Clear Data</button>
             </div>
             <div id="settingsStatus" style="margin-top: 10px; padding: 8px; border-radius: 4px; font-size: 12px; display: none;"></div>
         </div>
@@ -1866,7 +2040,7 @@
         <!-- Recent Flights Section (cross-device sync) -->
         <div class="input-section">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-                <h3 style="color: #e0e0e0; margin: 0; font-size: 16px;">Recent Flights</h3>
+                <h3 style="color: #d9d7cd; margin: 0; font-size: 16px;">Recent Flights</h3>
                 <span id="wbSyncStatus" title="Cloud sync status" style="font-size: 11px; color: #888; display: inline-flex; align-items: center; gap: 5px;">
                     <span id="wbSyncDot" style="width: 8px; height: 8px; border-radius: 50%; background: #888; display: inline-block;"></span>
                     <span id="wbSyncText">Connecting…</span>
@@ -1877,15 +2051,15 @@
             </p>
 
             <!-- Resume banner: appears when a newer in-progress flight exists on another device -->
-            <div id="wbResumeBanner" style="display: none; background: rgba(33, 150, 243, 0.12); border: 1px solid #2196F3; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px;">
+            <div id="wbResumeBanner" style="display: none; background: rgba(217, 119, 87, 0.12); border: 1px solid #d97757; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px;">
                 <div style="color: #cfe8ff; font-size: 12px; margin-bottom: 8px;" id="wbResumeText">You have an unsaved flight from another device.</div>
                 <div style="display: flex; gap: 8px;">
-                    <button onclick="wbResumeLastFlight()" style="flex: 1; background: rgba(33, 150, 243, 0.25); color: #fff; border: 1px solid #2196F3; padding: 7px 10px; border-radius: 6px; cursor: pointer; font-size: 12px;">Resume it</button>
+                    <button class="btn btn-primary" style="flex: 1;" onclick="wbResumeLastFlight()">Resume it</button>
                     <button onclick="wbDismissResume()" style="background: none; color: #9bb; border: 1px solid #456; padding: 7px 10px; border-radius: 6px; cursor: pointer; font-size: 12px;">Dismiss</button>
                 </div>
             </div>
 
-            <button onclick="wbSaveCurrentFlight()" style="background: rgba(33, 150, 243, 0.2); color: white; border: 2px solid #2196F3; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-size: 14px; width: 100%; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2); margin-bottom: 12px;" onmouseover="this.style.background='rgba(33, 150, 243, 0.3)'; this.style.transform='translateY(-1px)';" onmouseout="this.style.background='rgba(33, 150, 243, 0.2)'; this.style.transform='translateY(0)';">💾 Save This Flight</button>
+            <button class="btn btn-primary" style="margin-bottom: 12px;" onclick="wbSaveCurrentFlight()">Save This Flight</button>
 
             <div id="recentFlightsList" style="display: flex; flex-direction: column; gap: 8px;">
                 <div style="color: #777; font-size: 12px; text-align: center; padding: 8px;">No saved flights yet.</div>
@@ -1894,36 +2068,38 @@
 
         <!-- Aircraft Management Section -->
         <div class="input-section">
-            <h3 style="color: #e0e0e0; margin-bottom: 15px; font-size: 16px;">Aircraft Management</h3>
+            <h3 style="color: #d9d7cd; margin-bottom: 15px; font-size: 16px;">Aircraft Management</h3>
             <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px;">
-                <button onclick="saveCurrentAircraft()" style="background: rgba(76, 175, 80, 0.2); color: white; border: 2px solid #4CAF50; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-size: 14px; width: 100%; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);" onmouseover="this.style.background='rgba(76, 175, 80, 0.3)'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(76, 175, 80, 0.3)';" onmouseout="this.style.background='rgba(76, 175, 80, 0.2)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(76, 175, 80, 0.2)';">✈️ Save Current Aircraft</button>
-                <button onclick="showAircraftManager()" style="background: rgba(255, 152, 0, 0.2); color: white; border: 2px solid #FF9800; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-size: 14px; width: 100%; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(255, 152, 0, 0.2);" onmouseover="this.style.background='rgba(255, 152, 0, 0.3)'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(255, 152, 0, 0.3)';" onmouseout="this.style.background='rgba(255, 152, 0, 0.2)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(255, 152, 0, 0.2)';">📋 Manage Aircraft</button>
-                <button onclick="showCustomAircraftManager()" style="background: rgba(96, 125, 139, 0.2); color: white; border: 2px solid #607D8B; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-size: 14px; width: 100%; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(96, 125, 139, 0.2);" onmouseover="this.style.background='rgba(96, 125, 139, 0.3)'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(96, 125, 139, 0.3)';" onmouseout="this.style.background='rgba(96, 125, 139, 0.2)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(96, 125, 139, 0.2)';">🧰 Manage Custom Aircraft</button>
-                <button onclick="showCustomAircraftBuilder()" style="background: rgba(76, 175, 80, 0.2); color: white; border: 2px solid #4CAF50; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-size: 14px; width: 100%; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);" onmouseover="this.style.background='rgba(76, 175, 80, 0.3)'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(76, 175, 80, 0.3)';" onmouseout="this.style.background='rgba(76, 175, 80, 0.2)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(76, 175, 80, 0.2)';">🛠️ Custom Aircraft Builder</button>
+                <button class="btn btn-primary" onclick="saveCurrentAircraft()">Save Current Aircraft</button>
+                <button class="btn" onclick="showAircraftManager()">Manage Aircraft</button>
+                <button class="btn" onclick="showCustomAircraftManager()">Manage Custom Aircraft</button>
+                <button class="btn" onclick="showCustomAircraftBuilder()">Custom Aircraft Builder</button>
             </div>
             
             <!-- Aircraft Manager Modal -->
-            <div id="aircraftManager" style="display: none; background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%); border-radius: 8px; padding: 15px; margin-top: 10px; border: 1px solid #555;">
+            <div id="aircraftManager" style="display: none; background: #30302e;
+            border: 1px solid #3d3b37; border-radius: 8px; padding: 15px; margin-top: 10px; border: 1px solid #45433e;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <h4 style="color: #e0e0e0; margin: 0;">Saved Aircraft</h4>
-                    <button onclick="hideAircraftManager()" style="background: none; border: none; color: #ccc; font-size: 18px; cursor: pointer;">×</button>
+                    <h4 style="color: #d9d7cd; margin: 0;">Saved Aircraft</h4>
+                    <button onclick="hideAircraftManager()" style="background: none; border: none; color: #b5b3a9; font-size: 18px; cursor: pointer;">×</button>
                 </div>
                 <div id="aircraftList"></div>
             </div>
 
-            <div id="customAircraftManager" style="display: none; background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%); border-radius: 8px; padding: 15px; margin-top: 10px; border: 1px solid #555;">
+            <div id="customAircraftManager" style="display: none; background: #30302e;
+            border: 1px solid #3d3b37; border-radius: 8px; padding: 15px; margin-top: 10px; border: 1px solid #45433e;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <h4 style="color: #e0e0e0; margin: 0;">Custom Aircraft</h4>
-                    <button onclick="hideCustomAircraftManager()" style="background: none; border: none; color: #ccc; font-size: 18px; cursor: pointer;">×</button>
+                    <h4 style="color: #d9d7cd; margin: 0;">Custom Aircraft</h4>
+                    <button onclick="hideCustomAircraftManager()" style="background: none; border: none; color: #b5b3a9; font-size: 18px; cursor: pointer;">×</button>
                 </div>
                 <div id="customAircraftList"></div>
             </div>
             
             <!-- Custom Aircraft Builder Modal -->
-            <div id="customAircraftBuilder" style="display: none; background-color: #1a1a1a; border-radius: 8px; padding: 15px; margin-top: 10px; border: 1px solid #555; max-height: 80vh; overflow-y: auto;">
+            <div id="customAircraftBuilder" style="display: none; background-color: #2b2a28; border-radius: 8px; padding: 15px; margin-top: 10px; border: 1px solid #45433e; max-height: 80vh; overflow-y: auto;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #555;">
-                    <h3 style="color: #4CAF50; margin: 0; font-size: 16px;">🛠️ Custom Aircraft Builder</h3>
-                    <button onclick="hideCustomAircraftBuilder()" style="background: none; border: none; color: #ccc; font-size: 20px; cursor: pointer; padding: 0; line-height: 1;">&times;</button>
+                    <h3 style="color: #d97757; margin: 0; font-size: 16px;">Custom Aircraft Builder</h3>
+                    <button onclick="hideCustomAircraftBuilder()" style="background: none; border: none; color: #b5b3a9; font-size: 20px; cursor: pointer; padding: 0; line-height: 1;">&times;</button>
                 </div>
                 <input type="hidden" id="customAircraftOriginalName" value="">
                 
@@ -2100,8 +2276,8 @@
 
                 <!-- CG Envelope Section -->
                 <div class="input-section">
-                    <h4 style="color: #4CAF50; margin-bottom: 10px; font-size: 14px;">CG Envelope Points</h4>
-                    <p style="color: #ccc; font-size: 11px; margin-bottom: 15px;">Define the CG envelope by entering coordinate points (CG position, Weight). Points will be connected in order to form the envelope.</p>
+                    <h4 style="color: #d97757; margin-bottom: 10px; font-size: 14px;">CG Envelope Points</h4>
+                    <p style="color: #b5b3a9; font-size: 11px; margin-bottom: 15px;">Define the CG envelope by entering coordinate points (CG position, Weight). Points will be connected in order to form the envelope.</p>
                     
                     <div id="cgEnvelopePoints">
                         <div class="cg-point-row" style="display: flex; gap: 10px; margin-bottom: 8px; align-items: center;">
@@ -2113,7 +2289,7 @@
                                 <label class="input-label" style="font-size: 11px;">Weight (lbs)</label>
                                 <input type="number" inputmode="decimal" class="input-field cg-weight" placeholder="1000" step="1" style="font-size: 12px; padding: 6px;">
                             </div>
-                            <button type="button" onclick="removeCGPoint(this)" style="background-color: #f44336; color: white; border: none; padding: 6px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">×</button>
+                            <button class="btn btn-danger btn-inline" type="button" onclick="removeCGPoint(this)" style="padding: 4px 10px;">×</button>
                         </div>
                         <div class="cg-point-row" style="display: flex; gap: 10px; margin-bottom: 8px; align-items: center;">
                             <div style="flex: 1;">
@@ -2124,7 +2300,7 @@
                                 <label class="input-label" style="font-size: 11px;">Weight (lbs)</label>
                                 <input type="number" inputmode="decimal" class="input-field cg-weight" placeholder="1350" step="1" style="font-size: 12px; padding: 6px;">
                             </div>
-                            <button type="button" onclick="removeCGPoint(this)" style="background-color: #f44336; color: white; border: none; padding: 6px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">×</button>
+                            <button class="btn btn-danger btn-inline" type="button" onclick="removeCGPoint(this)" style="padding: 4px 10px;">×</button>
                         </div>
                         <div class="cg-point-row" style="display: flex; gap: 10px; margin-bottom: 8px; align-items: center;">
                             <div style="flex: 1;">
@@ -2135,7 +2311,7 @@
                                 <label class="input-label" style="font-size: 11px;">Weight (lbs)</label>
                                 <input type="number" inputmode="decimal" class="input-field cg-weight" placeholder="1670" step="1" style="font-size: 12px; padding: 6px;">
                             </div>
-                            <button type="button" onclick="removeCGPoint(this)" style="background-color: #f44336; color: white; border: none; padding: 6px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">×</button>
+                            <button class="btn btn-danger btn-inline" type="button" onclick="removeCGPoint(this)" style="padding: 4px 10px;">×</button>
                         </div>
                         <div class="cg-point-row" style="display: flex; gap: 10px; margin-bottom: 8px; align-items: center;">
                             <div style="flex: 1;">
@@ -2146,7 +2322,7 @@
                                 <label class="input-label" style="font-size: 11px;">Weight (lbs)</label>
                                 <input type="number" inputmode="decimal" class="input-field cg-weight" placeholder="1670" step="1" style="font-size: 12px; padding: 6px;">
                             </div>
-                            <button type="button" onclick="removeCGPoint(this)" style="background-color: #f44336; color: white; border: none; padding: 6px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">×</button>
+                            <button class="btn btn-danger btn-inline" type="button" onclick="removeCGPoint(this)" style="padding: 4px 10px;">×</button>
                         </div>
                         <div class="cg-point-row" style="display: flex; gap: 10px; margin-bottom: 8px; align-items: center;">
                             <div style="flex: 1;">
@@ -2157,15 +2333,15 @@
                                 <label class="input-label" style="font-size: 11px;">Weight (lbs)</label>
                                 <input type="number" inputmode="decimal" class="input-field cg-weight" placeholder="1000" step="1" style="font-size: 12px; padding: 6px;">
                             </div>
-                            <button type="button" onclick="removeCGPoint(this)" style="background-color: #f44336; color: white; border: none; padding: 6px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">×</button>
+                            <button class="btn btn-danger btn-inline" type="button" onclick="removeCGPoint(this)" style="padding: 4px 10px;">×</button>
                         </div>
                     </div>
                     
-                    <button type="button" onclick="addCGPoint()" style="width: 100%; background-color: #2196F3; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-top: 10px;">+ Add Point</button>
+                    <button type="button" onclick="addCGPoint()" style="width: 100%; background-color: #d97757; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-top: 10px;">+ Add Point</button>
                     
                     <!-- Axis Configuration -->
                     <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #555;">
-                        <h5 style="color: #4CAF50; margin-bottom: 10px; font-size: 12px;">Chart Axis Configuration</h5>
+                        <h5 style="color: #d97757; margin-bottom: 10px; font-size: 12px;">Chart Axis Configuration</h5>
                         <div style="display: flex; gap: 10px; margin-bottom: 10px;">
                             <div style="flex: 1;">
                                 <label class="input-label" style="font-size: 11px;">X-Axis Range (CG positions, comma-separated)</label>
@@ -2201,8 +2377,8 @@
                 <div class="input-section" style="border-top: 1px solid #555; padding-top: 15px; margin-top: 20px;">
                     <div style="display: flex; gap: 10px; justify-content: space-between;">
                         <button type="button" onclick="clearCustomAircraftForm()" style="flex: 1; background-color: #666; color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-size: 14px;">Clear</button>
-                        <button type="button" onclick="loadCustomAircraftTemplate()" style="flex: 1; background-color: #2196F3; color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-size: 14px;">Template</button>
-                        <button type="button" onclick="saveCustomAircraft()" style="flex: 2; background-color: #4CAF50; color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-size: 14px;">💾 Save Aircraft</button>
+                        <button type="button" onclick="loadCustomAircraftTemplate()" style="flex: 1; background-color: #d97757; color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-size: 14px;">Template</button>
+                        <button class="btn" style="flex: 2;" type="button" onclick="saveCustomAircraft()">Save Aircraft</button>
                     </div>
                 </div>
             </div>
@@ -2210,8 +2386,8 @@
 
         <!-- App Information Section -->
         <div class="input-section">
-            <h3 style="color: #e0e0e0; margin-bottom: 15px; font-size: 16px;">About</h3>
-            <p style="color: #ccc; font-size: 12px; line-height: 1.4;">
+            <h3 style="color: #d9d7cd; margin-bottom: 15px; font-size: 16px;">About</h3>
+            <p style="color: #b5b3a9; font-size: 12px; line-height: 1.4;">
                 Weight & Balance Calculator<br>
                 Version 2.0<br>
                 Supports C-152, C-172, P2006T, and custom aircraft<br>
@@ -2229,6 +2405,30 @@
 
     </div> <!-- Close desktop-layout div -->
 
+    <!-- Floating E6B Toggle (Desktop Only) -->
+    <div class="e6b-toggle" onclick="toggleE6BPanel()" title="E6B flight computer" style="
+        position: fixed;
+        top: 20px;
+        right: 190px;
+        height: 36px;
+        padding: 0 14px;
+        background: rgba(38, 38, 36, 0.92);
+        border: 1px solid #45433e;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        z-index: 1000;
+        color: #b5b3a9;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 2px;
+        transition: all 0.2s ease;
+    " onmouseover="this.style.borderColor='#d97757'; this.style.color='#f0eee6';" onmouseout="this.style.borderColor='#45433e'; this.style.color='#b5b3a9';">
+        E6B
+    </div>
+
     <!-- Floating Home Link (Desktop Only) -->
     <a class="home-chip" href="index.html" title="Back to Pilot Study Tools" style="
         position: fixed;
@@ -2236,22 +2436,22 @@
         right: 80px;
         height: 36px;
         padding: 0 14px;
-        background: rgba(13, 13, 16, 0.9);
-        border: 1px solid #2a2a30;
+        background: rgba(38, 38, 36, 0.92);
+        border: 1px solid #45433e;
         border-radius: 8px;
         cursor: pointer;
         display: flex;
         align-items: center;
         gap: 7px;
         z-index: 1000;
-        color: #999;
-        font-family: 'Courier New', monospace;
-        font-size: 12px;
+        color: #b5b3a9;
+        font-size: 11px;
+        font-weight: 600;
         letter-spacing: 2px;
         text-decoration: none;
         transition: all 0.2s ease;
-    " onmouseover="this.style.borderColor='#4af'; this.style.color='#fff';" onmouseout="this.style.borderColor='#2a2a30'; this.style.color='#999';">
-        ⌂ HOME
+    " onmouseover="this.style.borderColor='#d97757'; this.style.color='#f0eee6';" onmouseout="this.style.borderColor='#45433e'; this.style.color='#b5b3a9';">
+        HOME
     </a>
 
     <!-- Floating Settings Toggle (Desktop Only) -->
@@ -2261,8 +2461,8 @@
         right: 20px;
         width: 36px;
         height: 36px;
-        background: rgba(13, 13, 16, 0.9);
-        border: 1px solid #2a2a30;
+        background: rgba(38, 38, 36, 0.92);
+        border: 1px solid #45433e;
         border-radius: 8px;
         cursor: pointer;
         display: flex;
@@ -2271,8 +2471,8 @@
         font-size: 16px;
         z-index: 1000;
         transition: all 0.2s ease;
-    " onmouseover="this.style.borderColor='#4CAF50';" onmouseout="this.style.borderColor='#2a2a30';">
-        ⚙️
+    " onmouseover="this.style.borderColor='#d97757';" onmouseout="this.style.borderColor='#45433e';">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b5b3a9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </div>
 
     <!-- Mobile Navigation (Mobile Only) -->
@@ -2293,19 +2493,23 @@
         }
         </style>
         <button class="mobile-nav-btn" onclick="showMobileColumn('left')">
-            <div class="nav-icon">📊</div>
+            <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="8" width="7" height="13" rx="1"/></svg></div>
             <div>Data</div>
         </button>
         <button class="mobile-nav-btn" onclick="showMobileColumn('right')">
-            <div class="nav-icon">📈</div>
+            <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="15 7 21 7 21 13"/></svg></div>
             <div>Charts</div>
         </button>
+        <button class="mobile-nav-btn" onclick="showMobileColumn('e6b')">
+            <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><rect x="8" y="6" width="8" height="4" rx="1"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/></svg></div>
+            <div>E6B</div>
+        </button>
         <button class="mobile-nav-btn" onclick="showMobileColumn('settings')">
-            <div class="nav-icon">⚙️</div>
+            <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1L7 17M17 7l2.1-2.1"/></svg></div>
             <div>Settings</div>
         </button>
         <button class="mobile-nav-btn" onclick="window.location.href='index.html'">
-            <div class="nav-icon">⌂</div>
+            <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></div>
             <div>Home</div>
         </button>
     </div>
@@ -2334,7 +2538,7 @@
             }
             
             // Remove all mobile column classes
-            desktopLayout.classList.remove('mobile-show-left', 'mobile-show-right', 'mobile-show-settings');
+            desktopLayout.classList.remove('mobile-show-left', 'mobile-show-right', 'mobile-show-e6b', 'mobile-show-settings');
 
             // Add appropriate mobile column class
             switch(column) {
@@ -2352,6 +2556,9 @@
                         drawCGChart();
                     }, 100);
                     break;
+                case 'e6b':
+                    desktopLayout.classList.add('mobile-show-e6b');
+                    break;
                 case 'settings':
                     desktopLayout.classList.add('mobile-show-settings');
                     break;
@@ -2365,14 +2572,14 @@
             
             if (container.style.display === 'none' || container.style.display === '') {
                 container.style.display = 'block';
-                button.textContent = '📚 Hide Mnemonics';
-                button.style.background = 'linear-gradient(135deg, rgba(255, 87, 34, 0.3) 0%, rgba(255, 87, 34, 0.1) 100%)';
-                button.style.borderColor = '#FF5722';
+                button.textContent = 'Hide Mnemonics';
+                button.style.background = 'linear-gradient(135deg, rgba(217, 119, 87, 0.3) 0%, rgba(217, 119, 87, 0.1) 100%)';
+                button.style.borderColor = '#d97757';
             } else {
                 container.style.display = 'none';
-                button.textContent = '📚 Mnemonics';
-                button.style.background = 'linear-gradient(135deg, rgba(76, 175, 80, 0.3) 0%, rgba(76, 175, 80, 0.1) 100%)';
-                button.style.borderColor = '#4CAF50';
+                button.textContent = 'Mnemonics';
+                button.style.background = 'linear-gradient(135deg, rgba(217, 119, 87, 0.3) 0%, rgba(217, 119, 87, 0.1) 100%)';
+                button.style.borderColor = '#4a4844';
             }
         }
 
@@ -2383,14 +2590,14 @@
             
             if (container.style.display === 'none' || container.style.display === '') {
                 container.style.display = 'block';
-                button.textContent = '📚 Hide General Knowledge';
-                button.style.background = 'linear-gradient(135deg, rgba(255, 87, 34, 0.3) 0%, rgba(255, 87, 34, 0.1) 100%)';
-                button.style.borderColor = '#FF5722';
+                button.textContent = 'Hide General Knowledge';
+                button.style.background = 'linear-gradient(135deg, rgba(217, 119, 87, 0.3) 0%, rgba(217, 119, 87, 0.1) 100%)';
+                button.style.borderColor = '#d97757';
             } else {
                 container.style.display = 'none';
-                button.textContent = '📚 General Aviation Knowledge';
-                button.style.background = 'linear-gradient(135deg, rgba(156, 39, 176, 0.3) 0%, rgba(156, 39, 176, 0.1) 100%)';
-                button.style.borderColor = '#9C27B0';
+                button.textContent = 'General Aviation Knowledge';
+                button.style.background = 'linear-gradient(135deg, rgba(149, 133, 201, 0.3) 0%, rgba(149, 133, 201, 0.1) 100%)';
+                button.style.borderColor = '#4a4844';
             }
         }
 
@@ -2403,7 +2610,7 @@
             if (detail.style.display === 'none' || detail.style.display === '') {
                 detail.style.display = 'block';
                 icon.textContent = '−';
-                title.style.backgroundColor = 'rgba(76, 175, 80, 0.1)';
+                title.style.backgroundColor = 'rgba(143, 191, 143, 0.10)';
             } else {
                 detail.style.display = 'none';
                 icon.textContent = '+';
@@ -3951,7 +4158,7 @@ const P2006T_SE_PERFORMANCE = {
             
             if (aircraftType !== 'C-152' && aircraftType !== 'P2006T' && !aircraftType.startsWith('CUSTOM_')) {
                 // Show message for other aircraft types
-                ctx.fillStyle = '#cccccc';
+                ctx.fillStyle = '#b5b3a9';
                 ctx.font = '16px Arial';
                 ctx.textAlign = 'center';
                 ctx.fillText('CG Chart available for C-152, P2006T, and Custom Aircraft only', canvas.width/2, canvas.height/2);
@@ -4012,7 +4219,7 @@ const P2006T_SE_PERFORMANCE = {
             const weightToY = (weight) => margin + ((weightMax - weight) / (weightMax - weightMin)) * chartHeight;
             
             // Draw grid
-            ctx.strokeStyle = '#404040';
+            ctx.strokeStyle = '#3b3a37';
             ctx.lineWidth = 0.3;
             
             // Set grid increments based on aircraft type
@@ -4042,7 +4249,7 @@ const P2006T_SE_PERFORMANCE = {
             // Major vertical grid lines (CG)
             for (let cg = cgMin; cg <= cgMax; cg += majorCGIncrement) {
                 const x = cgToX(cg);
-                ctx.strokeStyle = '#505050';
+                ctx.strokeStyle = '#454340';
                 ctx.lineWidth = 0.5;
                 ctx.beginPath();
                 ctx.moveTo(x, margin);
@@ -4051,7 +4258,7 @@ const P2006T_SE_PERFORMANCE = {
             }
             
             // Minor vertical grid lines (CG)
-            ctx.strokeStyle = '#303030';
+            ctx.strokeStyle = '#343330';
             ctx.lineWidth = 0.2;
             for (let cg = cgMin; cg <= cgMax; cg += minorCGIncrement) {
                 if (cg % majorCGIncrement !== 0) { // Skip major grid lines
@@ -4066,7 +4273,7 @@ const P2006T_SE_PERFORMANCE = {
             // Major horizontal grid lines (Weight)
             for (let weight = weightMin; weight <= weightMax; weight += majorWeightIncrement) {
                 const y = weightToY(weight);
-                ctx.strokeStyle = '#505050';
+                ctx.strokeStyle = '#454340';
                 ctx.lineWidth = 0.5;
                 ctx.beginPath();
                 ctx.moveTo(margin, y);
@@ -4075,7 +4282,7 @@ const P2006T_SE_PERFORMANCE = {
             }
             
             // Minor horizontal grid lines (Weight)
-            ctx.strokeStyle = '#303030';
+            ctx.strokeStyle = '#343330';
             ctx.lineWidth = 0.2;
             for (let weight = weightMin; weight <= weightMax; weight += minorWeightIncrement) {
                 if (weight % majorWeightIncrement !== 0) { // Skip major grid lines
@@ -4088,7 +4295,7 @@ const P2006T_SE_PERFORMANCE = {
             }
             
             // Draw CG envelope based on aircraft type
-            ctx.strokeStyle = '#2196F3'; // Blue color to match reference
+            ctx.strokeStyle = '#8fa7bf'; // Steel blue envelope
             ctx.lineWidth = 2; // Reduced from 3 to make lines thinner
             ctx.beginPath();
             
@@ -4104,12 +4311,12 @@ const P2006T_SE_PERFORMANCE = {
                 ctx.stroke();
                 
                 // Fill the envelope area with blue tint
-                ctx.fillStyle = 'rgba(33, 150, 243, 0.1)';
+                ctx.fillStyle = 'rgba(143, 167, 191, 0.10)';
                 ctx.fill();
                 
                 // Draw STC envelope extension as dashed line
                 // STC path: 32.6,1670 -> 33,1710 -> 35.4,1710 -> 36.5,1670
-                ctx.strokeStyle = '#2196F3'; // Same blue color
+                ctx.strokeStyle = '#8fa7bf'; // Same steel blue
                 ctx.lineWidth = 1.5; // Reduced from 2 to make dashed line thinner
                 ctx.setLineDash([8, 4]); // Dashed line pattern
                 ctx.beginPath();
@@ -4137,11 +4344,11 @@ const P2006T_SE_PERFORMANCE = {
                 ctx.stroke();
                 
                 // Fill the envelope area with blue tint
-                ctx.fillStyle = 'rgba(33, 150, 243, 0.1)';
+                ctx.fillStyle = 'rgba(143, 167, 191, 0.10)';
                 ctx.fill();
                 
                 // Draw MTOW limit lines
-                ctx.strokeStyle = '#FF5722'; // Orange/red color for MTOW lines
+                ctx.strokeStyle = '#d9a545'; // Amber MTOW lines
                 ctx.lineWidth = 1.5; // Reduced from 2 to make MTOW lines thinner
                 ctx.setLineDash([5, 3]); // Dashed line pattern
                 
@@ -4168,7 +4375,7 @@ const P2006T_SE_PERFORMANCE = {
                 // Custom aircraft CG envelope
                 const specs = aircraftSpecs[aircraftType];
                 if (specs && specs.cgEnvelope && specs.cgEnvelope.length > 2) {
-                    ctx.strokeStyle = '#4CAF50'; // Green color for custom aircraft
+                    ctx.strokeStyle = '#8fbf8f'; // Muted green for custom aircraft
                     ctx.lineWidth = 2; // Reduced from 3 to make lines thinner
                     ctx.beginPath();
                     
@@ -4193,13 +4400,13 @@ const P2006T_SE_PERFORMANCE = {
                     ctx.stroke();
                     
                     // Fill the envelope area with green tint
-                    ctx.fillStyle = 'rgba(76, 175, 80, 0.1)';
+                    ctx.fillStyle = 'rgba(143, 191, 143, 0.10)';
                     ctx.fill();
                 }
             }
             
             // Draw axes labels
-            ctx.fillStyle = '#cccccc';
+            ctx.fillStyle = '#b5b3a9';
             ctx.font = '12px Arial';
             ctx.textAlign = 'center';
             
@@ -4218,7 +4425,7 @@ const P2006T_SE_PERFORMANCE = {
             
             // Add MTOW labels for P2006T
             if (aircraftType === 'P2006T') {
-                ctx.fillStyle = '#FF5722'; // Orange/red color for MTOW labels
+                ctx.fillStyle = '#d9a545'; // Amber MTOW labels
                 ctx.font = '10px Arial';
                 ctx.textAlign = 'left';
                 
@@ -4346,17 +4553,17 @@ const P2006T_SE_PERFORMANCE = {
             
             // Plot Zero Fuel Weight point
             if (zeroFuelWeight > 0 && zeroFuelCG > 0) {
-                plotPoint(zeroFuelWeight, zeroFuelCG, '#4CAF50', 'ZFW'); // Green
+                plotPoint(zeroFuelWeight, zeroFuelCG, '#6faf6a', 'ZFW'); // Muted green
             }
             
             // Plot T/O Weight point  
             if (takeoffWeight > 0 && takeoffCG > 0) {
-                plotPoint(takeoffWeight, takeoffCG, '#FF9800', 'T/O'); // Orange
+                plotPoint(takeoffWeight, takeoffCG, '#d97757', 'T/O'); // Terracotta
             }
             
             // Plot Est Landing Weight point
             if (landingWeight > 0 && landingCG > 0) {
-                plotPoint(landingWeight, landingCG, '#9C27B0', 'LDG'); // Purple
+                plotPoint(landingWeight, landingCG, '#9585c9', 'LDG'); // Muted violet
             }
         }
 
@@ -5149,7 +5356,7 @@ const P2006T_SE_PERFORMANCE = {
                 const desktopLayout = document.querySelector('.desktop-layout');
                 if (desktopLayout) {
                     // Remove any existing mobile classes
-                    desktopLayout.classList.remove('mobile-show-left', 'mobile-show-right', 'mobile-show-settings');
+                    desktopLayout.classList.remove('mobile-show-left', 'mobile-show-right', 'mobile-show-e6b', 'mobile-show-settings');
                     // Set to show Data column (left panel) by default
                     desktopLayout.classList.add('mobile-show-left');
                     console.log('Set mobile to show Data column by default');
@@ -5311,7 +5518,7 @@ function updateCustomAircraftManager() {
     const names = Object.keys(customAircraft);
 
     if (names.length === 0) {
-        list.innerHTML = '<div style="color: #ccc; font-size: 12px;">No custom aircraft saved.</div>';
+        list.innerHTML = '<div style="color: #b5b3a9; font-size: 12px;">No custom aircraft saved.</div>';
         return;
     }
 
@@ -5332,7 +5539,7 @@ function updateCustomAircraftManager() {
 
         const editBtn = document.createElement('button');
         editBtn.textContent = 'Edit';
-        editBtn.style.backgroundColor = '#4CAF50';
+        editBtn.style.backgroundColor = '#d97757';
         editBtn.style.color = 'white';
         editBtn.style.border = 'none';
         editBtn.style.padding = '8px 10px';
@@ -5436,7 +5643,7 @@ function editCustomAircraft(aircraftName) {
                     <label class="input-label" style="font-size: 11px;">Weight (lbs)</label>
                     <input type="number" inputmode="decimal" class="input-field cg-weight" value="${point.weight}" step="1" style="font-size: 12px; padding: 6px;">
                 </div>
-                <button type="button" onclick="removeCGPoint(this)" style="background-color: #f44336; color: white; border: none; padding: 6px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">×</button>
+                <button class="btn btn-danger btn-inline" type="button" onclick="removeCGPoint(this)" style="padding: 4px 10px;">×</button>
             `;
             
             container.appendChild(newRow);
@@ -5574,19 +5781,19 @@ function showSettingsStatus(message, type) {
         // Set colors based on type
         switch(type) {
             case 'success':
-                statusDiv.style.backgroundColor = '#4CAF50';
+                statusDiv.style.backgroundColor = '#5f9e58';
                 statusDiv.style.color = 'white';
                 break;
             case 'error':
-                statusDiv.style.backgroundColor = '#f44336';
+                statusDiv.style.backgroundColor = '#c05a50';
                 statusDiv.style.color = 'white';
                 break;
             case 'info':
-                statusDiv.style.backgroundColor = '#2196F3';
+                statusDiv.style.backgroundColor = '#d97757';
                 statusDiv.style.color = 'white';
                 break;
             default:
-                statusDiv.style.backgroundColor = '#666';
+                statusDiv.style.backgroundColor = '#5a5852';
                 statusDiv.style.color = 'white';
         }
                 
@@ -5868,29 +6075,30 @@ function updateAircraftManager() {
 
         function createAircraftListContent() {
             if (Object.keys(savedAircraft).length === 0) {
-                return '<div style="color: #ccc; text-align: center; padding: 20px;">No saved aircraft yet. Use "Save Current Aircraft" to add one.</div>';
+                return '<div style="color: #b5b3a9; text-align: center; padding: 20px;">No saved aircraft yet. Use "Save Current Aircraft" to add one.</div>';
             }
 
             let content = '';
             Object.entries(savedAircraft).forEach(([name, aircraft]) => {
                 content += `
-                    <div style="background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%); border-radius: 6px; padding: 10px; margin-bottom: 8px; border: 1px solid #555;">
+                    <div style="background: #30302e;
+            border: 1px solid #3d3b37; border-radius: 6px; padding: 10px; margin-bottom: 8px; border: 1px solid #45433e;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div>
                                 <div style="font-weight: bold; color: #fff; margin-bottom: 4px;">${name}</div>
-                                <div style="font-size: 12px; color: #ccc;">
+                                <div style="font-size: 12px; color: #b5b3a9;">
                                     ${aircraft.aircraftType} • ${aircraft.tailNumber}
                                     ${aircraft.weight ? ` • ${aircraft.weight} lbs` : ''}
                                 </div>
                             </div>
                             <div style="display: flex; gap: 8px;">
-                                <button onclick="loadSavedAircraft('${name}')" style="background-color: #4CAF50; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                                <button class="btn btn-primary btn-inline" style="padding: 6px 12px; font-size: 12px;" onclick="loadSavedAircraft('${name}')">
                                     Load
                                 </button>
-                                <button onclick="setDefaultAircraft('${name}')" style="background-color: #2196F3; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                                <button class="btn btn-inline" style="padding: 6px 12px; font-size: 12px;" onclick="setDefaultAircraft('${name}')">
                                     Default
                                 </button>
-                                <button onclick="deleteAircraft('${name}')" style="background-color: #f44336; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                                <button class="btn btn-danger btn-inline" style="padding: 6px 12px; font-size: 12px;" onclick="deleteAircraft('${name}')">
                                     Delete
                                 </button>
                             </div>
@@ -5933,7 +6141,7 @@ function deleteAircraft(aircraftName) {
 
             updateSavedAircraftDropdowns();
             updateAircraftManager();
-            showSettingsStatus(`Aircraft "${aircraftName}" deleted successfully! 🗑️`, 'success');
+            showSettingsStatus(`Aircraft "${aircraftName}" deleted successfully! `, 'success');
         } catch (error) {
             showSettingsStatus('Error deleting aircraft: ' + error.message, 'error');
         }
@@ -6121,7 +6329,7 @@ function loadCustomAircraftTemplate() {
                 <label class="input-label" style="font-size: 11px;">Weight (lbs)</label>
                 <input type="number" inputmode="decimal" class="input-field cg-weight" value="${point.weight}" step="1" style="font-size: 12px; padding: 6px;">
             </div>
-            <button type="button" onclick="removeCGPoint(this)" style="background-color: #f44336; color: white; border: none; padding: 6px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">×</button>
+            <button class="btn btn-danger btn-inline" type="button" onclick="removeCGPoint(this)" style="padding: 4px 10px;">×</button>
         `;
         
         container.appendChild(newRow);
@@ -6352,29 +6560,29 @@ function displayCustomAircraftInfo(aircraft) {
     const performanceSection = document.querySelector('.info-grid');
     if (performanceSection && aircraft.vspeeds) {
         // Create custom performance display
-        let customInfo = '<div style="background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%); padding: 15px; border-radius: 8px; margin-top: 10px;">';
-        customInfo += `<h4 style="color: #4CAF50; margin-bottom: 10px;">${aircraft.name} - Custom Aircraft</h4>`;
+        let customInfo = '<div style="background: #30302e; border: 1px solid #3d3b37; padding: 15px; border-radius: 8px; margin-top: 10px;">';
+        customInfo += `<h4 style="color: #d97757; margin-bottom: 10px;">${aircraft.name} - Custom Aircraft</h4>`;
         customInfo += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">';
         
         // V-speeds column
-        customInfo += '<div><h5 style="color: #e0e0e0; margin-bottom: 8px;">V-Speeds</h5>';
-        if (aircraft.vspeeds.vs0) customInfo += `<div style="color: #ccc; font-size: 12px;">Vs0: ${aircraft.vspeeds.vs0} kts</div>`;
-        if (aircraft.vspeeds.vs1) customInfo += `<div style="color: #ccc; font-size: 12px;">Vs1: ${aircraft.vspeeds.vs1} kts</div>`;
-        if (aircraft.vspeeds.vr) customInfo += `<div style="color: #ccc; font-size: 12px;">Vr: ${aircraft.vspeeds.vr} kts</div>`;
-        if (aircraft.vspeeds.vx) customInfo += `<div style="color: #ccc; font-size: 12px;">Vx: ${aircraft.vspeeds.vx} kts</div>`;
-        if (aircraft.vspeeds.vy) customInfo += `<div style="color: #ccc; font-size: 12px;">Vy: ${aircraft.vspeeds.vy} kts</div>`;
-        if (aircraft.vspeeds.va) customInfo += `<div style="color: #ccc; font-size: 12px;">Va: ${aircraft.vspeeds.va} kts</div>`;
-        if (aircraft.vspeeds.vno) customInfo += `<div style="color: #ccc; font-size: 12px;">Vno: ${aircraft.vspeeds.vno} kts</div>`;
-        if (aircraft.vspeeds.vne) customInfo += `<div style="color: #ccc; font-size: 12px;">Vne: ${aircraft.vspeeds.vne} kts</div>`;
+        customInfo += '<div><h5 style="color: #d9d7cd; margin-bottom: 8px;">V-Speeds</h5>';
+        if (aircraft.vspeeds.vs0) customInfo += `<div style="color: #b5b3a9; font-size: 12px;">Vs0: ${aircraft.vspeeds.vs0} kts</div>`;
+        if (aircraft.vspeeds.vs1) customInfo += `<div style="color: #b5b3a9; font-size: 12px;">Vs1: ${aircraft.vspeeds.vs1} kts</div>`;
+        if (aircraft.vspeeds.vr) customInfo += `<div style="color: #b5b3a9; font-size: 12px;">Vr: ${aircraft.vspeeds.vr} kts</div>`;
+        if (aircraft.vspeeds.vx) customInfo += `<div style="color: #b5b3a9; font-size: 12px;">Vx: ${aircraft.vspeeds.vx} kts</div>`;
+        if (aircraft.vspeeds.vy) customInfo += `<div style="color: #b5b3a9; font-size: 12px;">Vy: ${aircraft.vspeeds.vy} kts</div>`;
+        if (aircraft.vspeeds.va) customInfo += `<div style="color: #b5b3a9; font-size: 12px;">Va: ${aircraft.vspeeds.va} kts</div>`;
+        if (aircraft.vspeeds.vno) customInfo += `<div style="color: #b5b3a9; font-size: 12px;">Vno: ${aircraft.vspeeds.vno} kts</div>`;
+        if (aircraft.vspeeds.vne) customInfo += `<div style="color: #b5b3a9; font-size: 12px;">Vne: ${aircraft.vspeeds.vne} kts</div>`;
         customInfo += '</div>';
         
         // Limits column
-        customInfo += '<div><h5 style="color: #e0e0e0; margin-bottom: 8px;">Limits</h5>';
-        customInfo += `<div style="color: #ccc; font-size: 12px;">Max Weight: ${aircraft.maxWeight} lbs</div>`;
-        customInfo += `<div style="color: #ccc; font-size: 12px;">Forward CG: ${aircraft.forwardCG} in</div>`;
-        customInfo += `<div style="color: #ccc; font-size: 12px;">Aft CG: ${aircraft.aftCG} in</div>`;
-        if (aircraft.performance.serviceCeiling) customInfo += `<div style="color: #ccc; font-size: 12px;">Service Ceiling: ${aircraft.performance.serviceCeiling} ft</div>`;
-        if (aircraft.performance.rateOfClimb) customInfo += `<div style="color: #ccc; font-size: 12px;">Rate of Climb: ${aircraft.performance.rateOfClimb} fpm</div>`;
+        customInfo += '<div><h5 style="color: #d9d7cd; margin-bottom: 8px;">Limits</h5>';
+        customInfo += `<div style="color: #b5b3a9; font-size: 12px;">Max Weight: ${aircraft.maxWeight} lbs</div>`;
+        customInfo += `<div style="color: #b5b3a9; font-size: 12px;">Forward CG: ${aircraft.forwardCG} in</div>`;
+        customInfo += `<div style="color: #b5b3a9; font-size: 12px;">Aft CG: ${aircraft.aftCG} in</div>`;
+        if (aircraft.performance.serviceCeiling) customInfo += `<div style="color: #b5b3a9; font-size: 12px;">Service Ceiling: ${aircraft.performance.serviceCeiling} ft</div>`;
+        if (aircraft.performance.rateOfClimb) customInfo += `<div style="color: #b5b3a9; font-size: 12px;">Rate of Climb: ${aircraft.performance.rateOfClimb} fpm</div>`;
         customInfo += '</div>';
         
         customInfo += '</div></div>';
@@ -6400,7 +6608,7 @@ function showAircraftSavedPopup(aircraftName) {
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        background-color: #4CAF50;
+        background-color: #d97757;
         color: white;
         padding: 20px 30px;
         border-radius: 10px;
@@ -6410,7 +6618,7 @@ function showAircraftSavedPopup(aircraftName) {
         box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         text-align: center;
     `;
-    popup.innerHTML = `✈️ Aircraft Saved!<br><span style="font-size: 14px; font-weight: normal;">${aircraftName}</span>`;
+    popup.innerHTML = `Aircraft Saved!<br><span style="font-size: 14px; font-weight: normal;">${aircraftName}</span>`;
     
     document.body.appendChild(popup);
     
@@ -6562,7 +6770,7 @@ function addCGPoint() {
             <label class="input-label" style="font-size: 11px;">Weight (lbs)</label>
             <input type="number" inputmode="decimal" class="input-field cg-weight" placeholder="0" step="1" style="font-size: 12px; padding: 6px;">
         </div>
-        <button type="button" onclick="removeCGPoint(this)" style="background-color: #f44336; color: white; border: none; padding: 6px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">×</button>
+        <button class="btn btn-danger btn-inline" type="button" onclick="removeCGPoint(this)" style="padding: 4px 10px;">×</button>
     `;
     
     container.appendChild(newRow);
@@ -6577,9 +6785,9 @@ function toggleCGEnvelope() {
         // Show the CG envelope
         container.style.display = 'block';
         button.textContent = 'Hide CG Envelope';
-        button.style.background = 'linear-gradient(135deg, rgba(255, 87, 34, 0.3) 0%, rgba(255, 87, 34, 0.1) 100%)';
-        button.style.borderColor = '#FF5722';
-        button.style.boxShadow = '0 2px 4px rgba(255, 87, 34, 0.2)';
+        button.style.background = 'linear-gradient(135deg, rgba(217, 119, 87, 0.3) 0%, rgba(217, 119, 87, 0.1) 100%)';
+        button.style.borderColor = '#d97757';
+        button.style.boxShadow = '0 2px 4px rgba(217, 119, 87, 0.2)';
         
         // Draw the CG chart
         drawCGChartInLimitsPanel();
@@ -6587,9 +6795,9 @@ function toggleCGEnvelope() {
         // Hide the CG envelope
         container.style.display = 'none';
         button.textContent = 'Show CG Envelope';
-        button.style.background = 'linear-gradient(135deg, rgba(76, 175, 80, 0.3) 0%, rgba(76, 175, 80, 0.1) 100%)';
-        button.style.borderColor = '#4CAF50';
-        button.style.boxShadow = '0 2px 4px rgba(76, 175, 80, 0.2)';
+        button.style.background = 'linear-gradient(135deg, rgba(217, 119, 87, 0.3) 0%, rgba(217, 119, 87, 0.1) 100%)';
+        button.style.borderColor = '#4a4844';
+        button.style.boxShadow = '0 2px 4px rgba(217, 119, 87, 0.2)';
     }
 }
 
@@ -7176,10 +7384,10 @@ function updateWeatherPanel(weatherData, errorMessage = null) {
         if (metarDisplay) {
             if (errorMessage) {
                 metarDisplay.textContent = errorMessage;
-                metarDisplay.style.color = '#FF9800';
+                metarDisplay.style.color = '#d9a545';
             } else if (weatherData && weatherData.raw) {
                 metarDisplay.textContent = weatherData.raw;
-                metarDisplay.style.color = '#4CAF50';
+                metarDisplay.style.color = '#c9c7ba';
             }
         }
         
@@ -7375,5 +7583,6 @@ function updateFormFieldsFromWeather(weatherData) {
 </script>
 <!-- Cross-device flight sync (Recent Flights) -->
 <script src="wbsync.js"></script>
+<script src="e6b.js"></script>
 </body>
 </html>

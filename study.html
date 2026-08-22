@@ -10,10 +10,10 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  background: #08080a;
+  background: #262624;
   min-height: 100vh;
   font-family: 'Courier New', monospace;
-  color: #ccc;
+  color: #b5b3a9;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -29,13 +29,13 @@ header {
 header h1 {
   font-size: clamp(22px, 5vw, 36px);
   letter-spacing: 8px;
-  color: #fff;
+  color: #f0eee6;
   font-weight: normal;
 }
 header p {
   font-size: 11px;
   letter-spacing: 3px;
-  color: #333;
+  color: #7a786e;
   margin-top: 8px;
 }
 header .back-link {
@@ -43,11 +43,11 @@ header .back-link {
   margin-top: 16px;
   font-size: 10px;
   letter-spacing: 2px;
-  color: #333;
+  color: #7a786e;
   text-decoration: none;
   transition: color 0.15s;
 }
-header .back-link:hover { color: #4af; }
+header .back-link:hover { color: #d97757; }
 
 /* ── GRID ── */
 #study-grid {
@@ -60,8 +60,8 @@ header .back-link:hover { color: #4af; }
 
 /* ── SECTION CARD ── */
 .tool-card {
-  background: #0d0d10;
-  border: 1px solid #1e1e22;
+  background: #30302e;
+  border: 1px solid #3d3b37;
   border-radius: 10px;
   overflow: hidden;
   display: flex;
@@ -69,23 +69,23 @@ header .back-link:hover { color: #4af; }
 }
 .tool-card-header {
   padding: 20px 20px 14px;
-  border-bottom: 1px solid #1a1a1e;
+  border-bottom: 1px solid #3d3b37;
 }
 .tool-card-icon {
   font-size: 20px;
   margin-bottom: 8px;
-  color: #4af;
+  color: #d97757;
 }
 .tool-card-title {
   font-size: 13px;
   letter-spacing: 4px;
-  color: #fff;
+  color: #f0eee6;
   font-weight: normal;
 }
 .tool-card-desc {
   font-size: 10px;
   letter-spacing: 1px;
-  color: #444;
+  color: #8a887c;
   margin-top: 5px;
   line-height: 1.5;
 }
@@ -103,10 +103,10 @@ header .back-link:hover { color: #4af; }
   align-items: center;
   justify-content: space-between;
   padding: 10px 14px;
-  background: #0a0a0d;
-  border: 1px solid #252528;
+  background: #2b2a28;
+  border: 1px solid #45433e;
   border-radius: 6px;
-  color: #aaa;
+  color: #b5b3a9;
   text-decoration: none;
   font-family: 'Courier New', monospace;
   font-size: 12px;
@@ -115,19 +115,19 @@ header .back-link:hover { color: #4af; }
   cursor: pointer;
 }
 .ac-btn:hover {
-  border-color: #4af;
-  background: #0a1520;
-  color: #fff;
+  border-color: #d97757;
+  background: rgba(217, 119, 87, 0.07);
+  color: #f0eee6;
 }
-.ac-btn:hover .ac-arrow { color: #4af; }
+.ac-btn:hover .ac-arrow { color: #d97757; }
 .ac-btn.disabled {
   opacity: 0.28;
   pointer-events: none;
   cursor: default;
 }
 .ac-btn-name { flex: 1; }
-.ac-btn-sub  { font-size: 9px; color: #333; letter-spacing: 1px; margin-right: 10px; }
-.ac-arrow    { color: #333; font-size: 13px; transition: color 0.15s; }
+.ac-btn-sub  { font-size: 9px; color: #7a786e; letter-spacing: 1px; margin-right: 10px; }
+.ac-arrow    { color: #7a786e; font-size: 13px; transition: color 0.15s; }
 
 /* ── MOBILE ── */
 @media (max-width: 600px) {

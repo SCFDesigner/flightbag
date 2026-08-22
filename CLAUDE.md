@@ -17,6 +17,7 @@ Never estimate, approximate, or invent values. If a number is in this tool, it h
 ## Stack
 - Plain HTML / CSS / JavaScript — no frameworks, no build step
 - Each page is a self-contained `.html` file
+- Design language: warm charcoal palette (#262624 base, #30302e panels, #3b3a37 cells, #45433e borders), single terracotta accent #d97757, muted green/amber/red only for status, no emoji in UI (inline SVG icons), mono reserved for numeric readouts
 - Cross-device flight sync via Firebase Realtime Database (`wbsync.js`, project `weight-and-balance-d5044`, no login)
 
 ## Git
@@ -31,6 +32,7 @@ Never estimate, approximate, or invent values. If a number is in this tool, it h
 | `index.html` | Home — Pilot Study Tools launcher |
 | `wb.html` | Weight & Balance calculator (C-152 / C-172 / P2006T / custom). Layout order matches the flight school's paper form — do not reorder. |
 | `wbsync.js` | Firebase cross-device sync for wb.html (Recent Flights) |
+| `e6b.js` | E6B flight computer logic for wb.html (wind/WCA/GS, time-speed-distance, fuel, descent, PA/DA/TAS, conversions) |
 | `study.html` | Study hub |
 | `p2006t_study.html` | P2006T multi-engine study |
 | `mnemonics.html` | Mnemonics reference |
