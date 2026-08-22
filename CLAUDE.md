@@ -41,4 +41,5 @@ Never estimate, approximate, or invent values. If a number is in this tool, it h
 | `p2006t_chairfly.html` | Chairfly trainer with G1000 simulation. Requires landscape orientation. |
 | `maneuvers.html` | SEL maneuvers study & test — reference, flashcards, step-ordering test, ACS limits test, speed/power tables. Aircraft selector (C-152 default / C-172) substitutes V-speeds into procedure text; standard selector (Private / Commercial / CFI) filters maneuvers and picks the ACS column. |
 | `maneuvers-data.js` | Verbatim transcription of the SEL Maneuvers Guide Rev 2 — speeds, power tables, procedures, ACS standards. The single source of truth for `maneuvers.html`; every entry cites its guide page. |
+| `holds.html` + `holds.js` | Hold Trainer — IFR holding tutorial (anatomy/entries/timing), interactive AIM 70°-rule entry explorer, and entry quiz with animated answers. |
 | `navlog.html` | C-152 cross-country planner — POH Fig 5-1/5-6/5-7 data baked in, vertical profile view, wind triangle, fillable Jeppesen VFR nav log. Descent figures are user-set, not POH. |

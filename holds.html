@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Hold Trainer</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg0: #262624;
+  --bg1: #30302e;
+  --bg2: #3b3a37;
+  --line: #45433e;
+  --text: #f0eee6;
+  --text2: #b5b3a9;
+  --text3: #918f84;
+  --accent: #d97757;
+  --ok: #6faf6a;
+  --warn: #d9a545;
+  --bad: #d96257;
+  --mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+}
+body {
+  background: var(--bg0);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
+}
+header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line);
+}
+header h1 {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  color: var(--text);
+}
+.home-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 12px;
+  background: var(--bg1);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text2);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-decoration: none;
+  transition: border-color .15s, color .15s;
+}
+.home-chip:hover { border-color: var(--accent); color: var(--text); }
+.tabs { display: flex; gap: 6px; margin-left: auto; }
+.tab {
+  background: var(--bg1);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text2);
+  padding: 7px 16px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: border-color .15s, color .15s, background .15s;
+}
+.tab:hover { border-color: var(--accent); color: var(--text); }
+.tab.active { background: rgba(217,119,87,.12); border-color: var(--accent); color: var(--text); }
+
+main {
+  display: flex;
+  gap: 18px;
+  padding: 18px;
+  max-width: 1100px;
+  margin: 0 auto;
+  align-items: flex-start;
+}
+.canvas-wrap {
+  flex: 0 0 auto;
+  background: var(--bg1);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px;
+}
+#holdCanvas { display: block; border-radius: 6px; background: #2b2a28; }
+.side {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.card {
+  background: var(--bg1);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 16px;
+}
+.card h2 {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 10px;
+}
+.card p { font-size: 13.5px; line-height: 1.55; color: var(--text2); margin-bottom: 8px; }
+.card p strong { color: var(--text); }
+.card p em { color: var(--accent); font-style: normal; font-weight: 600; }
+.btn {
+  display: inline-block;
+  background: var(--bg2);
+  color: var(--text);
+  border: 1px solid #4a4844;
+  padding: 9px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+  transition: border-color .15s, background .15s;
+}
+.btn:hover { border-color: var(--accent); }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: #1f1e1b; font-weight: 600; }
+.btn-primary:hover { background: #e08663; }
+.btn:disabled { opacity: .35; cursor: default; }
+.btn:disabled:hover { border-color: #4a4844; }
+.btnrow { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+.stepdots { display: flex; gap: 5px; align-items: center; margin-left: auto; }
+.stepdots span { width: 7px; height: 7px; border-radius: 50%; background: var(--bg2); border: 1px solid var(--line); }
+.stepdots span.on { background: var(--accent); border-color: var(--accent); }
+
+.ctl { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.ctl label { font-size: 12px; color: var(--text2); min-width: 118px; }
+.ctl input[type=range] { flex: 1; accent-color: var(--accent); }
+.ctl .val {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--text);
+  min-width: 46px;
+  text-align: right;
+}
+.seg { display: flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg button {
+  background: var(--bg1);
+  color: var(--text2);
+  border: none;
+  padding: 7px 14px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.seg button.on { background: rgba(217,119,87,.15); color: var(--text); }
+.entry-name {
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 1px;
+}
+.legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 10px; }
+.legend i { font-style: normal; font-size: 11px; color: var(--text2); display: inline-flex; align-items: center; gap: 6px; }
+.legend b { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+
+.answers { display: flex; gap: 8px; margin-top: 10px; }
+.answers .btn { flex: 1; text-align: center; font-weight: 600; }
+.answers .btn.good { border-color: var(--ok); background: rgba(111,175,106,.15); }
+.answers .btn.badpick { border-color: var(--bad); background: rgba(217,98,87,.12); }
+.quiz-q { font-size: 14.5px; line-height: 1.6; color: var(--text); }
+.quiz-q .mono { font-family: var(--mono); color: var(--warn); }
+.score { font-family: var(--mono); font-size: 12px; color: var(--text3); margin-top: 10px; }
+.feedback { font-size: 13px; margin-top: 10px; line-height: 1.5; color: var(--text2); display: none; }
+.feedback.show { display: block; }
+.feedback .yes { color: var(--ok); font-weight: 700; }
+.feedback .no { color: var(--bad); font-weight: 700; }
+
+@media (max-width: 860px) {
+  main { flex-direction: column; align-items: stretch; }
+  .canvas-wrap { align-self: center; }
+  header { flex-wrap: wrap; }
+  .tabs { margin-left: 0; width: 100%; }
+  .tab { flex: 1; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a class="home-chip" href="index.html">HOME</a>
+  <h1>HOLD TRAINER</h1>
+  <div class="tabs">
+    <button class="tab active" data-mode="learn" onclick="setMode('learn')">LEARN</button>
+    <button class="tab" data-mode="entries" onclick="setMode('entries')">ENTRIES</button>
+    <button class="tab" data-mode="practice" onclick="setMode('practice')">PRACTICE</button>
+  </div>
+</header>
+
+<main>
+  <div class="canvas-wrap"><canvas id="holdCanvas" width="460" height="460"></canvas></div>
+  <div class="side">
+
+    <!-- LEARN -->
+    <div class="card" id="learnCard">
+      <div style="display:flex; align-items:center; margin-bottom:10px;">
+        <h2 id="learnTitle" style="margin-bottom:0;">What is a hold?</h2>
+        <div class="stepdots" id="learnDots"></div>
+      </div>
+      <div id="learnBody"></div>
+      <div class="btnrow">
+        <button class="btn" id="learnPrev" onclick="learnStepMove(-1)">← Back</button>
+        <button class="btn btn-primary" id="learnNext" onclick="learnStepMove(1)">Next →</button>
+        <button class="btn" onclick="replayLearn()">Replay animation</button>
+      </div>
+    </div>
+
+    <!-- ENTRIES -->
+    <div class="card" id="entriesCard" style="display:none;">
+      <h2>Entry Explorer</h2>
+      <div class="ctl">
+        <label>Inbound course</label>
+        <input type="range" id="ctlCourse" min="0" max="359" value="360" step="5">
+        <span class="val" id="valCourse">360°</span>
+      </div>
+      <div class="ctl">
+        <label>Your heading to fix</label>
+        <input type="range" id="ctlHeading" min="0" max="359" value="45" step="5">
+        <span class="val" id="valHeading">045°</span>
+      </div>
+      <div class="ctl">
+        <label>Turns</label>
+        <div class="seg">
+          <button id="segR" class="on" onclick="setTurns('R')">Standard (Right)</button>
+          <button id="segL" onclick="setTurns('L')">Nonstandard (Left)</button>
+        </div>
+      </div>
+      <p style="font-size:12px;">Entry for this arrival:</p>
+      <div class="entry-name" id="entryName">DIRECT</div>
+      <div class="btnrow">
+        <button class="btn btn-primary" onclick="flyEntry()">Fly this entry</button>
+      </div>
+      <div class="legend">
+        <i><b style="background:rgba(217,119,87,.55);"></b> Direct (180°)</i>
+        <i><b style="background:rgba(217,165,69,.55);"></b> Teardrop (70°)</i>
+        <i><b style="background:rgba(127,179,217,.55);"></b> Parallel (110°)</i>
+      </div>
+    </div>
+
+    <!-- PRACTICE -->
+    <div class="card" id="practiceCard" style="display:none;">
+      <h2>Entry Quiz</h2>
+      <div class="quiz-q" id="quizText"></div>
+      <div class="answers">
+        <button class="btn" id="ansDirect" onclick="answer('DIRECT')">DIRECT</button>
+        <button class="btn" id="ansTeardrop" onclick="answer('TEARDROP')">TEARDROP</button>
+        <button class="btn" id="ansParallel" onclick="answer('PARALLEL')">PARALLEL</button>
+      </div>
+      <div class="feedback" id="quizFeedback"></div>
+      <div class="btnrow">
+        <button class="btn btn-primary" id="nextQBtn" onclick="nextQuestion()" style="display:none;">Next question →</button>
+      </div>
+      <div class="score" id="scoreLine"></div>
+    </div>
+
+    <div class="card" id="notesCard">
+      <h2>Quick Reference</h2>
+      <p><strong>Standard hold:</strong> right turns, 1-minute inbound legs at or below 14,000 MSL (1½ min above).</p>
+      <p><strong>Entries (AIM 5-3-8):</strong> sectors set by a line 70° to the inbound course — <em>direct</em> 180°, <em>teardrop</em> 70°, <em>parallel</em> 110°.</p>
+      <p><strong>Timing:</strong> start outbound timing abeam the fix (or wings-level). Adjust the outbound leg to make the inbound leg 1 minute.</p>
+      <p><strong>Wind:</strong> correct on the inbound leg, then triple that drift correction on the outbound leg (opposite side).</p>
+    </div>
+
+  </div>
+</main>
+
+<script src="holds.js"></script>
+</body>
+</html>

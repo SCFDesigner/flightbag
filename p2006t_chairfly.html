@@ -594,6 +594,185 @@ const MANEUVERS = [
 ]}
 ];
 
+// ─── GROUND-REF PATH GENERATOR (wind simulation) ─────────────
+// Replaces the hand-placed keyframes for the three ground-reference
+// maneuvers with tracks computed from constant TAS plus a north wind, so
+// the shape, the groundspeed changes, and the bank angles all stay
+// consistent with each other (steepest bank downwind, shallowest upwind).
+(function buildGroundRefPaths(){
+  const TAS = 95, WIND = 18;           // kts; wind FROM the north (top of screen)
+  const KTS2FPS = 1.68781;
+
+  // Groundspeed while holding ground track (tx,ty) (unit vector, y down).
+  // Wind blows toward +y; crab cancels the cross component.
+  function gsFor(tx, ty){
+    const wAlong = WIND * ty;
+    const wCross = WIND * tx;
+    return wAlong + Math.sqrt(Math.max(1, TAS*TAS - wCross*wCross));
+  }
+
+  // March along a parametric path P(u) (screen fractions, square coords).
+  // scale = feet per screen unit. Returns dense keyframes with computed
+  // groundspeed pacing and curvature-derived bank.
+  function march(Pfn, scale, callouts){
+    // Arc-length table
+    const N = 1200, tbl = [0];
+    let prev = Pfn(0), total = 0;
+    for(let i=1;i<=N;i++){
+      const q = Pfn(i/N);
+      total += Math.hypot(q.x-prev.x, q.y-prev.y);
+      tbl.push(total); prev = q;
+    }
+    const uAtLen = s => {
+      if(s<=0) return 0; if(s>=total) return 1;
+      let lo=0, hi=N;
+      while(hi-lo>1){ const mid=(lo+hi)>>1; (tbl[mid]<s?lo=mid:hi=mid); }
+      const f=(s-tbl[lo])/((tbl[hi]-tbl[lo])||1e-9);
+      return (lo+f)/N;
+    };
+    const dirAt = u => {
+      const e=1/N, a=Pfn(Math.max(0,u-e)), b=Pfn(Math.min(1,u+e));
+      let tx=b.x-a.x, ty=b.y-a.y; const L=Math.hypot(tx,ty)||1e-9;
+      return {tx:tx/L, ty:ty/L};
+    };
+    const bankAt = (u, gs) => {
+      // circumradius through three nearby samples -> turn radius
+      const e=4/N;
+      const a=Pfn(Math.max(0,u-e)), b=Pfn(u), c=Pfn(Math.min(1,u+e));
+      const abx=b.x-a.x, aby=b.y-a.y, bcx=c.x-b.x, bcy=c.y-b.y;
+      const cross = abx*bcy - aby*bcx;           // + = right turn (y down)
+      const ab=Math.hypot(abx,aby), bc=Math.hypot(bcx,bcy), ca=Math.hypot(c.x-a.x,c.y-a.y);
+      const area2 = Math.abs(cross);
+      if(area2 < 1e-9) return 0;
+      const Rscr = (ab*bc*ca)/(2*area2);
+      const Rft = Rscr*scale;
+      if(Rft > 60000) return 0;
+      const bank = Math.atan((gs*gs)/(11.26*Rft))*180/Math.PI;
+      return Math.min(45, bank) * (cross>=0 ? 1 : -1);
+    };
+
+    const dt = 0.1, kfEvery = 0.6;
+    let s=0, t=0, nextKF=0;
+    const kfs=[];
+    while(s < total*scale - 1 && t < 400){
+      const u = uAtLen(s/scale);
+      if(t >= nextKF - 1e-9){
+        const p = Pfn(u), d = dirAt(u), gs = gsFor(d.tx,d.ty);
+        kfs.push({t:+t.toFixed(1), x:p.x, y:p.y, u:u, alt:.25, ias:TAS, pitch:0,
+                  bank:+bankAt(u,gs).toFixed(1), mp:24, gear:"UP", flaps:"UP",
+                  eng:"BOTH", callout:""});
+        nextKF += kfEvery;
+      }
+      const d = dirAt(u);
+      s += gsFor(d.tx,d.ty)*KTS2FPS*dt;
+      t += dt;
+    }
+    // close the path with a final keyframe at u=1
+    const pEnd=Pfn(1), dEnd=dirAt(1);
+    kfs.push({t:+t.toFixed(1), x:pEnd.x, y:pEnd.y, u:1, alt:.25, ias:TAS, pitch:0,
+              bank:0, mp:24, gear:"UP", flaps:"UP", eng:"BOTH", callout:""});
+    // smooth banks (two passes) so roll-in/out isn't a step
+    for(let pass=0;pass<2;pass++)
+      for(let i=1;i<kfs.length-1;i++)
+        kfs[i].bank = +( (kfs[i-1].bank + 2*kfs[i].bank + kfs[i+1].bank)/4 ).toFixed(1);
+    // attach callouts to the nearest keyframe by path position
+    callouts.forEach(co => {
+      let best=0, bd=9;
+      kfs.forEach((k,i)=>{ const d=Math.abs(k.u-co.u); if(d<bd){bd=d;best=i;} });
+      kfs[best].callout = co.text;
+    });
+    // fill callouts forward so every frame shows the latest one
+    for(let i=1;i<kfs.length;i++) if(!kfs[i].callout) kfs[i].callout = kfs[i-1].callout;
+    kfs.forEach(k=>delete k.u);
+    return kfs;
+  }
+
+  // --- Shapes (square coords, center .5/.5, y down, wind from top) ---
+  const PT_R = 0.27;                    // turns-around-a-point circle radius
+  const circlePath = u => {             // left turns: S -> E -> N -> W, start west abeam
+    const a = Math.PI - u*2*Math.PI;
+    return { x:.5 + PT_R*Math.cos(a), y:.5 + PT_R*Math.sin(a) };
+  };
+
+  const ST_R = 0.17, ST_X0 = 0.84;      // S-turns across an E-W road
+  const sturnPath = u => {
+    if(u < .5){                         // right 180 south of the road
+      const a = (u/.5)*Math.PI;
+      return { x:(ST_X0-ST_R) + ST_R*Math.cos(a), y:.5 + ST_R*Math.sin(a) };
+    }
+    const b = -(((u-.5)/.5)*Math.PI);   // left 180 north of the road
+    return { x:(ST_X0-3*ST_R) + ST_R*Math.cos(b), y:.5 + ST_R*Math.sin(b) };
+  };
+
+  // Rounded-rect course (left pattern, field kept off the left wing)
+  const RC_HW=.28, RC_HH=.22, RC_CR=.09;
+  function roundedRectPath(u){
+    const cx=.5, cy=.5, w=RC_HW-RC_CR, h=RC_HH-RC_CR, R=RC_CR;
+    const sv=2*h, sh=2*w, arc=Math.PI*R/2;
+    const per = 2*sv + 2*sh + 4*arc;
+    let s = u*per;
+    const corner=(ccx,ccy,a0,d)=>({x:ccx+R*Math.cos(a0-d/R), y:ccy+R*Math.sin(a0-d/R)});
+    // Circuit (left pattern): W side S-bound, S side E-bound, E side N-bound, N side W-bound
+    if(s<=h) return {x:cx-RC_HW, y:cy+s}; s-=h;                       // west lower half (downwind)
+    if(s<=arc) return corner(cx-w, cy+h,  Math.PI,   s); s-=arc;      // SW corner
+    if(s<=sh)  return {x:cx-w+s, y:cy+RC_HH}; s-=sh;                  // south side
+    if(s<=arc) return corner(cx+w, cy+h,  Math.PI/2, s); s-=arc;      // SE corner
+    if(s<=sv)  return {x:cx+RC_HW, y:cy+h-s}; s-=sv;                  // east side
+    if(s<=arc) return corner(cx+w, cy-h,  0,         s); s-=arc;      // NE corner
+    if(s<=sh)  return {x:cx+w-s, y:cy-RC_HH}; s-=sh;                  // north side
+    if(s<=arc) return corner(cx-w, cy-h, -Math.PI/2, s); s-=arc;      // NW corner
+    return {x:cx-RC_HW, y:cy-h+Math.min(s,h)};                        // west upper half back to start
+  }
+
+  const M_POINT = MANEUVERS.find(m=>m.name.includes('Turns Around'));
+  const M_STURN = MANEUVERS.find(m=>m.name.includes('S-Turns'));
+  const M_RECT  = MANEUVERS.find(m=>m.name.includes('Rectangular'));
+
+  if(M_POINT){
+    M_POINT.keyframes = march(circlePath, 1300/PT_R, [
+      {u:0.00, text:"Enter downwind abeam the point — steepest bank coming"},
+      {u:0.13, text:"Downwind quarter — fastest GS, steepest bank"},
+      {u:0.25, text:"Crosswind (wind from outside) — bank easing, crab INTO the circle"},
+      {u:0.40, text:"Turning upwind — GS slowing, keep shallowing the bank"},
+      {u:0.50, text:"Upwind quarter — slowest GS, shallowest bank"},
+      {u:0.66, text:"Crosswind (wind from inside) — crab OUTSIDE, bank building"},
+      {u:0.85, text:"Back toward downwind — steepen to hold radius"},
+      {u:0.99, text:"Abeam entry — circle complete, exit downwind"}
+    ]);
+    M_POINT.duration = M_POINT.keyframes[M_POINT.keyframes.length-1].t;
+    M_POINT.square = true; M_POINT.groundRef = 'point'; M_POINT.initHdg = 180;
+  }
+  if(M_STURN){
+    M_STURN.keyframes = march(sturnPath, 1250/ST_R, [
+      {u:0.00, text:"Cross the road wings-level, downwind — roll RIGHT, steepest bank"},
+      {u:0.15, text:"First quarter — bank shallowing as GS slows"},
+      {u:0.35, text:"Upwind side of the arc — shallowest bank"},
+      {u:0.49, text:"Wings level crossing the road — immediately roll LEFT"},
+      {u:0.60, text:"Left arc upwind — shallow bank, drifting slow"},
+      {u:0.85, text:"Turning back downwind — steepen the bank"},
+      {u:0.99, text:"Cross the road wings level — S-turn complete"}
+    ]);
+    M_STURN.duration = M_STURN.keyframes[M_STURN.keyframes.length-1].t;
+    M_STURN.square = true; M_STURN.groundRef = 'sturn'; M_STURN.initHdg = 180;
+  }
+  if(M_RECT){
+    M_RECT.keyframes = march(roundedRectPath, 10000, [
+      {u:0.00, text:"DOWNWIND leg — fastest groundspeed, crab as needed"},
+      {u:0.10, text:"Downwind-to-base: MORE than 90° of turn, steepest bank"},
+      {u:0.22, text:"BASE leg — crab INTO the wind (toward the field)"},
+      {u:0.38, text:"Base-to-upwind: more than 90°, bank easing through the turn"},
+      {u:0.52, text:"UPWIND leg — slowest groundspeed"},
+      {u:0.62, text:"Upwind-to-crosswind: LESS than 90° of turn, shallowest bank"},
+      {u:0.74, text:"CROSSWIND leg — crab into the wind (away from the field)"},
+      {u:0.86, text:"Crosswind-to-downwind: less than 90°, bank increasing"},
+      {u:0.99, text:"Established downwind — course complete"}
+    ]);
+    M_RECT.duration = M_RECT.keyframes[M_RECT.keyframes.length-1].t;
+    M_RECT.square = true; M_RECT.groundRef = 'rect'; M_RECT.initHdg = 180;
+    M_RECT.field = {hw:RC_HW-.10, hh:RC_HH-.09};
+  }
+})();
+
 // ─── CHECKLIST DATA ──────────────────────────────────────────
 const CL_NORMAL = [
 {title:"Before Starting Engine",items:["Preflight – COMPLETE","Passenger Briefing – COMPLETE","Documents – ONBOARD","Seats/Belts/Doors – ADJUST and LOCK","Parking Brake – SET","Emergency Gear Levers – STOWED","All Switches – OFF","Field Switches – OFF","Prop Controls – FULL FWD","Throttles – IDLE","Fuel Selectors – RH→LEFT, LH→RIGHT","Fuel Quantities – CHECK","Circuit Breakers – IN","Battery Master – ON","Voltmeter – CHECK 12-14V"]},
@@ -720,7 +899,15 @@ function getCanvasXY(m,st,W,H){
     if(isCruiseMvr(m)) return {cx:W*(0.04+st.x*0.92), cy:H*(1.1-st.alt*1.5)};
     return {cx:W*(0.04+st.x*0.92),cy:H*(0.85-st.alt*0.78)};
   }
+  if(m.square) return sqXY(W,H,st.x,st.y);
   return {cx:W*(0.04+st.x*0.92),cy:H*(0.04+st.y*0.92)};
+}
+
+// Square mapping: ground-ref data lives in square coordinates so circles
+// stay circles regardless of the canvas aspect ratio.
+function sqXY(W,H,x,y){
+  const S=Math.min(W,H)*0.94;
+  return {cx:W/2+(x-0.5)*S, cy:H/2+(y-0.5)*S};
 }
 
 // ─── RENDER FRAME ────────────────────────────────────────────
@@ -835,11 +1022,43 @@ function drawTopView(m,st,t,W,H){
   skyX.fillStyle='rgba(255,255,255,0.28)'; skyX.font='13px Courier New';
   skyX.fillText('N',W/2-5,16); skyX.fillText('S',W/2-5,H-4);
   skyX.fillText('W',5,H/2+5); skyX.fillText('E',W-14,H/2+5);
-  // Ref circle for turns
-  if(m.name.includes('Point')||m.name.includes('S-Turn')||m.name.includes('Rect')){
-    skyX.fillStyle='#fa8'; skyX.beginPath(); skyX.arc(W*.5,H*.5,7,0,Math.PI*2); skyX.fill();
-    skyX.strokeStyle='rgba(255,170,80,0.18)'; skyX.lineWidth=1; skyX.setLineDash([5,5]);
-    skyX.beginPath(); skyX.arc(W*.5,H*.5,W*.26,0,Math.PI*2); skyX.stroke(); skyX.setLineDash([]);
+  // Ground-reference visuals: wind arrow + the actual reference
+  if(m.groundRef){
+    const S=Math.min(W,H)*0.94;
+    // Wind arrow — wind FROM the north (top of screen)
+    skyX.strokeStyle='#7fb3d9'; skyX.fillStyle='#7fb3d9'; skyX.lineWidth=2;
+    for(let i=0;i<3;i++){
+      const ax=26+i*20, ay0=14, ay1=44;
+      skyX.beginPath(); skyX.moveTo(ax,ay0); skyX.lineTo(ax,ay1); skyX.stroke();
+      skyX.beginPath(); skyX.moveTo(ax-4,ay1-6); skyX.lineTo(ax,ay1); skyX.lineTo(ax+4,ay1-6); skyX.stroke();
+    }
+    skyX.font='11px Courier New';
+    skyX.fillText('WIND', 24, 58);
+
+    if(m.groundRef==='point'){
+      const c=sqXY(W,H,.5,.5);
+      skyX.fillStyle='#fa8'; skyX.beginPath(); skyX.arc(c.cx,c.cy,7,0,Math.PI*2); skyX.fill();
+      skyX.fillStyle='rgba(255,170,136,0.7)'; skyX.font='10px Courier New';
+      skyX.fillText('POINT', c.cx+11, c.cy+4);
+      skyX.strokeStyle='rgba(255,170,80,0.25)'; skyX.lineWidth=1; skyX.setLineDash([5,5]);
+      skyX.beginPath(); skyX.arc(c.cx,c.cy,0.27*S,0,Math.PI*2); skyX.stroke(); skyX.setLineDash([]);
+    } else if(m.groundRef==='sturn'){
+      const a=sqXY(W,H,0,.5), b=sqXY(W,H,1,.5);
+      skyX.strokeStyle='rgba(200,200,190,0.5)'; skyX.lineWidth=6;
+      skyX.beginPath(); skyX.moveTo(a.cx,a.cy); skyX.lineTo(b.cx,b.cy); skyX.stroke();
+      skyX.strokeStyle='rgba(60,60,55,0.9)'; skyX.lineWidth=1; skyX.setLineDash([9,7]);
+      skyX.beginPath(); skyX.moveTo(a.cx,a.cy); skyX.lineTo(b.cx,b.cy); skyX.stroke(); skyX.setLineDash([]);
+      skyX.fillStyle='rgba(200,200,190,0.7)'; skyX.font='10px Courier New';
+      skyX.fillText('ROAD', a.cx+8, a.cy-8);
+    } else if(m.groundRef==='rect' && m.field){
+      const tl=sqXY(W,H,.5-m.field.hw,.5-m.field.hh), br=sqXY(W,H,.5+m.field.hw,.5+m.field.hh);
+      skyX.fillStyle='rgba(110,140,90,0.25)';
+      skyX.fillRect(tl.cx,tl.cy,br.cx-tl.cx,br.cy-tl.cy);
+      skyX.strokeStyle='rgba(170,200,140,0.45)'; skyX.lineWidth=1.5;
+      skyX.strokeRect(tl.cx,tl.cy,br.cx-tl.cx,br.cy-tl.cy);
+      skyX.fillStyle='rgba(190,210,160,0.7)'; skyX.font='11px Courier New'; skyX.textAlign='center';
+      skyX.fillText('FIELD', (tl.cx+br.cx)/2, (tl.cy+br.cy)/2+4); skyX.textAlign='start';
+    }
   }
   // Runway for pattern maneuvers
   if(m.name.match(/Landing|Approach|Missed/)){
