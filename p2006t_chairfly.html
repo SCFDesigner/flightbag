@@ -93,6 +93,33 @@ body { background: #111; width: 100vw; height: 100vh; overflow: hidden; position
 .btn:hover { background: #1e1e22; border-color: #4af; color: #4af; }
 .btn.active { background: #08101e; border-color: #4af; color: #4af; }
 
+
+/* ── C-152 mode: clean panel, no G1000 chrome ── */
+body.ac-c152 .bezel-img { display: none; }
+body.ac-c152 #pfd-canvas { left: 0; top: 0; width: 100%; height: 100%; }
+body.ac-c152 #mfd-screen { left: 0; top: 0; width: 100%; height: 100%; background: #ece6d4; }
+body.ac-c152 #gear-col > .gear-col-label:first-child,
+body.ac-c152 #gear-indicator,
+body.ac-c152 #gear-knob-btn { display: none; }
+/* paper checklist */
+body.ac-c152 #mfd-header { background: #e0d9c3; border-bottom: 2px solid #b8b09a; }
+body.ac-c152 #mfd-header span { color: #4a4436; }
+body.ac-c152 #mfd-tabs { border-bottom: 1px solid #b8b09a; background: #e6dfcb; }
+body.ac-c152 .mfd-tab { color: #8a8270; border-right: 1px solid #cfc7b0; }
+body.ac-c152 .mfd-tab:hover { color: #4a4436; background: #ddd5bd; }
+body.ac-c152 .mfd-tab.active { color: #26231b; background: #ece6d4; border-bottom: 2px solid #7a5b28; }
+body.ac-c152 .mfd-tab.emg-tab.active { color: #8c2f24; border-bottom-color: #8c2f24; background: #ece6d4; }
+body.ac-c152 #mfd-body::-webkit-scrollbar-thumb { background: #b8b09a; }
+body.ac-c152 .cl-panel-mfd { background: #f2ecdc; border: 1px solid #cbc3aa; }
+body.ac-c152 .cl-panel-mfd.emg { border-color: #c9a49e; background: #f2e8e0; }
+body.ac-c152 .cl-ptitle { color: #26231b; border-bottom: 1px solid #d8d0b8; padding-bottom: 3px; }
+body.ac-c152 .cl-ptitle.emg { color: #8c2f24; }
+body.ac-c152 .cl-step { color: #57503f; font-family: 'Courier New', monospace; font-size: 11.5px; }
+body.ac-c152 .cl-step b { color: #1d1a13; }
+body.ac-c152 .cl-step.emg b { color: #8c2f24; }
+body.ac-c152 .cl-sec-title { color: #7a5b28; border-bottom-color: #d8d0b8; }
+body.ac-c152 .cl-sec-title.emg { color: #8c2f24; }
+
 /* Gear Column */
 #gear-col { width: 64px; min-width: 64px; background: #0a0a0c; border-left: 1px solid #1c1c1e; border-right: 1px solid #1c1c1e; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
 .gear-col-label { font-size: 7px; letter-spacing: 2px; color: #3a3a3a; text-align: center; font-family: 'Courier New', monospace; }
@@ -265,8 +292,9 @@ function selectAircraft(id) {
   CL_NORMAL = ACTIVE_AC === 'c152' ? CL_NORMAL_C152 : CL_NORMAL_P2006T;
   CL_EMERGENCY = ACTIVE_AC === 'c152' ? CL_EMERGENCY_C152 : CL_EMERGENCY_P2006T;
   buildSidebar();
+  document.body.classList.toggle('ac-c152', ACTIVE_AC === 'c152');
   const mt = document.getElementById('mfd-title');
-  if(mt) mt.textContent = ACTIVE_AC==='c152' ? 'USAA 152 — CHECKLIST' : 'G1000 — MFD';
+  if(mt) mt.textContent = ACTIVE_AC==='c152' ? 'USAA 152 — PAPER CHECKLIST' : 'G1000 — MFD';
   document.getElementById('aircraft-select').style.display = 'none';
   document.getElementById('app').style.display = '';
   resize();
@@ -1251,7 +1279,25 @@ const sideImgNorm = new Image(); sideImgNorm.src = makeSideSVG('#ffffff');
 const sideImgFail = new Image(); sideImgFail.src = makeSideSVG('#ff8844');
 
 const topImg = new Image();
-topImg.src = 'airplane_svg/cessna top view.png';
+topImg.src = 'airplane_svg/top-view.jpg';
+// The source is a JPG silhouette on a light checkerboard: key out the light
+// background and recolor the airframe white for the dark map.
+let topSprite = null;
+topImg.onload = () => {
+  const c = document.createElement('canvas');
+  c.width = topImg.naturalWidth; c.height = topImg.naturalHeight;
+  const x = c.getContext('2d');
+  x.drawImage(topImg, 0, 0);
+  const d = x.getImageData(0, 0, c.width, c.height);
+  const p = d.data;
+  for(let i = 0; i < p.length; i += 4){
+    if(Math.min(p[i], p[i+1], p[i+2]) > 170){ p[i+3] = 0; }
+    else { p[i] = 235; p[i+1] = 235; p[i+2] = 235; }
+  }
+  x.putImageData(d, 0, 0);
+  topSprite = c;
+  if(typeof selIdx !== 'undefined' && selIdx >= 0) renderFrame(MANEUVERS[selIdx], animTime);
+};
 
 // ─── STATE ───────────────────────────────────────────────────
 let selIdx = -1, playing = false, animTime = 0, animStart = null, rafId = null, trailPts = [];
@@ -1572,17 +1618,17 @@ function drawAirplaneTop(cx,cy,rot,eng,W,H){
   skyX.save();
   skyX.translate(cx, cy);
   skyX.rotate(rot * Math.PI/180);
-  if(topImg.complete && topImg.naturalWidth){
-    const ar = topImg.naturalWidth / topImg.naturalHeight;
+  if(topSprite){
+    const ar = topSprite.width / topSprite.height;
     const tw = s * ar, th = s;
     if(eng==='FAIL'){
-      skyX.drawImage(topImg, -tw/2, -th/2, tw, th);
+      skyX.drawImage(topSprite, -tw/2, -th/2, tw, th);
       skyX.globalCompositeOperation = 'source-atop';
-      skyX.fillStyle = 'rgba(255,120,40,0.7)';
+      skyX.fillStyle = 'rgba(255,120,40,0.85)';
       skyX.fillRect(-tw/2, -th/2, tw, th);
       skyX.globalCompositeOperation = 'source-over';
     } else {
-      skyX.drawImage(topImg, -tw/2, -th/2, tw, th);
+      skyX.drawImage(topSprite, -tw/2, -th/2, tw, th);
     }
   } else {
     // fallback
@@ -1621,10 +1667,10 @@ function drawSixPack(st,altFt,vsi,hdg){
   const W=pfdC.width,H=pfdC.height,ctx=pfdX;
   ctx.clearRect(0,0,W,H);
   ctx.fillStyle='#211f1d'; ctx.fillRect(0,0,W,H);
-  const stripH=Math.round(H*0.14);
-  const gw=W/3, gh=(H-stripH)/2;
-  const r=Math.min(gw,gh)*0.42;
-  const cxs=[gw/2, gw*1.5, gw*2.5], cys=[gh/2+4, gh*1.5];
+  const stripH=Math.round(H*0.10);
+  const gw=W/4, gh=(H-stripH)/2;
+  const r=Math.min(gw,gh)*0.44;
+  const cxs=[gw/2, gw*1.5, gw*2.5, gw*3.5], cys=[gh/2+3, gh*1.5];
 
   // ── ASI (0-160, 300° sweep starting at 30° from top) ──
   (function(){
@@ -1789,15 +1835,70 @@ function drawSixPack(st,altFt,vsi,hdg){
     spLabel(ctx,cx,cy+r*0.68,'100 FPM',6);
   })();
 
-  // ── RPM + flap strip ──
+  // ── VOR head (OBS + CDI) — inert until a VOR trainer drives it ──
+  (function(){
+    const cx=cxs[3], cy=cys[0];
+    spGauge(ctx,cx,cy,r);
+    // compass card (OBS set to 360 for now)
+    const obs=0;
+    ctx.save(); ctx.translate(cx,cy); ctx.rotate(-obs*Math.PI/180);
+    for(let d=0;d<360;d+=30){
+      const a=(d-90)*Math.PI/180;
+      ctx.strokeStyle='#c9c7ba'; ctx.lineWidth=1.2;
+      ctx.beginPath();
+      ctx.moveTo(Math.cos(a)*r*0.82,Math.sin(a)*r*0.82);
+      ctx.lineTo(Math.cos(a)*r*0.92,Math.sin(a)*r*0.92);
+      ctx.stroke();
+    }
+    ctx.restore();
+    ctx.fillStyle='#c9c7ba'; ctx.font='8px Courier New'; ctx.textAlign='center';
+    ctx.fillText('0',cx,cy-r*0.66);
+    // CDI needle — centered, no signal
+    ctx.strokeStyle='#f0eee6'; ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.moveTo(cx,cy-r*0.5); ctx.lineTo(cx,cy+r*0.5); ctx.stroke();
+    // deflection dots
+    for(let i=-2;i<=2;i++){
+      if(i===0) continue;
+      ctx.fillStyle='#7a786e'; ctx.beginPath(); ctx.arc(cx+i*r*0.22,cy,2,0,Math.PI*2); ctx.fill();
+    }
+    // NAV flag
+    ctx.fillStyle='#a33'; ctx.fillRect(cx+r*0.28,cy-r*0.42,r*0.34,r*0.2);
+    ctx.fillStyle='#f0eee6'; ctx.font='bold 7px Courier New';
+    ctx.fillText('NAV',cx+r*0.45,cy-r*0.28);
+    spLabel(ctx,cx,cy+r*0.62,'VOR · OBS',7);
+    ctx.textAlign='start';
+  })();
+
+  // ── Tachometer ──
+  (function(){
+    const cx=cxs[3], cy=cys[1];
+    spGauge(ctx,cx,cy,r);
+    const rpm2deg=v=>40+(Math.max(0,Math.min(3000,v))/3000)*280;
+    for(let v=0;v<=3000;v+=500){
+      const a=(rpm2deg(v)-90)*Math.PI/180;
+      ctx.strokeStyle='#c9c7ba'; ctx.lineWidth=1.5;
+      ctx.beginPath();
+      ctx.moveTo(cx+Math.cos(a)*r*0.76,cy+Math.sin(a)*r*0.76);
+      ctx.lineTo(cx+Math.cos(a)*r*0.9,cy+Math.sin(a)*r*0.9);
+      ctx.stroke();
+      if(v%1000===0){
+        ctx.fillStyle='#c9c7ba'; ctx.font='7px Courier New'; ctx.textAlign='center';
+        ctx.fillText(v/100,cx+Math.cos(a)*r*0.6,cy+Math.sin(a)*r*0.6+2.5);
+      }
+    }
+    ctx.textAlign='start';
+    spNeedle(ctx,cx,cy,r,rpm2deg(st.mp),'#f0eee6',2.5);
+    spLabel(ctx,cx,cy+r*0.45,'TACH',7);
+    spLabel(ctx,cx,cy+r*0.66,Math.round(st.mp)+' RPM',7,'#7fd97f');
+  })();
+
+  // ── Flap strip ──
   const sy=H-stripH;
   ctx.fillStyle='#161514'; ctx.fillRect(0,sy,W,stripH);
   ctx.strokeStyle='#3c3a36'; ctx.lineWidth=1; ctx.strokeRect(0.5,sy+0.5,W-1,stripH-1);
-  ctx.fillStyle='#7fd97f'; ctx.font='bold '+Math.round(stripH*0.42)+'px Courier New';
-  ctx.fillText('RPM '+String(Math.round(st.mp)).padStart(4,' '), 10, sy+stripH*0.62);
-  ctx.fillStyle='#c9c7ba'; ctx.font=Math.round(stripH*0.34)+'px Courier New';
-  ctx.textAlign='right';
-  ctx.fillText('FLAPS '+st.flaps, W-10, sy+stripH*0.62);
+  ctx.fillStyle='#c9c7ba'; ctx.font=Math.round(stripH*0.44)+'px Courier New';
+  ctx.textAlign='center';
+  ctx.fillText('FLAPS  '+st.flaps, W/2, sy+stripH*0.66);
   ctx.textAlign='start';
 }
 
@@ -2244,7 +2345,7 @@ function updateFlapLever(flaps){
   const bar = document.getElementById('flap-bar');
   const lbl = document.getElementById('flap-bar-label');
   if(!bar || !lbl) return;
-  const pos = {UP:0, TO:19, FULL:38};
+  const pos = {UP:0, TO:19, FULL:38, '10°':13, '20°':26};
   lbl.textContent = flaps;
   bar.style.top = (pos[flaps] ?? 0) + 'px';
 }
