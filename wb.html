@@ -1939,9 +1939,11 @@
             <div class="input-group"><label class="input-label">TAS (kts)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bTas" data-panel="wind" placeholder="95"></div>
             <div class="input-group"><label class="input-label">Wind Dir (°)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bWindDir" data-panel="wind" placeholder="270"></div>
             <div class="input-group"><label class="input-label">Wind Speed (kts)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bWindSpd" data-panel="wind" placeholder="10"></div>
+            <div class="input-group"><label class="input-label">Variation (°W+ / E−)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bVar" data-panel="wind" placeholder="3"></div>
             <button class="btn" type="button" onclick="e6bFillWind()" style="margin-bottom: 10px;">Use Current Weather</button>
             <div class="e6b-out"><span>WCA</span><span id="e6bOutWca">—</span></div>
-            <div class="e6b-out"><span>Heading</span><span id="e6bOutHdg">—</span></div>
+            <div class="e6b-out"><span>True Heading</span><span id="e6bOutHdg">—</span></div>
+            <div class="e6b-out"><span>Magnetic Heading</span><span id="e6bOutMh">—</span></div>
             <div class="e6b-out"><span>Groundspeed</span><span id="e6bOutGs">—</span></div>
             <div class="e6b-out"><span>Headwind</span><span id="e6bOutHw">—</span></div>
             <div class="e6b-out"><span>Crosswind</span><span id="e6bOutXw">—</span></div>
@@ -1989,18 +1991,53 @@
             <button class="btn" type="button" onclick="e6bFillAlt()" style="margin-bottom: 10px;">Use Current Weather</button>
             <div class="e6b-out"><span>Pressure Alt</span><span id="e6bOutPa">—</span></div>
             <div class="e6b-out"><span>Density Alt</span><span id="e6bOutDa">—</span></div>
+            <div class="e6b-out"><span>ISA Deviation</span><span id="e6bOutIsaDev">—</span></div>
             <div class="e6b-out"><span>TAS (approx)</span><span id="e6bOutTas">—</span></div>
+        </div>
+
+        <!-- Cloud Base / Freezing Level -->
+        <div class="input-section">
+            <div class="e6b-section-title">Cloud Base &amp; Freezing Level</div>
+            <div class="input-group"><label class="input-label">Temp (°C)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bCbTemp" data-panel="cloud" placeholder="19"></div>
+            <div class="input-group"><label class="input-label">Dew Point (°C)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bCbDew" data-panel="cloud" placeholder="5"></div>
+            <div class="input-group"><label class="input-label">Elevation (ft)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bCbElev" data-panel="cloud" placeholder="642"></div>
+            <button class="btn" type="button" onclick="e6bFillCloud()" style="margin-bottom: 10px;">Use Current Weather</button>
+            <div class="e6b-out"><span>Cloud Base AGL</span><span id="e6bOutCbAgl">—</span></div>
+            <div class="e6b-out"><span>Cloud Base MSL</span><span id="e6bOutCbMsl">—</span></div>
+            <div class="e6b-out"><span>Freezing Level</span><span id="e6bOutFrz">—</span></div>
+            <div class="e6b-hint" style="margin-top: 8px; margin-bottom: 0;">Estimates: base ≈ spread ÷ 2.5 °C × 1000 ft; freezing ≈ 2 °C / 1000 ft lapse. Verify with reported ceilings.</div>
+        </div>
+
+        <!-- Climb Gradient -->
+        <div class="input-section">
+            <div class="e6b-section-title">Climb Gradient</div>
+            <div class="e6b-hint">Enter GS plus either one — the rest compute.</div>
+            <div class="input-group"><label class="input-label">GS (kts)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bClbGs" data-panel="climb" placeholder="70"></div>
+            <div class="input-group"><label class="input-label">Required (ft/NM)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bClbGrad" data-panel="climb" placeholder="200"></div>
+            <div class="input-group"><label class="input-label">Climb Rate (fpm)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bClbFpm" data-panel="climb" placeholder=""></div>
+            <div class="e6b-out"><span id="e6bClbLabel">Result</span><span id="e6bClbOut">—</span></div>
+        </div>
+
+        <!-- Glide -->
+        <div class="input-section">
+            <div class="e6b-section-title">Glide Distance</div>
+            <div class="input-group"><label class="input-label">Height AGL (ft)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bGldAlt" data-panel="glide" placeholder="3000"></div>
+            <div class="input-group"><label class="input-label">Glide (NM/1000ft)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bGldRatio" data-panel="glide" placeholder="" step="0.1"></div>
+            <div class="e6b-out"><span>Glide Range</span><span id="e6bOutGld">—</span></div>
+            <div class="e6b-hint" style="margin-top: 8px; margin-bottom: 0;">Use your POH best-glide figure (no wind). Headwind shortens it.</div>
         </div>
 
         <!-- Conversions -->
         <div class="input-section">
             <div class="e6b-section-title">Conversions</div>
             <div class="e6b-convrow"><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvKts" data-group="speed" data-unit="kts"><span class="e6b-convlbl">kts</span><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvMph" data-group="speed" data-unit="mph"><span class="e6b-convlbl">mph</span></div>
-            <div class="e6b-convrow"><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvNm" data-group="dist" data-unit="nm"><span class="e6b-convlbl">NM</span><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvSm" data-group="dist" data-unit="sm"><span class="e6b-convlbl">SM</span></div>
+            <div class="e6b-convrow"><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvNm" data-group="dist" data-unit="nm"><span class="e6b-convlbl">NM</span><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvSm" data-group="dist" data-unit="sm"><span class="e6b-convlbl">SM</span><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvKm" data-group="dist" data-unit="km"><span class="e6b-convlbl">km</span></div>
             <div class="e6b-convrow"><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvGal" data-group="fuelw" data-unit="gal"><span class="e6b-convlbl">gal</span><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvLbs" data-group="fuelw" data-unit="lbs"><span class="e6b-convlbl">lbs</span></div>
             <div class="e6b-convrow"><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvC" data-group="temp" data-unit="c"><span class="e6b-convlbl">°C</span><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvF" data-group="temp" data-unit="f"><span class="e6b-convlbl">°F</span></div>
             <div class="e6b-convrow"><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvFt" data-group="len" data-unit="ft"><span class="e6b-convlbl">ft</span><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvM" data-group="len" data-unit="m"><span class="e6b-convlbl">m</span></div>
             <div class="e6b-convrow"><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvHg" data-group="press" data-unit="hg" step="0.01"><span class="e6b-convlbl">inHg</span><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvMb" data-group="press" data-unit="mb"><span class="e6b-convlbl">mb</span></div>
+            <div class="e6b-convrow"><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvL" data-group="vol" data-unit="l"><span class="e6b-convlbl">L</span><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvGal2" data-group="vol" data-unit="gal"><span class="e6b-convlbl">gal</span></div>
+            <div class="e6b-convrow"><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvKg" data-group="mass" data-unit="kg"><span class="e6b-convlbl">kg</span><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvLb" data-group="mass" data-unit="lb"><span class="e6b-convlbl">lbs</span></div>
         </div>
     </div>
 
