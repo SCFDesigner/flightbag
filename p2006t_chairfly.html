@@ -600,21 +600,20 @@ const MANEUVERS = [
 // the shape, the groundspeed changes, and the bank angles all stay
 // consistent with each other (steepest bank downwind, shallowest upwind).
 (function buildGroundRefPaths(){
-  const TAS = 95, WIND = 18;           // kts; wind FROM the north (top of screen)
   const KTS2FPS = 1.68781;
-
-  // Groundspeed while holding ground track (tx,ty) (unit vector, y down).
-  // Wind blows toward +y; crab cancels the cross component.
-  function gsFor(tx, ty){
-    const wAlong = WIND * ty;
-    const wCross = WIND * tx;
-    return wAlong + Math.sqrt(Math.max(1, TAS*TAS - wCross*wCross));
-  }
 
   // March along a parametric path P(u) (screen fractions, square coords).
   // scale = feet per screen unit. Returns dense keyframes with computed
   // groundspeed pacing and curvature-derived bank.
-  function march(Pfn, scale, callouts){
+  function march(Pfn, scale, callouts, opts){
+    const TAS = (opts && opts.tas) || 95;
+    const WIND = (opts && opts.wind !== undefined) ? opts.wind : 18;
+    const ALT = (opts && opts.alt) || .25;
+    const MP = (opts && opts.mp) || 24;
+    const gsFor = (tx,ty) => {
+      const wAlong = WIND * ty, wCross = WIND * tx;
+      return wAlong + Math.sqrt(Math.max(1, TAS*TAS - wCross*wCross));
+    };
     // Arc-length table
     const N = 1200, tbl = [0];
     let prev = Pfn(0), total = 0;
@@ -648,7 +647,7 @@ const MANEUVERS = [
       const Rft = Rscr*scale;
       if(Rft > 60000) return 0;
       const bank = Math.atan((gs*gs)/(11.26*Rft))*180/Math.PI;
-      return Math.min(45, bank) * (cross>=0 ? 1 : -1);
+      return Math.min(52, bank) * (cross>=0 ? 1 : -1);
     };
 
     const dt = 0.1, kfEvery = 0.6;
@@ -658,8 +657,8 @@ const MANEUVERS = [
       const u = uAtLen(s/scale);
       if(t >= nextKF - 1e-9){
         const p = Pfn(u), d = dirAt(u), gs = gsFor(d.tx,d.ty);
-        kfs.push({t:+t.toFixed(1), x:p.x, y:p.y, u:u, alt:.25, ias:TAS, pitch:0,
-                  bank:+bankAt(u,gs).toFixed(1), mp:24, gear:"UP", flaps:"UP",
+        kfs.push({t:+t.toFixed(1), x:p.x, y:p.y, u:u, alt:ALT, ias:TAS, pitch:0,
+                  bank:+bankAt(u,gs).toFixed(1), mp:MP, gear:"UP", flaps:"UP",
                   eng:"BOTH", callout:""});
         nextKF += kfEvery;
       }
@@ -669,8 +668,8 @@ const MANEUVERS = [
     }
     // close the path with a final keyframe at u=1
     const pEnd=Pfn(1), dEnd=dirAt(1);
-    kfs.push({t:+t.toFixed(1), x:pEnd.x, y:pEnd.y, u:1, alt:.25, ias:TAS, pitch:0,
-              bank:0, mp:24, gear:"UP", flaps:"UP", eng:"BOTH", callout:""});
+    kfs.push({t:+t.toFixed(1), x:pEnd.x, y:pEnd.y, u:1, alt:ALT, ias:TAS, pitch:0,
+              bank:0, mp:MP, gear:"UP", flaps:"UP", eng:"BOTH", callout:""});
     // smooth banks (two passes) so roll-in/out isn't a step
     for(let pass=0;pass<2;pass++)
       for(let i=1;i<kfs.length-1;i++)
@@ -722,6 +721,47 @@ const MANEUVERS = [
     if(s<=sh)  return {x:cx+w-s, y:cy-RC_HH}; s-=sh;                  // north side
     if(s<=arc) return corner(cx-w, cy-h, -Math.PI/2, s); s-=arc;      // NW corner
     return {x:cx-RC_HW, y:cy-h+Math.min(s,h)};                        // west upper half back to start
+  }
+
+
+  // Steep turns: straight entry eastbound, left 360, wings level for a
+  // beat, immediately right 360, straight exit. Air work — drawn with no
+  // wind so both circles are round.
+  const SP_R = 0.155, SP_LEAD = 0.14, SP_MID = 0.03;
+  function steepPath(u){
+    const R=SP_R, circ=2*Math.PI*R;
+    const per = SP_LEAD + circ + SP_MID + circ + SP_LEAD;
+    let s = u*per;
+    const x0=0.5-(SP_LEAD+SP_MID/2), y0=0.5;   // entry start (heading east)
+    if(s<=SP_LEAD) return {x:x0+s, y:y0};
+    s-=SP_LEAD;
+    const c1x=x0+SP_LEAD, c1y=y0-R;            // left-turn circle (above the line)
+    if(s<=circ){ const a=Math.PI/2 - s/R; return {x:c1x+R*Math.cos(a), y:c1y+R*Math.sin(a)}; }
+    s-=circ;
+    if(s<=SP_MID) return {x:c1x+s, y:y0};
+    s-=SP_MID;
+    const c2x=c1x+SP_MID, c2y=y0+R;            // right-turn circle (below the line)
+    if(s<=circ){ const a=-Math.PI/2 + s/R; return {x:c2x+R*Math.cos(a), y:c2y+R*Math.sin(a)}; }
+    s-=circ;
+    return {x:c2x+Math.min(s,SP_LEAD), y:y0};
+  }
+
+  const M_STEEP = MANEUVERS.find(m=>m.name.includes('Steep Turns'));
+  if(M_STEEP){
+    // 50° bank at 110 KIAS -> turn radius ≈ 900 ft
+    M_STEEP.keyframes = march(steepPath, 900/SP_R, [
+      {u:0.00, text:'Clearing turns complete — 110 KIAS, Power 23-24"/2250'},
+      {u:0.09, text:'Roll into 50° LEFT bank — back pressure past 30°'},
+      {u:0.30, text:'50° bank — +2-3" MP, altitude ±100, airspeed ±10'},
+      {u:0.48, text:'Approaching entry heading — lead rollout by 25°'},
+      {u:0.525, text:'Wings level — immediately roll RIGHT'},
+      {u:0.60, text:'50° RIGHT bank — back pressure, +2-3" MP'},
+      {u:0.80, text:'360° right turn — altitude ±100'},
+      {u:0.94, text:'Lead the rollout — 25° before entry heading'},
+      {u:0.995, text:'Wings level on entry heading — both 360s complete'}
+    ], {tas:110, wind:0, alt:.5, mp:24});
+    M_STEEP.duration = M_STEEP.keyframes[M_STEEP.keyframes.length-1].t;
+    M_STEEP.square = true; M_STEEP.initHdg = 90;
   }
 
   const M_POINT = MANEUVERS.find(m=>m.name.includes('Turns Around'));
