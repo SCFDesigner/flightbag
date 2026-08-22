@@ -1554,16 +1554,48 @@ function drawTopView(m,st,t,W,H){
       skyX.fillText('FIELD', (tl.cx+br.cx)/2, (tl.cy+br.cy)/2+4); skyX.textAlign='start';
     }
   }
-  // Runway for pattern maneuvers
-  if(m.name.match(/Landing|Approach|Missed/)){
-    skyX.fillStyle='#484848'; skyX.fillRect(W*.5-8,H*.90,16,H*.10);
-    skyX.fillStyle='rgba(255,255,255,0.5)'; skyX.font='11px Courier New';
-    skyX.fillText('RWY',W*.5-14,H*.99);
+  // Runway for pattern maneuvers — placed at the lowest point of the
+  // profile (the touchdown / runway crossing) and aligned with the track
+  // direction there, so the pattern actually flows around it.
+  if(m.name.match(/Landing|Approach|Missed|180/) && m.view==='top'){
+    if(/Emergency Approach/.test(m.name)){
+      // off-airport: draw the chosen field, not a runway
+      const kEnd=m.keyframes[m.keyframes.length-1];
+      const pf=getCanvasXY(m,kEnd,W,H);
+      skyX.fillStyle='rgba(110,140,90,0.30)';
+      skyX.strokeStyle='rgba(170,200,140,0.5)'; skyX.lineWidth=1.5;
+      skyX.fillRect(pf.cx-34,pf.cy-70,68,110);
+      skyX.strokeRect(pf.cx-34,pf.cy-70,68,110);
+      skyX.fillStyle='rgba(190,210,160,0.8)'; skyX.font='10px Courier New'; skyX.textAlign='center';
+      skyX.fillText('FIELD',pf.cx,pf.cy-20); skyX.textAlign='start';
+    } else {
+      // find the lowest-altitude keyframe (closest to the runway)
+      let ti=0, best=1e9;
+      m.keyframes.forEach(k=>{ if(k.alt<best){best=k.alt; ti=k.t;} });
+      const stLo=interp(m,ti), pLo=getCanvasXY(m,stLo,W,H);
+      const stPre=interp(m,Math.max(0,ti-4)), pPre=getCanvasXY(m,stPre,W,H);
+      let dx=pLo.cx-pPre.cx, dy=pLo.cy-pPre.cy;
+      const L=Math.hypot(dx,dy)||1; dx/=L; dy/=L;
+      const rwLen=Math.min(W,H)*0.42, rwW=17;
+      skyX.save();
+      skyX.translate(pLo.cx-dx*rwLen*0.18, pLo.cy-dy*rwLen*0.18);
+      skyX.rotate(Math.atan2(dy,dx));
+      skyX.fillStyle='#3d3d3d'; skyX.fillRect(0,-rwW/2,rwLen,rwW);
+      skyX.strokeStyle='#2a2a2a'; skyX.lineWidth=1; skyX.strokeRect(0,-rwW/2,rwLen,rwW);
+      // threshold bars
+      skyX.fillStyle='rgba(255,255,255,0.75)';
+      for(let i=-1;i<=1;i+=2){ skyX.fillRect(4,i*rwW*0.28-1.5,10,3); }
+      // centerline dashes
+      skyX.strokeStyle='rgba(255,255,255,0.55)'; skyX.lineWidth=1.5; skyX.setLineDash([8,7]);
+      skyX.beginPath(); skyX.moveTo(18,0); skyX.lineTo(rwLen-6,0); skyX.stroke(); skyX.setLineDash([]);
+      skyX.restore();
+    }
   }
   drawTrail(m,W,H);
   const p=getCanvasXY(m,st,W,H);
   trailPts.push({...p,t});
-  drawAirplaneTop(p.cx,p.cy, m.square ? getHeadingAt(t) : st.bank, st.eng,W,H);
+  const iconRot = m.square ? getHeadingAt(t) : (trackAngleTop(m,t,p,W,H) ?? 0);
+  drawAirplaneTop(p.cx,p.cy, iconRot, st.eng,W,H);
 }
 
 function catmullRomPath(ctx,pts,steps){
@@ -1615,6 +1647,20 @@ function drawAirplaneSide(cx,cy,pitch,bank,eng,W,H){
   skyX.rotate(-pitch * Math.PI/180);
   if(img.complete && img.naturalWidth) skyX.drawImage(img, -w/2, -h/2, w, h);
   skyX.restore();
+}
+
+function trackAngleTop(m,t,p,W,H){
+  // tangent of the drawn track at time t (canvas space)
+  const st2=interp(m,Math.min(m.duration,t+0.5));
+  const p2=getCanvasXY(m,st2,W,H);
+  let dx=p2.cx-p.cx, dy=p2.cy-p.cy;
+  if(Math.hypot(dx,dy)<0.6){
+    const st0=interp(m,Math.max(0,t-0.5));
+    const p0=getCanvasXY(m,st0,W,H);
+    dx=p.cx-p0.cx; dy=p.cy-p0.cy;
+    if(Math.hypot(dx,dy)<0.6) return null;
+  }
+  return Math.atan2(dx,-dy)*180/Math.PI;
 }
 
 function drawAirplaneTop(cx,cy,rot,eng,W,H){
