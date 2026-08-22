@@ -218,6 +218,7 @@ body.ac-c152 .cl-sec-title.emg { color: #8c2f24; }
   <div style="position:absolute;top:12px;left:14px;z-index:10;display:flex;gap:6px;">
     <a href="index.html" style="background:rgba(0,0,0,0.55);border:1px solid #555;border-radius:4px;padding:4px 12px;font-size:12px;color:#aaa;text-decoration:none;letter-spacing:1px;" onmouseover="this.style.color='#fff';this.style.borderColor='#888'" onmouseout="this.style.color='#aaa';this.style.borderColor='#555'">← W&amp;B</a>
     <a href="maneuvers.html" title="Study SEL maneuvers — steps, ACS limits, flashcards" style="background:rgba(0,0,0,0.55);border:1px solid #555;border-radius:4px;padding:4px 12px;font-size:12px;color:#aaa;text-decoration:none;letter-spacing:1px;" onmouseover="this.style.color='#8f6';this.style.borderColor='#8f6'" onmouseout="this.style.color='#aaa';this.style.borderColor='#555'">SEL MANEUVERS →</a>
+    <a id="ac-switch-btn" title="Switch aircraft" onclick="showAircraftSelect()" style="background:rgba(0,0,0,0.55);border:1px solid #555;border-radius:4px;padding:4px 12px;font-size:12px;color:#aaa;text-decoration:none;letter-spacing:1px;cursor:pointer;" onmouseover="this.style.color='#4af';this.style.borderColor='#4af'" onmouseout="this.style.color='#aaa';this.style.borderColor='#555'">✈ P2006T ⌄</a>
   </div>
   <div id="maneuver-title">SELECT A MANEUVER</div>
   <div id="rp-controls">
@@ -286,6 +287,10 @@ body.ac-c152 .cl-sec-title.emg { color: #8c2f24; }
 // ─── AIRCRAFT SELECTION ──────────────────────────────────────
 document.getElementById('app').style.display = 'none';
 
+function showAircraftSelect() {
+  stopAnim();
+  document.getElementById('aircraft-select').style.display = 'flex';
+}
 function selectAircraft(id) {
   ACTIVE_AC = (id === 'c152') ? 'c152' : 'p2006t';
   MANEUVERS = ACTIVE_AC === 'c152' ? MANEUVERS_C152 : MANEUVERS_P2006T;
@@ -295,6 +300,8 @@ function selectAircraft(id) {
   document.body.classList.toggle('ac-c152', ACTIVE_AC === 'c152');
   const mt = document.getElementById('mfd-title');
   if(mt) mt.textContent = ACTIVE_AC==='c152' ? 'USAA 152 — PAPER CHECKLIST' : 'G1000 — MFD';
+  const ab = document.getElementById('ac-switch-btn');
+  if(ab) ab.textContent = ACTIVE_AC==='c152' ? '✈ C-152 ⌄' : '✈ P2006T ⌄';
   document.getElementById('aircraft-select').style.display = 'none';
   document.getElementById('app').style.display = '';
   resize();
