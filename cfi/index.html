@@ -8,15 +8,28 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="CFI Binder">
-<meta name="theme-color" content="#08080a">
+<meta name="theme-color" content="#1e1e1d">
 <title>CFI Lesson Condenser</title>
 <style>
 :root {
-  --bg0:#08080a; --bg1:#101016; --bg2:#16161e; --bg3:#1e1e2a;
-  --text:#d0d0e0; --text2:#999aaa; --text3:#666678; --text4:#444458;
+  /* neutral dark slate — --chrome is the nav/toolbar shell (darker than the
+     page), --bg1..3 are surfaces that sit *above* the page and get lighter */
+  --bg0:#2b2b2a; --bg1:#333331; --bg2:#3d3d3a; --bg3:#4a4a46;
+  --chrome:#1e1e1d;
+  --text:#f0eee9; --text2:#bdbab3; --text3:#918e87; --text4:#6c6963;
   --blue:#44aaff; --orange:#ffaa00; --lime:#88ff66; --red:#ff5566;
-  --bdr:#1a1a24; --btn:#1e1e2a;
-  --fs:15px;
+  --coral:#e08a63;
+  --bdr:#3d3d3a; --btn:#3a3a37;
+  --fs:15px; --lh:1.45; --measure:1100px;
+  /* text that sits on top of an accent fill — computed per accent so a light
+     theme (or a dark accent pick) never lands dark-on-dark */
+  --on-blue:#14140f; --on-lime:#14140f; --on-orange:#14140f;
+  /* accents nudged toward the text colour, so they lighten on a dark page and
+     darken on a light one; tint fills mix the accent into the page */
+  --topic:#7fc9ff; --accent2:#ffd24a;
+  --num:#ffaa00; --note:#44aaff;
+  --sel-bg:#31352c; --sel-bg2:#37402f; --spk-bg:#2b3540; --spk-bd:#3f5f7d;
+  --acs-bg:#3a3230; --acs-bd:#4a3a34; --lime-bd:#414a38; --here-bg:#33322a;
   --sidebar-w:260px;
 }
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -25,12 +38,12 @@ body { background:var(--bg0); color:var(--text); font-family:'SF Pro Display',-a
 
 /* ===== layout ===== */
 #app { display:flex; height:100vh; }
-nav { width:var(--sidebar-w); min-width:var(--sidebar-w); background:var(--bg1); border-right:1px solid var(--bdr); display:flex; flex-direction:column; }
+nav { width:var(--sidebar-w); min-width:var(--sidebar-w); background:var(--chrome); border-right:1px solid var(--bdr); display:flex; flex-direction:column; }
 #main { flex:1; display:flex; flex-direction:column; min-width:0; }
 #panes { flex:1; display:flex; min-height:0; }
 .pane { flex:1; min-width:0; display:flex; flex-direction:column; border-right:1px solid var(--bdr); }
 .pane:last-child { border-right:none; }
-.pane-head { padding:8px 14px; background:var(--bg1); border-bottom:1px solid var(--bdr); display:flex; gap:8px; align-items:center; font-size:.8em; color:var(--text2); text-transform:uppercase; letter-spacing:.08em; flex-shrink:0; }
+.pane-head { padding:8px 14px; background:var(--chrome); border-bottom:1px solid var(--bdr); display:flex; gap:8px; align-items:center; font-size:.8em; color:var(--text2); text-transform:uppercase; letter-spacing:.08em; flex-shrink:0; }
 .pane-body { flex:1; overflow-y:auto; padding:14px 18px 40vh 14px; }
 
 /* ===== sidebar ===== */
@@ -47,37 +60,37 @@ nav { width:var(--sidebar-w); min-width:var(--sidebar-w); background:var(--bg1);
 .lesson-item { padding:5px 14px 5px 22px; font-size:12.5px; color:var(--text2); cursor:pointer; border-left:2px solid transparent; display:flex; justify-content:space-between; gap:6px; align-items:center; }
 .lesson-item:hover { background:var(--bg2); color:var(--text); }
 .lesson-item.active { background:var(--bg2); border-left-color:var(--blue); color:var(--text); }
-.lesson-item .cnt { font-size:10px; color:var(--bg0); background:var(--lime); border-radius:8px; padding:0 6px; line-height:15px; font-weight:600; }
+.lesson-item .cnt { font-size:10px; color:var(--on-lime); background:var(--lime); border-radius:8px; padding:0 6px; line-height:15px; font-weight:600; }
 .lesson-item .cnt.zero { display:none; }
 .lesson-item .toc-tri { color:var(--text4); padding:2px 4px; margin:-2px -4px; flex:0 0 auto; }
 .lesson-item .toc-tri:hover { color:var(--text); }
 
 /* ===== header/toolbar ===== */
-#toolbar { background:var(--bg1); border-bottom:1px solid var(--bdr); padding:8px 14px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; flex-shrink:0; }
+#toolbar { background:var(--chrome); border-bottom:1px solid var(--bdr); padding:8px 14px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; flex-shrink:0; }
 #lesson-title { font-size:15px; font-weight:600; color:var(--text); margin-right:auto; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 #lesson-title .refs { display:block; font-size:10.5px; font-weight:400; color:var(--text3); }
 .tbtn { background:var(--btn); color:var(--text2); border:1px solid var(--bdr); border-radius:6px; padding:5px 10px; font-size:12px; cursor:pointer; white-space:nowrap; }
 .tbtn:hover { color:var(--text); border-color:var(--text4); }
-.tbtn.primary { color:var(--bg0); background:var(--blue); border-color:var(--blue); font-weight:600; }
-.tbtn.playing { color:var(--bg0); background:var(--lime); border-color:var(--lime); font-weight:600; }
+.tbtn.primary { color:var(--on-blue); background:var(--blue); border-color:var(--blue); font-weight:600; }
+.tbtn.playing { color:var(--on-lime); background:var(--lime); border-color:var(--lime); font-weight:600; }
 .tctl { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--text3); }
 .tctl input[type=range] { width:80px; accent-color:var(--blue); }
 select { background:var(--btn); color:var(--text2); border:1px solid var(--bdr); border-radius:6px; padding:4px 6px; font-size:11px; max-width:150px; }
 
 /* ===== content nodes ===== */
-.node { position:relative; padding:2px 56px 2px 8px; border-radius:5px; line-height:1.42; }
+.node { position:relative; padding:2px 56px 2px 8px; border-radius:5px; line-height:var(--lh); }
 .node:hover { background:var(--bg1); }
 .node.hdr0 { font-weight:700; color:var(--blue); margin-top:14px; font-size:1.05em; }
 .node.sect { font-weight:700; color:var(--orange); margin-top:16px; text-transform:uppercase; font-size:.85em; letter-spacing:.06em; }
 .node.bold { font-weight:600; }
-.node.topic { font-weight:600; color:#7fc9ff; }
+.node.topic { font-weight:600; color:var(--topic); }
 .node .bullet { color:var(--text4); margin-right:6px; }
 /* depth markers: ▸/▪ topic · • point · ◦ sub-point · – detail, each dimmer */
 .bullet.b1 { color:var(--text2); }
 .bullet.b2 { color:var(--text3); }
 .bullet.b3 { color:var(--text4); font-size:.9em; }
 .bullet.b4 { color:var(--text4); font-size:.85em; }
-.node .acs { font-size:.68em; color:var(--bg0); background:var(--text4); border-radius:4px; padding:1px 5px; margin-left:7px; vertical-align:middle; white-space:nowrap; }
+.node .acs, .wk-t .acs { font-size:.68em; color:var(--coral); background:var(--acs-bg); border:1px solid var(--acs-bd); border-radius:4px; padding:0 5px; margin-left:7px; vertical-align:middle; white-space:nowrap; }
 .node img { max-width:92%; display:block; margin:8px 0; border-radius:8px; border:1px solid var(--bdr); }
 .node.tblrow { color:var(--text2); font-size:.92em; }
 .node .nbtns { position:absolute; right:2px; top:2px; display:none; gap:2px; }
@@ -85,10 +98,10 @@ select { background:var(--btn); color:var(--text2); border:1px solid var(--bdr);
 .nb { width:20px; height:20px; border-radius:5px; border:1px solid var(--bdr); background:var(--bg2); color:var(--text3); font-size:12px; line-height:18px; text-align:center; cursor:pointer; user-select:none; }
 .nb:hover { color:var(--text); border-color:var(--text4); }
 .nb.add:hover { color:var(--lime); border-color:var(--lime); }
-.node.selected { background:rgba(136,255,102,.07); }
+.node.selected { background:var(--sel-bg); }
 .node.selected .nbtns { display:flex; }
-.node.selected .nb.add { color:var(--lime); border-color:var(--lime); background:rgba(136,255,102,.12); }
-.node.speaking { background:rgba(68,170,255,.14); outline:1px solid rgba(68,170,255,.4); }
+.node.selected .nb.add { color:var(--lime); border-color:var(--lime); background:var(--sel-bg2); }
+.node.speaking { background:var(--spk-bg); outline:1px solid var(--spk-bd); }
 
 /* ===== pane title (which AOE / task you are in) ===== */
 .pane-title { margin:0 0 14px; padding-bottom:9px; border-bottom:1px solid var(--bdr); }
@@ -114,16 +127,16 @@ select { background:var(--btn); color:var(--text2); border:1px solid var(--bdr);
 /* ===== tabs ===== */
 .tabs { display:flex; gap:2px; }
 .tab { padding:4px 12px; font-size:11.5px; cursor:pointer; border-radius:6px 6px 0 0; color:var(--text3); background:transparent; border:1px solid transparent; text-transform:none; letter-spacing:0; }
-.tab.active { color:var(--text); background:var(--bg2); border-color:var(--bdr); border-bottom-color:var(--bg2); }
+.tab.active { color:var(--text); background:var(--bg0); border-color:var(--bdr); border-bottom-color:var(--bg0); }
 .tab:hover { color:var(--text); }
 .tab .mcount { color:var(--lime); font-weight:700; }
 
 /* ===== my script ===== */
-.ms-item { position:relative; padding:3px 84px 3px 26px; border-radius:5px; line-height:1.48; }
+.ms-item { position:relative; padding:3px 84px 3px 26px; border-radius:5px; line-height:var(--lh); }
 .ms-item.sect { font-weight:700; color:var(--orange); margin-top:22px; margin-bottom:4px; text-transform:uppercase;
                 font-size:.85em; letter-spacing:.06em; padding-bottom:4px; border-bottom:1px solid var(--bdr); }
 .ms-item.hdr0 { font-weight:700; color:var(--blue); margin-top:16px; margin-bottom:3px; font-size:1.05em; }
-.ms-item.topic { font-weight:600; color:#7fc9ff; margin-top:9px; }
+.ms-item.topic { font-weight:600; color:var(--topic); margin-top:9px; }
 .ms-item .bullet { color:var(--text4); margin-right:6px; }
 .ms-item .bullet.b1 { color:var(--text2); }
 .ms-item .bullet.b2 { color:var(--text3); }
@@ -157,7 +170,7 @@ select { background:var(--btn); color:var(--text2); border:1px solid var(--bdr);
 #fcard .fc-back .bk { padding:3px 0 3px 0; color:var(--text); }
 #fcard .fc-back .bk.sub { padding-left:20px; color:var(--text2); font-size:.94em; }
 #fcard .fc-back .bk.act { color:var(--lime); font-weight:600; }
-#fcard .fc-back .bk b { color:#7fc9ff; }
+#fcard .fc-back .bk b { color:var(--topic); }
 #card-actions { display:flex; gap:10px; margin-top:14px; }
 #card-actions button { flex:1; padding:13px; font-size:14px; border-radius:10px; border:1px solid var(--bdr);
                        background:var(--bg2); cursor:pointer; font-family:inherit; font-weight:600; }
@@ -178,10 +191,10 @@ select { background:var(--btn); color:var(--text2); border:1px solid var(--bdr);
 .flow-item { display:flex; gap:9px; align-items:baseline; padding:3px 6px; border-radius:5px; cursor:pointer; line-height:1.35; }
 .flow-item:hover { background:var(--bg1); }
 .flow-num { color:var(--text4); font-size:.8em; min-width:20px; text-align:right; flex-shrink:0; font-variant-numeric:tabular-nums; }
-.flow-text { color:#7fc9ff; font-weight:600; }
+.flow-text { color:var(--topic); font-weight:600; }
 .flow-item.sub .flow-text { color:var(--text2); font-weight:400; font-size:.94em; }
 .flow-item.d2 { margin-left:26px; padding-top:2px; padding-bottom:2px; }
-.flow-item.d2 .flow-text { color:#7fc9ff; font-weight:600; font-size:.93em; }
+.flow-item.d2 .flow-text { color:var(--topic); font-weight:600; font-size:.93em; }
 .flow-item.d3 { margin-left:44px; padding-top:1px; padding-bottom:1px; }
 .flow-item.d3 .flow-num { color:var(--text4); }
 .flow-item.d3 .flow-text { color:var(--text2); font-weight:400; font-size:.9em; }
@@ -200,8 +213,8 @@ kbd { background:var(--bg3); border:1px solid var(--text4); border-radius:4px; p
 .toc-item.sect { color:var(--orange); text-transform:uppercase; font-size:10px; letter-spacing:.05em; margin-top:4px; }
 .toc-item.deep { padding-left:46px; color:var(--text4); font-size:11px; }
 .toc-item.deep:hover { color:var(--text2); }
-.toc-item.here { color:#ffd24a; border-left-color:#ffd24a; background:rgba(255,210,74,.07); font-weight:600; }
-.toc-item.here.sect { color:#ffd24a; }
+.toc-item.here { color:var(--accent2); border-left-color:var(--accent2); background:var(--here-bg); font-weight:600; }
+.toc-item.here.sect { color:var(--accent2); }
 
 /* ===== nav: library (documents · videos · links) ===== */
 /* library lives in the main sidebar scroll, one divider per section;
@@ -243,7 +256,7 @@ kbd { background:var(--bg3); border:1px solid var(--text4); border-radius:4px; p
 #nav-settings .tctl input[type=range] { flex:1; margin-left:8px; }
 
 /* ===== toolbar toggles & read mode ===== */
-.tbtn.on { color:var(--bg0); background:var(--blue); border-color:var(--blue); font-weight:600; }
+.tbtn.on { color:var(--on-blue); background:var(--blue); border-color:var(--blue); font-weight:600; }
 #read-ctl { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
 body:not(.readmode) #read-ctl { display:none; }
 body:not(.readmode) .nb.play, body:not(.readmode) .mb.play { display:none !important; }
@@ -263,7 +276,7 @@ body.nosplit #pane-ext { display:none; }
 #sync-state.err { color:var(--orange); }
 
 /* ===== pdf viewer ===== */
-#pv-stage { border:1px solid var(--bdr); border-radius:10px; background:#26262e; overflow:auto;
+#pv-stage { border:1px solid var(--bdr); border-radius:10px; background:#343432; overflow:auto;
             max-height:calc(100vh - 130px); text-align:center; position:relative; }
 #pv-canvas { display:inline-block; margin:8px 0; background:#fff; box-shadow:0 4px 18px rgba(0,0,0,.5); }
 #pv-msg { position:absolute; top:16px; left:0; right:0; color:var(--text3); font-size:13px; }
@@ -282,10 +295,10 @@ body.nosplit #pane-ext { display:none; }
 .pv-total { color:var(--text4); font-size:12px; }
 
 /* ===== school standards card ===== */
-.school-card { background:var(--bg1); border:1px solid rgba(136,255,102,.25); border-radius:10px;
+.school-card { background:var(--bg1); border:1px solid var(--lime-bd); border-radius:10px;
                padding:10px 14px; margin:0 0 12px; font-size:.88em; }
 .sc-head { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
-.sc-tag { background:var(--lime); color:var(--bg0); font-weight:700; font-size:.68em; border-radius:4px; padding:1px 6px; }
+.sc-tag { background:var(--lime); color:var(--on-lime); font-weight:700; font-size:.68em; border-radius:4px; padding:1px 6px; }
 .sc-title { color:var(--text); font-weight:600; flex:1; font-size:.92em; }
 .sc-var { color:var(--lime); font-weight:600; font-size:.82em; margin:7px 0 2px; }
 .sc-grid { display:grid; grid-template-columns:auto 1fr; gap:2px 14px; margin:4px 0; }
@@ -303,7 +316,7 @@ body.nosplit #pane-ext { display:none; }
               font-size:.62em; font-weight:700; letter-spacing:.04em; vertical-align:middle;
               color:var(--orange); border:1px solid rgba(255,170,0,.35); background:rgba(255,170,0,.07);
               text-transform:none; white-space:nowrap; }
-.inline-ref:hover { color:var(--bg0); background:var(--orange); border-color:var(--orange); }
+.inline-ref:hover { color:var(--on-orange); background:var(--orange); border-color:var(--orange); }
 body.noedit .inline-ref { opacity:.85; }
 
 /* ===== handbook deep links ===== */
@@ -317,7 +330,7 @@ body.noedit .inline-ref { opacity:.85; }
 
 /* ===== reference links ===== */
 a.reflink { color:var(--orange); text-decoration:none; border-bottom:1px dotted currentColor; }
-a.reflink:hover { color:#ffc84d; border-bottom-style:solid; }
+a.reflink:hover { color:var(--accent2); border-bottom-style:solid; }
 .ms-link { padding:3px 0 3px 26px; font-size:.92em; }
 .ms-link a.reflink { border-bottom:none; }
 .ms-link a.reflink::before { content:'🔗 '; font-size:.85em; }
@@ -404,7 +417,7 @@ a.reflink:hover { color:#ffc84d; border-bottom-style:solid; }
             cursor:pointer; border-left:2px solid transparent; }
 .acs-item:hover { background:var(--bg2); border-left-color:var(--blue); }
 .acs-item.sub { padding-left:26px; }
-.acs-item .ac-code { color:var(--text4); font-size:10.5px; min-width:96px; flex-shrink:0;
+.acs-item .ac-code { color:var(--coral); font-size:10.5px; min-width:96px; flex-shrink:0;
                      font-variant-numeric:tabular-nums; }
 .acs-item.sub .ac-code { min-width:82px; }
 .acs-item .ac-text { color:var(--text2); flex:1; line-height:1.35; }
@@ -435,6 +448,112 @@ a.reflink:hover { color:#ffc84d; border-bottom-style:solid; }
   #dock-next { text-align:right; padding-right:16px; }
 }
 
+/* ===== look & feel panel ===== */
+#lf-modal { position:fixed; inset:0; z-index:180; background:rgba(0,0,0,.55);
+            display:none; align-items:center; justify-content:center; padding:20px; }
+#lf-modal.show { display:flex; }
+#lf-box { width:100%; max-width:520px; max-height:88vh; display:flex; flex-direction:column;
+          background:var(--bg1); border:1px solid var(--bdr); border-radius:14px; overflow:hidden;
+          box-shadow:0 18px 50px rgba(0,0,0,.5); }
+.lf-head { display:flex; align-items:center; gap:10px; padding:12px 16px;
+           border-bottom:1px solid var(--bdr); background:var(--chrome); }
+.lf-head h2 { font-size:14px; font-weight:700; color:var(--text); margin-right:auto; letter-spacing:.02em; }
+.lf-body { padding:14px 16px; overflow-y:auto; }
+.lf-sec { font-size:10.5px; text-transform:uppercase; letter-spacing:.1em; color:var(--text3);
+          margin:16px 0 8px; border-bottom:1px solid var(--bdr); padding-bottom:5px; }
+.lf-sec:first-child { margin-top:0; }
+.lf-presets { display:grid; grid-template-columns:repeat(auto-fit, minmax(96px,1fr)); gap:7px; }
+.lf-preset { border:1px solid var(--bdr); border-radius:9px; padding:8px 6px 7px; cursor:pointer;
+             background:var(--bg2); font-family:inherit; font-size:11.5px; color:var(--text2); }
+.lf-preset:hover { color:var(--text); border-color:var(--text4); }
+.lf-preset.on { border-color:var(--blue); color:var(--text); }
+.lf-swatch { display:flex; gap:3px; justify-content:center; margin-bottom:5px; }
+.lf-swatch i { width:13px; height:13px; border-radius:4px; border:1px solid rgba(128,128,128,.35); }
+.lf-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px,1fr)); gap:8px 12px; }
+.lf-col { display:flex; align-items:center; gap:9px; font-size:12.5px; color:var(--text2); }
+.lf-col input[type=color] { width:30px; height:24px; padding:0; border:1px solid var(--bdr);
+                            border-radius:6px; background:none; cursor:pointer; flex:0 0 auto; }
+.lf-col span { flex:1; }
+.lf-row { display:flex; align-items:center; gap:11px; font-size:12.5px; color:var(--text2); padding:5px 0; }
+.lf-row > span:first-child { width:106px; flex:0 0 auto; }
+.lf-row input[type=range] { flex:1; accent-color:var(--blue); }
+.lf-row .lf-val { width:52px; text-align:right; color:var(--text3); font-variant-numeric:tabular-nums; }
+.lf-foot { display:flex; gap:8px; padding:11px 16px; border-top:1px solid var(--bdr);
+           background:var(--chrome); }
+.lf-foot .tbtn:last-child { margin-left:auto; }
+.lf-preset.mine { border-style:dashed; }
+.lf-preset .lf-del { position:absolute; top:2px; right:5px; color:var(--text4); font-size:11px; line-height:1; }
+.lf-preset .lf-del:hover { color:var(--red); }
+.lf-preset { position:relative; }
+.lf-save { display:flex; gap:7px; margin-top:9px; }
+.lf-save input { flex:1; min-width:0; background:var(--bg2); border:1px solid var(--bdr); color:var(--text);
+                 border-radius:7px; padding:5px 9px; font-size:12px; font-family:inherit; outline:none; }
+.lf-save input:focus { border-color:var(--blue); }
+.lf-note { font-size:11px; color:var(--text4); margin-top:12px; line-height:1.45; }
+
+/* ===== CFI / CFII mode switch + worksheet ===== */
+#mode-switch { display:flex; gap:3px; margin-top:9px; }
+#mode-switch button { flex:1; background:var(--btn); color:var(--text3); border:1px solid var(--bdr);
+                      border-radius:6px; padding:4px 0; font-size:11px; font-family:inherit;
+                      cursor:pointer; letter-spacing:.08em; font-weight:600; }
+#mode-switch button:hover { color:var(--text); }
+#mode-switch button.on { background:var(--bg2); color:var(--text); border-color:var(--blue); }
+
+body.cfii #pane-ext, body.cfii #pane-right { display:none; }
+body:not(.cfii) #pane-wk { display:none; }
+body.cfii #pane-wk { display:flex; }
+body.cfii #tgl-split, body.cfii #tgl-read, body.cfii #read-ctl,
+body.cfii #pane-switch, body.cfii #tgl-edit { display:none !important; }
+
+#wk-body { padding-bottom:50vh; }
+#wk-inner { max-width:var(--measure); }
+/* the printed plan's own geometry: 65/35, full-width, 4-across, 50/50 */
+.wk-rows { display:flex; flex-direction:column; gap:10px; margin-bottom:14px; }
+.wk-cardrow { display:flex; gap:10px; align-items:stretch; }
+.wk-cardrow > .front-card { min-width:0; }
+.wk-cardrow.solo > .front-card { flex:1 1 auto; }
+@media (max-width: 820px) { .wk-cardrow { flex-wrap:wrap; }
+  .wk-cardrow > .front-card { flex:1 1 100% !important; } }
+.front-card.writein { display:flex; flex-direction:column; }
+.front-card .fc-hint { color:var(--text4); font-style:italic; font-size:.92em;
+                       padding:1px 0 1px 11px; position:relative; line-height:1.35; }
+.front-card .fc-hint::before { content:none; }
+.wk-head { font-size:10.5px; text-transform:uppercase; letter-spacing:.1em; color:var(--text3);
+           border-bottom:1px solid var(--bdr); padding-bottom:5px; margin:26px 0 10px; }
+.wk-head:first-of-type { margin-top:4px; }
+.wk-node { position:relative; }
+.wk-row { display:flex; gap:9px; align-items:baseline; padding:2px 0; }
+.wk-num { color:var(--num); opacity:.62; font-variant-numeric:tabular-nums; flex:0 0 auto; }
+.wk-t { flex:1; line-height:var(--lh); }
+.wk-1 { margin-top:22px; }
+.wk-1 > .wk-row > .wk-num { color:var(--num); opacity:1; font-weight:700; }
+.wk-1 > .wk-row > .wk-t { color:var(--text); font-weight:700; font-size:1.07em; }
+.wk-2 { margin-left:24px; margin-top:7px; }
+.wk-2 > .wk-row > .wk-num { opacity:.78; }
+.wk-2 > .wk-row > .wk-t { color:var(--text); font-weight:600; }
+.wk-3 { margin-left:22px; }
+.wk-3 > .wk-row > .wk-t { color:var(--text2); }
+.wk-mp { color:var(--note); font-size:.89em; font-style:italic; margin:0 0 3px 26px; line-height:1.4; }
+/* a real textarea, not a contenteditable — the list editor needs value +
+   selectionStart, and a plain textarea is the only thing that gives both
+   reliably on iOS as well as desktop */
+.wk-fill { display:block; width:calc(100% - 26px); margin:3px 0 7px 26px;
+           padding:4px 10px; border:none; border-left:2px dashed var(--bdr);
+           border-radius:0 5px 5px 0; background:transparent; color:var(--text2);
+           font-family:inherit; font-size:inherit; line-height:1.5; resize:none;
+           overflow:hidden; outline:none; min-height:26px; }
+.wk-fill::placeholder { color:var(--text4); font-style:italic; }
+.wk-fill:hover { background:var(--bg1); border-left-color:var(--text4); }
+.wk-fill:focus { background:var(--bg1); border-left:2px solid var(--blue); color:var(--text); }
+.wk-fill.has { border-left:2px solid var(--lime); color:var(--text); }
+.wk-fill.incard { width:100%; margin:7px 0 0; min-height:52px; }
+.wk-fill.big { min-height:96px; }
+@media (pointer: coarse) { .wk-fill { font-size:16px; } }
+.wk-concl { margin:34px 0 0; padding-top:12px; border-top:1px solid var(--bdr);
+            color:var(--text3); font-size:.9em; }
+.wk-progress { color:var(--text3); font-size:11.5px; text-transform:none; letter-spacing:0; margin-left:auto; }
+.wk-progress b { color:var(--lime); }
+
 ::-webkit-scrollbar { width:9px; }
 ::-webkit-scrollbar-thumb { background:var(--bg3); border-radius:5px; }
 ::-webkit-scrollbar-track { background:transparent; }
@@ -458,6 +577,10 @@ a.reflink:hover { color:#ffc84d; border-bottom-style:solid; }
     <div id="nav-head">
       <h1>CFI BINDER</h1>
       <div class="sub">lesson plans · slides · scripts</div>
+      <div id="mode-switch">
+        <button data-mode="cfi" class="on">CFI</button>
+        <button data-mode="cfii">CFII</button>
+      </div>
       <input id="search" type="text" placeholder="Filter lessons…">
     </div>
     <div id="nav-scroll">
@@ -467,15 +590,15 @@ a.reflink:hover { color:#ffc84d; border-bottom-style:solid; }
     <div id="nav-settings">
       <div class="ns-label" id="ns-toggle"><span>Settings</span><span class="tri">▾</span></div>
       <div id="ns-body">
-      <button class="tbtn" id="btn-copy">Copy My Lesson Plan</button>
-      <button class="tbtn" id="btn-dl">Export My Lesson Plan (.md)</button>
+      <button class="tbtn" id="btn-copy">Copy this page</button>
+      <button class="tbtn" id="btn-dl">Export this page (.md)</button>
       <button class="tbtn" id="btn-offline">⤓ Save binder offline</button>
       <div id="offline-state">checking…</div>
-      <button class="tbtn" id="btn-offline-lib">⤓ Save all documents (360 MB)</button>
+      <button class="tbtn" id="btn-offline-lib">⤓ Save all documents (409 MB)</button>
       <div id="offline-lib-state"></div>
       <div id="sync-state">sync: starting…</div>
       <button class="tbtn" id="btn-update">↻ Force update</button>
-      <div class="tctl">Aa <input type="range" id="fsize" min="12" max="20" step="1" value="15"></div>
+      <button class="tbtn" id="btn-look">🎨 Look &amp; Feel</button>
       </div>
     </div>
   </nav>
@@ -511,6 +634,13 @@ a.reflink:hover { color:#ffc84d; border-bottom-style:solid; }
         <div class="pane-body" id="lp-body" style="display:none"></div>
         <div class="pane-body" id="acs-body" style="display:none"></div>
       </div>
+      <div class="pane" id="pane-wk">
+        <div class="pane-head">
+          <div class="tabs"><div class="tab active">Worksheet</div></div>
+          <span class="wk-progress" id="wk-progress"></span>
+        </div>
+        <div class="pane-body" id="wk-body"></div>
+      </div>
       <div class="pane" id="pane-right">
         <div class="pane-head">
           <div class="tabs">
@@ -530,6 +660,47 @@ a.reflink:hover { color:#ffc84d; border-bottom-style:solid; }
   </div>
 </div>
 <div id="toast"></div>
+
+<!-- look & feel: presets, accent colours, text scale -->
+<div id="lf-modal">
+  <div id="lf-box">
+    <div class="lf-head"><h2>Look &amp; Feel</h2><button class="tbtn" id="lf-x">✕</button></div>
+    <div class="lf-body">
+      <div class="lf-sec">Preset</div>
+      <div class="lf-presets" id="lf-presets"></div>
+      <div class="lf-save">
+        <input id="lf-name" type="text" placeholder="Name this look…" maxlength="28">
+        <button class="tbtn" id="lf-save">Save</button>
+      </div>
+
+      <div class="lf-sec">Colours</div>
+      <div class="lf-grid">
+        <label class="lf-col"><input type="color" data-tok="bg0"><span>Page</span></label>
+        <label class="lf-col"><input type="color" data-tok="chrome"><span>Sidebar &amp; bars</span></label>
+        <label class="lf-col"><input type="color" data-tok="text"><span>Text</span></label>
+        <label class="lf-col"><input type="color" data-tok="num"><span>Numbers</span></label>
+        <label class="lf-col"><input type="color" data-tok="note"><span>Notes &amp; asides</span></label>
+        <label class="lf-col"><input type="color" data-tok="blue"><span>Links &amp; buttons</span></label>
+        <label class="lf-col"><input type="color" data-tok="orange"><span>Section labels</span></label>
+        <label class="lf-col"><input type="color" data-tok="lime"><span>Highlight</span></label>
+        <label class="lf-col"><input type="color" data-tok="coral"><span>ACS codes</span></label>
+      </div>
+
+      <div class="lf-sec">Text &amp; layout</div>
+      <div class="lf-row"><span>Text size</span><input type="range" id="lf-fs" min="12" max="22" step="1"><span class="lf-val" id="lf-fs-v"></span></div>
+      <div class="lf-row"><span>Line spacing</span><input type="range" id="lf-lh" min="1.2" max="2" step="0.05"><span class="lf-val" id="lf-lh-v"></span></div>
+      <div class="lf-row"><span>Content width</span><input type="range" id="lf-measure" min="720" max="1800" step="20"><span class="lf-val" id="lf-measure-v"></span></div>
+
+      <div class="lf-note">Panels, borders and dimmed text are worked out from the page and
+      text colours, so they stay in step with whatever you pick. Saved looks follow you
+      to your phone and tablet.</div>
+    </div>
+    <div class="lf-foot">
+      <button class="tbtn" id="lf-reset">Reset to defaults</button>
+      <button class="tbtn primary" id="lf-done">Done</button>
+    </div>
+  </div>
+</div>
 
 <!-- full-screen figure viewer -->
 <div id="lightbox">
@@ -558,6 +729,7 @@ a.reflink:hover { color:#ffc84d; border-bottom-style:solid; }
 <script src="draw.js"></script>
 <script src="figs.js"></script>
 <script src="acs.js"></script>
+<script src="cfii.js"></script>
 <script src="vendor/pdf.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
@@ -569,8 +741,27 @@ const LS_KEY = 'cfi-condenser-v1';
 
 let store = { sel: {}, prefs: { rate: 1.4, voice: '', fs: 15 }, last: null };
 try { const raw = localStorage.getItem(LS_KEY); if (raw) store = Object.assign(store, JSON.parse(raw)); } catch(e) {}
+// Worksheet answers are keyed by outline path, and that key becomes a Firebase
+// path segment — one containing "." (or # $ / [ ]) makes set() reject the whole
+// payload, silently killing sync. Repair any that predate the '-' separator.
+if (store.wk) Object.keys(store.wk).forEach(k => {
+  const m = store.wk[k];
+  if (!m || typeof m !== 'object') return;
+  Object.keys(m).forEach(path => {
+    if (!/[.#$/[\]]/.test(path)) return;
+    m[path.replace(/[.#$/[\]]/g, '-')] = m[path];
+    delete m[path];
+  });
+});
 function save() {
+  // stamps the open lesson as edited — ONLY for real selection/note/edit changes
   if (curKey && !applyingRemote) (store.selTs = store.selTs || {})[curKey] = Date.now();
+  savePrefs();
+}
+/* Preferences, navigation and theme changes must not touch selTs. Sync is
+   newest-wins per lesson, so stamping on a mere lesson-open let an untouched
+   lesson beat the real edits sitting on another device. */
+function savePrefs() {
   localStorage.setItem(LS_KEY, JSON.stringify(store));
   if (typeof schedulePush === 'function' && !applyingRemote) schedulePush();
 }
@@ -580,8 +771,40 @@ let curKey = null;     // selection key
 let tocOpen = false;   // the open lesson's topic list in the sidebar (arrow-toggled)
 let openAoes = new Set(D.aoes.map(a => a.num));
 
+/* ---------- CFI / CFII mode ----------
+   CFII is a worksheet, not a script: the header and intro come over verbatim
+   from the Backseat Pilot plan, the body is titles only, and Collin fills in
+   the rest himself. It rides in its own pane so nothing on the CFI side moves. */
+let mode = store.prefs.mode === 'cfii' ? 'cfii' : 'cfi';
+function DATA() { return mode === 'cfii' ? (window.CFII_DATA || { aoes: [] }) : D; }
+(window.CFII_DATA || { aoes: [] }).aoes.forEach(a => openAoes.add(a.num));
+
+function setMode(m) {
+  if (m === mode) return;
+  mode = m;
+  store.prefs.mode = m;
+  tocOpen = false; cur = null; curKey = null;
+  document.body.classList.toggle('cfii', m === 'cfii');
+  document.querySelectorAll('#mode-switch button').forEach(b => b.classList.toggle('on', b.dataset.mode === m));
+  $('#search').value = '';
+  renderNav('');
+  const set = DATA().aoes;
+  const want = (store.prefs.lastBy || {})[m];
+  let hit = null;
+  set.forEach(a => a.lessons.forEach(l => { if (l.id === want) hit = { a, l }; }));
+  if (!hit && set.length && set[0].lessons.length) hit = { a: set[0], l: set[0].lessons[0] };
+  if (hit) loadLesson(hit.a, hit.l);
+  else { $('#lesson-title').childNodes[0].textContent = 'No CFII lessons built yet'; $('#wk-body').innerHTML = ''; }
+  savePrefs();
+}
+document.querySelectorAll('#mode-switch button').forEach(b => b.onclick = () => setMode(b.dataset.mode));
+
 /* ---------- sidebar ---------- */
 function selCount(key) {
+  if (mode === 'cfii') {
+    const w = store.wk && store.wk[key];
+    return w ? Object.keys(w).filter(k => (w[k] || '').trim()).length : 0;
+  }
   const s = store.sel[key];
   return s ? (s.x ? s.x.length : 0) + (s.c ? s.c.length : 0) : 0;
 }
@@ -589,7 +812,7 @@ function renderNav(filter) {
   const list = $('#nav-list');
   list.innerHTML = '';
   const f = (filter || '').toLowerCase();
-  D.aoes.forEach(aoe => {
+  DATA().aoes.forEach(aoe => {
     const lessons = aoe.lessons.filter(l => !f || l.title.toLowerCase().includes(f) || aoe.name.toLowerCase().includes(f));
     if (!lessons.length) return;
     const hdr = document.createElement('div');
@@ -647,6 +870,7 @@ function activeOutline() {
   return cur.lesson.con ? { nodes: cur.lesson.con.nodes, src: 'c' } : null;
 }
 function renderToc(container) {
+  if (mode === 'cfii') return renderWkToc(container);
   const o = activeOutline();
   if (!o) return;
   // same topic filter the Flow tab uses — headings and ACS elements, not prose
@@ -667,7 +891,7 @@ function renderToc(container) {
 
 /* ---------- scroll-spy: light up where you are ---------- */
 function visiblePaneBody() {
-  for (const s of ['#mine-body', '#con-body', '#flow-body', '#lp-body', '#ext-body']) {
+  for (const s of ['#wk-body', '#mine-body', '#con-body', '#flow-body', '#lp-body', '#ext-body']) {
     const el = $(s);
     if (el && el.style.display !== 'none' && el.offsetParent) return el;
   }
@@ -710,7 +934,7 @@ function onPaneScroll() {
   spyTick = true;
   requestAnimationFrame(() => { spyTick = false; syncTocHighlight(); showDock(); });
 }
-['#mine-body', '#con-body', '#flow-body', '#lp-body', '#ext-body'].forEach(s => {
+['#wk-body', '#mine-body', '#con-body', '#flow-body', '#lp-body', '#ext-body'].forEach(s => {
   const el = document.querySelector(s);
   if (el) el.addEventListener('scroll', onPaneScroll, { passive: true });
 });
@@ -1143,7 +1367,10 @@ function loadLesson(aoe, l) {
   stopReading();
   cur = { aoe, lesson: l };
   curKey = l.id;
-  store.last = l.id; save();
+  store.last = l.id;
+  (store.prefs.lastBy = store.prefs.lastBy || {})[mode] = l.id;
+  savePrefs();
+  if (mode === 'cfii') return loadWorksheet(l);
   $('#lesson-title').childNodes[0].textContent = l.title;
   const refs = (l.ext && l.ext.refs) || (l.con && l.con.refs) || '';
   $('#lesson-title .refs').textContent = refs ? 'Refs: ' + refs : '';
@@ -1357,6 +1584,11 @@ const BOOK_PATTERNS = [
   [/risk management|\bRMH\b/i,     'FAA-H-8083-2'],
   [/weight *(&|and) *balance/i,    'FAA-H-8083-1'],
   [/aviation weather|\bAWH\b/i,    'FAA-H-8083-28'],
+  [/instrument flying|\bIFH\b/i,    'FAA-H-8083-15'],
+  [/instrument procedures|\bIPH\b/i, 'FAA-H-8083-16'],
+  [/aeronautical information manual|\bAIM\b/, 'AIM'],
+  [/\bAC[- ]?61[- ]?65\b/i,        'AC61-65'],
+  [/\bAC[- ]?61[- ]?98\b/i,        'AC61-98'],
 ];
 function chapterPage(bcode, ch) {
   const book = CFI_REFS.books[bcode];
@@ -1425,10 +1657,12 @@ function refChipEl(ref, compact) {
   if (!book) return null;
   const a = document.createElement('span');
   a.className = 'inline-ref';
-  a.textContent = `${book.abbr} p.${ref.p}`;
-  a.title = ref.exact
-    ? `${book.name} — this topic starts on page ${ref.p}`
-    : `${book.name} — Chapter ${ref.ch}: ${ref.t} (opens at page ${ref.p})`;
+  a.textContent = ref.ch ? `${book.abbr} p.${ref.p}` : book.abbr;
+  a.title = !ref.ch
+    ? `${book.name} — opens the whole book`
+    : ref.exact
+      ? `${book.name} — this topic starts on page ${ref.p}`
+      : `${book.name} — Chapter ${ref.ch}: ${ref.t} (opens at page ${ref.p})`;
   a.onclick = e => {
     e.stopPropagation();
     openDoc(`${book.file}#page=${ref.p}`, `${book.name} — p.${ref.p}`);
@@ -1653,18 +1887,21 @@ function myScriptText() {
   }
   return out;
 }
+// in CFII the buttons export the worksheet — same buttons, whatever is on screen
+function exportText() { return mode === 'cfii' ? worksheetText() : myScriptText(); }
+function exportName() { return mode === 'cfii' ? ' - Worksheet.md' : ' - My Lesson Plan.md'; }
 $('#btn-copy').onclick = () => {
-  const t = myScriptText();
-  if (!t.trim()) return toast('My Lesson Plan is empty');
+  const t = exportText();
+  if (!t.trim()) return toast(mode === 'cfii' ? 'Nothing to copy yet' : 'My Lesson Plan is empty');
   navigator.clipboard.writeText(t).then(() => toast('Copied to clipboard'));
 };
 $('#btn-dl').onclick = () => {
   if (!cur) return;
-  const t = myScriptText();
-  if (!t.trim()) return toast('My Lesson Plan is empty');
+  const t = exportText();
+  if (!t.trim()) return toast(mode === 'cfii' ? 'Nothing to export yet' : 'My Lesson Plan is empty');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([t], { type: 'text/markdown' }));
-  a.download = cur.lesson.title.replace(/[^\w.& -]+/g, '') + ' - My Lesson Plan.md';
+  a.download = cur.lesson.title.replace(/[^\w.& -]+/g, '') + exportName();
   a.click();
   toast('Exported');
 };
@@ -1729,10 +1966,10 @@ function jumpToNode(src, i) {
       if (el) { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); flashEl(el); }
       return;
     }
-    splitView = true; store.prefs.split = true; save(); applyModes();  // extra detail needs the left pane
+    splitView = true; store.prefs.split = true; savePrefs(); applyModes();  // extra detail needs the left pane
   }
   setLeftTab(src === 'x' ? 'ext' : 'lp');
-  store.prefs.leftTab = src === 'x' ? 'ext' : 'lp'; save();
+  store.prefs.leftTab = src === 'x' ? 'ext' : 'lp'; savePrefs();
   const pane = src === 'x' ? '#ext-body' : '#lp-body';
   const el = document.querySelector(`${pane} .node[data-idx="${i}"]`);
   if (el) { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); flashEl(el); }
@@ -1760,7 +1997,7 @@ function renderFlow() {
                     `<span class="hint">${count} topics · click any line to jump to it</span>`;
   fb.appendChild(tools);
   tools.querySelector('#flow-mask').onclick = () => { flowMasked = !flowMasked; renderFlow(); };
-  tools.querySelector('#flow-deep').onclick = () => { store.prefs.flowDeep = !deep; save(); renderFlow(); };
+  tools.querySelector('#flow-deep').onclick = () => { store.prefs.flowDeep = !deep; savePrefs(); renderFlow(); };
 
   let n = 0;
   topics.forEach(t => {
@@ -2146,7 +2383,7 @@ function jumpToAcs(code) {
 }
 document.querySelectorAll('.tab[data-ltab]').forEach(t => t.onclick = () => {
   setLeftTab(t.dataset.ltab);
-  store.prefs.leftTab = t.dataset.ltab; save();
+  store.prefs.leftTab = t.dataset.ltab; savePrefs();
 });
 
 /* ---------- TTS ---------- */
@@ -2256,7 +2493,7 @@ function populateVoices() {
 }
 synth.onvoiceschanged = populateVoices;
 populateVoices();
-$('#voice').onchange = e => { store.prefs.voice = e.target.value; save(); if (speaking) { const s = spkSrc, i = spkIdx; stopReading(); startReading(s, i); } };
+$('#voice').onchange = e => { store.prefs.voice = e.target.value; savePrefs(); if (speaking) { const s = spkSrc, i = spkIdx; stopReading(); startReading(s, i); } };
 
 let msPlaylist = [];   // rendered My Script lines, in display order
 function spokenNodes(src) {
@@ -2368,15 +2605,200 @@ $('#btn-stop').onclick = stopReading;
 $('#rate').oninput = e => {
   const r = parseFloat(e.target.value);
   $('#rate-val').textContent = r.toFixed(1) + 'x';
-  store.prefs.rate = r; save();
+  store.prefs.rate = r; savePrefs();
   if (ttsAudio && !ttsAudio.paused) ttsAudio.playbackRate = r; // neural: live, no restart
   else if (speaking && synth.speaking) { synth.cancel(); setTimeout(() => { if (speaking) speakCurrent(); }, 60); }
 };
-$('#fsize').oninput = e => { document.documentElement.style.setProperty('--fs', e.target.value + 'px'); store.prefs.fs = +e.target.value; save(); };
+/* ================= look & feel =================
+   Seven colours are picked; the rest of the palette is derived from them, so
+   panels, borders and dimmed text always sit at a sensible distance from the
+   page colour and a bad pick can't leave text unreadable. */
+const LOOK_KEYS = ['bg0', 'chrome', 'text', 'blue', 'orange', 'lime', 'coral', 'num', 'note'];
+const LOOK_PRESETS = {
+  slate:    { label: 'Slate',    bg0:'#2b2b2a', chrome:'#1e1e1d', text:'#f0eee9',
+              blue:'#44aaff', orange:'#ffaa00', lime:'#88ff66', coral:'#e08a63',
+              num:'#ffaa00', note:'#44aaff' },
+  midnight: { label: 'Midnight', bg0:'#08080a', chrome:'#101016', text:'#d0d0e0',
+              blue:'#44aaff', orange:'#ffaa00', lime:'#88ff66', coral:'#e08a63',
+              num:'#ffaa00', note:'#44aaff' },
+  warm:     { label: 'Warm',     bg0:'#2b2724', chrome:'#1d1a18', text:'#f2ece3',
+              blue:'#7cbce8', orange:'#e8a33d', lime:'#9ad36a', coral:'#e08a63',
+              num:'#e8a33d', note:'#7cbce8' },
+  paper:    { label: 'Paper',    bg0:'#f5f3ee', chrome:'#e4e0d7', text:'#23211e',
+              blue:'#1f6fb2', orange:'#a8660a', lime:'#3f8f2f', coral:'#b8542c',
+              num:'#a8660a', note:'#1f6fb2' },
+};
+const LOOK_DEFAULTS = Object.assign({ preset:'slate', fs:15, lh:1.45, measure:1100 },
+                                    LOOK_PRESETS.slate);
+delete LOOK_DEFAULTS.label;
+
+function hexToRgb(h) {
+  const m = /^#?([0-9a-f]{6})$/i.exec((h || '').trim());
+  if (!m) return { r: 128, g: 128, b: 128 };
+  const n = parseInt(m[1], 16);
+  return { r: n >> 16 & 255, g: n >> 8 & 255, b: n & 255 };
+}
+const toHex = c => '#' + [c.r, c.g, c.b].map(v =>
+  Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
+function mixHex(a, b, t) {
+  const x = hexToRgb(a), y = hexToRgb(b);
+  return toHex({ r: x.r + (y.r - x.r) * t, g: x.g + (y.g - x.g) * t, b: x.b + (y.b - x.b) * t });
+}
+function luma(h) { const c = hexToRgb(h); return (0.299 * c.r + 0.587 * c.g + 0.114 * c.b) / 255; }
+const onColour = h => luma(h) > 0.55 ? '#14140f' : '#ffffff';
+
+function look() {
+  const l = Object.assign({}, LOOK_DEFAULTS, store.prefs.look || {});
+  if (store.prefs.fs && !(store.prefs.look || {}).fs) l.fs = store.prefs.fs;  // carry the old slider over
+  return l;
+}
+function applyLook() {
+  const l = look(), r = document.documentElement.style;
+  LOOK_KEYS.forEach(k => r.setProperty('--' + k, l[k]));
+  // surfaces climb away from the page colour; dim text falls back toward it
+  r.setProperty('--bg1', mixHex(l.bg0, l.text, 0.07));
+  r.setProperty('--bg2', mixHex(l.bg0, l.text, 0.13));
+  r.setProperty('--bg3', mixHex(l.bg0, l.text, 0.20));
+  r.setProperty('--btn', mixHex(l.bg0, l.text, 0.10));
+  r.setProperty('--bdr', mixHex(l.bg0, l.text, 0.14));
+  r.setProperty('--text2', mixHex(l.text, l.bg0, 0.26));
+  r.setProperty('--text3', mixHex(l.text, l.bg0, 0.48));
+  r.setProperty('--text4', mixHex(l.text, l.bg0, 0.66));
+  r.setProperty('--topic', mixHex(l.blue, l.text, 0.30));
+  r.setProperty('--accent2', mixHex(l.orange, l.text, 0.26));
+  r.setProperty('--sel-bg', mixHex(l.bg0, l.lime, 0.10));
+  r.setProperty('--sel-bg2', mixHex(l.bg0, l.lime, 0.20));
+  r.setProperty('--spk-bg', mixHex(l.bg0, l.blue, 0.18));
+  r.setProperty('--spk-bd', mixHex(l.bg0, l.blue, 0.45));
+  r.setProperty('--acs-bg', mixHex(l.bg0, l.coral, 0.16));
+  r.setProperty('--acs-bd', mixHex(l.bg0, l.coral, 0.34));
+  r.setProperty('--lime-bd', mixHex(l.bg0, l.lime, 0.30));
+  r.setProperty('--here-bg', mixHex(l.bg0, l.orange, 0.10));
+  r.setProperty('--on-blue', onColour(l.blue));
+  r.setProperty('--on-lime', onColour(l.lime));
+  r.setProperty('--on-orange', onColour(l.orange));
+  r.setProperty('--fs', l.fs + 'px');
+  r.setProperty('--lh', l.lh);
+  r.setProperty('--measure', l.measure + 'px');
+  const meta = document.querySelector('meta[name=theme-color]');
+  if (meta) meta.setAttribute('content', l.chrome);
+}
+function setLook(patch, fromPreset) {
+  const l = Object.assign(look(), patch);
+  if (!fromPreset && Object.keys(patch).some(k => LOOK_KEYS.includes(k))) l.preset = 'custom';
+  store.prefs.look = l;
+  store.lookTs = Date.now();
+  applyLook();
+  savePrefs();
+  syncLookUI();
+}
+/* Saved looks live in an ARRAY, not an object keyed by name: a name Collin
+   types could contain "." or "/", which Firebase rejects as a key and which
+   would fail the whole push. */
+function myThemes() { return (store.themes = store.themes || []); }
+function saveTheme(name) {
+  const l = look(), t = { name };
+  LOOK_KEYS.concat(['fs', 'lh', 'measure']).forEach(k => { t[k] = l[k]; });
+  const list = myThemes();
+  const at = list.findIndex(x => x.name.toLowerCase() === name.toLowerCase());
+  if (at >= 0) list[at] = t; else list.push(t);
+  store.themesTs = Date.now();
+  store.prefs.look = Object.assign(look(), { preset: 'my:' + name });
+  store.lookTs = Date.now();
+  savePrefs();
+  buildLookPresets();
+  syncLookUI();
+  toast('Saved "' + name + '"');
+}
+function deleteTheme(name) {
+  store.themes = myThemes().filter(x => x.name !== name);
+  store.themesTs = Date.now();
+  if (look().preset === 'my:' + name) setLook({ preset: 'custom' }, true);
+  savePrefs();
+  buildLookPresets();
+  syncLookUI();
+}
+function syncLookUI() {
+  const l = look();
+  document.querySelectorAll('#lf-modal input[type=color]').forEach(i => { i.value = l[i.dataset.tok]; });
+  const set = (id, v, txt) => { const e = $(id); if (e) e.value = v; const t = $(id + '-v'); if (t) t.textContent = txt; };
+  set('#lf-fs', l.fs, l.fs + 'px');
+  set('#lf-lh', l.lh, (+l.lh).toFixed(2));
+  set('#lf-measure', l.measure, l.measure + 'px');
+  document.querySelectorAll('.lf-preset').forEach(b => b.classList.toggle('on', b.dataset.preset === l.preset));
+}
+function buildLookPresets() {
+  const host = $('#lf-presets');
+  if (!host) return;
+  host.innerHTML = '';
+  Object.entries(LOOK_PRESETS).forEach(([key, p]) => {
+    const b = document.createElement('button');
+    b.className = 'lf-preset';
+    b.dataset.preset = key;
+    b.innerHTML = '<span class="lf-swatch">' +
+      [p.bg0, p.blue, p.orange, p.lime].map(c => `<i style="background:${c}"></i>`).join('') +
+      `</span>${p.label}`;
+    b.onclick = () => {
+      const { label, ...cols } = p;
+      setLook(Object.assign({ preset: key }, cols), true);
+    };
+    host.appendChild(b);
+  });
+  myThemes().forEach(t => {
+    const b = document.createElement('button');
+    b.className = 'lf-preset mine';
+    b.dataset.preset = 'my:' + t.name;
+    b.innerHTML = '<span class="lf-del" title="Delete">✕</span><span class="lf-swatch">' +
+      [t.bg0, t.blue, t.num, t.note].map(c => `<i style="background:${c}"></i>`).join('') +
+      `</span>${escapeHtml(t.name)}`;
+    b.onclick = e => {
+      if (e.target.classList.contains('lf-del')) { e.stopPropagation(); deleteTheme(t.name); return; }
+      const { name, ...vals } = t;
+      setLook(Object.assign({ preset: 'my:' + name }, vals), true);
+    };
+    host.appendChild(b);
+  });
+}
+function openLook(on) {
+  $('#lf-modal').classList.toggle('show', on);
+  if (on) syncLookUI();
+}
+buildLookPresets();
+applyLook();
+$('#btn-look').onclick = () => openLook(true);
+$('#lf-x').onclick = () => openLook(false);
+$('#lf-done').onclick = () => openLook(false);
+$('#lf-modal').onclick = e => { if (e.target === $('#lf-modal')) openLook(false); };
+$('#lf-reset').onclick = () => {
+  store.prefs.look = Object.assign({}, LOOK_DEFAULTS);
+  store.lookTs = Date.now();
+  applyLook(); savePrefs(); buildLookPresets(); syncLookUI();
+};
+$('#lf-save').onclick = () => {
+  const el = $('#lf-name');
+  const name = (el.value || '').trim();
+  if (!name) { el.focus(); return; }
+  saveTheme(name);
+  el.value = '';
+};
+$('#lf-name').addEventListener('keydown', e => {
+  e.stopPropagation();
+  if (e.key === 'Enter') { e.preventDefault(); $('#lf-save').click(); }
+});
+document.querySelectorAll('#lf-modal input[type=color]').forEach(i =>
+  i.addEventListener('input', () => setLook({ [i.dataset.tok]: i.value })));
+$('#lf-fs').oninput = e => setLook({ fs: +e.target.value }, true);
+$('#lf-lh').oninput = e => setLook({ lh: +e.target.value }, true);
+$('#lf-measure').oninput = e => setLook({ measure: +e.target.value }, true);
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && $('#lf-modal').classList.contains('show')) { e.stopPropagation(); openLook(false); }
+}, true);
+
 
 /* keyboard */
 document.addEventListener('keydown', e => {
-  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.isContentEditable) return;
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA'
+      || e.target.tagName === 'SELECT' || e.target.isContentEditable) return;
   if (cardsVisible() && currentCard()) {   // cards take over the keys while showing
     if (e.code === 'Space') { e.preventDefault(); cardFlipped = !cardFlipped; renderCards(); }
     else if (e.key === 'ArrowRight') { e.preventDefault(); cardAnswer(true); }
@@ -2418,9 +2840,9 @@ function applyModes() {
   $('#tgl-split').textContent = splitView ? '⿲ Split' : '▭ Focus';
   if (!readMode) stopReading();
 }
-$('#tgl-edit').onclick = () => { editMode = !editMode; store.prefs.edit = editMode; save(); applyModes(); };
-$('#tgl-read').onclick = () => { readMode = !readMode; store.prefs.read = readMode; save(); applyModes(); };
-$('#tgl-split').onclick = () => { splitView = !splitView; store.prefs.split = splitView; save(); applyModes(); };
+$('#tgl-edit').onclick = () => { editMode = !editMode; store.prefs.edit = editMode; savePrefs(); applyModes(); };
+$('#tgl-read').onclick = () => { readMode = !readMode; store.prefs.read = readMode; savePrefs(); applyModes(); };
+$('#tgl-split').onclick = () => { splitView = !splitView; store.prefs.split = splitView; savePrefs(); applyModes(); };
 
 /* ---------- mobile chrome ---------- */
 const mq = window.matchMedia('(max-width: 820px)');
@@ -2504,12 +2926,525 @@ document.addEventListener('click', e => {
   openLightbox(im.src, (cap || '').trim().slice(0, 90));
 }, true);
 
+
+/* ================= CFII worksheet =================
+   A fill-in study sheet. Everything that came from the Backseat Pilot plan is
+   verbatim and read-only (header, introduction, the outline of titles); every
+   blank underneath belongs to Collin and is stored per lesson + synced. */
+function wkAnswers() {
+  store.wk = store.wk || {};
+  return (store.wk[curKey] = store.wk[curKey] || {});
+}
+function wkSave() {
+  if (!applyingRemote) (store.wkTs = store.wkTs || {})[curKey] = Date.now();
+  localStorage.setItem(LS_KEY, JSON.stringify(store));
+  if (!applyingRemote) schedulePush();
+}
+function wkTotals() {
+  const l = cur && cur.lesson;
+  if (!l) return { done: 0, total: 0 };
+  // count exactly the blanks the renderer puts on the page
+  let total = l.concl ? 1 : 0;
+  (l.head || []).forEach(row => row.forEach(c => { if (c.blank) total += 1; }));
+  (l.intro || []).forEach(row => { total += row.length; });
+  (l.outline || []).forEach(e => {
+    total += 1;
+    (e.k || []).forEach(sub => { total += 1; total += (sub.k || []).length; });
+  });
+  const a = store.wk && store.wk[curKey] || {};
+  const done = Object.keys(a).filter(k => (a[k] || '').trim()).length;
+  return { done, total };
+}
+function updateWkProgress() {
+  const { done, total } = wkTotals();
+  const el = $('#wk-progress');
+  if (el) el.innerHTML = total ? `<b>${done}</b> / ${total} filled in` : '';
+}
+
+/* the handbook chapters this lesson's REFERENCES block actually cites */
+function cfiiRefs() {
+  if (!cur || !window.CFI_REFS) return [];
+  const out = [];
+  (cur.lesson.refs || []).forEach(line => {
+    for (const [re, bcode] of BOOK_PATTERNS) {
+      if (!re.test(line)) continue;
+      const m = line.match(/chapters?\s*([\d\s,&and\-]+)/i) || line.match(/\bch\.?\s*([\d\s,&and\-]+)/i);
+      const nums = m ? m[1].split(/[^\d]+/).filter(Boolean) : [];
+      let added = 0;
+      nums.forEach(n => {
+        const hit = chapterPage(bcode, +n);
+        if (hit && !out.some(o => o.b === hit.b && o.ch === hit.ch)) { out.push(hit); added++; }
+      });
+      if (!added && CFI_REFS.books[bcode] && !out.some(o => o.b === bcode))
+        out.push({ b: bcode, ch: 0, t: CFI_REFS.books[bcode].name, p: 1 });
+      break;
+    }
+  });
+  return out;
+}
+/* one chip per element, but only where the chapter actually changes */
+function wkHeadingRefs(outline) {
+  const refs = cfiiRefs();
+  const out = {};
+  if (!refs.length) return out;
+  let lastKey = null;
+  outline.forEach((e, i) => {
+    let best = refs[0];
+    if (refs.length > 1) {
+      const words = simTokens(e.t);
+      let score = 0;
+      refs.forEach(r => { const sc = dice(words, simTokens(r.t)); if (sc > score) { score = sc; best = r; } });
+    }
+    const key = best.b + ':' + best.ch;
+    if (key !== lastKey) { out[i] = best; lastKey = key; }
+  });
+  return out;
+}
+
+/* ---------- Word-style list editing inside a worksheet blank ----------
+   Enter continues 1. / a. / i. / A. / I. / - and renumbers what follows;
+   Enter on an empty item ends (or outdents) the list; Tab and Shift-Tab
+   change level and pick the marker style for that depth. */
+const WK_BULLETS = ['-', '*', '•', '◦', '▪'];
+const WK_LIST_RE = /^([ \t]*)([0-9]+|[A-Za-z]+|[-*•◦▪])([.)]?)([ \t]*)(.*)$/;
+const WK_INDENT = '   ';
+const WK_DEPTH_KIND = ['num', 'alpha', 'roman'];
+const ROMAN_VALS = [[1000,'M'],[900,'CM'],[500,'D'],[400,'CD'],[100,'C'],[90,'XC'],
+                    [50,'L'],[40,'XL'],[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']];
+function intToRoman(n) {
+  let out = '';
+  for (const [v, sym] of ROMAN_VALS) while (n >= v) { out += sym; n -= v; }
+  return out;
+}
+function romanToInt(str) {
+  const map = { i:1, v:5, x:10, l:50, c:100, d:500, m:1000 };
+  const s = str.toLowerCase();
+  let total = 0;
+  for (let k = 0; k < s.length; k++) {
+    const a = map[s[k]], b = map[s[k + 1]];
+    if (!a) return 0;
+    total += (b && b > a) ? -a : a;
+  }
+  return total;
+}
+/* "i" is both the first roman numeral and the ninth letter. Prefer roman when a
+   sibling above is already roman, or when the token can only be roman. */
+function wkMarkerKind(tok, hint) {
+  if (/^\d+$/.test(tok)) return 'num';
+  if (WK_BULLETS.includes(tok)) return 'bullet';
+  const lower = tok === tok.toLowerCase();
+  const roman = lower ? 'roman' : 'ROMAN';
+  const alpha = lower ? 'alpha' : 'ALPHA';
+  const looksRoman = /^[ivxlcdm]+$/i.test(tok) && romanToInt(tok) > 0;
+  if (looksRoman && (hint === roman || tok.length > 1 || /^i$/i.test(tok))) return roman;
+  if (/^[A-Za-z]$/.test(tok)) return alpha;
+  if (looksRoman) return roman;
+  return null;
+}
+function wkNextMarker(tok, kind) {
+  if (kind === 'bullet') return tok;
+  if (kind === 'num') return String(+tok + 1);
+  if (kind === 'roman') return intToRoman(romanToInt(tok) + 1).toLowerCase();
+  if (kind === 'ROMAN') return intToRoman(romanToInt(tok) + 1);
+  if (kind === 'alpha' || kind === 'ALPHA') {
+    const last = tok.charCodeAt(tok.length - 1);
+    const wrap = tok.toLowerCase().endsWith('z');
+    if (wrap) return (kind === 'alpha' ? 'a' : 'A').repeat(tok.length + 1);
+    return tok.slice(0, -1) + String.fromCharCode(last + 1);
+  }
+  return tok;
+}
+function wkFirstMarker(kind) {
+  return kind === 'num' ? '1' : kind === 'alpha' ? 'a' : kind === 'ALPHA' ? 'A'
+       : kind === 'ROMAN' ? 'I' : kind === 'roman' ? 'i' : '-';
+}
+/* One definition of "this line is a list item", shared by every caller.
+   The marker may stand alone ("i." then Enter is how you start a list), but a
+   marker with text jammed against it is prose — that keeps "e.g." out. */
+function wkParseLine(line, hint) {
+  const m = line.match(WK_LIST_RE);
+  if (!m) return null;
+  const [, indent, tok, sep, gap, rest] = m;
+  const isBullet = WK_BULLETS.includes(tok);
+  if (!sep && !isBullet) return null;               // "1 apple" is not a list
+  if (rest && !gap && !isBullet) return null;       // "e.g." is not a list
+  const kind = wkMarkerKind(tok, hint);
+  if (!kind) return null;
+  return { indent, tok, sep: sep || '.', gap: gap || ' ', rest, kind, isBullet };
+}
+/* the list item directly above this one at the same depth, if there is one */
+function wkSibling(lines, idx, indentLen) {
+  for (let i = idx - 1; i >= 0; i--) {
+    const p = wkParseLine(lines[i]);
+    if (!p) { if (lines[i].trim() === '') continue; return null; }
+    if (p.indent.length > indentLen) continue;      // a child of some earlier item
+    if (p.indent.length < indentLen) return null;   // we've reached the parent
+    return p;
+  }
+  return null;
+}
+/* renumber the run of same-depth items that follows lines[start] */
+function wkRenumber(lines, start) {
+  const p0 = lines[start] != null ? wkParseLine(lines[start]) : null;
+  if (!p0 || p0.kind === 'bullet') return;
+  const indentLen = p0.indent.length;
+  let tok = p0.tok;
+  for (let i = start + 1; i < lines.length; i++) {
+    const p = wkParseLine(lines[i], p0.kind);
+    if (!p) { if (lines[i].trim() === '') continue; break; }
+    if (p.indent.length > indentLen) continue;      // nested list, leave alone
+    if (p.indent.length < indentLen) break;
+    if (p.kind !== p0.kind) break;                  // a different list starts here
+    tok = wkNextMarker(tok, p0.kind);
+    lines[i] = p.indent + tok + p.sep + p.gap + p.rest;
+  }
+}
+function wkLineAt(v, pos) {
+  const start = v.lastIndexOf('\n', pos - 1) + 1;
+  const nl = v.indexOf('\n', pos);
+  return { start, end: nl === -1 ? v.length : nl };
+}
+function wkApply(ta, lines, lineIdx, col) {
+  ta.value = lines.join('\n');
+  let off = 0;
+  for (let i = 0; i < lineIdx; i++) off += lines[i].length + 1;
+  const at = off + Math.min(col, lines[lineIdx].length);
+  ta.selectionStart = ta.selectionEnd = at;
+  wkAutoSize(ta);
+  wkCommit(ta);
+}
+function wkListKeys(e, ta) {
+  e.stopPropagation();
+  if (e.key !== 'Enter' && e.key !== 'Tab') return;
+  if (e.key === 'Enter' && (e.shiftKey || e.metaKey || e.ctrlKey || e.altKey)) return;
+  const v = ta.value, pos = ta.selectionStart;
+  if (pos !== ta.selectionEnd) return;                 // leave selections alone
+  const { start, end } = wkLineAt(v, pos);
+  const line = v.slice(start, end);
+  const lines = v.split('\n');
+  const lineIdx = v.slice(0, start).split('\n').length - 1;
+  const hint = (() => {
+    const m = line.match(WK_LIST_RE);
+    const sib = wkSibling(lines, lineIdx, m ? m[1].length : 0);
+    return sib ? sib.kind : null;
+  })();
+  const p = wkParseLine(line, hint);
+
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    if (!p) {                                          // plain text: just indent
+      if (e.shiftKey) {
+        if (!/^[ \t]/.test(line)) return;
+        const trimmed = line.replace(new RegExp('^(?:' + WK_INDENT + '|[ \t])'), '');
+        const shrank = line.length - trimmed.length;
+        lines[lineIdx] = trimmed;
+        wkApply(ta, lines, lineIdx, Math.max(0, pos - start - shrank));
+      } else {
+        lines[lineIdx] = WK_INDENT + line;
+        wkApply(ta, lines, lineIdx, pos - start + WK_INDENT.length);
+      }
+      return;
+    }
+    if (e.shiftKey && !p.indent.length) return;
+    const newIndent = e.shiftKey
+      ? p.indent.slice(0, Math.max(0, p.indent.length - WK_INDENT.length))
+      : p.indent + WK_INDENT;
+    const sib = wkSibling(lines, lineIdx, newIndent.length);
+    let kind, marker;
+    if (sib) {
+      kind = sib.kind;
+      marker = wkNextMarker(sib.tok, kind);
+    } else if (p.isBullet) {
+      kind = 'bullet'; marker = p.tok;
+    } else {
+      const depth = Math.round(newIndent.length / WK_INDENT.length);
+      kind = WK_DEPTH_KIND[depth % WK_DEPTH_KIND.length];
+      marker = wkFirstMarker(kind);
+    }
+    lines[lineIdx] = newIndent + marker + (kind === 'bullet' ? '' : p.sep) + p.gap + p.rest;
+    wkRenumber(lines, lineIdx);
+    wkApply(ta, lines, lineIdx, pos - start + (lines[lineIdx].length - line.length));
+    return;
+  }
+
+  // ----- Enter -----
+  if (!p) return;                                      // ordinary newline
+  e.preventDefault();                                  // both branches below act
+  const sibling = wkSibling(lines, lineIdx, p.indent.length);
+
+  // A marker with nothing after it means one of two things. If there is no item
+  // above it, he is *starting* a list ("i." + Enter) — carry on to the next
+  // marker. If there is, he is finishing one — close it out, like Word.
+  if (!p.rest.trim() && sibling) {
+    if (p.indent.length) {
+      const out = p.indent.slice(0, Math.max(0, p.indent.length - WK_INDENT.length));
+      const up = wkSibling(lines, lineIdx, out.length);
+      const k = up ? up.kind : p.kind;
+      const marker = up ? wkNextMarker(up.tok, k) : wkFirstMarker(k);
+      lines[lineIdx] = out + marker + (k === 'bullet' ? '' : p.sep) + p.gap;
+    } else {
+      lines[lineIdx] = '';
+    }
+    wkRenumber(lines, lineIdx);
+    wkApply(ta, lines, lineIdx, lines[lineIdx].length);
+    return;
+  }
+
+  // normalise "i." to "i. " so the marker he typed matches the ones we generate
+  const col = Math.max(pos - start, p.indent.length + p.tok.length + p.sep.length + p.gap.length);
+  const norm = p.indent + p.tok + (p.isBullet ? '' : p.sep) + p.gap + p.rest;
+  const cut = Math.min(col, norm.length);
+  lines[lineIdx] = norm.slice(0, cut);
+  const next = wkNextMarker(p.tok, p.kind);
+  const head = p.indent + next + (p.isBullet ? '' : p.sep) + p.gap;
+  lines.splice(lineIdx + 1, 0, head + norm.slice(cut));
+  wkRenumber(lines, lineIdx + 1);
+  wkApply(ta, lines, lineIdx + 1, head.length);
+}
+
+/* ---------- the blank itself ---------- */
+function wkAutoSize(ta) {
+  ta.style.height = 'auto';
+  ta.style.height = Math.max(ta.scrollHeight, ta.classList.contains('big') ? 96 : 26) + 'px';
+}
+let wkSaveTimer = null;
+function wkCommit(ta) {
+  const a = wkAnswers();
+  const path = ta.dataset.path;
+  if (ta.value.trim()) a[path] = ta.value; else delete a[path];
+  ta.classList.toggle('has', !!ta.value.trim());
+  clearTimeout(wkSaveTimer);
+  wkSaveTimer = setTimeout(() => {
+    wkSave();                       // localStorage + push to the other devices
+    updateWkProgress();
+    renderNav($('#search').value);
+  }, 500);
+}
+function wkFill(path, opts) {
+  opts = opts || {};
+  const ta = document.createElement('textarea');
+  ta.className = 'wk-fill' + (opts.incard ? ' incard' : '') + (opts.big ? ' big' : '');
+  ta.dataset.path = path;
+  ta.value = wkAnswers()[path] || '';
+  ta.placeholder = opts.ph || 'Write here…';
+  ta.rows = 1;
+  ta.classList.toggle('has', !!ta.value.trim());
+  ta.addEventListener('input', () => { wkAutoSize(ta); wkCommit(ta); });
+  ta.addEventListener('keydown', e => wkListKeys(e, ta));
+  ta.addEventListener('blur', () => { clearTimeout(wkSaveTimer); wkSave(); updateWkProgress(); renderNav($('#search').value); });
+  return ta;
+}
+
+function wkCard(b, opts) {
+  opts = opts || {};
+  const c = document.createElement('div');
+  c.className = 'front-card' + (opts.write ? ' writein' : '');
+  const h = document.createElement('div');
+  h.className = 'fc-h'; h.textContent = b.h;
+  c.appendChild(h);
+  b.v.forEach(line => {
+    const d = document.createElement('div');
+    // a blank card's Backseat Pilot text is a prompt, not content — dim it so
+    // it reads as a hint above what he actually writes
+    if (b.blank) d.className = 'fc-hint';
+    d.textContent = line;
+    c.appendChild(d);
+  });
+  if (opts.refs) cfiiRefs().forEach(r => {
+    const chip = refChipEl(r, true);
+    if (chip) { const w = document.createElement('div'); w.className = 'nob'; w.appendChild(chip); c.appendChild(w); }
+  });
+  if (opts.write) {
+    const ta = wkFill('h:' + b.h, { incard: true, big: !!b.blank,
+                                    ph: b.blank ? 'Write yours here…' : 'Your notes…' });
+    c.appendChild(ta);
+  }
+  return c;
+}
+function wkCardRow(row, opts) {
+  const r = document.createElement('div');
+  r.className = 'wk-cardrow' + (row.length === 1 ? ' solo' : '');
+  row.forEach(card => {
+    const el = wkCard(card, {
+      refs: card.h === 'REFERENCES',
+      write: !!(opts && opts.write) || !!card.blank
+    });
+    // multi-card rows keep the printed plan's proportions; a lone card fills
+    if (row.length > 1) el.style.flex = (card.w || 50) + ' 1 0';
+    r.appendChild(el);
+  });
+  return r;
+}
+function wkSection(label) {
+  const d = document.createElement('div');
+  d.className = 'wk-head'; d.textContent = label;
+  return d;
+}
+function wkRow(num, text, acs, ref) {
+  const row = document.createElement('div');
+  row.className = 'wk-row';
+  row.innerHTML = `<span class="wk-num">${num}</span><span class="wk-t">${escapeHtml(text)}</span>`;
+  const t = row.querySelector('.wk-t');
+  (acs || []).forEach(code => {
+    const a = document.createElement('span');
+    a.className = 'acs'; a.textContent = code;
+    t.appendChild(a);
+  });
+  if (ref) { const chip = refChipEl(ref, true); if (chip) t.appendChild(chip); }
+  return row;
+}
+
+function renderWorksheet() {
+  let body = $('#wk-body');
+  if (!body || !cur) return;
+  const l = cur.lesson;
+  body.innerHTML = '';
+  const inner = document.createElement('div');
+  inner.id = 'wk-inner';
+  body.appendChild(inner);
+  body = inner;                       // keep the worksheet at a readable measure
+  body.appendChild(paneTitleEl());
+
+  if ((l.head || []).length) {
+    body.appendChild(wkSection('Lesson Plan'));
+    const rows = document.createElement('div');
+    rows.className = 'wk-rows';
+    l.head.forEach(row => rows.appendChild(wkCardRow(row)));
+    body.appendChild(rows);
+  }
+
+  if ((l.intro || []).length) {
+    body.appendChild(wkSection('Introduction'));
+    const rows = document.createElement('div');
+    rows.className = 'wk-rows';
+    l.intro.forEach(row => rows.appendChild(wkCardRow(row, { write: true })));
+    body.appendChild(rows);
+  }
+
+  const outline = l.outline || [];
+  if (outline.length) {
+    body.appendChild(wkSection('Development'));
+    const hrefs = wkHeadingRefs(outline);
+    outline.forEach((e, i) => {
+      const p1 = String(i + 1);
+      const n1 = document.createElement('div');
+      n1.className = 'wk-node wk-1';
+      n1.dataset.path = p1;
+      n1.appendChild(wkRow(p1 + '.', e.t, e.acs, hrefs[i]));
+      if (e.mp) { const mp = document.createElement('div'); mp.className = 'wk-mp'; mp.textContent = e.mp; n1.appendChild(mp); }
+      n1.appendChild(wkFill(p1));
+      (e.k || []).forEach((sub, j) => {
+        const p2 = p1 + '-' + (j + 1);
+        const n2 = document.createElement('div');
+        n2.className = 'wk-node wk-2';
+        n2.dataset.path = p2;
+        n2.appendChild(wkRow((j + 1) + '.', sub.t, sub.acs));
+        n2.appendChild(wkFill(p2));
+        (sub.k || []).forEach((leaf, k) => {
+          const p3 = p2 + '-' + (k + 1);
+          const n3 = document.createElement('div');
+          n3.className = 'wk-node wk-3';
+          n3.dataset.path = p3;
+          n3.appendChild(wkRow((k + 1) + '.', leaf.t, leaf.acs));
+          n3.appendChild(wkFill(p3));
+          n2.appendChild(n3);
+        });
+        n1.appendChild(n2);
+      });
+      body.appendChild(n1);
+    });
+  }
+
+  if (l.concl) {
+    body.appendChild(wkSection('Conclusion'));
+    const d = document.createElement('div');
+    d.className = 'wk-concl'; d.textContent = l.concl;
+    body.appendChild(d);
+    body.appendChild(wkFill('concl'));
+  }
+  updateWkProgress();
+  // scrollHeight only reports once the textareas are in the document
+  requestAnimationFrame(() => $('#wk-body').querySelectorAll('textarea.wk-fill').forEach(wkAutoSize));
+}
+
+function loadWorksheet(l) {
+  $('#lesson-title').childNodes[0].textContent = l.title;
+  const r = (l.refs || []).join(' · ');
+  $('#lesson-title .refs').textContent = r ? 'Refs: ' + r : '';
+  renderWorksheet();
+  renderNav($('#search').value);
+  updateDock();
+  $('#wk-body').scrollTop = 0;
+}
+
+function renderWkToc(container) {
+  const outline = (cur && cur.lesson.outline) || [];
+  outline.forEach((e, i) => {
+    const d = document.createElement('div');
+    d.className = 'toc-item sect';
+    d.textContent = (i + 1) + '. ' + (e.t.length > 38 ? e.t.slice(0, 36).trim() + '…' : e.t);
+    d.title = e.t;
+    d.onclick = ev => { ev.stopPropagation(); wkJump(String(i + 1)); if (isMobile()) openNav(false); };
+    container.appendChild(d);
+    (e.k || []).forEach((sub, j) => {
+      const s = document.createElement('div');
+      s.className = 'toc-item deep';
+      const t = sub.t.length > 36 ? sub.t.slice(0, 34).trim() + '…' : sub.t;
+      s.textContent = t; s.title = sub.t;
+      s.onclick = ev => { ev.stopPropagation(); wkJump((i + 1) + '-' + (j + 1)); if (isMobile()) openNav(false); };
+      container.appendChild(s);
+    });
+  });
+}
+function wkJump(path) {
+  const el = document.querySelector(`#wk-body .wk-node[data-path="${path}"]`);
+  if (!el) return;
+  const box = $('#wk-body');
+  box.scrollTop += el.getBoundingClientRect().top - box.getBoundingClientRect().top - 12;
+  flashEl(el);
+}
+
+/* worksheet -> markdown, so the Settings export buttons stay honest in CFII */
+function worksheetText() {
+  const l = cur && cur.lesson;
+  if (!l) return '';
+  const a = store.wk && store.wk[curKey] || {};
+  const out = ['# ' + l.title, ''];
+  const card = c => {
+    out.push('**' + c.h + '**');
+    c.v.forEach(v => out.push('- ' + v));
+    if (a['h:' + c.h]) out.push('', a['h:' + c.h]);
+    out.push('');
+  };
+  (l.head || []).forEach(row => row.forEach(card));
+  (l.intro || []).forEach(row => row.forEach(card));
+  (l.outline || []).forEach((e, i) => {
+    const p1 = String(i + 1);
+    out.push('## ' + p1 + '. ' + e.t);
+    if (e.mp) out.push('_' + e.mp + '_');
+    if (a[p1]) out.push('', a[p1]);
+    (e.k || []).forEach((sub, j) => {
+      const p2 = p1 + '-' + (j + 1);
+      out.push('', '### ' + p1 + '.' + (j + 1) + ' ' + sub.t);
+      if (a[p2]) out.push(a[p2]);
+      (sub.k || []).forEach((leaf, k) => {
+        const p3 = p2 + '-' + (k + 1);
+        out.push('- **' + leaf.t + '**');
+        if (a[p3]) out.push('  ' + a[p3].replace(/\n/g, '\n  '));
+      });
+    });
+    out.push('');
+  });
+  if (l.concl) { out.push('## ' + l.concl); if (a.concl) out.push('', a.concl); }
+  return out.join('\n');
+}
+
 /* ---------- quick-action dock: prev/next lesson + thumb-reach menu ---------- */
 const dockEl = $('#dock');
 let dockTimer = null;
 function flatLessons() {
   const out = [];
-  D.aoes.forEach(a => a.lessons.forEach(l => out.push({ aoe: a, lesson: l })));
+  DATA().aoes.forEach(a => a.lessons.forEach(l => out.push({ aoe: a, lesson: l })));
   return out;
 }
 function dockNeighbors() {
@@ -2646,7 +3581,7 @@ async function libReport() {
     box.classList.toggle('collapsed', !open);
     tog.querySelector('.tri').textContent = open ? '▾' : '▸';
   };
-  tog.onclick = () => { store.prefs.settingsOpen = store.prefs.settingsOpen === false; save(); apply(); };
+  tog.onclick = () => { store.prefs.settingsOpen = store.prefs.settingsOpen === false; savePrefs(); apply(); };
   apply();
 })();
 
@@ -2680,11 +3615,21 @@ $('#btn-offline-lib').onclick = () => {
    lesson wins. Prefs (font size, toggles, voice) stay per-device. */
 const SYNC_PATH = 'cfiBinder/state';
 let syncDb = null, syncPushTimer = null, applyingRemote = false;
+/* A device that starts with empty local storage (fresh browser, cleared cache,
+   private window) must never be able to push its emptiness over everyone
+   else's data. Nothing is sent until the first remote snapshot has been read
+   and merged, so the first push always carries the merged picture. */
+let syncReady = false;
 const clientId = (() => {
   let id = localStorage.getItem('cfi-client-id');
   if (!id) { id = Math.random().toString(36).slice(2, 10); localStorage.setItem('cfi-client-id', id); }
   return id;
 })();
+function isDenied(e) {
+  const m = ((e && (e.code || e.message)) || '').toString().toLowerCase();
+  return m.includes('permission') || m.includes('denied');
+}
+const DENIED_MSG = '⚠ cloud sync refused — check Realtime Database rules';
 function setSyncState(txt, cls) {
   const el = $('#sync-state');
   if (el) { el.textContent = 'sync: ' + txt; el.className = cls || ''; }
@@ -2694,21 +3639,62 @@ function syncPayload() {
   // containing any (and empty-object lessons pruned by Firebase can reappear
   // locally as undefined via mergeRemote on other devices)
   return JSON.parse(JSON.stringify({ sel: store.sel, selTs: store.selTs || {}, last: store.last,
+           wk: store.wk || {}, wkTs: store.wkTs || {},
+           look: store.prefs.look || {}, lookTs: store.lookTs || 0,
+           themes: store.themes || [], themesTs: store.themesTs || 0,
            clientId, updatedAt: Date.now() }));
 }
 function schedulePush() {
-  if (!syncDb || applyingRemote) return;
+  if (!syncDb || applyingRemote || !syncReady) return;
   clearTimeout(syncPushTimer);
   syncPushTimer = setTimeout(() => {
+    if (!syncDb) return;               // re-check: 1.2s passes before this fires
     syncDb.ref(SYNC_PATH).set(syncPayload())
       .then(() => setSyncState('✓ saved to cloud', 'ok'))
-      .catch(() => setSyncState('offline — will sync when online', 'err'));
+      .catch(() => {
+        // One rejected value fails the whole set(). The lesson picks are the
+        // checkride-critical half, so retry without the worksheet rather than
+        // letting both go unsynced.
+        const lean = syncPayload();
+        delete lean.wk; delete lean.wkTs;
+        delete lean.look; delete lean.lookTs; delete lean.themes; delete lean.themesTs;
+        return syncDb.ref(SYNC_PATH).set(lean)
+          .then(() => setSyncState('✓ saved — worksheet notes did NOT sync', 'err'))
+          .catch(e2 => setSyncState(isDenied(e2) ? DENIED_MSG
+                                                : 'offline — will sync when online', 'err'));
+      });
   }, 1200);
 }
 function mergeRemote(remote) {
-  if (!remote || !remote.sel) return false;
-  const rTs = remote.selTs || {}, lTs = store.selTs || {};
+  if (!remote || (!remote.sel && !remote.wk)) return false;
   let changed = false;
+  // worksheet answers merge on their own clock, per lesson
+  const rwTs = remote.wkTs || {}, lwTs = store.wkTs || {};
+  const wkeys = new Set([...Object.keys(remote.wk || {}), ...Object.keys(store.wk || {})]);
+  wkeys.forEach(k => {
+    if ((rwTs[k] || 0) > (lwTs[k] || 0)) {
+      store.wk = store.wk || {};
+      store.wk[k] = (remote.wk || {})[k] || {};
+      (store.wkTs = store.wkTs || {})[k] = rwTs[k];
+      changed = true;
+    }
+  });
+  // appearance carries its own clock so a theme change never disturbs lessons
+  let lookChanged = false;
+  if ((remote.lookTs || 0) > (store.lookTs || 0)) {
+    store.prefs.look = Object.assign({}, LOOK_DEFAULTS, remote.look || {});
+    store.lookTs = remote.lookTs;
+    changed = lookChanged = true;
+  }
+  if ((remote.themesTs || 0) > (store.themesTs || 0)) {
+    store.themes = remote.themes || [];
+    store.themesTs = remote.themesTs;
+    changed = lookChanged = true;
+  }
+  if (lookChanged) { applyLook(); buildLookPresets(); syncLookUI(); }
+
+  if (!remote.sel) return changed;
+  const rTs = remote.selTs || {}, lTs = store.selTs || {};
   const keys = new Set([...Object.keys(remote.sel), ...Object.keys(store.sel)]);
   keys.forEach(k => {
     if ((rTs[k] || 0) > (lTs[k] || 0)) {
@@ -2733,31 +3719,40 @@ function initSync() {
     syncDb = firebase.database();
     syncDb.ref(SYNC_PATH).on('value', snap => {
       const remote = snap.val();
-      if (!remote) { setSyncState('✓ connected', 'ok'); schedulePush(); return; }
-      if (remote.clientId === clientId) { setSyncState('✓ synced', 'ok'); return; }
+      if (!remote) { syncReady = true; setSyncState('✓ connected', 'ok'); schedulePush(); return; }
+      if (remote.clientId === clientId) { syncReady = true; setSyncState('✓ synced', 'ok'); return; }
       applyingRemote = true;
       const changed = mergeRemote(remote);
       applyingRemote = false;
+      syncReady = true;
       if (changed) {
         localStorage.setItem(LS_KEY, JSON.stringify(store));
-        if (cur) { renderMine(); updateCounts(); }
+        if (cur && mode === 'cfii') renderWorksheet();
+        else if (cur) { renderMine(); updateCounts(); }
         setSyncState('✓ pulled changes from your other device', 'ok');
       } else setSyncState('✓ synced', 'ok');
-    }, () => setSyncState('offline — using this device only', 'err'));
+    }, e => {
+      syncReady = true;              // no snapshot is coming; local edits may still queue
+      setSyncState(isDenied(e) ? DENIED_MSG : 'offline — using this device only', 'err');
+    });
   } catch (e) { setSyncState('unavailable', 'err'); }
 }
 initSync();
 
 /* ---------- init ---------- */
 $('#rate').value = store.prefs.rate; $('#rate-val').textContent = store.prefs.rate.toFixed(1) + 'x';
-$('#fsize').value = store.prefs.fs; document.documentElement.style.setProperty('--fs', store.prefs.fs + 'px');
+applyLook();
 applyModes();
+document.body.classList.toggle('cfii', mode === 'cfii');
+document.querySelectorAll('#mode-switch button').forEach(b => b.classList.toggle('on', b.dataset.mode === mode));
 renderNav('');
 renderLibrary();
-if (store.last) {
-  for (const a of D.aoes) { const l = a.lessons.find(l => l.id === store.last); if (l) { loadLesson(a, l); break; } }
+{
+  const want = (store.prefs.lastBy || {})[mode] || store.last;
+  for (const a of DATA().aoes) { const l = a.lessons.find(l => l.id === want); if (l) { loadLesson(a, l); break; } }
+  if (!cur && DATA().aoes.length && DATA().aoes[0].lessons.length)
+    loadLesson(DATA().aoes[0], DATA().aoes[0].lessons[0]);
 }
-if (!cur) loadLesson(D.aoes[0], D.aoes[0].lessons[0]);
 </script>
 </body>
 </html>
