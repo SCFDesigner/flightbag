@@ -138,12 +138,20 @@ textarea.input { min-height:90px; resize:vertical; line-height:1.45; }
 .next-card .act { color:var(--green); font-weight:600; margin-top:2px; }
 
 /* ===== count ===== */
-.cnt-row { display:grid; grid-template-columns:1fr 78px 40px; gap:8px; align-items:center; padding:10px 0; border-bottom:1px solid var(--bdr); }
+.cnt-row { padding:12px 0; border-bottom:1px solid var(--bdr); border-left:3px solid var(--c, transparent); padding-left:10px; margin-left:-14px; padding-left:11px; }
 .cnt-row:last-child { border-bottom:0; }
+.cnt-row .top { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
 .cnt-row .name { font-weight:600; line-height:1.25; }
-.cnt-row .sub { font-size:var(--fs-xs); color:var(--text3); margin-top:2px; display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
-.cnt-row .input { text-align:center; padding:8px 4px; font-weight:700; font-variant-numeric:tabular-nums; }
+.cnt-row .input { text-align:center; padding:8px 4px; font-weight:700; font-variant-numeric:tabular-nums; min-height:44px; font-size:17px; }
 .cnt-row.flag .input { border-color:var(--red); }
+.cnt-grid { display:grid; grid-template-columns:1fr 1.2fr 1fr 1fr; gap:6px; }
+.cnt-grid .cell { background:var(--bg2); border-radius:var(--r2); padding:6px 6px 7px; text-align:center; min-height:64px; display:flex; flex-direction:column; justify-content:center; }
+.cnt-grid .cell.in { background:transparent; padding:0; }
+.cnt-grid .l { font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text3); margin-bottom:2px; }
+.cnt-grid .v { font-size:17px; font-weight:700; font-variant-numeric:tabular-nums; line-height:1.1; }
+.cnt-grid .s { font-size:10px; color:var(--text3); margin-top:2px; }
+.cnt-grid .v.green { color:var(--green); } .cnt-grid .v.amber { color:var(--amber); } .cnt-grid .v.dim { color:var(--text3); font-weight:500; font-size:13px; }
+.cnt-grid a.setpar { color:var(--amber); font-weight:700; font-size:12px; }
 .exp { width:40px; height:40px; border-radius:var(--r2); border:1px solid var(--bdr2); background:var(--bg2); color:var(--text3); display:flex; align-items:center; justify-content:center; font-size:var(--fs-xs); font-weight:800; }
 .exp.on { background:var(--red-dim); color:var(--red); border-color:var(--red); }
 .need { color:var(--green); font-weight:700; } .need.zero { color:var(--text3); font-weight:500; }
@@ -257,9 +265,8 @@ textarea.input { min-height:90px; resize:vertical; line-height:1.45; }
           </div>
           <button class="btn sm ghost" onclick="newDay()">New day</button>
         </div>
-        <div class="sm muted" style="margin-top:8px">Count what's on the shelf. Need = par − counted. As you bake, each row shows baked, in the oven, and what's still left. Tap <b>EXP</b> if the shelf stock is expired and has to be pulled.</div>
+        <div class="sm muted" style="margin-top:8px">Type what's on the floor for each item. <b>Left</b> = par − floor − baked. Baked fills in as loads come out of the oven. Tap <b>EXP</b> if the shelf stock is expired and has to be pulled (counts as 0).</div>
       </div>
-      <div id="count-summary"></div>
       <div id="count-list"></div>
       <div class="sticky-foot">
         <button class="btn primary block" id="build-btn" onclick="buildTasks()">Open today's list</button>
@@ -812,33 +819,33 @@ function renderCount() {
   const tk = todayKey();
   $('#count-date').textContent = store.counts.date === tk ? 'Today · ' + new Date().toLocaleDateString(undefined, {weekday:'short', month:'short', day:'numeric'}) : 'From ' + store.counts.date + ' — tap New day to start fresh';
   const items = enabledItems().sort(sortItems);
-  if (!items.length) { $('#count-list').innerHTML = '<div class="empty"><b>No items enabled</b>Turn some on in Settings.</div>'; $('#count-summary').innerHTML = ''; return; }
-  let html = '', cat = null, needItems = 0, needPcs = 0, bakedPcs = 0, ovenPcs = 0, leftPcs = 0, counted = 0;
+  if (!items.length) { $('#count-list').innerHTML = '<div class="empty"><b>No items enabled</b>Turn some on in Settings.</div>'; return; }
+  let html = '', cat = null, needItems = 0, leftPcs = 0;
   items.forEach(it => {
-    if (it.cat !== cat) { cat = it.cat; html += (html ? '</div>' : '') + '<div class="sec-title">' + esc(cat) + '</div><div class="card" style="padding:4px 14px">'; }
+    if (it.cat !== cat) { cat = it.cat; html += (html ? '</div>' : '') + '<div class="sec-title">' + esc(cat) + '</div><div class="card" style="padding:0 14px">'; }
     const v = store.counts.vals[it.id], ex = !!store.counts.exp[it.id], nd = need(it), t = taskFor(it);
-    if (v != null || ex) counted++;
+    const hasPar = it.par != null && it.par !== '';
     const n = t ? (t.need || 0) : (nd ? nd.n : 0), baked = t ? (t.baked || 0) : 0, ov = t ? inOven(t) : 0, left = Math.max(0, n - baked - ov);
-    if (n > 0) { needItems++; needPcs += n; bakedPcs += Math.min(baked, n); ovenPcs += ov; leftPcs += left; }
-    const parTxt = it.par == null || it.par === '' ? '<a class="xs" style="color:var(--amber);font-weight:700" onclick="openEditor(\'' + it.id + '\')">set par</a>' : '<span class="muted">par ' + esc(it.par) + (it.parBy ? ' by ' + it.parBy + 'AM' : '') + '</span>';
-    let stat = '';
-    if (n > 0) {
-      stat = '<span class="pill">need ' + n + '</span>' + (baked ? '<span class="pill green">baked ' + baked + (baked > n ? ' (+' + (baked - n) + ')' : '') + '</span>' : '') + (ov ? '<span class="pill amber">' + ov + ' in oven</span>' : '') +
-             (left > 0 ? '<span class="need">' + left + ' left' + (Number(it.batch) > 1 ? ' ≈ ' + Math.ceil(left / it.batch) + ' sheet' + (Math.ceil(left / it.batch) > 1 ? 's' : '') : '') + '</span>' : (baked >= n ? '<span class="pill green">done</span>' : ''));
-    } else if (nd) stat = '<span class="need zero">stocked</span>';
-    html += '<div class="cnt-row ' + (ex ? 'flag' : '') + '"><div class="grow"><div class="name">' + esc(it.name) + (it.verify ? ' <span class="verify">verify</span>' : '') + '</div><div class="sub">' + parTxt + stat + '</div></div>' +
-      '<input class="input" type="number" inputmode="numeric" placeholder="—" value="' + (v ?? '') + '" oninput="setCount(\'' + it.id + '\',this.value)">' +
-      '<button class="exp ' + (ex ? 'on' : '') + '" onclick="toggleExp(\'' + it.id + '\')">EXP</button></div>';
+    if (n > 0) { needItems++; leftPcs += left; }
+    // four numbers per item: par (target), floor (her count), baked (out of the oven), left (still to bake)
+    const parCell = hasPar ? '<div class="v">' + esc(it.par) + '</div><div class="s">' + (it.parBy ? 'by ' + it.parBy + ' AM' : 'target') + '</div>' : '<a class="setpar" onclick="openEditor(\'' + it.id + '\')">set par</a>';
+    const bakedCell = baked || ov ? '<div class="v green">' + baked + (baked > n && n ? '<span class="s" style="color:var(--green)"> +' + (baked - n) + '</span>' : '') + '</div><div class="s' + (ov ? ' amber' : '') + '"' + (ov ? ' style="color:var(--amber)"' : '') + '>' + (ov ? ov + ' in oven' : 'out of oven') + '</div>' : '<div class="v dim">—</div><div class="s">out of oven</div>';
+    let leftCell;
+    if (!hasPar) leftCell = '<div class="v dim">—</div><div class="s">no par</div>';
+    else if (v == null && !ex && !t) leftCell = '<div class="v dim">—</div><div class="s">count first</div>';
+    else if (n === 0) leftCell = '<div class="v dim">stocked</div><div class="s">at par</div>';
+    else if (left === 0) leftCell = ov ? '<div class="v amber">' + ov + '</div><div class="s">in oven</div>' : '<div class="v green">done</div><div class="s">need ' + n + '</div>';
+    else leftCell = '<div class="v">' + left + '</div><div class="s">' + (baked || ov ? 'of ' + n : 'to bake') + (Number(it.batch) > 1 ? ' · ≈' + Math.ceil(left / it.batch) + ' sh' : '') + '</div>';
+    html += '<div class="cnt-row ' + (ex ? 'flag' : '') + '" style="--c:' + itemColor(it) + '"><div class="top"><div class="name grow">' + esc(it.name) + (it.verify ? ' <span class="verify">verify</span>' : '') + '</div><button class="exp ' + (ex ? 'on' : '') + '" onclick="toggleExp(\'' + it.id + '\')" title="shelf stock expired — pull it">EXP</button></div>' +
+      '<div class="cnt-grid">' +
+        '<div class="cell"><div class="l">Par</div>' + parCell + '</div>' +
+        '<div class="cell in"><input class="input" type="number" inputmode="numeric" placeholder="floor" aria-label="on the floor" value="' + (v ?? '') + '" oninput="setCount(\'' + it.id + '\',this.value)"><div class="l" style="margin-top:3px">' + (ex ? '<span style="color:var(--red)">expired → 0</span>' : 'On floor') + '</div></div>' +
+        '<div class="cell"><div class="l">Baked</div>' + bakedCell + '</div>' +
+        '<div class="cell"><div class="l">Left</div>' + leftCell + '</div>' +
+      '</div></div>';
   });
   html += '</div>';
   $('#count-list').innerHTML = html;
-  $('#count-summary').innerHTML = needItems ? '<div class="kpi" style="grid-template-columns:repeat(4,1fr);gap:8px">' +
-    '<div class="card" style="padding:10px 8px;text-align:center"><div class="l">Need</div><div class="v" style="font-size:20px">' + needPcs + '</div></div>' +
-    '<div class="card" style="padding:10px 8px;text-align:center"><div class="l">Baked</div><div class="v" style="font-size:20px;color:var(--green)">' + bakedPcs + '</div></div>' +
-    '<div class="card" style="padding:10px 8px;text-align:center"><div class="l">In oven</div><div class="v" style="font-size:20px;color:var(--amber)">' + ovenPcs + '</div></div>' +
-    '<div class="card" style="padding:10px 8px;text-align:center"><div class="l">Left</div><div class="v" style="font-size:20px">' + leftPcs + '</div></div></div>' +
-    '<div class="bar" style="margin:-4px 0 12px"><i style="width:' + (needPcs ? Math.min(100, bakedPcs / needPcs * 100) : 0) + '%"></i></div>'
-    : (counted ? '<div class="card sm muted">Everything counted so far is stocked.</div>' : '');
   $('#build-btn').textContent = needItems ? 'Open today\'s list · ' + needItems + ' item' + (needItems > 1 ? 's' : '') + ', ' + leftPcs + ' pcs left' : 'Open today\'s list';
 }
 function touchCounts() { if (store.counts.date !== todayKey()) { store.counts = { date: todayKey(), vals: {}, exp: {} }; } }
