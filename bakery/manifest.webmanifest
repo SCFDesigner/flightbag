@@ -1,0 +1,14 @@
+{
+  "name": "Bakery Shift",
+  "short_name": "Bakery",
+  "description": "Morning bake planner: floor count, bake list, oven timers",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0c0d0f",
+  "theme_color": "#0c0d0f",
+  "icons": [
+    { "src": "icon.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

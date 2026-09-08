@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Bakery">
+<meta name="theme-color" content="#0c0d0f">
+<link rel="apple-touch-icon" href="icon.svg">
+<title>Bakery Shift</title>
+<style>
+:root {
+  /* dark palette from the reference dashboard: near-black page, charcoal
+     cards, one bright green accent, muted status colours */
+  --bg0:#0c0d0f; --bg1:#151618; --bg2:#1c1d21; --bg3:#25272c;
+  --bdr:#2a2c32; --bdr2:#35383f;
+  --text:#f2f2f0; --text2:#a4a7ae; --text3:#6d7078; --text4:#4a4d54;
+  --green:#3fd67f; --green-dim:rgba(63,214,127,.16); --on-green:#0b1a11;
+  --amber:#f2b342; --amber-dim:rgba(242,179,66,.16);
+  --red:#ff5d57; --red-dim:rgba(255,93,87,.16);
+  --blue:#5b9dff; --blue-dim:rgba(91,157,255,.16);
+  --purple:#a78bfa;
+  --r:16px; --r2:11px; --r3:8px;
+  --pad:16px; --gap:12px;
+  --fs:15px; --fs-sm:12.5px; --fs-xs:11px;
+  --nav-h:64px;
+  --font:-apple-system,'SF Pro Display',system-ui,'Segoe UI',Roboto,sans-serif;
+  --mono:'SF Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body { height:100%; }
+body { background:var(--bg0); color:var(--text); font-family:var(--font); font-size:var(--fs); line-height:1.4; overscroll-behavior:none; }
+button, input, select, textarea { font:inherit; color:inherit; }
+button { background:none; border:0; cursor:pointer; }
+input[type=number] { -moz-appearance:textfield; }
+input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance:none; }
+
+/* ===== shell ===== */
+#app { display:flex; flex-direction:column; height:100vh; height:100dvh; }
+header { display:flex; align-items:center; justify-content:space-between; padding:calc(env(safe-area-inset-top) + 10px) var(--pad) 10px; background:var(--bg0); border-bottom:1px solid var(--bdr); flex:0 0 auto; }
+header h1 { font-size:17px; font-weight:700; letter-spacing:-.01em; }
+header h1 span { color:var(--text3); font-weight:500; }
+#hdr-clock { font-family:var(--mono); font-size:15px; color:var(--text2); }
+#sync { display:flex; align-items:center; gap:6px; font-size:var(--fs-xs); color:var(--text3); }
+#sync i { width:7px; height:7px; border-radius:50%; background:var(--text4); display:inline-block; }
+#sync.ok i { background:var(--green); } #sync.err i { background:var(--amber); }
+main { flex:1 1 auto; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:var(--pad) var(--pad) calc(var(--nav-h) + env(safe-area-inset-bottom) + 24px); }
+.view { display:none; } .view.on { display:block; }
+
+nav { position:fixed; left:0; right:0; bottom:0; height:calc(var(--nav-h) + env(safe-area-inset-bottom)); padding-bottom:env(safe-area-inset-bottom); background:rgba(12,13,15,.92); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border-top:1px solid var(--bdr); display:flex; z-index:20; }
+nav button { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; color:var(--text3); font-size:var(--fs-xs); font-weight:600; position:relative; }
+nav button svg { width:22px; height:22px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+nav button.on { color:var(--green); }
+nav button .badge[hidden] { display:none; }
+nav button .badge { position:absolute; top:8px; right:calc(50% - 20px); min-width:16px; height:16px; padding:0 4px; border-radius:8px; background:var(--red); color:#fff; font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; }
+
+/* ===== primitives ===== */
+.card { background:var(--bg1); border:1px solid var(--bdr); border-radius:var(--r); padding:14px; margin-bottom:var(--gap); }
+.card h2, .sec-title { font-size:var(--fs-sm); font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:.06em; margin-bottom:10px; display:flex; align-items:center; justify-content:space-between; }
+.sec-title { margin:18px 0 8px; }
+.sec-title small { text-transform:none; letter-spacing:0; font-weight:500; color:var(--text3); }
+.row { display:flex; align-items:center; gap:10px; }
+.grow { flex:1; min-width:0; }
+.muted { color:var(--text3); } .dim { color:var(--text2); }
+.sm { font-size:var(--fs-sm); } .xs { font-size:var(--fs-xs); }
+.mono { font-family:var(--mono); font-variant-numeric:tabular-nums; }
+.ellip { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pill { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:999px; font-size:var(--fs-xs); font-weight:700; background:var(--bg3); color:var(--text2); white-space:nowrap; }
+.pill.green { background:var(--green-dim); color:var(--green); }
+.pill.amber { background:var(--amber-dim); color:var(--amber); }
+.pill.red { background:var(--red-dim); color:var(--red); }
+.pill.blue { background:var(--blue-dim); color:var(--blue); }
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:10px 14px; border-radius:var(--r2); background:var(--bg3); color:var(--text); font-weight:600; font-size:var(--fs-sm); border:1px solid var(--bdr2); min-height:40px; }
+.btn:active { transform:scale(.98); }
+.btn.primary { background:var(--green); color:var(--on-green); border-color:var(--green); }
+.btn.danger { background:var(--red-dim); color:var(--red); border-color:transparent; }
+.btn.ghost { background:transparent; border-color:var(--bdr2); color:var(--text2); }
+.btn.block { width:100%; }
+.btn.sm { padding:6px 10px; min-height:32px; font-size:var(--fs-xs); border-radius:var(--r3); }
+.btn:disabled { opacity:.4; }
+.field { display:flex; flex-direction:column; gap:4px; }
+.field label { font-size:var(--fs-xs); color:var(--text3); font-weight:600; text-transform:uppercase; letter-spacing:.05em; }
+.input { background:var(--bg2); border:1px solid var(--bdr2); border-radius:var(--r2); padding:10px 12px; color:var(--text); width:100%; min-height:42px; outline:none; }
+.input:focus { border-color:var(--green); }
+select.input { appearance:none; -webkit-appearance:none; background-image:linear-gradient(45deg,transparent 50%,var(--text3) 50%),linear-gradient(135deg,var(--text3) 50%,transparent 50%); background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%; background-size:5px 5px; background-repeat:no-repeat; padding-right:32px; }
+textarea.input { min-height:90px; resize:vertical; line-height:1.45; }
+.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+.bar { height:6px; background:var(--bg3); border-radius:3px; overflow:hidden; }
+.bar > i { display:block; height:100%; background:var(--green); border-radius:3px; transition:width .3s; }
+.bar.amber > i { background:var(--amber); } .bar.blue > i { background:var(--blue); }
+.switch { width:44px; height:26px; border-radius:13px; background:var(--bg3); border:1px solid var(--bdr2); position:relative; flex:0 0 auto; transition:background .2s; }
+.switch::after { content:''; position:absolute; top:3px; left:3px; width:18px; height:18px; border-radius:50%; background:var(--text2); transition:left .2s, background .2s; }
+.switch.on { background:var(--green); border-color:var(--green); }
+.switch.on::after { left:22px; background:var(--on-green); }
+.empty { text-align:center; color:var(--text3); padding:26px 12px; font-size:var(--fs-sm); line-height:1.5; }
+.empty b { color:var(--text2); display:block; margin-bottom:4px; font-size:var(--fs); }
+.list-row { display:flex; align-items:center; gap:10px; padding:11px 0; border-bottom:1px solid var(--bdr); }
+.list-row:last-child { border-bottom:0; }
+.chev { color:var(--text4); flex:0 0 auto; }
+.kpi { display:grid; grid-template-columns:1fr 1fr; gap:var(--gap); margin-bottom:var(--gap); }
+.kpi .card { margin:0; padding:12px 14px; }
+.kpi .v { font-size:24px; font-weight:700; letter-spacing:-.02em; margin-top:2px; font-variant-numeric:tabular-nums; }
+.kpi .l { font-size:var(--fs-xs); color:var(--text3); font-weight:600; text-transform:uppercase; letter-spacing:.05em; }
+.verify { color:var(--amber); font-size:var(--fs-xs); font-weight:700; }
+
+/* ===== today ===== */
+#clock-card { text-align:center; padding:18px 14px 14px; }
+#clock-big { font-size:56px; font-weight:700; letter-spacing:-.03em; line-height:1; font-variant-numeric:tabular-nums; }
+#clock-big small { font-size:22px; color:var(--text3); font-weight:500; margin-left:4px; }
+#clock-date { color:var(--text3); font-size:var(--fs-sm); margin-top:6px; }
+#deadlines { display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; justify-content:center; }
+.dl { flex:1 1 130px; background:var(--bg2); border:1px solid var(--bdr); border-radius:var(--r2); padding:8px 10px; text-align:left; }
+.dl .l { font-size:var(--fs-xs); color:var(--text3); font-weight:600; }
+.dl .v { font-weight:700; font-variant-numeric:tabular-nums; margin-top:1px; }
+.dl.soon { border-color:var(--amber); } .dl.soon .v { color:var(--amber); }
+.dl.past { opacity:.5; }
+.timer { padding:14px; border-radius:var(--r); background:var(--bg1); border:1px solid var(--bdr); margin-bottom:var(--gap); }
+.timer .t { font-size:40px; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:-.02em; line-height:1; margin:8px 0 10px; }
+.timer.soon { border-color:var(--amber); box-shadow:0 0 0 1px var(--amber) inset; animation:pulse 1s infinite; }
+.timer.soon .t { color:var(--amber); }
+.timer.done { border-color:var(--red); background:var(--red-dim); }
+.timer.done .t { color:var(--red); }
+@keyframes pulse { 0%,100% { box-shadow:0 0 0 1px var(--amber) inset; } 50% { box-shadow:0 0 0 3px var(--amber) inset; } }
+#hero { display:none; padding:22px 18px; border-radius:var(--r); margin-bottom:var(--gap); text-align:center; }
+#hero.on { display:block; }
+#hero.soon { background:var(--amber); color:#1a1305; }
+#hero.done { background:var(--red); color:#fff; }
+#hero .k { font-size:var(--fs-sm); font-weight:800; text-transform:uppercase; letter-spacing:.1em; opacity:.85; }
+#hero .n { font-size:26px; font-weight:800; margin:4px 0; letter-spacing:-.01em; }
+#hero .t { font-size:64px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:-.03em; line-height:1; margin:8px 0 14px; }
+#hero .btn { background:rgba(0,0,0,.25); color:inherit; border-color:transparent; font-size:var(--fs); min-height:46px; }
+#hero.done .btn.primary { background:#fff; color:var(--red); }
+.next-card .name { font-size:18px; font-weight:700; }
+.next-card .act { color:var(--green); font-weight:600; margin-top:2px; }
+
+/* ===== count ===== */
+.cnt-row { display:grid; grid-template-columns:1fr 78px 40px; gap:8px; align-items:center; padding:10px 0; border-bottom:1px solid var(--bdr); }
+.cnt-row:last-child { border-bottom:0; }
+.cnt-row .name { font-weight:600; line-height:1.25; }
+.cnt-row .sub { font-size:var(--fs-xs); color:var(--text3); margin-top:2px; display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+.cnt-row .input { text-align:center; padding:8px 4px; font-weight:700; font-variant-numeric:tabular-nums; }
+.cnt-row.flag .input { border-color:var(--red); }
+.exp { width:40px; height:40px; border-radius:var(--r2); border:1px solid var(--bdr2); background:var(--bg2); color:var(--text3); display:flex; align-items:center; justify-content:center; font-size:var(--fs-xs); font-weight:800; }
+.exp.on { background:var(--red-dim); color:var(--red); border-color:var(--red); }
+.need { color:var(--green); font-weight:700; } .need.zero { color:var(--text3); font-weight:500; }
+.sticky-foot { position:sticky; bottom:0; margin:0 calc(-1 * var(--pad)) calc(-1 * var(--pad)); padding:10px var(--pad) 12px; background:linear-gradient(to top, var(--bg0) 70%, transparent); }
+
+/* ===== tasks ===== */
+.task { background:var(--bg1); border:1px solid var(--bdr); border-radius:var(--r); margin-bottom:10px; overflow:hidden; }
+.task .head { display:flex; align-items:center; gap:12px; padding:12px 14px; }
+.task .chk { width:26px; height:26px; border-radius:50%; border:2px solid var(--bdr2); flex:0 0 auto; display:flex; align-items:center; justify-content:center; }
+.task .chk svg { width:14px; height:14px; stroke:var(--on-green); stroke-width:3; fill:none; display:none; }
+.task.done .chk { background:var(--green); border-color:var(--green); } .task.done .chk svg { display:block; }
+.task.done .title { color:var(--text3); text-decoration:line-through; }
+.task .title { font-weight:700; }
+.task .sub { font-size:var(--fs-xs); color:var(--text3); margin-top:2px; display:flex; gap:6px; flex-wrap:wrap; }
+.task .body { display:none; padding:0 14px 14px; border-top:1px solid var(--bdr); }
+.task.open .body { display:block; }
+.task .body .bar { margin:12px 0 6px; }
+.steps { margin:12px 0; }
+.step { display:flex; gap:10px; align-items:flex-start; padding:7px 0; font-size:var(--fs-sm); color:var(--text2); }
+.step .sq { width:20px; height:20px; border-radius:6px; border:1.5px solid var(--bdr2); flex:0 0 auto; margin-top:1px; display:flex; align-items:center; justify-content:center; }
+.step.on .sq { background:var(--green); border-color:var(--green); }
+.step.on { color:var(--text3); text-decoration:line-through; }
+.tbtns { display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:8px; margin-top:10px; }
+.partial { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 12px; background:var(--bg2); border-radius:var(--r2); margin-top:10px; font-size:var(--fs-sm); }
+.partial b { color:var(--amber); }
+#task-add { display:flex; gap:8px; margin-top:8px; }
+
+/* ===== bake ===== */
+.spec { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin:10px 0; }
+.spec div { background:var(--bg2); border-radius:var(--r2); padding:8px 10px; }
+.spec .l { font-size:10px; color:var(--text3); font-weight:700; text-transform:uppercase; letter-spacing:.06em; }
+.spec .v { font-weight:700; margin-top:2px; font-variant-numeric:tabular-nums; }
+.item-row .cat { font-size:var(--fs-xs); color:var(--text3); }
+
+/* ===== sheet / modal ===== */
+#scrim { position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:40; display:none; }
+#scrim.on { display:block; }
+.sheet { position:fixed; left:0; right:0; bottom:0; max-height:92vh; max-height:92dvh; background:var(--bg1); border-radius:20px 20px 0 0; border-top:1px solid var(--bdr2); z-index:50; display:none; flex-direction:column; }
+.sheet.on { display:flex; }
+.sheet .sh-head { display:flex; align-items:center; justify-content:space-between; padding:14px var(--pad) 10px; border-bottom:1px solid var(--bdr); }
+.sheet .sh-head h3 { font-size:17px; font-weight:700; }
+.sheet .sh-body { overflow-y:auto; padding:var(--pad); padding-bottom:calc(var(--pad) + env(safe-area-inset-bottom)); display:flex; flex-direction:column; gap:12px; }
+.sheet .sh-foot { display:flex; gap:10px; padding:10px var(--pad) calc(12px + env(safe-area-inset-bottom)); border-top:1px solid var(--bdr); }
+#toast { position:fixed; left:50%; bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 14px); transform:translateX(-50%); background:var(--bg3); color:var(--text); border:1px solid var(--bdr2); padding:10px 16px; border-radius:999px; font-size:var(--fs-sm); font-weight:600; z-index:60; opacity:0; transition:opacity .2s; pointer-events:none; white-space:nowrap; }
+#toast.on { opacity:1; }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>Bakery <span id="hdr-sub">Today</span></h1>
+    <div class="row" style="gap:12px">
+      <div id="sync"><i></i><span>local</span></div>
+      <div id="hdr-clock" class="mono">--:--</div>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ================= TODAY ================= -->
+    <section id="v-today" class="view on">
+      <div id="hero"></div>
+      <div class="card" id="clock-card">
+        <div id="clock-big">--:--<small>--</small></div>
+        <div id="clock-date"></div>
+        <div id="deadlines"></div>
+      </div>
+      <div id="timers"></div>
+      <div class="kpi">
+        <div class="card" style="min-width:0"><div class="l">Oven</div><div class="v ellip" id="kpi-oven" style="font-size:15px;margin-top:6px">Empty</div><div class="mono sm dim" id="kpi-oven-t"></div></div>
+        <div class="card"><div class="l">Racks today</div><div class="v" id="kpi-racks">0 / 0</div><div class="bar" style="margin-top:8px"><i id="kpi-bar" style="width:0%"></i></div></div>
+      </div>
+      <div class="card next-card" id="next-card"></div>
+    </section>
+
+    <!-- ================= COUNT ================= -->
+    <section id="v-count" class="view">
+      <div class="card">
+        <div class="row">
+          <div class="grow">
+            <div style="font-weight:700">Floor count</div>
+            <div class="sm muted" id="count-date"></div>
+          </div>
+          <button class="btn sm ghost" onclick="newDay()">New day</button>
+        </div>
+        <div class="sm muted" style="margin-top:8px">Count what's on the shelf. Need = par − counted, rounded up to whole racks. Tap <b>EXP</b> if the shelf stock is expired and has to be pulled.</div>
+      </div>
+      <div id="count-list"></div>
+      <div class="sticky-foot">
+        <button class="btn primary block" id="build-btn" onclick="buildTasks()">Build today's tasks</button>
+      </div>
+    </section>
+
+    <!-- ================= TASKS ================= -->
+    <section id="v-tasks" class="view">
+      <div class="card">
+        <div class="row">
+          <div class="grow"><div style="font-weight:700" id="tasks-title">Today's checklist</div><div class="sm muted" id="tasks-sub"></div></div>
+          <div class="mono" id="tasks-pct" style="font-weight:700"></div>
+        </div>
+        <div class="bar" style="margin-top:10px"><i id="tasks-bar" style="width:0%"></i></div>
+      </div>
+      <div id="task-list"></div>
+      <div class="card">
+        <div class="sm dim" style="font-weight:700;margin-bottom:6px">Add a task</div>
+        <div id="task-add">
+          <input class="input grow" id="task-new" placeholder="e.g. Markdown Manager by 9" enterkeyhint="done">
+          <button class="btn" onclick="addCustomTask()">Add</button>
+        </div>
+        <button class="btn ghost block" style="margin-top:8px" onclick="openPickItem()">+ Add an item to bake</button>
+      </div>
+    </section>
+
+    <!-- ================= BAKE ================= -->
+    <section id="v-bake" class="view">
+      <input class="input" id="bake-search" placeholder="Search items…" oninput="renderBake()" style="margin-bottom:6px">
+      <div id="bake-list"></div>
+    </section>
+
+    <!-- ================= SETTINGS ================= -->
+    <section id="v-settings" class="view">
+      <div class="card">
+        <h2>Notes <small id="notes-ts"></small></h2>
+        <textarea class="input" id="notes" placeholder="Anything you learn at work: real par numbers, how many fit on a rack, things the sheet gets wrong, ideas for the app…" oninput="saveNotes()"></textarea>
+      </div>
+      <div class="card">
+        <h2>Oven</h2>
+        <div class="grid2">
+          <div class="field"><label>Ovens</label><input class="input" type="number" inputmode="numeric" id="set-ovens" min="1" onchange="saveSettings()"></div>
+          <div class="field"><label>Shelves per rack</label><input class="input" type="number" inputmode="numeric" id="set-shelves" min="1" onchange="saveSettings()"></div>
+        </div>
+        <div class="xs muted" style="margin-top:8px">Sheet times assume a full rack. The bake timer offers −10° for a partial rack.</div>
+      </div>
+      <div class="card">
+        <h2>Shelf deadlines <button class="btn sm ghost" onclick="addDeadline()">+ Add</button></h2>
+        <div id="deadline-list"></div>
+      </div>
+      <div class="card">
+        <h2>Alerts</h2>
+        <div class="list-row"><div class="grow">Sound when a timer ends</div><button class="switch" id="sw-sound" onclick="toggleSetting('sound',this)"></button></div>
+        <div class="list-row"><div class="grow">Keep screen awake while timers run</div><button class="switch" id="sw-wake" onclick="toggleSetting('wake',this)"></button></div>
+        <div class="list-row"><div class="grow">Phone notifications <div class="xs muted" id="notif-state"></div></div><button class="btn sm" onclick="askNotif()">Enable</button></div>
+        <div class="xs muted" style="margin-top:6px">A web app can't ring while the phone is locked. Keep the screen on (the toggle above) and the alarm will always fire.</div>
+      </div>
+      <div class="card">
+        <h2>Items <button class="btn sm primary" onclick="openEditor(null)">+ Add item</button></h2>
+        <div class="xs muted" style="margin-bottom:8px">Toggle what your store carries. Tap an item to set par, rack size, shelf life, temps and steps. <span class="verify">verify</span> marks values that were hard to read on the sheet photo.</div>
+        <div id="settings-items"></div>
+      </div>
+      <div class="card">
+        <h2>Data</h2>
+        <div class="sm muted" id="sync-detail" style="margin-bottom:10px"></div>
+        <div class="grid2">
+          <button class="btn" onclick="newDay()">Reset today</button>
+          <button class="btn danger" onclick="resetAll()">Reset everything</button>
+        </div>
+        <div class="xs muted" style="margin-top:10px">Source: Sprouts Bakery Temperature Cheat Sheet 12.15.2023 + Opening Shift schedule. Add to Home Screen from the share menu to install.</div>
+      </div>
+    </section>
+  </main>
+
+  <nav>
+    <button data-v="today" onclick="go('today')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Today<span class="badge" id="badge-today" hidden></span></button>
+    <button data-v="count" onclick="go('count')"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/><path d="M17 17l2 2 3-3"/></svg>Count</button>
+    <button data-v="tasks" onclick="go('tasks')"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Tasks<span class="badge" id="badge-tasks" hidden></span></button>
+    <button data-v="bake" onclick="go('bake')"><svg viewBox="0 0 24 24"><path d="M4 11h16v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M6 11V7a6 6 0 0 1 12 0v4"/><path d="M8 15h8"/></svg>Bake</button>
+    <button data-v="settings" onclick="go('settings')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Settings</button>
+  </nav>
+</div>
+
+<div id="scrim" onclick="closeSheets()"></div>
+
+<!-- item editor -->
+<div class="sheet" id="sh-edit">
+  <div class="sh-head"><h3 id="ed-title">Edit item</h3><button class="btn sm ghost" onclick="closeSheets()">Close</button></div>
+  <div class="sh-body">
+    <div class="field"><label>Name</label><input class="input" id="ed-name" placeholder="e.g. Blueberry Muffins"></div>
+    <div class="grid2">
+      <div class="field"><label>Category</label><select class="input" id="ed-cat"></select></div>
+      <div class="field"><label>Shown on Count</label><div class="row" style="height:42px"><button class="switch on" id="ed-enabled" onclick="this.classList.toggle('on')"></button></div></div>
+    </div>
+    <div class="sec-title" style="margin-top:4px">Floor</div>
+    <div class="grid3">
+      <div class="field"><label>Par (on floor)</label><input class="input" type="number" inputmode="numeric" id="ed-par" placeholder="—"></div>
+      <div class="field"><label>Needed by</label><select class="input" id="ed-parby"><option value="7">7 AM</option><option value="9">9 AM</option><option value="">Anytime</option></select></div>
+      <div class="field"><label>Per rack</label><input class="input" type="number" inputmode="numeric" id="ed-batch" placeholder="1"></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>Shelf life (days)</label><input class="input" type="number" inputmode="numeric" id="ed-shelf" placeholder="—"></div>
+      <div class="field"><label>Comes as</label><select class="input" id="ed-thawtype" onchange="edThawUI()"><option value="none">Frozen → oven</option><option value="overnight">Broken out overnight</option><option value="timed">Thaw this morning</option></select></div>
+    </div>
+    <div class="sec-title" style="margin-top:4px">Oven</div>
+    <div class="grid3">
+      <div class="field" id="ed-thawmin-f"><label>Thaw (min)</label><input class="input" type="number" inputmode="numeric" id="ed-thawmin"></div>
+      <div class="field"><label>Proof (min)</label><input class="input" type="number" inputmode="numeric" id="ed-proof" placeholder="0"></div>
+      <div class="field"><label>Steam (sec)</label><input class="input" type="number" inputmode="numeric" id="ed-steam" placeholder="0"></div>
+    </div>
+    <div class="grid3">
+      <div class="field"><label>Temp °F</label><input class="input" type="number" inputmode="numeric" id="ed-temp"></div>
+      <div class="field"><label>Bake min (lo)</label><input class="input" type="number" inputmode="numeric" id="ed-tlo"></div>
+      <div class="field"><label>Bake min (hi)</label><input class="input" type="number" inputmode="numeric" id="ed-thi"></div>
+    </div>
+    <div class="field"><label>Note</label><input class="input" id="ed-note" placeholder="toppings, egg wash, anything special"></div>
+    <div class="field"><label>Steps — one per line</label><textarea class="input" id="ed-steps" style="min-height:150px"></textarea></div>
+    <div class="row" id="ed-verify-row" hidden><span class="verify">verify</span><span class="sm muted grow">Some values were hard to read on the sheet photo — check them.</span><button class="btn sm ghost" onclick="clearVerify()">Checked</button></div>
+    <button class="btn danger block" id="ed-delete" onclick="deleteItem()">Delete item</button>
+  </div>
+  <div class="sh-foot"><button class="btn ghost grow" onclick="closeSheets()">Cancel</button><button class="btn primary grow" onclick="saveEditor()">Save</button></div>
+</div>
+
+<!-- item detail (Bake tab) -->
+<div class="sheet" id="sh-detail">
+  <div class="sh-head"><h3 id="dt-title" class="ellip">Item</h3><button class="btn sm ghost" onclick="closeSheets()">Close</button></div>
+  <div class="sh-body" id="dt-body"></div>
+</div>
+
+<!-- pick item to add as a task -->
+<div class="sheet" id="sh-pick">
+  <div class="sh-head"><h3>Add item to bake</h3><button class="btn sm ghost" onclick="closeSheets()">Close</button></div>
+  <div class="sh-body">
+    <div class="field"><label>Item</label><select class="input" id="pick-item"></select></div>
+    <div class="field"><label>Racks</label><input class="input" type="number" inputmode="numeric" id="pick-racks" value="1" min="1"></div>
+  </div>
+  <div class="sh-foot"><button class="btn ghost grow" onclick="closeSheets()">Cancel</button><button class="btn primary grow" onclick="addItemTask()">Add task</button></div>
+</div>
+
+<!-- custom timer -->
+<div class="sheet" id="sh-timer">
+  <div class="sh-head"><h3>Custom timer</h3><button class="btn sm ghost" onclick="closeSheets()">Close</button></div>
+  <div class="sh-body">
+    <div class="field"><label>Label</label><input class="input" id="ct-label" placeholder="e.g. Cookies rack 2"></div>
+    <div class="field"><label>Minutes</label><input class="input" type="number" inputmode="numeric" id="ct-min" value="15" min="1"></div>
+  </div>
+  <div class="sh-foot"><button class="btn ghost grow" onclick="closeSheets()">Cancel</button><button class="btn primary grow" onclick="startCustomTimer()">Start</button></div>
+</div>
+
+<div id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+<script src="data.js"></script>
+<script>
+/* =====================================================================
+   STORE
+   ===================================================================== */
+const LS_KEY = 'bakery-store-v1';
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const now = () => Date.now();
+const todayKey = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); };
+const uid = () => Math.random().toString(36).slice(2, 9);
+
+const DEFAULT_SETTINGS = {
+  ovens: 1, shelves: 12, sound: true, wake: true,
+  deadlines: [ { id:'d7', label:'7 AM shelf', time:'07:00' }, { id:'d9', label:'9 AM shelf', time:'09:00' } ]
+};
+
+let store = {
+  items: {}, itemsTs: {},
+  counts: { date: todayKey(), vals: {}, exp: {} }, countsTs: 0,
+  tasks: { date: todayKey(), list: [] }, tasksTs: 0,
+  timers: [], timersTs: 0,
+  notes: '', notesTs: 0,
+  settings: JSON.parse(JSON.stringify(DEFAULT_SETTINGS)), settingsTs: 0
+};
+try { const raw = localStorage.getItem(LS_KEY); if (raw) store = Object.assign(store, JSON.parse(raw)); } catch(e) { console.warn('[bakery] localStorage read failed', e); }
+
+/* seed rows that are not in the store yet get added (a deleted item stays
+   deleted — deletion is a flag, so a seed can't resurrect it) */
+function ensureSeed() {
+  const seed = bakerySeedItems();
+  let changed = false;
+  Object.values(seed).forEach(s => { if (!store.items[s.id]) { store.items[s.id] = s; store.itemsTs[s.id] = store.itemsTs[s.id] || 1; changed = true; } });
+  store.settings = Object.assign({}, DEFAULT_SETTINGS, store.settings || {});
+  if (!store.settings.deadlines || !store.settings.deadlines.length) store.settings.deadlines = DEFAULT_SETTINGS.deadlines;
+  if (changed) persist();
+}
+function persist() { try { localStorage.setItem(LS_KEY, JSON.stringify(store)); } catch(e) { console.warn('[bakery] localStorage write failed', e); } }
+function save(section) {
+  if (section === 'items') { /* caller stamps itemsTs[id] */ }
+  else store[section + 'Ts'] = now();
+  persist(); schedulePush();
+}
+function liveItems() { return Object.values(store.items).filter(i => !i.deleted); }
+function enabledItems() { return liveItems().filter(i => i.enabled); }
+function catOrder(c) { return BAKERY_CAT_PRIORITY[c] || 50; }
+function sortItems(a, b) { return catOrder(a.cat) - catOrder(b.cat) || (a.order ?? 999) - (b.order ?? 999) || a.name.localeCompare(b.name); }
+function allCats() {
+  const s = new Set(BAKERY_CATEGORIES); liveItems().forEach(i => s.add(i.cat));
+  return Array.from(s).sort((a,b) => catOrder(a) - catOrder(b) || a.localeCompare(b));
+}
+function fmtTime(it) { return it.timeLo ? (it.timeLo === it.timeHi || !it.timeHi ? it.timeLo : it.timeLo + '-' + it.timeHi) + ' min' : ''; }
+function thawLabel(it) { return it.thawType === 'none' ? 'Frozen' : it.thawType === 'overnight' ? 'Overnight' : 'Thaw ' + it.thawMin + 'm'; }
+function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('on'), 2200); }
+
+/* =====================================================================
+   NAV
+   ===================================================================== */
+let view = 'today';
+const TITLES = { today:'Today', count:'Count', tasks:'Tasks', bake:'Bake', settings:'Settings' };
+function go(v) {
+  view = v;
+  $$('.view').forEach(e => e.classList.toggle('on', e.id === 'v-' + v));
+  $$('nav button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  $('#hdr-sub').textContent = TITLES[v];
+  $('#main').scrollTop = 0;
+  render();
+}
+function render() {
+  ({ today: renderToday, count: renderCount, tasks: renderTasks, bake: renderBake, settings: renderSettings })[view]();
+  renderBadges();
+}
+function renderBadges() {
+  const due = store.timers.filter(t => t.endsAt <= now()).length;
+  const bt = $('#badge-today'); bt.hidden = !due; bt.textContent = due;
+  const open = store.tasks.list.filter(t => !taskDone(t)).length;
+  const bk = $('#badge-tasks'); bk.hidden = !open || store.tasks.date !== todayKey(); bk.textContent = open;
+}
+
+/* =====================================================================
+   TODAY
+   ===================================================================== */
+function pad2(n) { return String(n).padStart(2, '0'); }
+function fmtClock(d) { let h = d.getHours(); const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12; return { hm: h + ':' + pad2(d.getMinutes()), s: pad2(d.getSeconds()), ap }; }
+function fmtDur(ms) { const neg = ms < 0; ms = Math.abs(ms); const s = Math.round(ms / 1000); const m = Math.floor(s / 60), r = s % 60; return (neg ? '-' : '') + m + ':' + pad2(r); }
+function fmtLong(ms) { const m = Math.round(ms / 60000); if (Math.abs(m) < 60) return m + ' min'; const h = Math.floor(Math.abs(m) / 60), r = Math.abs(m) % 60; return (m < 0 ? '-' : '') + h + 'h ' + (r ? r + 'm' : ''); }
+function deadlineAt(dl) { const [h, m] = (dl.time || '00:00').split(':').map(Number); const d = new Date(); d.setHours(h, m, 0, 0); return d.getTime(); }
+
+function renderToday() {
+  const d = new Date(), c = fmtClock(d);
+  $('#clock-big').innerHTML = c.hm + '<small>' + c.ap + '</small>';
+  $('#clock-date').textContent = d.toLocaleDateString(undefined, { weekday:'long', month:'long', day:'numeric' });
+  $('#deadlines').innerHTML = (store.settings.deadlines || []).map(dl => {
+    const diff = deadlineAt(dl) - now();
+    const cls = diff < 0 ? 'past' : diff < 45 * 60000 ? 'soon' : '';
+    return '<div class="dl ' + cls + '"><div class="l">' + esc(dl.label) + '</div><div class="v">' + (diff < 0 ? 'passed' : 'in ' + fmtLong(diff)) + '</div></div>';
+  }).join('');
+  renderTimers();
+  // oven + racks kpi
+  const bake = store.timers.filter(t => t.kind === 'bake' && t.endsAt > now()).sort((a,b) => a.endsAt - b.endsAt)[0];
+  $('#kpi-oven').textContent = bake ? bake.label : 'Empty';
+  $('#kpi-oven-t').textContent = bake ? fmtDur(bake.endsAt - now()) + ' left' : '';
+  const tot = store.tasks.list.reduce((s,t) => s + (t.batches || 0), 0), done = store.tasks.list.reduce((s,t) => s + Math.min(t.done || 0, t.batches || 0), 0);
+  $('#kpi-racks').textContent = done + ' / ' + tot;
+  $('#kpi-bar').style.width = (tot ? done / tot * 100 : 0) + '%';
+  // next up
+  const nx = nextTask();
+  const nc = $('#next-card');
+  if (!store.tasks.list.length || store.tasks.date !== todayKey()) {
+    nc.innerHTML = '<h2>Next up</h2><div class="empty"><b>No tasks for today yet</b>Count the floor, then build the list.</div><button class="btn primary block" onclick="go(\'count\')">Go to Count</button>';
+  } else if (!nx) {
+    nc.innerHTML = '<h2>Next up</h2><div class="empty"><b>All done</b>Every task on the list is complete.</div>';
+  } else {
+    const it = nx.itemId ? store.items[nx.itemId] : null;
+    nc.innerHTML = '<h2>Next up</h2><div class="name">' + esc(nx.title) + '</div><div class="act">' + esc(nextAction(nx)) + '</div>' +
+      (it ? '<div class="sm muted" style="margin-top:4px">' + esc(thawLabel(it)) + (it.proofMin ? ' · proof ' + it.proofMin + 'm' : '') + (it.temp ? ' · ' + it.temp + '°' : '') + (it.steam ? ' · steam ' + it.steam : '') + (fmtTime(it) ? ' · ' + fmtTime(it) : '') + '</div>' : '') +
+      '<div class="row" style="margin-top:12px;gap:8px"><button class="btn primary grow" onclick="openTask(\'' + nx.id + '\')">Open task</button><button class="btn grow" onclick="openCustomTimer()">Custom timer</button></div>';
+  }
+}
+function nextTask() {
+  const list = sortedTasks();
+  return list.find(t => !taskDone(t) && !store.timers.some(x => x.taskId === t.id && x.endsAt > now())) || list.find(t => !taskDone(t)) || null;
+}
+function nextAction(t) {
+  if (!t.itemId) return t.when ? 'Due ' + t.when : 'Custom task';
+  const it = store.items[t.itemId]; if (!it) return '';
+  const running = store.timers.find(x => x.taskId === t.id && x.endsAt > now());
+  if (running) return running.kind[0].toUpperCase() + running.kind.slice(1) + ' running · ' + fmtDur(running.endsAt - now());
+  const rack = (t.done || 0) + 1;
+  if (!t.pulled && it.thawType === 'timed') return 'Pull & thaw ' + it.thawMin + ' min';
+  if (!t.proofed && it.proofMin) return 'Proof ' + it.proofMin + ' min';
+  return 'Bake rack ' + rack + ' of ' + t.batches + (it.temp ? ' · ' + it.temp + '°' : '');
+}
+
+function renderTimers() {
+  const box = $('#timers'), hero = $('#hero');
+  const list = store.timers.slice().sort((a,b) => a.endsAt - b.endsAt);
+  const due = list.filter(t => t.endsAt <= now());
+  const soon = list.find(t => t.endsAt > now() && t.endsAt - now() <= 120000);
+  if (due.length) {
+    const t = due[0];
+    hero.className = 'done on';
+    hero.innerHTML = '<div class="k">Timer done</div><div class="n">' + esc(t.label) + '</div><div class="t">' + fmtDur(t.endsAt - now()) + '</div>' +
+      '<div class="row" style="gap:8px">' + (t.kind === 'bake' && t.taskId ? '<button class="btn primary grow" onclick="ackTimer(\'' + t.id + '\',true)">Out of the oven — rack done</button>' : '<button class="btn primary grow" onclick="ackTimer(\'' + t.id + '\',true)">Done</button>') +
+      '<button class="btn" onclick="snooze(\'' + t.id + '\')">+1 min</button></div>';
+  } else if (soon) {
+    hero.className = 'soon on';
+    hero.innerHTML = '<div class="k">Coming up</div><div class="n">' + esc(soon.label) + '</div><div class="t">' + fmtDur(soon.endsAt - now()) + '</div><div class="sm" style="opacity:.8">Get ready to open the oven</div>';
+  } else { hero.className = ''; hero.innerHTML = ''; }
+  if (!list.length) { box.innerHTML = '<div class="card"><h2>Timers</h2><div class="empty"><b>Nothing running</b>Start a timer from a task, or set a custom one.</div><button class="btn block" onclick="openCustomTimer()">Custom timer</button></div>'; return; }
+  box.innerHTML = '<div class="sec-title" style="margin-top:0">Timers <button class="btn sm ghost" onclick="openCustomTimer()">+ Custom</button></div>' + list.map(t => {
+    const left = t.endsAt - now(), pct = Math.max(0, Math.min(100, (1 - left / t.dur) * 100));
+    const cls = left <= 0 ? 'done' : left <= 120000 ? 'soon' : '';
+    const kindPill = { thaw:'blue', proof:'amber', bake:'green', custom:'' }[t.kind] || '';
+    return '<div class="timer ' + cls + '"><div class="row"><span class="pill ' + kindPill + '">' + esc(t.kind) + '</span><div class="grow ellip" style="font-weight:700">' + esc(t.label) + '</div>' + (t.tempNote ? '<span class="pill amber">' + esc(t.tempNote) + '</span>' : '') + '</div>' +
+      '<div class="t mono">' + fmtDur(left) + '</div><div class="bar ' + (cls === 'soon' ? 'amber' : '') + '"><i style="width:' + pct + '%"></i></div>' +
+      '<div class="row" style="margin-top:10px;gap:8px"><button class="btn sm" onclick="snooze(\'' + t.id + '\')">+1 min</button><span class="xs muted grow">ends ' + fmtClock(new Date(t.endsAt)).hm + (t.hint ? ' · ' + esc(t.hint) : '') + '</span><button class="btn sm ' + (left <= 0 ? 'primary' : 'ghost') + '" onclick="ackTimer(\'' + t.id + '\',' + (t.kind === 'bake' && !!t.taskId) + ')">' + (left <= 0 ? 'Done' : 'Finish') + '</button></div></div>';
+  }).join('');
+}
+
+/* ---- timers ---- */
+function startTimer(o) {
+  const dur = Math.max(1, o.minutes) * 60000;
+  store.timers.push({ id: uid(), label: o.label, kind: o.kind || 'custom', itemId: o.itemId || null, taskId: o.taskId || null, startedAt: now(), endsAt: now() + dur, dur, tempNote: o.tempNote || '', hint: o.hint || '', fired: false });
+  save('timers'); unlockAudio(); updateWake(); render();
+  toast(o.label + ' · ' + o.minutes + ' min');
+}
+function snooze(id) { const t = store.timers.find(x => x.id === id); if (!t) return; t.endsAt = Math.max(t.endsAt, now()) + 60000; t.dur += 60000; t.fired = false; stopAlarm(); save('timers'); render(); }
+function ackTimer(id, advance) {
+  const t = store.timers.find(x => x.id === id); if (!t) return;
+  store.timers = store.timers.filter(x => x.id !== id);
+  stopAlarm();
+  if (t.taskId) {
+    const task = store.tasks.list.find(x => x.id === t.taskId);
+    if (task) {
+      if (t.kind === 'thaw') task.pulled = true;
+      if (t.kind === 'proof') task.proofed = true;
+      if (t.kind === 'bake' && advance) task.done = Math.min((task.done || 0) + 1, task.batches || 1);
+      save('tasks');
+    }
+  }
+  save('timers'); updateWake(); render();
+}
+function openCustomTimer() { $('#ct-label').value = ''; $('#ct-min').value = 15; openSheet('sh-timer'); }
+function startCustomTimer() { const m = parseFloat($('#ct-min').value); if (!m) return; startTimer({ label: $('#ct-label').value.trim() || 'Timer', minutes: m, kind: 'custom' }); closeSheets(); go('today'); }
+
+/* ---- alarm: web audio beep loop + vibration + notification ---- */
+let actx = null, alarmOn = false, alarmTimer = null;
+function unlockAudio() { try { if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === 'suspended') actx.resume(); } catch(e) {} }
+function beep() {
+  if (!actx || !store.settings.sound) return;
+  try {
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = 'square'; o.frequency.value = 1050; g.gain.value = 0.0001;
+    o.connect(g); g.connect(actx.destination);
+    const t = actx.currentTime;
+    for (let i = 0; i < 3; i++) { g.gain.setValueAtTime(0.25, t + i * 0.22); g.gain.setValueAtTime(0.0001, t + i * 0.22 + 0.12); }
+    o.start(t); o.stop(t + 0.8);
+  } catch(e) {}
+}
+function startAlarm() { if (alarmOn) return; alarmOn = true; unlockAudio(); beep(); try { navigator.vibrate && navigator.vibrate([300,150,300,150,600]); } catch(e) {} alarmTimer = setInterval(() => { beep(); try { navigator.vibrate && navigator.vibrate([300,150,300]); } catch(e) {} }, 1500); }
+function stopAlarm() { if (!alarmOn) return; alarmOn = false; clearInterval(alarmTimer); alarmTimer = null; try { navigator.vibrate && navigator.vibrate(0); } catch(e) {} }
+function notify(t) {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  try { new Notification('Timer done: ' + t.label, { body: t.kind === 'bake' ? 'Take it out of the oven' : 'Ready for the next step', tag: t.id }); } catch(e) {}
+}
+function askNotif() {
+  if (!('Notification' in window)) { toast('Not supported on this browser'); return; }
+  Notification.requestPermission().then(() => { renderSettings(); toast(Notification.permission === 'granted' ? 'Notifications on' : 'Notifications ' + Notification.permission); });
+}
+let wakeLock = null;
+async function updateWake() {
+  const want = store.settings.wake && store.timers.length > 0 && document.visibilityState === 'visible';
+  try {
+    if (want && !wakeLock && 'wakeLock' in navigator) { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => { wakeLock = null; }); }
+    else if (!want && wakeLock) { await wakeLock.release(); wakeLock = null; }
+  } catch(e) { wakeLock = null; }
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { updateWake(); tick(); } });
+
+/* one-second heartbeat */
+function tick() {
+  const c = fmtClock(new Date());
+  $('#hdr-clock').textContent = c.hm;
+  let fire = false;
+  store.timers.forEach(t => { if (t.endsAt <= now() && !t.fired) { t.fired = true; fire = true; notify(t); } });
+  if (fire) { persist(); startAlarm(); if (view !== 'today') go('today'); }
+  if (!store.timers.some(t => t.endsAt <= now())) stopAlarm();
+  if (view === 'today') renderToday();
+  else if (view === 'tasks' && store.timers.length) renderTasks();
+  renderBadges();
+}
+setInterval(tick, 1000);
+
+/* =====================================================================
+   COUNT
+   ===================================================================== */
+function rollDay() {
+  const tk = todayKey();
+  if (store.counts.date !== tk && store.tasks.date !== tk) return false;
+  return true;
+}
+function need(it) {
+  const c = store.counts.vals[it.id];
+  if (it.par == null || it.par === '') return null;
+  const have = store.counts.exp[it.id] ? 0 : (c == null || c === '' ? null : Number(c));
+  if (have == null) return null;
+  const n = Math.max(0, Number(it.par) - have);
+  return { n, racks: Math.ceil(n / Math.max(1, Number(it.batch) || 1)) };
+}
+function renderCount() {
+  const tk = todayKey();
+  $('#count-date').textContent = store.counts.date === tk ? 'Today · ' + new Date().toLocaleDateString(undefined, {weekday:'short', month:'short', day:'numeric'}) : 'From ' + store.counts.date + ' — tap New day to start fresh';
+  const items = enabledItems().sort(sortItems);
+  if (!items.length) { $('#count-list').innerHTML = '<div class="empty"><b>No items enabled</b>Turn some on in Settings.</div>'; return; }
+  let html = '', cat = null, needCount = 0, racks = 0;
+  items.forEach(it => {
+    if (it.cat !== cat) { cat = it.cat; html += (html ? '</div>' : '') + '<div class="sec-title">' + esc(cat) + '</div><div class="card" style="padding:4px 14px">'; }
+    const v = store.counts.vals[it.id], ex = !!store.counts.exp[it.id], nd = need(it);
+    if (nd && nd.n > 0) { needCount++; racks += nd.racks; }
+    const parTxt = it.par == null || it.par === '' ? '<a class="xs" style="color:var(--amber);font-weight:700" onclick="openEditor(\'' + it.id + '\')">set par</a>' : '<span>par ' + esc(it.par) + (it.parBy ? ' by ' + it.parBy + 'AM' : '') + '</span>';
+    const needTxt = nd == null ? '' : nd.n > 0 ? '<span class="need">bake ' + nd.n + ' · ' + nd.racks + ' rack' + (nd.racks > 1 ? 's' : '') + '</span>' : '<span class="need zero">stocked</span>';
+    html += '<div class="cnt-row ' + (ex ? 'flag' : '') + '"><div class="grow"><div class="name">' + esc(it.name) + (it.verify ? ' <span class="verify">verify</span>' : '') + '</div><div class="sub">' + parTxt + needTxt + '</div></div>' +
+      '<input class="input" type="number" inputmode="numeric" placeholder="—" value="' + (v ?? '') + '" oninput="setCount(\'' + it.id + '\',this.value)">' +
+      '<button class="exp ' + (ex ? 'on' : '') + '" onclick="toggleExp(\'' + it.id + '\')">EXP</button></div>';
+  });
+  html += '</div>';
+  $('#count-list').innerHTML = html;
+  $('#build-btn').textContent = needCount ? 'Build today\'s tasks · ' + needCount + ' item' + (needCount > 1 ? 's' : '') + ', ' + racks + ' rack' + (racks !== 1 ? 's' : '') : 'Build today\'s tasks';
+}
+function touchCounts() { if (store.counts.date !== todayKey()) { store.counts = { date: todayKey(), vals: {}, exp: {} }; } }
+function setCount(id, v) { touchCounts(); store.counts.vals[id] = v === '' ? null : Number(v); save('counts'); renderCountRow(); }
+function toggleExp(id) { touchCounts(); store.counts.exp[id] = !store.counts.exp[id]; save('counts'); renderCount(); }
+let rcT = null; function renderCountRow() { clearTimeout(rcT); rcT = setTimeout(() => { const a = document.activeElement; const s = $('#main').scrollTop; renderCount(); $('#main').scrollTop = s; }, 700); }
+function newDay() {
+  if (!confirm('Start a new day? Clears the floor count and today\'s task list. Items, pars and notes are kept.')) return;
+  store.counts = { date: todayKey(), vals: {}, exp: {} }; save('counts');
+  store.tasks = { date: todayKey(), list: store.tasks.list.filter(t => !t.itemId && t.keep) }; save('tasks');
+  store.timers = []; save('timers'); stopAlarm(); updateWake();
+  render(); toast('New day');
+}
+function buildTasks() {
+  const tk = todayKey();
+  if (store.tasks.date !== tk) store.tasks = { date: tk, list: [] };
+  let added = 0, updated = 0;
+  enabledItems().forEach(it => {
+    const nd = need(it);
+    const ex = store.tasks.list.find(t => t.itemId === it.id);
+    if (nd && nd.n > 0) {
+      if (ex) { if (ex.batches !== nd.racks) { ex.batches = nd.racks; updated++; } ex.pieces = nd.n; }
+      else { store.tasks.list.push(newItemTask(it, nd.racks, nd.n)); added++; }
+    } else if (ex && ex.auto && !(ex.done > 0)) {
+      store.tasks.list = store.tasks.list.filter(t => t !== ex);
+    }
+  });
+  save('tasks');
+  go('tasks');
+  toast(added || updated ? (added ? added + ' added' : '') + (added && updated ? ', ' : '') + (updated ? updated + ' updated' : '') : 'Nothing needs baking');
+}
+function newItemTask(it, racks, pieces) {
+  return { id: uid(), itemId: it.id, title: it.name, batches: Math.max(1, racks), pieces: pieces || null, done: 0, pulled: false, proofed: false, stepsDone: [], auto: true, partial: false };
+}
+
+/* =====================================================================
+   TASKS
+   ===================================================================== */
+function taskDone(t) { return t.itemId ? (t.done || 0) >= (t.batches || 1) : !!t.checked; }
+function sortedTasks() {
+  return store.tasks.list.slice().sort((a, b) => {
+    const ia = a.itemId ? store.items[a.itemId] : null, ib = b.itemId ? store.items[b.itemId] : null;
+    const pa = ia ? catOrder(ia.cat) : 40, pb = ib ? catOrder(ib.cat) : 40;
+    return pa - pb || (ia && ib ? sortItems(ia, ib) : 0) || (a.created || 0) - (b.created || 0);
+  });
+}
+let openTaskId = null;
+function openTask(id) { openTaskId = id; go('tasks'); setTimeout(() => { const el = document.getElementById('task-' + id); if (el) el.scrollIntoView({ block:'start', behavior:'smooth' }); }, 50); }
+function renderTasks() {
+  const tk = todayKey(), stale = store.tasks.date !== tk;
+  const list = sortedTasks();
+  const tot = list.length, dn = list.filter(taskDone).length;
+  $('#tasks-title').textContent = stale ? 'List from ' + store.tasks.date : 'Today\'s checklist';
+  $('#tasks-sub').textContent = tot ? dn + ' of ' + tot + ' done' + (stale ? ' · Count → New day to reset' : '') : 'Count the floor and build the list, or add tasks below.';
+  $('#tasks-pct').textContent = tot ? Math.round(dn / tot * 100) + '%' : '';
+  $('#tasks-bar').style.width = (tot ? dn / tot * 100 : 0) + '%';
+  if (!tot) { $('#task-list').innerHTML = '<div class="empty"><b>Nothing on the list</b>Build it from the Count tab, or add tasks by hand.</div>'; return; }
+  $('#task-list').innerHTML = list.map(t => t.itemId ? itemTaskHtml(t) : customTaskHtml(t)).join('');
+}
+function customTaskHtml(t) {
+  return '<div class="task ' + (t.checked ? 'done' : '') + '" id="task-' + t.id + '"><div class="head"><button class="chk" onclick="toggleCustom(\'' + t.id + '\')"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button><div class="grow"><div class="title">' + esc(t.title) + '</div>' + (t.when ? '<div class="sub">due ' + esc(t.when) + '</div>' : '') + '</div><button class="btn sm ghost" onclick="removeTask(\'' + t.id + '\')">✕</button></div></div>';
+}
+function itemTaskHtml(t) {
+  const it = store.items[t.itemId];
+  if (!it) return '';
+  const done = taskDone(t), open = openTaskId === t.id;
+  const running = store.timers.filter(x => x.taskId === t.id && x.endsAt > now());
+  const pct = Math.min(100, (t.done || 0) / (t.batches || 1) * 100);
+  const sub = [ (t.pieces ? t.pieces + ' pcs · ' : '') + t.batches + ' rack' + (t.batches > 1 ? 's' : ''), thawLabel(it), it.proofMin ? 'proof ' + it.proofMin + 'm' : '', it.temp ? it.temp + '°' : '', fmtTime(it) ].filter(Boolean);
+  const steps = (it.steps || []).map((s, i) => '<div class="step ' + ((t.stepsDone || []).includes(i) ? 'on' : '') + '" onclick="toggleStep(\'' + t.id + '\',' + i + ')"><div class="sq">' + ((t.stepsDone || []).includes(i) ? '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#0b1a11" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>' : '') + '</div><div>' + esc(s) + '</div></div>').join('');
+  const temp = it.temp ? (t.partial ? it.temp - 10 : it.temp) : null;
+  const btns = [];
+  if (it.thawType === 'timed' && it.thawMin) btns.push('<button class="btn ' + (t.pulled ? 'ghost' : 'primary') + '" onclick="startTaskTimer(\'' + t.id + '\',\'thaw\')">Thaw ' + it.thawMin + 'm' + (t.pulled ? ' ✓' : '') + '</button>');
+  if (it.proofMin) btns.push('<button class="btn ' + (t.proofed || (!t.pulled && it.thawType === 'timed') ? 'ghost' : 'primary') + '" onclick="startTaskTimer(\'' + t.id + '\',\'proof\')">Proof ' + it.proofMin + 'm' + (t.proofed ? ' ✓' : '') + '</button>');
+  if (it.timeLo) btns.push('<button class="btn ' + (btns.length && !((t.pulled || it.thawType !== 'timed') && (t.proofed || !it.proofMin)) ? '' : 'primary') + '" onclick="startTaskTimer(\'' + t.id + '\',\'bake\')" ' + (done ? 'disabled' : '') + '>Bake ' + fmtTime(it) + '</button>');
+  return '<div class="task ' + (done ? 'done' : '') + (open ? ' open' : '') + '" id="task-' + t.id + '">' +
+    '<div class="head" onclick="toggleOpen(\'' + t.id + '\')"><div class="chk"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div><div class="grow"><div class="title ellip">' + esc(t.title) + '</div><div class="sub">' + sub.map(esc).join(' · ') + (running.length ? ' · <span style="color:var(--green)">' + running[0].kind + ' ' + fmtDur(running[0].endsAt - now()) + '</span>' : '') + '</div></div><div class="mono sm dim">' + (t.done || 0) + '/' + t.batches + '</div></div>' +
+    '<div class="body">' +
+      '<div class="bar"><i style="width:' + pct + '%"></i></div>' +
+      '<div class="row" style="justify-content:space-between"><span class="xs muted">racks done</span><div class="row" style="gap:6px"><button class="btn sm" onclick="bumpRack(\'' + t.id + '\',-1)">−</button><button class="btn sm primary" onclick="bumpRack(\'' + t.id + '\',1)">+ Rack done</button></div></div>' +
+      (it.note ? '<div class="sm" style="margin-top:10px;color:var(--amber)">' + esc(it.note) + '</div>' : '') +
+      '<div class="steps">' + (steps || '<div class="xs muted">No steps yet — add them in Bake.</div>') + '</div>' +
+      (it.temp ? '<div class="partial"><span>Partial rack? <b>' + temp + '°</b>' + (t.partial ? ' (−10°)' : '') + '</span><button class="switch ' + (t.partial ? 'on' : '') + '" onclick="togglePartial(\'' + t.id + '\')"></button></div>' : '') +
+      '<div class="tbtns">' + btns.join('') + '</div>' +
+      '<div class="row" style="margin-top:12px;gap:8px"><button class="btn sm ghost" onclick="openDetail(\'' + it.id + '\')">Item details</button><button class="btn sm ghost" onclick="openEditor(\'' + it.id + '\')">Edit item</button><span class="grow"></span><button class="btn sm ghost" onclick="removeTask(\'' + t.id + '\')">Remove</button></div>' +
+    '</div></div>';
+}
+function toggleOpen(id) { openTaskId = openTaskId === id ? null : id; renderTasks(); }
+function toggleStep(id, i) { const t = store.tasks.list.find(x => x.id === id); if (!t) return; t.stepsDone = t.stepsDone || []; const k = t.stepsDone.indexOf(i); k >= 0 ? t.stepsDone.splice(k, 1) : t.stepsDone.push(i); save('tasks'); renderTasks(); }
+function togglePartial(id) { const t = store.tasks.list.find(x => x.id === id); if (!t) return; t.partial = !t.partial; save('tasks'); renderTasks(); }
+function bumpRack(id, d) { const t = store.tasks.list.find(x => x.id === id); if (!t) return; t.done = Math.max(0, Math.min(t.batches, (t.done || 0) + d)); save('tasks'); renderTasks(); if (taskDone(t)) toast(t.title + ' complete'); }
+function toggleCustom(id) { const t = store.tasks.list.find(x => x.id === id); if (!t) return; t.checked = !t.checked; save('tasks'); renderTasks(); }
+function removeTask(id) { store.tasks.list = store.tasks.list.filter(x => x.id !== id); store.timers = store.timers.filter(x => x.taskId !== id); save('tasks'); save('timers'); updateWake(); renderTasks(); }
+function addCustomTask() {
+  const inp = $('#task-new'), title = inp.value.trim(); if (!title) return;
+  if (store.tasks.date !== todayKey()) store.tasks = { date: todayKey(), list: [] };
+  store.tasks.list.push({ id: uid(), itemId: null, title, checked: false, created: now() });
+  inp.value = ''; save('tasks'); renderTasks();
+}
+$('#task-new').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addCustomTask(); } });
+function startTaskTimer(id, kind) {
+  const t = store.tasks.list.find(x => x.id === id), it = t && store.items[t.itemId]; if (!it) return;
+  if (kind === 'thaw') startTimer({ label: it.name + ' · thaw', minutes: it.thawMin, kind, itemId: it.id, taskId: id, hint: 'tacky to the touch' });
+  else if (kind === 'proof') startTimer({ label: it.name + ' · proof', minutes: it.proofMin, kind, itemId: it.id, taskId: id });
+  else {
+    const temp = it.temp ? (t.partial ? it.temp - 10 : it.temp) : null;
+    startTimer({ label: it.name + ' · rack ' + ((t.done || 0) + 1) + '/' + t.batches, minutes: it.timeLo, kind: 'bake', itemId: it.id, taskId: id, tempNote: temp ? temp + '°' : '', hint: it.timeHi && it.timeHi > it.timeLo ? 'check, up to ' + it.timeHi + ' min' + (it.steam ? ' · steam ' + it.steam : '') : (it.steam ? 'steam ' + it.steam : '') });
+  }
+  go('today');
+}
+function openPickItem() {
+  const sel = $('#pick-item');
+  sel.innerHTML = liveItems().sort(sortItems).map(i => '<option value="' + i.id + '">' + esc(i.name) + '</option>').join('');
+  $('#pick-racks').value = 1; openSheet('sh-pick');
+}
+function addItemTask() {
+  const it = store.items[$('#pick-item').value]; if (!it) return;
+  if (store.tasks.date !== todayKey()) store.tasks = { date: todayKey(), list: [] };
+  const racks = Math.max(1, parseInt($('#pick-racks').value) || 1);
+  const ex = store.tasks.list.find(t => t.itemId === it.id);
+  if (ex) { ex.batches += racks; ex.auto = false; } else { const t = newItemTask(it, racks); t.auto = false; store.tasks.list.push(t); }
+  save('tasks'); closeSheets(); renderTasks();
+}
+
+/* =====================================================================
+   BAKE (library)
+   ===================================================================== */
+function renderBake() {
+  const q = ($('#bake-search').value || '').toLowerCase().trim();
+  const items = enabledItems().sort(sortItems).filter(i => !q || i.name.toLowerCase().includes(q) || i.cat.toLowerCase().includes(q));
+  if (!items.length) { $('#bake-list').innerHTML = '<div class="empty"><b>No items</b>' + (q ? 'Nothing matches your search.' : 'Enable items in Settings.') + '</div>'; return; }
+  let html = '', cat = null;
+  items.forEach(it => {
+    if (it.cat !== cat) { cat = it.cat; html += (html ? '</div>' : '') + '<div class="sec-title">' + esc(cat) + '</div><div class="card" style="padding:2px 14px">'; }
+    html += '<div class="list-row item-row" onclick="openDetail(\'' + it.id + '\')"><div class="grow"><div style="font-weight:600" class="ellip">' + esc(it.name) + (it.verify ? ' <span class="verify">verify</span>' : '') + '</div><div class="cat">' + [thawLabel(it), it.proofMin ? 'proof ' + it.proofMin + 'm' : '', it.temp ? it.temp + '°' : '', it.steam ? 'steam ' + it.steam : '', fmtTime(it)].filter(Boolean).map(esc).join(' · ') + '</div></div><span class="chev">›</span></div>';
+  });
+  $('#bake-list').innerHTML = html + '</div>';
+}
+function openDetail(id) {
+  const it = store.items[id]; if (!it) return;
+  $('#dt-title').textContent = it.name;
+  const sp = (l, v) => '<div><div class="l">' + l + '</div><div class="v">' + (v == null || v === '' ? '—' : esc(v)) + '</div></div>';
+  $('#dt-body').innerHTML =
+    '<div class="row"><span class="pill">' + esc(it.cat) + '</span>' + (it.verify ? '<span class="verify">verify against the sheet</span>' : '') + '</div>' +
+    '<div class="spec">' + sp('Comes as', thawLabel(it)) + sp('Proof', it.proofMin ? it.proofMin + ' min' : '—') + sp('Steam', it.steam ? it.steam + ' s' : '—') + sp('Temp', it.temp ? it.temp + '°' : '—') + sp('Bake', fmtTime(it) || '—') + sp('Partial rack', it.temp ? (it.temp - 10) + '°' : '—') + '</div>' +
+    '<div class="spec">' + sp('Par', it.par) + sp('By', it.parBy ? it.parBy + ' AM' : 'anytime') + sp('Per rack', it.batch) + '</div>' +
+    (it.shelfDays ? '<div class="sm muted">Shelf life ' + esc(it.shelfDays) + ' day' + (it.shelfDays == 1 ? '' : 's') + '</div>' : '') +
+    (it.note ? '<div class="sm" style="color:var(--amber)">' + esc(it.note) + '</div>' : '') +
+    '<div class="sec-title" style="margin:6px 0 0">Steps</div>' +
+    '<div class="steps" style="margin-top:0">' + ((it.steps || []).map((s, i) => '<div class="step"><div class="sq" style="border-radius:50%;font-size:10px;color:var(--text3)">' + (i + 1) + '</div><div>' + esc(s) + '</div></div>').join('') || '<div class="xs muted">No steps yet.</div>') + '</div>' +
+    '<div class="grid2"><button class="btn" onclick="openEditor(\'' + it.id + '\')">Edit</button><button class="btn primary" onclick="quickBake(\'' + it.id + '\')" ' + (it.timeLo ? '' : 'disabled') + '>Bake timer ' + fmtTime(it) + '</button></div>';
+  openSheet('sh-detail');
+}
+function quickBake(id) { const it = store.items[id]; if (!it) return; startTimer({ label: it.name, minutes: it.timeLo, kind: 'bake', itemId: id, tempNote: it.temp ? it.temp + '°' : '', hint: it.timeHi > it.timeLo ? 'check, up to ' + it.timeHi + ' min' : '' }); closeSheets(); go('today'); }
+
+/* =====================================================================
+   SETTINGS
+   ===================================================================== */
+function renderSettings() {
+  const s = store.settings;
+  if (document.activeElement !== $('#notes')) $('#notes').value = store.notes || '';
+  $('#notes-ts').textContent = store.notesTs ? 'saved ' + new Date(store.notesTs).toLocaleString(undefined, { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }) : '';
+  $('#set-ovens').value = s.ovens; $('#set-shelves').value = s.shelves;
+  $('#sw-sound').classList.toggle('on', !!s.sound); $('#sw-wake').classList.toggle('on', !!s.wake);
+  $('#notif-state').textContent = !('Notification' in window) ? 'not supported here' : Notification.permission === 'granted' ? 'on' : Notification.permission === 'denied' ? 'blocked in browser settings' : 'off';
+  $('#deadline-list').innerHTML = (s.deadlines || []).map(d => '<div class="row" style="padding:6px 0"><input class="input grow" value="' + esc(d.label) + '" onchange="setDeadline(\'' + d.id + '\',\'label\',this.value)"><input class="input" type="time" style="width:140px;padding-left:8px;padding-right:6px" value="' + esc(d.time) + '" onchange="setDeadline(\'' + d.id + '\',\'time\',this.value)"><button class="btn sm ghost" onclick="removeDeadline(\'' + d.id + '\')">✕</button></div>').join('') || '<div class="xs muted">No deadlines.</div>';
+  const items = liveItems().sort(sortItems);
+  let html = '', cat = null;
+  items.forEach(it => {
+    if (it.cat !== cat) { cat = it.cat; html += '<div class="sec-title" style="margin:12px 0 2px">' + esc(cat) + '</div>'; }
+    const meta = [it.par != null && it.par !== '' ? 'par ' + it.par : '<span style="color:var(--amber)">no par</span>', it.batch > 1 ? it.batch + '/rack' : '', it.temp ? it.temp + '°' : '', fmtTime(it)].filter(Boolean).join(' · ');
+    html += '<div class="list-row"><div class="grow" onclick="openEditor(\'' + it.id + '\')"><div style="font-weight:600" class="ellip">' + esc(it.name) + (it.verify ? ' <span class="verify">verify</span>' : '') + '</div><div class="xs muted">' + meta + '</div></div><button class="switch ' + (it.enabled ? 'on' : '') + '" onclick="toggleItem(\'' + it.id + '\')"></button></div>';
+  });
+  $('#settings-items').innerHTML = html;
+  $('#sync-detail').textContent = syncDetail;
+}
+function saveSettings() { store.settings.ovens = Math.max(1, parseInt($('#set-ovens').value) || 1); store.settings.shelves = Math.max(1, parseInt($('#set-shelves').value) || 1); save('settings'); }
+function toggleSetting(k, el) { store.settings[k] = !store.settings[k]; el.classList.toggle('on', store.settings[k]); save('settings'); if (k === 'wake') updateWake(); if (k === 'sound' && store.settings.sound) { unlockAudio(); beep(); } }
+function setDeadline(id, k, v) { const d = (store.settings.deadlines || []).find(x => x.id === id); if (d) { d[k] = v; save('settings'); } }
+function addDeadline() { store.settings.deadlines.push({ id: uid(), label: 'Deadline', time: '10:00' }); save('settings'); renderSettings(); }
+function removeDeadline(id) { store.settings.deadlines = store.settings.deadlines.filter(x => x.id !== id); save('settings'); renderSettings(); }
+function toggleItem(id) { const it = store.items[id]; if (!it) return; it.enabled = !it.enabled; store.itemsTs[id] = now(); save('items'); renderSettings(); }
+let notesT = null;
+function saveNotes() { store.notes = $('#notes').value; clearTimeout(notesT); notesT = setTimeout(() => { save('notes'); $('#notes-ts').textContent = 'saved just now'; }, 600); }
+function resetAll() {
+  if (!confirm('Reset EVERYTHING on this device and in the cloud? Items go back to the cheat sheet, pars, notes, counts and tasks are erased.')) return;
+  if (!confirm('Really? This cannot be undone.')) return;
+  store = { items: {}, itemsTs: {}, counts: { date: todayKey(), vals: {}, exp: {} }, countsTs: now(), tasks: { date: todayKey(), list: [] }, tasksTs: now(), timers: [], timersTs: now(), notes: '', notesTs: now(), settings: JSON.parse(JSON.stringify(DEFAULT_SETTINGS)), settingsTs: now() };
+  ensureSeed(); Object.keys(store.items).forEach(k => store.itemsTs[k] = now()); persist(); schedulePush(); render(); toast('Reset');
+}
+
+/* ---- item editor ---- */
+let editId = null;
+function openSheet(id) { closeSheets(true); $('#scrim').classList.add('on'); $('#' + id).classList.add('on'); }
+function closeSheets(keepScrim) { $$('.sheet').forEach(s => s.classList.remove('on')); if (!keepScrim) $('#scrim').classList.remove('on'); }
+function edThawUI() { $('#ed-thawmin-f').style.visibility = $('#ed-thawtype').value === 'timed' ? 'visible' : 'hidden'; }
+function openEditor(id) {
+  editId = id;
+  const it = id ? store.items[id] : { name:'', cat:'Pastries', enabled:true, thawType:'none', thawMin:0, proofMin:0, temp:'', steam:0, timeLo:'', timeHi:'', par:'', parBy:'7', batch:1, shelfDays:'', note:'', steps:[] };
+  $('#ed-title').textContent = id ? 'Edit item' : 'New item';
+  const cats = allCats();
+  $('#ed-cat').innerHTML = cats.map(c => '<option>' + esc(c) + '</option>').join('') + '<option value="__new">New category…</option>';
+  $('#ed-cat').value = it.cat; $('#ed-cat').onchange = function () { if (this.value === '__new') { const c = prompt('Category name'); if (c) { const o = document.createElement('option'); o.textContent = c; this.insertBefore(o, this.lastElementChild); this.value = c; } else this.value = it.cat; } };
+  $('#ed-name').value = it.name; $('#ed-enabled').classList.toggle('on', !!it.enabled);
+  $('#ed-par').value = it.par ?? ''; $('#ed-parby').value = it.parBy ?? ''; $('#ed-batch').value = it.batch ?? 1; $('#ed-shelf').value = it.shelfDays ?? '';
+  $('#ed-thawtype').value = it.thawType || 'none'; $('#ed-thawmin').value = it.thawMin || ''; $('#ed-proof').value = it.proofMin || ''; $('#ed-steam').value = it.steam || '';
+  $('#ed-temp').value = it.temp || ''; $('#ed-tlo').value = it.timeLo || ''; $('#ed-thi').value = it.timeHi || '';
+  $('#ed-note').value = it.note || ''; $('#ed-steps').value = (it.steps || []).join('\n');
+  $('#ed-verify-row').hidden = !it.verify; $('#ed-delete').hidden = !id;
+  edThawUI(); openSheet('sh-edit');
+}
+function clearVerify() { if (editId && store.items[editId]) { store.items[editId].verify = false; store.itemsTs[editId] = now(); save('items'); $('#ed-verify-row').hidden = true; } }
+function num(v, d) { const n = parseFloat(v); return isNaN(n) ? d : n; }
+function saveEditor() {
+  const name = $('#ed-name').value.trim(); if (!name) { toast('Name required'); return; }
+  const it = editId ? store.items[editId] : { id: bakerySlug(name) + '-' + uid().slice(0, 4), order: 500 + liveItems().length, verify: false };
+  it.name = name; it.cat = $('#ed-cat').value === '__new' ? 'Misc' : $('#ed-cat').value; it.enabled = $('#ed-enabled').classList.contains('on');
+  it.par = $('#ed-par').value === '' ? null : num($('#ed-par').value, null); it.parBy = $('#ed-parby').value; it.batch = Math.max(1, num($('#ed-batch').value, 1)); it.shelfDays = $('#ed-shelf').value === '' ? null : num($('#ed-shelf').value, null);
+  it.thawType = $('#ed-thawtype').value; it.thawMin = it.thawType === 'timed' ? num($('#ed-thawmin').value, 0) : 0; it.proofMin = num($('#ed-proof').value, 0); it.steam = num($('#ed-steam').value, 0);
+  it.temp = num($('#ed-temp').value, 0); it.timeLo = num($('#ed-tlo').value, 0); it.timeHi = num($('#ed-thi').value, it.timeLo); if (it.timeHi < it.timeLo) it.timeHi = it.timeLo;
+  it.note = $('#ed-note').value.trim(); it.steps = $('#ed-steps').value.split('\n').map(s => s.trim()).filter(Boolean);
+  if (!it.steps.length) it.steps = bakeryDefaultSteps(it);
+  store.items[it.id] = it; store.itemsTs[it.id] = now(); save('items');
+  // keep task titles in sync
+  store.tasks.list.forEach(t => { if (t.itemId === it.id) t.title = it.name; });
+  closeSheets(); render(); toast('Saved');
+}
+function deleteItem() {
+  if (!editId || !confirm('Delete this item?')) return;
+  store.items[editId].deleted = true; store.itemsTs[editId] = now(); save('items');
+  store.tasks.list = store.tasks.list.filter(t => t.itemId !== editId); save('tasks');
+  closeSheets(); render();
+}
+
+/* =====================================================================
+   CROSS-DEVICE SYNC — same Firebase project as the flightbag tools.
+   Per-item timestamps for the master list; whole-section timestamps for
+   counts, tasks, timers, notes, settings (newest wins). A device that
+   starts empty never pushes before it has merged the cloud copy.
+   ===================================================================== */
+const SYNC_PATH = 'bakery/state';
+let syncDb = null, syncPushTimer = null, applyingRemote = false, syncReady = false, syncDetail = 'Local only';
+const clientId = (() => { let id = localStorage.getItem('bakery-client-id'); if (!id) { id = uid(); localStorage.setItem('bakery-client-id', id); } return id; })();
+function setSync(state, txt, detail) { const el = $('#sync'); el.className = state; el.querySelector('span').textContent = txt; syncDetail = detail || txt; if (view === 'settings') $('#sync-detail').textContent = syncDetail; }
+function syncPayload() {
+  return JSON.parse(JSON.stringify({ items: store.items, itemsTs: store.itemsTs, counts: store.counts, countsTs: store.countsTs, tasks: store.tasks, tasksTs: store.tasksTs, timers: store.timers, timersTs: store.timersTs, notes: store.notes, notesTs: store.notesTs, settings: store.settings, settingsTs: store.settingsTs, clientId, updatedAt: now() }));
+}
+function schedulePush() {
+  if (!syncDb || applyingRemote || !syncReady) return;
+  clearTimeout(syncPushTimer);
+  syncPushTimer = setTimeout(() => {
+    if (!syncDb) return;
+    syncDb.ref(SYNC_PATH).set(syncPayload())
+      .then(() => setSync('ok', 'saved', 'Saved to cloud · ' + new Date().toLocaleTimeString()))
+      .catch(e => { console.warn('[bakery] push failed', e); setSync('err', 'offline', /permission|denied/i.test(String(e && (e.code || e.message))) ? 'Cloud sync refused — check the Realtime Database rules for ' + SYNC_PATH : 'Offline — will sync when back online'); });
+  }, 1000);
+}
+function mergeRemote(r) {
+  if (!r) return false;
+  let changed = false;
+  const ri = r.items || {}, rts = r.itemsTs || {};
+  Object.keys(ri).forEach(k => { if ((rts[k] || 0) > (store.itemsTs[k] || 0)) { store.items[k] = ri[k]; if (!store.items[k].steps) store.items[k].steps = []; store.itemsTs[k] = rts[k]; changed = true; } });
+  ['counts', 'tasks', 'timers', 'notes', 'settings'].forEach(k => {
+    if ((r[k + 'Ts'] || 0) > (store[k + 'Ts'] || 0)) {
+      store[k] = r[k] != null ? r[k] : (k === 'timers' ? [] : k === 'notes' ? '' : store[k]);
+      if (k === 'tasks' && !store.tasks.list) store.tasks.list = [];
+      if (k === 'counts') { store.counts.vals = store.counts.vals || {}; store.counts.exp = store.counts.exp || {}; }
+      if (k === 'settings') store.settings = Object.assign({}, DEFAULT_SETTINGS, store.settings);
+      store[k + 'Ts'] = r[k + 'Ts']; changed = true;
+    }
+  });
+  return changed;
+}
+function initSync() {
+  if (typeof firebase === 'undefined') { setSync('err', 'offline', 'Firebase script did not load — this device only'); syncReady = true; return; }
+  try {
+    firebase.initializeApp({ apiKey: "AIzaSyCJNQslFf0_mGwRHFyx1aqtnfdgAk2tfao", authDomain: "weight-and-balance-d5044.firebaseapp.com", databaseURL: "https://weight-and-balance-d5044-default-rtdb.firebaseio.com", projectId: "weight-and-balance-d5044" });
+    syncDb = firebase.database();
+    syncDb.ref(SYNC_PATH).on('value', snap => {
+      const remote = snap.val();
+      if (!remote) { syncReady = true; setSync('ok', 'cloud', 'Connected · nothing in the cloud yet'); schedulePush(); return; }
+      if (remote.clientId === clientId) { syncReady = true; setSync('ok', 'synced', 'Synced · ' + new Date().toLocaleTimeString()); return; }
+      applyingRemote = true; const changed = mergeRemote(remote); applyingRemote = false; syncReady = true;
+      if (changed) { persist(); render(); updateWake(); setSync('ok', 'synced', 'Pulled changes from another device · ' + new Date().toLocaleTimeString()); }
+      else setSync('ok', 'synced', 'Synced · ' + new Date().toLocaleTimeString());
+    }, e => { syncReady = true; console.warn('[bakery] sync read failed', e); setSync('err', 'offline', /permission|denied/i.test(String(e && (e.code || e.message))) ? 'Cloud sync refused — check the Realtime Database rules for ' + SYNC_PATH : 'Offline — this device only'); });
+  } catch (e) { console.warn('[bakery] sync init failed', e); setSync('err', 'offline', 'Sync unavailable'); syncReady = true; }
+}
+
+/* =====================================================================
+   INIT
+   ===================================================================== */
+ensureSeed();
+document.addEventListener('touchstart', unlockAudio, { once: true, passive: true });
+document.addEventListener('click', unlockAudio, { once: true });
+initSync();
+go('today');
+tick();
+updateWake();
+if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(e => console.warn('[bakery] sw failed', e)); }
+console.log('[bakery] items', liveItems().length, 'enabled', enabledItems().length);
+</script>
+</body>
+</html>
