@@ -207,6 +207,8 @@ textarea.input { min-height:90px; resize:vertical; line-height:1.45; }
 .load-row.on .box svg { display:block; } .load-row .box svg { display:none; width:14px; height:14px; stroke:var(--on-green); stroke-width:3; fill:none; }
 .load-row .nm { font-weight:600; }
 .load-row .mt { font-size:var(--fs-xs); color:var(--text3); }
+.load-row .num { width:74px; text-align:center; padding:8px 4px; font-weight:700; min-height:40px; }
+.cnt-row .sub .pill { padding:1px 7px; font-weight:600; }
 .stepper { display:flex; align-items:center; gap:2px; flex:0 0 auto; }
 .stepper button { width:30px; height:30px; border-radius:8px; background:var(--bg3); color:var(--text); font-weight:700; }
 .stepper span { min-width:26px; text-align:center; font-weight:700; font-variant-numeric:tabular-nums; }
@@ -240,7 +242,7 @@ textarea.input { min-height:90px; resize:vertical; line-height:1.45; }
       <div id="timers"></div>
       <div class="kpi">
         <div class="card" style="min-width:0"><div class="l">Oven</div><div class="v ellip" id="kpi-oven" style="font-size:15px;margin-top:6px">Empty</div><div class="mono sm dim" id="kpi-oven-t"></div></div>
-        <div class="card"><div class="l">Sheets today</div><div class="v" id="kpi-racks">0 / 0</div><div class="bar" style="margin-top:8px"><i id="kpi-bar" style="width:0%"></i></div></div>
+        <div class="card"><div class="l">Baked today</div><div class="v" id="kpi-racks">0 / 0</div><div class="bar" style="margin-top:8px"><i id="kpi-bar" style="width:0%"></i></div></div>
       </div>
       <div class="card next-card" id="next-card"></div>
     </section>
@@ -255,11 +257,12 @@ textarea.input { min-height:90px; resize:vertical; line-height:1.45; }
           </div>
           <button class="btn sm ghost" onclick="newDay()">New day</button>
         </div>
-        <div class="sm muted" style="margin-top:8px">Count what's on the shelf. Need = par − counted, rounded up to whole baking sheets. Tap <b>EXP</b> if the shelf stock is expired and has to be pulled.</div>
+        <div class="sm muted" style="margin-top:8px">Count what's on the shelf. Need = par − counted. As you bake, each row shows baked, in the oven, and what's still left. Tap <b>EXP</b> if the shelf stock is expired and has to be pulled.</div>
       </div>
+      <div id="count-summary"></div>
       <div id="count-list"></div>
       <div class="sticky-foot">
-        <button class="btn primary block" id="build-btn" onclick="buildTasks()">Build today's tasks</button>
+        <button class="btn primary block" id="build-btn" onclick="buildTasks()">Open today's list</button>
       </div>
     </section>
 
@@ -310,13 +313,13 @@ textarea.input { min-height:90px; resize:vertical; line-height:1.45; }
       <div class="card">
         <h2>All time <small id="stats-since"></small></h2>
         <div class="kpi" style="margin-bottom:8px">
-          <div class="card" style="background:var(--bg2)"><div class="l">Sheets baked</div><div class="v" id="st-sheets">0</div></div>
+          <div class="card" style="background:var(--bg2)"><div class="l">Pieces baked</div><div class="v" id="st-pieces">0</div></div>
           <div class="card" style="background:var(--bg2)"><div class="l">Oven loads</div><div class="v" id="st-loads">0</div></div>
-          <div class="card" style="background:var(--bg2)"><div class="l">Pieces</div><div class="v" id="st-pieces">0</div></div>
+          <div class="card" style="background:var(--bg2)"><div class="l">Different items</div><div class="v" id="st-kinds">0</div></div>
           <div class="card" style="background:var(--bg2)"><div class="l">Shifts</div><div class="v" id="st-days">0</div></div>
         </div>
         <div id="st-items"></div>
-        <div class="xs muted" style="margin-top:8px">Every bake timer you start adds its sheets here. Pieces count only when the item has a per-sheet number.</div>
+        <div class="xs muted" style="margin-top:8px">Every oven load you start adds its pieces here.</div>
       </div>
       <div class="card">
         <h2>Alerts</h2>
@@ -369,7 +372,7 @@ textarea.input { min-height:90px; resize:vertical; line-height:1.45; }
     <div class="grid3">
       <div class="field"><label>Par (on floor)</label><input class="input" type="number" inputmode="numeric" id="ed-par" placeholder="—"></div>
       <div class="field"><label>Needed by</label><select class="input" id="ed-parby"><option value="7">7 AM</option><option value="9">9 AM</option><option value="">Anytime</option></select></div>
-      <div class="field"><label>Per sheet</label><input class="input" type="number" inputmode="numeric" id="ed-batch" placeholder="1"></div>
+      <div class="field"><label>Per sheet (hint)</label><input class="input" type="number" inputmode="numeric" id="ed-batch" placeholder="—"></div>
     </div>
     <div class="grid2">
       <div class="field"><label>Shelf life (days)</label><input class="input" type="number" inputmode="numeric" id="ed-shelf" placeholder="—"></div>
@@ -406,7 +409,7 @@ textarea.input { min-height:90px; resize:vertical; line-height:1.45; }
   <div class="sh-head"><h3>Add item to bake</h3><button class="btn sm ghost" onclick="closeSheets()">Close</button></div>
   <div class="sh-body">
     <div class="field"><label>Item</label><select class="input" id="pick-item"></select></div>
-    <div class="field"><label>Baking sheets</label><input class="input" type="number" inputmode="numeric" id="pick-racks" value="1" min="1"></div>
+    <div class="field"><label>Pieces to bake</label><input class="input" type="number" inputmode="numeric" id="pick-racks" value="" placeholder="e.g. 24" min="1"></div>
   </div>
   <div class="sh-foot"><button class="btn ghost grow" onclick="closeSheets()">Cancel</button><button class="btn primary grow" onclick="addItemTask()">Add task</button></div>
 </div>
@@ -415,7 +418,7 @@ textarea.input { min-height:90px; resize:vertical; line-height:1.45; }
 <div class="sheet" id="sh-load">
   <div class="sh-head"><h3>Load the oven</h3><button class="btn sm ghost" onclick="closeSheets()">Close</button></div>
   <div class="sh-body" style="gap:6px">
-    <div class="xs muted">Tick everything going in together. Each item gets its own timer, so the shorter ones ring first.</div>
+    <div class="xs muted">Type how many pieces of each item are going in. Each item gets its own timer, so the shorter ones ring first.</div>
     <div id="load-list"></div>
     <div class="sec-title" style="margin:10px 0 4px">Other items</div>
     <input class="input" id="load-search" placeholder="Search…" oninput="renderLoad()">
@@ -461,7 +464,7 @@ let store = {
   tasks: { date: todayKey(), list: [] }, tasksTs: 0,
   timers: [], timersTs: 0,
   notes: '', notesTs: 0,
-  stats: { loads: 0, sheets: 0, pieces: 0, days: {}, items: {}, since: 0 }, statsTs: 0,
+  stats: { loads: 0, pieces: 0, days: {}, items: {}, since: 0 }, statsTs: 0,
   settings: JSON.parse(JSON.stringify(DEFAULT_SETTINGS)), settingsTs: 0
 };
 try { const raw = localStorage.getItem(LS_KEY); if (raw) store = Object.assign(store, JSON.parse(raw)); } catch(e) { console.warn('[bakery] localStorage read failed', e); }
@@ -473,7 +476,10 @@ function ensureSeed() {
   let changed = false;
   Object.values(seed).forEach(s => { if (!store.items[s.id]) { store.items[s.id] = s; store.itemsTs[s.id] = store.itemsTs[s.id] || 1; changed = true; } });
   liveItems().forEach(it => { if (!it.say) it.say = bakeryDefaultSay(it); });
-  store.stats = Object.assign({ loads: 0, sheets: 0, pieces: 0, days: {}, items: {}, since: 0 }, store.stats || {});
+  store.stats = Object.assign({ loads: 0, pieces: 0, days: {}, items: {}, since: 0 }, store.stats || {});
+  // v1.1 tracked sheets; v1.2 tracks pieces. Convert anything still in sheets.
+  (store.tasks.list || []).forEach(t => { if (t.itemId && t.need == null) { const b = Number((store.items[t.itemId] || {}).batch) || 1; t.need = t.pieces || (t.batches || 1) * b; t.baked = (t.done || 0) * b; delete t.batches; delete t.done; delete t.pieces; } });
+  (store.timers || []).forEach(t => { if (t.sheets != null && t.pieces == null) { const b = Number((store.items[t.itemId] || {}).batch) || 1; t.pieces = t.sheets * b; delete t.sheets; } });
   store.settings = Object.assign({}, DEFAULT_SETTINGS, store.settings || {});
   if (!store.settings.deadlines || !store.settings.deadlines.length) store.settings.deadlines = DEFAULT_SETTINGS.deadlines;
   if (changed) persist();
@@ -556,7 +562,7 @@ function renderToday() {
   const bake = store.timers.filter(t => t.kind === 'bake' && t.endsAt > now()).sort((a,b) => a.endsAt - b.endsAt)[0];
   $('#kpi-oven').textContent = bake ? bake.label : 'Empty';
   $('#kpi-oven-t').textContent = bake ? fmtDur(bake.endsAt - now()) + ' left' : '';
-  const tot = store.tasks.list.reduce((s,t) => s + (t.batches || 0), 0), done = store.tasks.list.reduce((s,t) => s + Math.min(t.done || 0, t.batches || 0), 0);
+  const tot = store.tasks.list.reduce((s,t) => s + (t.itemId ? (t.need || 0) : 0), 0), done = store.tasks.list.reduce((s,t) => s + (t.itemId ? Math.min(t.baked || 0, t.need || 0) : 0), 0);
   $('#kpi-racks').textContent = done + ' / ' + tot;
   $('#kpi-bar').style.width = (tot ? done / tot * 100 : 0) + '%';
   // next up
@@ -582,10 +588,10 @@ function nextAction(t) {
   const it = store.items[t.itemId]; if (!it) return '';
   const running = store.timers.find(x => x.taskId === t.id && x.endsAt > now());
   if (running) return running.kind[0].toUpperCase() + running.kind.slice(1) + ' running · ' + fmtDur(running.endsAt - now());
-  const rack = (t.done || 0) + 1;
   if (!t.pulled && it.thawType === 'timed') return 'Pull & thaw ' + it.thawMin + ' min';
   if (!t.proofed && it.proofMin) return 'Proof ' + it.proofMin + ' min';
-  return 'Bake sheet ' + rack + ' of ' + t.batches + (it.temp ? ' · ' + it.temp + '°' : '');
+  const left = taskLeft(t);
+  return 'Bake ' + left + ((t.baked || 0) > 0 ? ' more' : '') + (it.temp ? ' · ' + it.temp + '°' : '');
 }
 
 function renderTimers() {
@@ -618,62 +624,79 @@ function renderTimers() {
 function startTimer(o, quiet) {
   const dur = Math.max(1, o.minutes) * 60000;
   const it = o.itemId ? store.items[o.itemId] : null;
-  store.timers.push({ id: uid(), label: o.label, short: o.short || (it ? it.say : '') || o.label, say: o.say || (it ? it.say : '') || '', color: it ? itemColor(it) : '', sheets: o.sheets || 0,
+  store.timers.push({ id: uid(), label: o.label, short: o.short || (it ? it.say : '') || o.label, say: o.say || (it ? it.say : '') || '', color: it ? itemColor(it) : '', pieces: o.pieces || 0,
     kind: o.kind || 'custom', itemId: o.itemId || null, taskId: o.taskId || null, startedAt: now(), endsAt: now() + dur, dur, tempNote: o.tempNote || '', hint: o.hint || '', fired: false });
-  if (o.kind === 'bake') bumpStats(it, o.sheets || 1);
+  if (o.kind === 'bake') bumpStats(it, o.pieces || 0);
   if (!quiet) { save('timers'); unlockAudio(); updateWake(); render(); toast(o.label + ' · ' + o.minutes + ' min'); }
 }
-/* lifetime stats — every bake timer adds its sheets (and pieces when the
-   item has a per-sheet count) */
-function bumpStats(it, sheets) {
-  const s = store.stats; s.loads = (s.loads || 0) + 1; s.sheets = (s.sheets || 0) + sheets;
-  const pcs = it && Number(it.batch) > 1 ? Number(it.batch) * sheets : 0; s.pieces = (s.pieces || 0) + pcs;
+/* lifetime stats — every oven load adds its pieces */
+function bumpStats(it, pieces) {
+  const s = store.stats; s.loads = (s.loads || 0) + 1; s.pieces = (s.pieces || 0) + pieces;
   s.days = s.days || {}; s.days[todayKey()] = true; if (!s.since) s.since = now();
-  if (it) { s.items = s.items || {}; const r = s.items[it.id] || { name: it.name, sheets: 0, pieces: 0, loads: 0 }; r.name = it.name; r.sheets += sheets; r.pieces += pcs; r.loads += 1; s.items[it.id] = r; }
+  if (it) { s.items = s.items || {}; const r = s.items[it.id] || { name: it.name, pieces: 0, loads: 0 }; r.name = it.name; r.pieces = (r.pieces || 0) + pieces; r.loads = (r.loads || 0) + 1; s.items[it.id] = r; }
   save('stats');
 }
 
-/* ---- load the oven: several items in at once, one timer each ---- */
-let loadSel = {};   // key → { taskId?, itemId, sheets, on }
+/* ---- load the oven: several items in at once, she types the piece count
+   for each, one timer each ---- */
+let loadSel = {};   // key → { taskId?, itemId, pieces, on }
 function loadKey(t, it) { return t ? 'task:' + t.id : 'item:' + it.id; }
+function loadDefault(t, it) { return t ? taskLeft(t) || (t.need || 0) : (Number(it.batch) > 1 ? Number(it.batch) : 0); }
+function loadEntry(k) {
+  const [kind, id] = k.split(':');
+  if (kind === 'task') { const t = store.tasks.list.find(x => x.id === id); return t ? { taskId: t.id, itemId: t.itemId, pieces: loadDefault(t, store.items[t.itemId]), on: true } : null; }
+  return store.items[id] ? { itemId: id, pieces: loadDefault(null, store.items[id]), on: true } : null;
+}
 function openLoad(pre) {
   loadSel = {};
-  (pre || []).forEach(k => { const [kind, id] = k.split(':'); if (kind === 'task') { const t = store.tasks.list.find(x => x.id === id); if (t) loadSel[k] = { taskId: t.id, itemId: t.itemId, sheets: Math.max(1, (t.batches || 1) - (t.done || 0)), on: true }; } else if (store.items[id]) loadSel[k] = { itemId: id, sheets: 1, on: true }; });
+  (pre || []).forEach(k => { const e = loadEntry(k); if (e) loadSel[k] = e; });
   $('#load-search').value = '';
   renderLoad(); openSheet('sh-load');
+  setTimeout(() => { const f = document.querySelector('#sh-load .load-row.on .num'); if (f && !f.value) f.focus(); }, 60);
 }
 function loadRowHtml(k, it, t, meta) {
   const s = loadSel[k];
-  const on = s && s.on, n = s ? s.sheets : (t ? Math.max(1, (t.batches || 1) - (t.done || 0)) : 1);
-  return '<div class="load-row ' + (on ? 'on' : '') + '"><div class="box" onclick="loadToggle(\'' + k + '\')"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div><span class="dot" style="--c:' + itemColor(it) + '"></span>' +
+  const on = s && s.on, n = s ? s.pieces : loadDefault(t, it);
+  return '<div class="load-row ' + (on ? 'on' : '') + '" data-k="' + k + '"><div class="box" onclick="loadToggle(\'' + k + '\')"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div><span class="dot" style="--c:' + itemColor(it) + '"></span>' +
     '<div class="grow" onclick="loadToggle(\'' + k + '\')"><div class="nm ellip">' + esc(it.name) + '</div><div class="mt">' + esc(meta) + '</div></div>' +
-    '<div class="stepper"><button onclick="loadStep(\'' + k + '\',-1)">−</button><span>' + n + '</span><button onclick="loadStep(\'' + k + '\',1)">+</button></div></div>';
+    '<input class="input num" type="number" inputmode="numeric" placeholder="pcs" value="' + (n || '') + '" oninput="loadNum(\'' + k + '\',this.value)"></div>';
+}
+function loadButton() {
+  const picks = Object.values(loadSel).filter(s => s.on);
+  const n = picks.length, pcs = picks.reduce((a, s) => a + (Number(s.pieces) || 0), 0), bad = picks.some(s => !(Number(s.pieces) > 0));
+  $('#load-start').textContent = !n ? 'Start timers' : bad ? 'Enter a piece count' : 'Start ' + n + ' timer' + (n > 1 ? 's' : '') + ' · ' + pcs + ' pcs';
+  $('#load-start').disabled = !n || bad;
 }
 function renderLoad() {
   const tasks = sortedTasks().filter(t => t.itemId && !taskDone(t) && store.items[t.itemId] && store.items[t.itemId].timeLo);
   const inTask = new Set(tasks.map(t => t.itemId));
-  $('#load-list').innerHTML = tasks.length ? '<div class="sec-title" style="margin:4px 0">Today\'s list</div>' + tasks.map(t => { const it = store.items[t.itemId]; return loadRowHtml(loadKey(t), it, t, ((t.batches || 1) - (t.done || 0)) + ' sheet' + ((t.batches - t.done) === 1 ? '' : 's') + ' left · ' + (t.partial && it.temp ? (it.temp - 10) + '° partial' : (it.temp ? it.temp + '°' : '')) + ' · ' + fmtTime(it)); }).join('') : '<div class="xs muted" style="padding:6px 0">Nothing left on today\'s list.</div>';
+  $('#load-list').innerHTML = tasks.length ? '<div class="sec-title" style="margin:4px 0">Today\'s list</div>' + tasks.map(t => { const it = store.items[t.itemId]; const ov = inOven(t); return loadRowHtml(loadKey(t), it, t, taskLeft(t) + ' left' + (ov ? ' · ' + ov + ' in oven' : '') + ' · ' + (t.partial && it.temp ? (it.temp - 10) + '° partial' : (it.temp ? it.temp + '°' : '')) + ' · ' + fmtTime(it)); }).join('') : '<div class="xs muted" style="padding:6px 0">Nothing left on today\'s list.</div>';
   const q = ($('#load-search').value || '').toLowerCase().trim();
   const others = enabledItems().sort(sortItems).filter(it => it.timeLo && !inTask.has(it.id) && (!q || it.name.toLowerCase().includes(q) || it.cat.toLowerCase().includes(q)));
-  $('#load-other').innerHTML = others.map(it => loadRowHtml(loadKey(null, it), it, null, (it.temp ? it.temp + '° · ' : '') + fmtTime(it))).join('') || '<div class="xs muted" style="padding:6px 0">No matches.</div>';
-  const n = Object.values(loadSel).filter(s => s.on).length;
-  $('#load-start').textContent = n ? 'Start ' + n + ' timer' + (n > 1 ? 's' : '') : 'Start timers';
-  $('#load-start').disabled = !n;
+  $('#load-other').innerHTML = others.map(it => loadRowHtml(loadKey(null, it), it, null, (it.temp ? it.temp + '° · ' : '') + fmtTime(it) + (Number(it.batch) > 1 ? ' · ' + it.batch + '/sheet' : ''))).join('') || '<div class="xs muted" style="padding:6px 0">No matches.</div>';
+  loadButton();
 }
 function loadToggle(k) {
-  const [kind, id] = k.split(':');
   if (loadSel[k]) loadSel[k].on = !loadSel[k].on;
-  else if (kind === 'task') { const t = store.tasks.list.find(x => x.id === id); if (t) loadSel[k] = { taskId: t.id, itemId: t.itemId, sheets: Math.max(1, (t.batches || 1) - (t.done || 0)), on: true }; }
-  else loadSel[k] = { itemId: id, sheets: 1, on: true };
+  else { const e = loadEntry(k); if (e) loadSel[k] = e; }
   renderLoad();
+  if (loadSel[k] && loadSel[k].on && !loadSel[k].pieces) setTimeout(() => { const f = document.querySelector('#sh-load .load-row[data-k="' + k + '"] .num'); if (f) f.focus(); }, 30);
 }
-function loadStep(k, d) { if (!loadSel[k]) loadToggle(k); const s = loadSel[k]; s.sheets = Math.max(1, s.sheets + d); s.on = true; renderLoad(); }
+function loadNum(k, v) {
+  if (!loadSel[k]) { const e = loadEntry(k); if (!e) return; loadSel[k] = e; }
+  loadSel[k].pieces = v === '' ? 0 : Math.max(0, parseInt(v) || 0); loadSel[k].on = true;
+  const row = document.querySelector('#sh-load .load-row[data-k="' + k + '"]'); if (row) row.classList.add('on');   // no re-render: keeps her keyboard open
+  loadButton();
+}
 function startLoad() {
-  const picks = Object.values(loadSel).filter(s => s.on); if (!picks.length) return;
+  const picks = Object.values(loadSel).filter(s => s.on && Number(s.pieces) > 0); if (!picks.length) return;
   picks.forEach(s => {
-    const it = store.items[s.itemId], t = s.taskId ? store.tasks.list.find(x => x.id === s.taskId) : null; if (!it) return;
+    const it = store.items[s.itemId]; let t = s.taskId ? store.tasks.list.find(x => x.id === s.taskId) : null; if (!it) return;
+    // baking something that isn't on the list yet → put it on the list so the
+    // count page and the checklist both see it
+    if (!t) { if (store.tasks.date !== todayKey()) store.tasks = { date: todayKey(), list: [] }; t = store.tasks.list.find(x => x.itemId === it.id); if (!t) { t = newItemTask(it, Number(s.pieces)); t.auto = false; store.tasks.list.push(t); } else if (!t.auto) t.need = (t.need || 0) + Number(s.pieces); save('tasks'); }
     const temp = it.temp ? (t && t.partial ? it.temp - 10 : it.temp) : null;
-    startTimer({ label: it.name + ' · ' + s.sheets + ' sheet' + (s.sheets > 1 ? 's' : ''), minutes: it.timeLo, kind: 'bake', itemId: it.id, taskId: t ? t.id : null, sheets: s.sheets,
+    startTimer({ label: it.name + ' · ' + s.pieces + ' pcs', minutes: it.timeLo, kind: 'bake', itemId: it.id, taskId: t ? t.id : null, pieces: Number(s.pieces),
       tempNote: temp ? temp + '°' : '', hint: (it.timeHi > it.timeLo ? 'check, up to ' + it.timeHi + ' min' : '') + (it.steam ? (it.timeHi > it.timeLo ? ' · ' : '') + 'steam ' + it.steam : '') }, true);
   });
   save('timers'); unlockAudio(); updateWake(); closeSheets(); go('today');
@@ -689,7 +712,7 @@ function ackTimer(id, advance) {
     if (task) {
       if (t.kind === 'thaw') task.pulled = true;
       if (t.kind === 'proof') task.proofed = true;
-      if (t.kind === 'bake' && advance) task.done = Math.min((task.done || 0) + (t.sheets || 1), task.batches || 1);
+      if (t.kind === 'bake' && advance) { task.baked = (task.baked || 0) + (t.pieces || 0); if (taskDone(task)) toast(task.title + ' complete'); }
       save('tasks');
     }
   }
@@ -779,32 +802,48 @@ function need(it) {
   if (it.par == null || it.par === '') return null;
   const have = store.counts.exp[it.id] ? 0 : (c == null || c === '' ? null : Number(c));
   if (have == null) return null;
-  const n = Math.max(0, Number(it.par) - have);
-  return { n, racks: Math.ceil(n / Math.max(1, Number(it.batch) || 1)) };
+  return { n: Math.max(0, Number(it.par) - have) };
 }
+/* pieces of this task currently in the oven (running bake timers) */
+function inOven(t) { return store.timers.filter(x => x.kind === 'bake' && x.taskId === t.id && x.endsAt > now()).reduce((a, x) => a + (x.pieces || 0), 0); }
+function taskLeft(t) { return Math.max(0, (t.need || 0) - (t.baked || 0) - inOven(t)); }
+function taskFor(it) { return store.tasks.date === todayKey() ? store.tasks.list.find(t => t.itemId === it.id) : null; }
 function renderCount() {
   const tk = todayKey();
   $('#count-date').textContent = store.counts.date === tk ? 'Today · ' + new Date().toLocaleDateString(undefined, {weekday:'short', month:'short', day:'numeric'}) : 'From ' + store.counts.date + ' — tap New day to start fresh';
   const items = enabledItems().sort(sortItems);
-  if (!items.length) { $('#count-list').innerHTML = '<div class="empty"><b>No items enabled</b>Turn some on in Settings.</div>'; return; }
-  let html = '', cat = null, needCount = 0, racks = 0;
+  if (!items.length) { $('#count-list').innerHTML = '<div class="empty"><b>No items enabled</b>Turn some on in Settings.</div>'; $('#count-summary').innerHTML = ''; return; }
+  let html = '', cat = null, needItems = 0, needPcs = 0, bakedPcs = 0, ovenPcs = 0, leftPcs = 0, counted = 0;
   items.forEach(it => {
     if (it.cat !== cat) { cat = it.cat; html += (html ? '</div>' : '') + '<div class="sec-title">' + esc(cat) + '</div><div class="card" style="padding:4px 14px">'; }
-    const v = store.counts.vals[it.id], ex = !!store.counts.exp[it.id], nd = need(it);
-    if (nd && nd.n > 0) { needCount++; racks += nd.racks; }
-    const parTxt = it.par == null || it.par === '' ? '<a class="xs" style="color:var(--amber);font-weight:700" onclick="openEditor(\'' + it.id + '\')">set par</a>' : '<span>par ' + esc(it.par) + (it.parBy ? ' by ' + it.parBy + 'AM' : '') + '</span>';
-    const needTxt = nd == null ? '' : nd.n > 0 ? '<span class="need">bake ' + nd.n + ' · ' + nd.racks + ' sheet' + (nd.racks > 1 ? 's' : '') + '</span>' : '<span class="need zero">stocked</span>';
-    html += '<div class="cnt-row ' + (ex ? 'flag' : '') + '"><div class="grow"><div class="name">' + esc(it.name) + (it.verify ? ' <span class="verify">verify</span>' : '') + '</div><div class="sub">' + parTxt + needTxt + '</div></div>' +
+    const v = store.counts.vals[it.id], ex = !!store.counts.exp[it.id], nd = need(it), t = taskFor(it);
+    if (v != null || ex) counted++;
+    const n = t ? (t.need || 0) : (nd ? nd.n : 0), baked = t ? (t.baked || 0) : 0, ov = t ? inOven(t) : 0, left = Math.max(0, n - baked - ov);
+    if (n > 0) { needItems++; needPcs += n; bakedPcs += Math.min(baked, n); ovenPcs += ov; leftPcs += left; }
+    const parTxt = it.par == null || it.par === '' ? '<a class="xs" style="color:var(--amber);font-weight:700" onclick="openEditor(\'' + it.id + '\')">set par</a>' : '<span class="muted">par ' + esc(it.par) + (it.parBy ? ' by ' + it.parBy + 'AM' : '') + '</span>';
+    let stat = '';
+    if (n > 0) {
+      stat = '<span class="pill">need ' + n + '</span>' + (baked ? '<span class="pill green">baked ' + baked + (baked > n ? ' (+' + (baked - n) + ')' : '') + '</span>' : '') + (ov ? '<span class="pill amber">' + ov + ' in oven</span>' : '') +
+             (left > 0 ? '<span class="need">' + left + ' left' + (Number(it.batch) > 1 ? ' ≈ ' + Math.ceil(left / it.batch) + ' sheet' + (Math.ceil(left / it.batch) > 1 ? 's' : '') : '') + '</span>' : (baked >= n ? '<span class="pill green">done</span>' : ''));
+    } else if (nd) stat = '<span class="need zero">stocked</span>';
+    html += '<div class="cnt-row ' + (ex ? 'flag' : '') + '"><div class="grow"><div class="name">' + esc(it.name) + (it.verify ? ' <span class="verify">verify</span>' : '') + '</div><div class="sub">' + parTxt + stat + '</div></div>' +
       '<input class="input" type="number" inputmode="numeric" placeholder="—" value="' + (v ?? '') + '" oninput="setCount(\'' + it.id + '\',this.value)">' +
       '<button class="exp ' + (ex ? 'on' : '') + '" onclick="toggleExp(\'' + it.id + '\')">EXP</button></div>';
   });
   html += '</div>';
   $('#count-list').innerHTML = html;
-  $('#build-btn').textContent = needCount ? 'Build today\'s tasks · ' + needCount + ' item' + (needCount > 1 ? 's' : '') + ', ' + racks + ' sheet' + (racks !== 1 ? 's' : '') : 'Build today\'s tasks';
+  $('#count-summary').innerHTML = needItems ? '<div class="kpi" style="grid-template-columns:repeat(4,1fr);gap:8px">' +
+    '<div class="card" style="padding:10px 8px;text-align:center"><div class="l">Need</div><div class="v" style="font-size:20px">' + needPcs + '</div></div>' +
+    '<div class="card" style="padding:10px 8px;text-align:center"><div class="l">Baked</div><div class="v" style="font-size:20px;color:var(--green)">' + bakedPcs + '</div></div>' +
+    '<div class="card" style="padding:10px 8px;text-align:center"><div class="l">In oven</div><div class="v" style="font-size:20px;color:var(--amber)">' + ovenPcs + '</div></div>' +
+    '<div class="card" style="padding:10px 8px;text-align:center"><div class="l">Left</div><div class="v" style="font-size:20px">' + leftPcs + '</div></div></div>' +
+    '<div class="bar" style="margin:-4px 0 12px"><i style="width:' + (needPcs ? Math.min(100, bakedPcs / needPcs * 100) : 0) + '%"></i></div>'
+    : (counted ? '<div class="card sm muted">Everything counted so far is stocked.</div>' : '');
+  $('#build-btn').textContent = needItems ? 'Open today\'s list · ' + needItems + ' item' + (needItems > 1 ? 's' : '') + ', ' + leftPcs + ' pcs left' : 'Open today\'s list';
 }
 function touchCounts() { if (store.counts.date !== todayKey()) { store.counts = { date: todayKey(), vals: {}, exp: {} }; } }
-function setCount(id, v) { touchCounts(); store.counts.vals[id] = v === '' ? null : Number(v); save('counts'); renderCountRow(); }
-function toggleExp(id) { touchCounts(); store.counts.exp[id] = !store.counts.exp[id]; save('counts'); renderCount(); }
+function setCount(id, v) { touchCounts(); store.counts.vals[id] = v === '' ? null : Number(v); save('counts'); syncTasksFromCount(); renderCountRow(); }
+function toggleExp(id) { touchCounts(); store.counts.exp[id] = !store.counts.exp[id]; save('counts'); syncTasksFromCount(); renderCount(); }
 let rcT = null; function renderCountRow() { clearTimeout(rcT); rcT = setTimeout(() => { const a = document.activeElement; const s = $('#main').scrollTop; renderCount(); $('#main').scrollTop = s; }, 700); }
 function newDay() {
   if (!confirm('Start a new day? Clears the floor count and today\'s task list. Items, pars and notes are kept.')) return;
@@ -813,32 +852,32 @@ function newDay() {
   store.timers = []; save('timers'); stopAlarm(); updateWake();
   render(); toast('New day');
 }
-function buildTasks() {
+/* the task list mirrors the count: every item that needs baking gets a task
+   with need = par − counted, updated live as she types. Tasks she added by
+   hand (auto:false) keep their own need. */
+function syncTasksFromCount() {
   const tk = todayKey();
   if (store.tasks.date !== tk) store.tasks = { date: tk, list: [] };
-  let added = 0, updated = 0;
+  let changed = false;
   enabledItems().forEach(it => {
-    const nd = need(it);
-    const ex = store.tasks.list.find(t => t.itemId === it.id);
+    const nd = need(it), ex = store.tasks.list.find(t => t.itemId === it.id);
     if (nd && nd.n > 0) {
-      if (ex) { if (ex.batches !== nd.racks) { ex.batches = nd.racks; updated++; } ex.pieces = nd.n; }
-      else { store.tasks.list.push(newItemTask(it, nd.racks, nd.n)); added++; }
-    } else if (ex && ex.auto && !(ex.done > 0)) {
-      store.tasks.list = store.tasks.list.filter(t => t !== ex);
-    }
+      if (!ex) { store.tasks.list.push(newItemTask(it, nd.n)); changed = true; }
+      else if (ex.auto && ex.need !== nd.n) { ex.need = nd.n; changed = true; }
+    } else if (ex && ex.auto && !(ex.baked > 0) && !inOven(ex)) { store.tasks.list = store.tasks.list.filter(t => t !== ex); changed = true; }
   });
-  save('tasks');
-  go('tasks');
-  toast(added || updated ? (added ? added + ' added' : '') + (added && updated ? ', ' : '') + (updated ? updated + ' updated' : '') : 'Nothing needs baking');
+  if (changed) save('tasks');
+  return changed;
 }
-function newItemTask(it, racks, pieces) {
-  return { id: uid(), itemId: it.id, title: it.name, batches: Math.max(1, racks), pieces: pieces || null, done: 0, pulled: false, proofed: false, stepsDone: [], auto: true, partial: false };
+function buildTasks() { syncTasksFromCount(); go('tasks'); }
+function newItemTask(it, pieces) {
+  return { id: uid(), itemId: it.id, title: it.name, need: Math.max(0, Number(pieces) || 0), baked: 0, pulled: false, proofed: false, stepsDone: [], auto: true, partial: false, created: now() };
 }
 
 /* =====================================================================
    TASKS
    ===================================================================== */
-function taskDone(t) { return t.itemId ? (t.done || 0) >= (t.batches || 1) : !!t.checked; }
+function taskDone(t) { return t.itemId ? (t.need || 0) > 0 && (t.baked || 0) >= (t.need || 0) : !!t.checked; }
 function sortedTasks() {
   return store.tasks.list.slice().sort((a, b) => {
     const ia = a.itemId ? store.items[a.itemId] : null, ib = b.itemId ? store.items[b.itemId] : null;
@@ -867,8 +906,9 @@ function itemTaskHtml(t) {
   if (!it) return '';
   const done = taskDone(t), open = openTaskId === t.id;
   const running = store.timers.filter(x => x.taskId === t.id && x.endsAt > now());
-  const pct = Math.min(100, (t.done || 0) / (t.batches || 1) * 100);
-  const sub = [ (t.pieces ? t.pieces + ' pcs · ' : '') + t.batches + ' sheet' + (t.batches > 1 ? 's' : ''), thawLabel(it), it.proofMin ? 'proof ' + it.proofMin + 'm' : '', it.temp ? it.temp + '°' : '', fmtTime(it) ].filter(Boolean);
+  const ov = inOven(t), left = taskLeft(t), baked = t.baked || 0;
+  const pct = Math.min(100, baked / (t.need || 1) * 100), pctOven = Math.min(100 - pct, ov / (t.need || 1) * 100);
+  const sub = [ 'need ' + t.need, baked ? 'baked ' + baked : '', ov ? ov + ' in oven' : '', left ? left + ' left' : (baked >= t.need ? 'done' : ''), it.temp ? it.temp + '°' : '', fmtTime(it) ].filter(Boolean);
   const steps = (it.steps || []).map((s, i) => '<div class="step ' + ((t.stepsDone || []).includes(i) ? 'on' : '') + '" onclick="toggleStep(\'' + t.id + '\',' + i + ')"><div class="sq">' + ((t.stepsDone || []).includes(i) ? '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#0b1a11" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>' : '') + '</div><div>' + esc(s) + '</div></div>').join('');
   const temp = it.temp ? (t.partial ? it.temp - 10 : it.temp) : null;
   const btns = [];
@@ -876,10 +916,10 @@ function itemTaskHtml(t) {
   if (it.proofMin) btns.push('<button class="btn ' + (t.proofed || (!t.pulled && it.thawType === 'timed') ? 'ghost' : 'primary') + '" onclick="startTaskTimer(\'' + t.id + '\',\'proof\')">Proof ' + it.proofMin + 'm' + (t.proofed ? ' ✓' : '') + '</button>');
   if (it.timeLo) btns.push('<button class="btn ' + (btns.length && !((t.pulled || it.thawType !== 'timed') && (t.proofed || !it.proofMin)) ? '' : 'primary') + '" onclick="startTaskTimer(\'' + t.id + '\',\'bake\')" ' + (done ? 'disabled' : '') + '>Bake ' + fmtTime(it) + '</button>');
   return '<div class="task ' + (done ? 'done' : '') + (open ? ' open' : '') + '" id="task-' + t.id + '">' +
-    '<div class="head" onclick="toggleOpen(\'' + t.id + '\')" style="border-left:4px solid ' + itemColor(it) + '"><div class="chk"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div><div class="grow"><div class="title ellip">' + esc(t.title) + '</div><div class="sub">' + sub.map(esc).join(' · ') + (running.length ? ' · <span style="color:var(--green)">' + running[0].kind + ' ' + fmtDur(running[0].endsAt - now()) + '</span>' : '') + '</div></div><div class="mono sm dim">' + (t.done || 0) + '/' + t.batches + '</div></div>' +
+    '<div class="head" onclick="toggleOpen(\'' + t.id + '\')" style="border-left:4px solid ' + itemColor(it) + '"><div class="chk"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div><div class="grow"><div class="title ellip">' + esc(t.title) + '</div><div class="sub">' + sub.map(esc).join(' · ') + (running.length ? ' · <span style="color:var(--green)">' + running[0].kind + ' ' + fmtDur(running[0].endsAt - now()) + '</span>' : '') + '</div></div><div class="mono sm dim">' + baked + '/' + t.need + '</div></div>' +
     '<div class="body">' +
-      '<div class="bar"><i style="width:' + pct + '%"></i></div>' +
-      '<div class="row" style="justify-content:space-between"><span class="xs muted">sheets done</span><div class="row" style="gap:6px"><button class="btn sm" onclick="bumpRack(\'' + t.id + '\',-1)">−</button><button class="btn sm primary" onclick="bumpRack(\'' + t.id + '\',1)">+ Sheet done</button></div></div>' +
+      '<div class="bar" style="position:relative"><i style="width:' + pct + '%"></i><i style="position:absolute;left:' + pct + '%;top:0;width:' + pctOven + '%;background:var(--amber);opacity:.7"></i></div>' +
+      '<div class="row" style="justify-content:space-between;gap:8px"><span class="xs muted grow">' + (it.thawType !== 'none' ? esc(thawLabel(it)) + (it.proofMin ? ' · proof ' + it.proofMin + 'm' : '') : 'Frozen → oven') + '</span><input class="input" type="number" inputmode="numeric" placeholder="pcs" id="addb-' + t.id + '" style="width:74px;padding:6px 4px;text-align:center;min-height:34px"><button class="btn sm primary" onclick="addBaked(\'' + t.id + '\')">+ Baked</button><button class="btn sm ghost" onclick="addBaked(\'' + t.id + '\',true)" title="undo">−</button></div>' +
       (it.note ? '<div class="sm" style="margin-top:10px;color:var(--amber)">' + esc(it.note) + '</div>' : '') +
       '<div class="steps">' + (steps || '<div class="xs muted">No steps yet — add them in Bake.</div>') + '</div>' +
       (it.temp ? '<div class="partial"><span>Partial load? <b>' + temp + '°</b>' + (t.partial ? ' (−10°)' : '') + '</span><button class="switch ' + (t.partial ? 'on' : '') + '" onclick="togglePartial(\'' + t.id + '\')"></button></div>' : '') +
@@ -890,7 +930,16 @@ function itemTaskHtml(t) {
 function toggleOpen(id) { openTaskId = openTaskId === id ? null : id; renderTasks(); }
 function toggleStep(id, i) { const t = store.tasks.list.find(x => x.id === id); if (!t) return; t.stepsDone = t.stepsDone || []; const k = t.stepsDone.indexOf(i); k >= 0 ? t.stepsDone.splice(k, 1) : t.stepsDone.push(i); save('tasks'); renderTasks(); }
 function togglePartial(id) { const t = store.tasks.list.find(x => x.id === id); if (!t) return; t.partial = !t.partial; save('tasks'); renderTasks(); }
-function bumpRack(id, d) { const t = store.tasks.list.find(x => x.id === id); if (!t) return; t.done = Math.max(0, Math.min(t.batches, (t.done || 0) + d)); save('tasks'); renderTasks(); if (taskDone(t)) toast(t.title + ' complete'); }
+/* log pieces baked without a timer (or undo with the − button) */
+function addBaked(id, undo) {
+  const t = store.tasks.list.find(x => x.id === id); if (!t) return;
+  const inp = document.getElementById('addb-' + id); let n = parseInt(inp && inp.value);
+  if (!(n > 0)) n = undo ? Math.min(t.baked || 0, Number((store.items[t.itemId] || {}).batch) || 1) : taskLeft(t);
+  if (!(n > 0)) return;
+  t.baked = Math.max(0, (t.baked || 0) + (undo ? -n : n));
+  if (!undo) bumpStats(store.items[t.itemId], n);
+  save('tasks'); renderTasks(); if (taskDone(t)) toast(t.title + ' complete');
+}
 function toggleCustom(id) { const t = store.tasks.list.find(x => x.id === id); if (!t) return; t.checked = !t.checked; save('tasks'); renderTasks(); }
 function removeTask(id) { store.tasks.list = store.tasks.list.filter(x => x.id !== id); store.timers = store.timers.filter(x => x.taskId !== id); save('tasks'); save('timers'); updateWake(); renderTasks(); }
 function addCustomTask() {
@@ -910,14 +959,14 @@ function startTaskTimer(id, kind) {
 function openPickItem() {
   const sel = $('#pick-item');
   sel.innerHTML = liveItems().sort(sortItems).map(i => '<option value="' + i.id + '">' + esc(i.name) + '</option>').join('');
-  $('#pick-racks').value = 1; openSheet('sh-pick');
+  $('#pick-racks').value = ''; openSheet('sh-pick');
 }
 function addItemTask() {
   const it = store.items[$('#pick-item').value]; if (!it) return;
   if (store.tasks.date !== todayKey()) store.tasks = { date: todayKey(), list: [] };
-  const racks = Math.max(1, parseInt($('#pick-racks').value) || 1);
+  const pcs = parseInt($('#pick-racks').value); if (!(pcs > 0)) { toast('How many pieces?'); return; }
   const ex = store.tasks.list.find(t => t.itemId === it.id);
-  if (ex) { ex.batches += racks; ex.auto = false; } else { const t = newItemTask(it, racks); t.auto = false; store.tasks.list.push(t); }
+  if (ex) { ex.need = (ex.need || 0) + pcs; ex.auto = false; } else { const t = newItemTask(it, pcs); t.auto = false; store.tasks.list.push(t); }
   save('tasks'); closeSheets(); renderTasks();
 }
 
@@ -963,10 +1012,10 @@ function renderSettings() {
   $('#sw-sound').classList.toggle('on', !!s.sound); $('#sw-wake').classList.toggle('on', !!s.wake);
   $('#sw-voice').classList.toggle('on', s.voice !== false); $('#sw-chime').classList.toggle('on', s.chime !== false);
   const st = store.stats || {};
-  $('#st-sheets').textContent = st.sheets || 0; $('#st-loads').textContent = st.loads || 0; $('#st-pieces').textContent = st.pieces || 0; $('#st-days').textContent = Object.keys(st.days || {}).length;
+  $('#st-kinds').textContent = Object.keys(st.items || {}).length; $('#st-loads').textContent = st.loads || 0; $('#st-pieces').textContent = st.pieces || 0; $('#st-days').textContent = Object.keys(st.days || {}).length;
   $('#stats-since').textContent = st.since ? 'since ' + new Date(st.since).toLocaleDateString(undefined, { month:'short', day:'numeric' }) : '';
-  const top = Object.values(st.items || {}).sort((a, b) => b.sheets - a.sheets).slice(0, 6);
-  $('#st-items').innerHTML = top.map(r => '<div class="stat"><span class="ellip">' + esc(r.name) + '</span><b>' + r.sheets + ' sheet' + (r.sheets === 1 ? '' : 's') + (r.pieces ? ' · ' + r.pieces + ' pcs' : '') + '</b></div>').join('') || '<div class="xs muted">Nothing baked yet.</div>';
+  const top = Object.values(st.items || {}).sort((a, b) => (b.pieces || 0) - (a.pieces || 0)).slice(0, 6);
+  $('#st-items').innerHTML = top.map(r => '<div class="stat"><span class="ellip">' + esc(r.name) + '</span><b>' + (r.pieces || 0) + ' pcs · ' + (r.loads || 0) + ' load' + (r.loads === 1 ? '' : 's') + '</b></div>').join('') || '<div class="xs muted">Nothing baked yet.</div>';
   $('#notif-state').textContent = !('Notification' in window) ? 'not supported here' : Notification.permission === 'granted' ? 'on' : Notification.permission === 'denied' ? 'blocked in browser settings' : 'off';
   $('#deadline-list').innerHTML = (s.deadlines || []).map(d => '<div class="row" style="padding:6px 0"><input class="input grow" value="' + esc(d.label) + '" onchange="setDeadline(\'' + d.id + '\',\'label\',this.value)"><input class="input" type="time" style="width:140px;padding-left:8px;padding-right:6px" value="' + esc(d.time) + '" onchange="setDeadline(\'' + d.id + '\',\'time\',this.value)"><button class="btn sm ghost" onclick="removeDeadline(\'' + d.id + '\')">✕</button></div>').join('') || '<div class="xs muted">No deadlines.</div>';
   const items = liveItems().sort(sortItems);
@@ -990,7 +1039,7 @@ function saveNotes() { store.notes = $('#notes').value; clearTimeout(notesT); no
 function resetAll() {
   if (!confirm('Reset EVERYTHING on this device and in the cloud? Items go back to the cheat sheet, pars, notes, counts and tasks are erased.')) return;
   if (!confirm('Really? This cannot be undone.')) return;
-  store = { items: {}, itemsTs: {}, counts: { date: todayKey(), vals: {}, exp: {} }, countsTs: now(), tasks: { date: todayKey(), list: [] }, tasksTs: now(), timers: [], timersTs: now(), notes: '', notesTs: now(), stats: { loads: 0, sheets: 0, pieces: 0, days: {}, items: {}, since: 0 }, statsTs: now(), settings: JSON.parse(JSON.stringify(DEFAULT_SETTINGS)), settingsTs: now() };
+  store = { items: {}, itemsTs: {}, counts: { date: todayKey(), vals: {}, exp: {} }, countsTs: now(), tasks: { date: todayKey(), list: [] }, tasksTs: now(), timers: [], timersTs: now(), notes: '', notesTs: now(), stats: { loads: 0, pieces: 0, days: {}, items: {}, since: 0 }, statsTs: now(), settings: JSON.parse(JSON.stringify(DEFAULT_SETTINGS)), settingsTs: now() };
   ensureSeed(); Object.keys(store.items).forEach(k => store.itemsTs[k] = now()); persist(); schedulePush(); render(); toast('Reset');
 }
 
@@ -1007,7 +1056,7 @@ function openEditor(id) {
   $('#ed-cat').innerHTML = cats.map(c => '<option>' + esc(c) + '</option>').join('') + '<option value="__new">New category…</option>';
   $('#ed-cat').value = it.cat; $('#ed-cat').onchange = function () { if (this.value === '__new') { const c = prompt('Category name'); if (c) { const o = document.createElement('option'); o.textContent = c; this.insertBefore(o, this.lastElementChild); this.value = c; } else this.value = it.cat; } };
   $('#ed-name').value = it.name; $('#ed-enabled').classList.toggle('on', !!it.enabled);
-  $('#ed-par').value = it.par ?? ''; $('#ed-parby').value = it.parBy ?? ''; $('#ed-batch').value = it.batch ?? 1; $('#ed-shelf').value = it.shelfDays ?? '';
+  $('#ed-par').value = it.par ?? ''; $('#ed-parby').value = it.parBy ?? ''; $('#ed-batch').value = it.batch > 1 ? it.batch : ''; $('#ed-shelf').value = it.shelfDays ?? '';
   $('#ed-thawtype').value = it.thawType || 'none'; $('#ed-thawmin').value = it.thawMin || ''; $('#ed-proof').value = it.proofMin || ''; $('#ed-steam').value = it.steam || '';
   $('#ed-temp').value = it.temp || ''; $('#ed-tlo').value = it.timeLo || ''; $('#ed-thi').value = it.timeHi || '';
   $('#ed-note').value = it.note || ''; $('#ed-say').value = it.say || ''; $('#ed-steps').value = (it.steps || []).join('\n');
@@ -1020,7 +1069,7 @@ function saveEditor() {
   const name = $('#ed-name').value.trim(); if (!name) { toast('Name required'); return; }
   const it = editId ? store.items[editId] : { id: bakerySlug(name) + '-' + uid().slice(0, 4), order: 500 + liveItems().length, verify: false };
   it.name = name; it.cat = $('#ed-cat').value === '__new' ? 'Misc' : $('#ed-cat').value; it.enabled = $('#ed-enabled').classList.contains('on');
-  it.par = $('#ed-par').value === '' ? null : num($('#ed-par').value, null); it.parBy = $('#ed-parby').value; it.batch = Math.max(1, num($('#ed-batch').value, 1)); it.shelfDays = $('#ed-shelf').value === '' ? null : num($('#ed-shelf').value, null);
+  it.par = $('#ed-par').value === '' ? null : num($('#ed-par').value, null); it.parBy = $('#ed-parby').value; it.batch = Math.max(1, num($('#ed-batch').value, 1)); // 1 = unknown, only used as a sheet hint it.shelfDays = $('#ed-shelf').value === '' ? null : num($('#ed-shelf').value, null);
   it.thawType = $('#ed-thawtype').value; it.thawMin = it.thawType === 'timed' ? num($('#ed-thawmin').value, 0) : 0; it.proofMin = num($('#ed-proof').value, 0); it.steam = num($('#ed-steam').value, 0);
   it.temp = num($('#ed-temp').value, 0); it.timeLo = num($('#ed-tlo').value, 0); it.timeHi = num($('#ed-thi').value, it.timeLo); if (it.timeHi < it.timeLo) it.timeHi = it.timeLo;
   it.note = $('#ed-note').value.trim(); it.steps = $('#ed-steps').value.split('\n').map(s => s.trim()).filter(Boolean);
@@ -1072,7 +1121,7 @@ function mergeRemote(r) {
       if (k === 'tasks' && !store.tasks.list) store.tasks.list = [];
       if (k === 'counts') { store.counts.vals = store.counts.vals || {}; store.counts.exp = store.counts.exp || {}; }
       if (k === 'settings') store.settings = Object.assign({}, DEFAULT_SETTINGS, store.settings);
-      if (k === 'stats') store.stats = Object.assign({ loads: 0, sheets: 0, pieces: 0, days: {}, items: {}, since: 0 }, store.stats || {});
+      if (k === 'stats') store.stats = Object.assign({ loads: 0, pieces: 0, days: {}, items: {}, since: 0 }, store.stats || {});
       store[k + 'Ts'] = r[k + 'Ts']; changed = true;
     }
   });
