@@ -187,6 +187,32 @@ textarea.input { min-height:90px; resize:vertical; line-height:1.45; }
 .sheet .sh-head h3 { font-size:17px; font-weight:700; }
 .sheet .sh-body { overflow-y:auto; padding:var(--pad); padding-bottom:calc(var(--pad) + env(safe-area-inset-bottom)); display:flex; flex-direction:column; gap:12px; }
 .sheet .sh-foot { display:flex; gap:10px; padding:10px var(--pad) calc(12px + env(safe-area-inset-bottom)); border-top:1px solid var(--bdr); }
+/* ===== mini timer strip (every tab) ===== */
+#strip { display:none; gap:8px; padding:8px var(--pad); overflow-x:auto; background:var(--bg0); border-bottom:1px solid var(--bdr); flex:0 0 auto; scrollbar-width:none; }
+#strip::-webkit-scrollbar { display:none; }
+#strip.on { display:flex; }
+.chip { display:flex; align-items:center; gap:7px; padding:6px 10px 6px 8px; border-radius:999px; background:var(--bg2); border:1px solid var(--bdr2); white-space:nowrap; flex:0 0 auto; font-size:var(--fs-sm); }
+.chip i { width:9px; height:9px; border-radius:50%; background:var(--c, var(--text3)); flex:0 0 auto; box-shadow:0 0 0 2px color-mix(in srgb, var(--c, var(--text3)) 30%, transparent); }
+.chip b { font-weight:600; max-width:120px; overflow:hidden; text-overflow:ellipsis; }
+.chip .mono { font-weight:700; }
+.chip.soon { border-color:var(--amber); } .chip.soon .mono { color:var(--amber); }
+.chip.done { border-color:var(--red); background:var(--red-dim); } .chip.done .mono { color:var(--red); }
+.timer { border-left:4px solid var(--c, var(--bdr)); }
+.dot { width:10px; height:10px; border-radius:50%; background:var(--c, var(--text3)); flex:0 0 auto; }
+/* ===== load oven picker ===== */
+.load-row { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--bdr); }
+.load-row:last-child { border-bottom:0; }
+.load-row .box { width:26px; height:26px; border-radius:8px; border:2px solid var(--bdr2); flex:0 0 auto; display:flex; align-items:center; justify-content:center; }
+.load-row.on .box { background:var(--green); border-color:var(--green); }
+.load-row.on .box svg { display:block; } .load-row .box svg { display:none; width:14px; height:14px; stroke:var(--on-green); stroke-width:3; fill:none; }
+.load-row .nm { font-weight:600; }
+.load-row .mt { font-size:var(--fs-xs); color:var(--text3); }
+.stepper { display:flex; align-items:center; gap:2px; flex:0 0 auto; }
+.stepper button { width:30px; height:30px; border-radius:8px; background:var(--bg3); color:var(--text); font-weight:700; }
+.stepper span { min-width:26px; text-align:center; font-weight:700; font-variant-numeric:tabular-nums; }
+.stat { display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid var(--bdr); font-size:var(--fs-sm); }
+.stat:last-child { border-bottom:0; }
+.stat b { font-variant-numeric:tabular-nums; }
 #toast { position:fixed; left:50%; bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 14px); transform:translateX(-50%); background:var(--bg3); color:var(--text); border:1px solid var(--bdr2); padding:10px 16px; border-radius:999px; font-size:var(--fs-sm); font-weight:600; z-index:60; opacity:0; transition:opacity .2s; pointer-events:none; white-space:nowrap; }
 #toast.on { opacity:1; }
 </style>
@@ -200,6 +226,7 @@ textarea.input { min-height:90px; resize:vertical; line-height:1.45; }
       <div id="hdr-clock" class="mono">--:--</div>
     </div>
   </header>
+  <div id="strip" onclick="go('today')"></div>
 
   <main id="main">
     <!-- ================= TODAY ================= -->
@@ -213,7 +240,7 @@ textarea.input { min-height:90px; resize:vertical; line-height:1.45; }
       <div id="timers"></div>
       <div class="kpi">
         <div class="card" style="min-width:0"><div class="l">Oven</div><div class="v ellip" id="kpi-oven" style="font-size:15px;margin-top:6px">Empty</div><div class="mono sm dim" id="kpi-oven-t"></div></div>
-        <div class="card"><div class="l">Racks today</div><div class="v" id="kpi-racks">0 / 0</div><div class="bar" style="margin-top:8px"><i id="kpi-bar" style="width:0%"></i></div></div>
+        <div class="card"><div class="l">Sheets today</div><div class="v" id="kpi-racks">0 / 0</div><div class="bar" style="margin-top:8px"><i id="kpi-bar" style="width:0%"></i></div></div>
       </div>
       <div class="card next-card" id="next-card"></div>
     </section>
@@ -228,7 +255,7 @@ textarea.input { min-height:90px; resize:vertical; line-height:1.45; }
           </div>
           <button class="btn sm ghost" onclick="newDay()">New day</button>
         </div>
-        <div class="sm muted" style="margin-top:8px">Count what's on the shelf. Need = par − counted, rounded up to whole racks. Tap <b>EXP</b> if the shelf stock is expired and has to be pulled.</div>
+        <div class="sm muted" style="margin-top:8px">Count what's on the shelf. Need = par − counted, rounded up to whole baking sheets. Tap <b>EXP</b> if the shelf stock is expired and has to be pulled.</div>
       </div>
       <div id="count-list"></div>
       <div class="sticky-foot">
@@ -266,30 +293,44 @@ textarea.input { min-height:90px; resize:vertical; line-height:1.45; }
     <section id="v-settings" class="view">
       <div class="card">
         <h2>Notes <small id="notes-ts"></small></h2>
-        <textarea class="input" id="notes" placeholder="Anything you learn at work: real par numbers, how many fit on a rack, things the sheet gets wrong, ideas for the app…" oninput="saveNotes()"></textarea>
+        <textarea class="input" id="notes" placeholder="Anything you learn at work: real par numbers, how many fit on a baking sheet, things the sheet gets wrong, ideas for the app…" oninput="saveNotes()"></textarea>
       </div>
       <div class="card">
         <h2>Oven</h2>
         <div class="grid2">
           <div class="field"><label>Ovens</label><input class="input" type="number" inputmode="numeric" id="set-ovens" min="1" onchange="saveSettings()"></div>
-          <div class="field"><label>Shelves per rack</label><input class="input" type="number" inputmode="numeric" id="set-shelves" min="1" onchange="saveSettings()"></div>
+          <div class="field"><label>Sheets per oven rack</label><input class="input" type="number" inputmode="numeric" id="set-shelves" min="1" onchange="saveSettings()"></div>
         </div>
-        <div class="xs muted" style="margin-top:8px">Sheet times assume a full rack. The bake timer offers −10° for a partial rack.</div>
+        <div class="xs muted" style="margin-top:8px">Cheat-sheet times assume a full oven rack. The bake timer offers −10° for a partial load.</div>
       </div>
       <div class="card">
         <h2>Shelf deadlines <button class="btn sm ghost" onclick="addDeadline()">+ Add</button></h2>
         <div id="deadline-list"></div>
       </div>
       <div class="card">
+        <h2>All time <small id="stats-since"></small></h2>
+        <div class="kpi" style="margin-bottom:8px">
+          <div class="card" style="background:var(--bg2)"><div class="l">Sheets baked</div><div class="v" id="st-sheets">0</div></div>
+          <div class="card" style="background:var(--bg2)"><div class="l">Oven loads</div><div class="v" id="st-loads">0</div></div>
+          <div class="card" style="background:var(--bg2)"><div class="l">Pieces</div><div class="v" id="st-pieces">0</div></div>
+          <div class="card" style="background:var(--bg2)"><div class="l">Shifts</div><div class="v" id="st-days">0</div></div>
+        </div>
+        <div id="st-items"></div>
+        <div class="xs muted" style="margin-top:8px">Every bake timer you start adds its sheets here. Pieces count only when the item has a per-sheet number.</div>
+      </div>
+      <div class="card">
         <h2>Alerts</h2>
         <div class="list-row"><div class="grow">Sound when a timer ends</div><button class="switch" id="sw-sound" onclick="toggleSetting('sound',this)"></button></div>
+        <div class="list-row"><div class="grow">Say the item name <div class="xs muted">"Muffins, muffins, muffins"</div></div><button class="switch" id="sw-voice" onclick="toggleSetting('voice',this)"></button></div>
+        <div class="list-row"><div class="grow">Soft chime <div class="xs muted">plays before the voice</div></div><button class="switch" id="sw-chime" onclick="toggleSetting('chime',this)"></button></div>
+        <div class="list-row"><div class="grow">Preview the alarm</div><button class="btn sm" onclick="previewAlarm()">Play</button></div>
         <div class="list-row"><div class="grow">Keep screen awake while timers run</div><button class="switch" id="sw-wake" onclick="toggleSetting('wake',this)"></button></div>
         <div class="list-row"><div class="grow">Phone notifications <div class="xs muted" id="notif-state"></div></div><button class="btn sm" onclick="askNotif()">Enable</button></div>
         <div class="xs muted" style="margin-top:6px">A web app can't ring while the phone is locked. Keep the screen on (the toggle above) and the alarm will always fire.</div>
       </div>
       <div class="card">
         <h2>Items <button class="btn sm primary" onclick="openEditor(null)">+ Add item</button></h2>
-        <div class="xs muted" style="margin-bottom:8px">Toggle what your store carries. Tap an item to set par, rack size, shelf life, temps and steps. <span class="verify">verify</span> marks values that were hard to read on the sheet photo.</div>
+        <div class="xs muted" style="margin-bottom:8px">Toggle what your store carries. Tap an item to set par, pieces per sheet, shelf life, temps and steps. <span class="verify">verify</span> marks values that were hard to read on the sheet photo.</div>
         <div id="settings-items"></div>
       </div>
       <div class="card">
@@ -328,7 +369,7 @@ textarea.input { min-height:90px; resize:vertical; line-height:1.45; }
     <div class="grid3">
       <div class="field"><label>Par (on floor)</label><input class="input" type="number" inputmode="numeric" id="ed-par" placeholder="—"></div>
       <div class="field"><label>Needed by</label><select class="input" id="ed-parby"><option value="7">7 AM</option><option value="9">9 AM</option><option value="">Anytime</option></select></div>
-      <div class="field"><label>Per rack</label><input class="input" type="number" inputmode="numeric" id="ed-batch" placeholder="1"></div>
+      <div class="field"><label>Per sheet</label><input class="input" type="number" inputmode="numeric" id="ed-batch" placeholder="1"></div>
     </div>
     <div class="grid2">
       <div class="field"><label>Shelf life (days)</label><input class="input" type="number" inputmode="numeric" id="ed-shelf" placeholder="—"></div>
@@ -346,6 +387,7 @@ textarea.input { min-height:90px; resize:vertical; line-height:1.45; }
       <div class="field"><label>Bake min (hi)</label><input class="input" type="number" inputmode="numeric" id="ed-thi"></div>
     </div>
     <div class="field"><label>Note</label><input class="input" id="ed-note" placeholder="toppings, egg wash, anything special"></div>
+    <div class="field"><label>Alarm says</label><input class="input" id="ed-say" placeholder="e.g. Muffins"></div>
     <div class="field"><label>Steps — one per line</label><textarea class="input" id="ed-steps" style="min-height:150px"></textarea></div>
     <div class="row" id="ed-verify-row" hidden><span class="verify">verify</span><span class="sm muted grow">Some values were hard to read on the sheet photo — check them.</span><button class="btn sm ghost" onclick="clearVerify()">Checked</button></div>
     <button class="btn danger block" id="ed-delete" onclick="deleteItem()">Delete item</button>
@@ -364,16 +406,29 @@ textarea.input { min-height:90px; resize:vertical; line-height:1.45; }
   <div class="sh-head"><h3>Add item to bake</h3><button class="btn sm ghost" onclick="closeSheets()">Close</button></div>
   <div class="sh-body">
     <div class="field"><label>Item</label><select class="input" id="pick-item"></select></div>
-    <div class="field"><label>Racks</label><input class="input" type="number" inputmode="numeric" id="pick-racks" value="1" min="1"></div>
+    <div class="field"><label>Baking sheets</label><input class="input" type="number" inputmode="numeric" id="pick-racks" value="1" min="1"></div>
   </div>
   <div class="sh-foot"><button class="btn ghost grow" onclick="closeSheets()">Cancel</button><button class="btn primary grow" onclick="addItemTask()">Add task</button></div>
+</div>
+
+<!-- load the oven: pick one or many items, one timer each -->
+<div class="sheet" id="sh-load">
+  <div class="sh-head"><h3>Load the oven</h3><button class="btn sm ghost" onclick="closeSheets()">Close</button></div>
+  <div class="sh-body" style="gap:6px">
+    <div class="xs muted">Tick everything going in together. Each item gets its own timer, so the shorter ones ring first.</div>
+    <div id="load-list"></div>
+    <div class="sec-title" style="margin:10px 0 4px">Other items</div>
+    <input class="input" id="load-search" placeholder="Search…" oninput="renderLoad()">
+    <div id="load-other"></div>
+  </div>
+  <div class="sh-foot"><button class="btn ghost grow" onclick="closeSheets()">Cancel</button><button class="btn primary grow" id="load-start" onclick="startLoad()">Start timers</button></div>
 </div>
 
 <!-- custom timer -->
 <div class="sheet" id="sh-timer">
   <div class="sh-head"><h3>Custom timer</h3><button class="btn sm ghost" onclick="closeSheets()">Close</button></div>
   <div class="sh-body">
-    <div class="field"><label>Label</label><input class="input" id="ct-label" placeholder="e.g. Cookies rack 2"></div>
+    <div class="field"><label>Label</label><input class="input" id="ct-label" placeholder="e.g. Cookies sheet 2"></div>
     <div class="field"><label>Minutes</label><input class="input" type="number" inputmode="numeric" id="ct-min" value="15" min="1"></div>
   </div>
   <div class="sh-foot"><button class="btn ghost grow" onclick="closeSheets()">Cancel</button><button class="btn primary grow" onclick="startCustomTimer()">Start</button></div>
@@ -396,7 +451,7 @@ const todayKey = () => { const d = new Date(); return d.getFullYear() + '-' + St
 const uid = () => Math.random().toString(36).slice(2, 9);
 
 const DEFAULT_SETTINGS = {
-  ovens: 1, shelves: 12, sound: true, wake: true,
+  ovens: 1, shelves: 12, sound: true, wake: true, voice: true, chime: true,
   deadlines: [ { id:'d7', label:'7 AM shelf', time:'07:00' }, { id:'d9', label:'9 AM shelf', time:'09:00' } ]
 };
 
@@ -406,6 +461,7 @@ let store = {
   tasks: { date: todayKey(), list: [] }, tasksTs: 0,
   timers: [], timersTs: 0,
   notes: '', notesTs: 0,
+  stats: { loads: 0, sheets: 0, pieces: 0, days: {}, items: {}, since: 0 }, statsTs: 0,
   settings: JSON.parse(JSON.stringify(DEFAULT_SETTINGS)), settingsTs: 0
 };
 try { const raw = localStorage.getItem(LS_KEY); if (raw) store = Object.assign(store, JSON.parse(raw)); } catch(e) { console.warn('[bakery] localStorage read failed', e); }
@@ -416,6 +472,8 @@ function ensureSeed() {
   const seed = bakerySeedItems();
   let changed = false;
   Object.values(seed).forEach(s => { if (!store.items[s.id]) { store.items[s.id] = s; store.itemsTs[s.id] = store.itemsTs[s.id] || 1; changed = true; } });
+  liveItems().forEach(it => { if (!it.say) it.say = bakeryDefaultSay(it); });
+  store.stats = Object.assign({ loads: 0, sheets: 0, pieces: 0, days: {}, items: {}, since: 0 }, store.stats || {});
   store.settings = Object.assign({}, DEFAULT_SETTINGS, store.settings || {});
   if (!store.settings.deadlines || !store.settings.deadlines.length) store.settings.deadlines = DEFAULT_SETTINGS.deadlines;
   if (changed) persist();
@@ -435,6 +493,7 @@ function allCats() {
   return Array.from(s).sort((a,b) => catOrder(a) - catOrder(b) || a.localeCompare(b));
 }
 function fmtTime(it) { return it.timeLo ? (it.timeLo === it.timeHi || !it.timeHi ? it.timeLo : it.timeLo + '-' + it.timeHi) + ' min' : ''; }
+function itemColor(it) { return it ? (it.color || bakeryCatColor(it.cat)) : 'var(--text3)'; }
 function thawLabel(it) { return it.thawType === 'none' ? 'Frozen' : it.thawType === 'overnight' ? 'Overnight' : 'Thaw ' + it.thawMin + 'm'; }
 function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('on'), 2200); }
@@ -454,7 +513,18 @@ function go(v) {
 }
 function render() {
   ({ today: renderToday, count: renderCount, tasks: renderTasks, bake: renderBake, settings: renderSettings })[view]();
-  renderBadges();
+  renderStrip(); renderBadges();
+}
+/* colour-coded mini timers under the header, on every tab but Today */
+function renderStrip() {
+  const el = $('#strip');
+  const list = store.timers.slice().sort((a, b) => a.endsAt - b.endsAt);
+  if (!list.length || view === 'today') { el.classList.remove('on'); el.innerHTML = ''; return; }
+  el.classList.add('on');
+  el.innerHTML = list.map(t => {
+    const left = t.endsAt - now(), cls = left <= 0 ? 'done' : left <= 120000 ? 'soon' : '';
+    return '<div class="chip ' + cls + '" style="--c:' + esc(t.color || 'var(--text3)') + '"><i></i><b>' + esc(t.short || t.label) + '</b><span class="mono">' + fmtDur(left) + '</span></div>';
+  }).join('');
 }
 function renderBadges() {
   const due = store.timers.filter(t => t.endsAt <= now()).length;
@@ -500,7 +570,7 @@ function renderToday() {
     const it = nx.itemId ? store.items[nx.itemId] : null;
     nc.innerHTML = '<h2>Next up</h2><div class="name">' + esc(nx.title) + '</div><div class="act">' + esc(nextAction(nx)) + '</div>' +
       (it ? '<div class="sm muted" style="margin-top:4px">' + esc(thawLabel(it)) + (it.proofMin ? ' · proof ' + it.proofMin + 'm' : '') + (it.temp ? ' · ' + it.temp + '°' : '') + (it.steam ? ' · steam ' + it.steam : '') + (fmtTime(it) ? ' · ' + fmtTime(it) : '') + '</div>' : '') +
-      '<div class="row" style="margin-top:12px;gap:8px"><button class="btn primary grow" onclick="openTask(\'' + nx.id + '\')">Open task</button><button class="btn grow" onclick="openCustomTimer()">Custom timer</button></div>';
+      '<div class="row" style="margin-top:12px;gap:8px"><button class="btn primary grow" onclick="openTask(\'' + nx.id + '\')">Open task</button><button class="btn grow" onclick="openLoad()">Load oven</button></div>';
   }
 }
 function nextTask() {
@@ -515,7 +585,7 @@ function nextAction(t) {
   const rack = (t.done || 0) + 1;
   if (!t.pulled && it.thawType === 'timed') return 'Pull & thaw ' + it.thawMin + ' min';
   if (!t.proofed && it.proofMin) return 'Proof ' + it.proofMin + ' min';
-  return 'Bake rack ' + rack + ' of ' + t.batches + (it.temp ? ' · ' + it.temp + '°' : '');
+  return 'Bake sheet ' + rack + ' of ' + t.batches + (it.temp ? ' · ' + it.temp + '°' : '');
 }
 
 function renderTimers() {
@@ -527,29 +597,87 @@ function renderTimers() {
     const t = due[0];
     hero.className = 'done on';
     hero.innerHTML = '<div class="k">Timer done</div><div class="n">' + esc(t.label) + '</div><div class="t">' + fmtDur(t.endsAt - now()) + '</div>' +
-      '<div class="row" style="gap:8px">' + (t.kind === 'bake' && t.taskId ? '<button class="btn primary grow" onclick="ackTimer(\'' + t.id + '\',true)">Out of the oven — rack done</button>' : '<button class="btn primary grow" onclick="ackTimer(\'' + t.id + '\',true)">Done</button>') +
+      '<div class="row" style="gap:8px">' + (t.kind === 'bake' && t.taskId ? '<button class="btn primary grow" onclick="ackTimer(\'' + t.id + '\',true)">Out of the oven</button>' : '<button class="btn primary grow" onclick="ackTimer(\'' + t.id + '\',true)">Done</button>') +
       '<button class="btn" onclick="snooze(\'' + t.id + '\')">+1 min</button></div>';
   } else if (soon) {
     hero.className = 'soon on';
     hero.innerHTML = '<div class="k">Coming up</div><div class="n">' + esc(soon.label) + '</div><div class="t">' + fmtDur(soon.endsAt - now()) + '</div><div class="sm" style="opacity:.8">Get ready to open the oven</div>';
   } else { hero.className = ''; hero.innerHTML = ''; }
-  if (!list.length) { box.innerHTML = '<div class="card"><h2>Timers</h2><div class="empty"><b>Nothing running</b>Start a timer from a task, or set a custom one.</div><button class="btn block" onclick="openCustomTimer()">Custom timer</button></div>'; return; }
-  box.innerHTML = '<div class="sec-title" style="margin-top:0">Timers <button class="btn sm ghost" onclick="openCustomTimer()">+ Custom</button></div>' + list.map(t => {
+  if (!list.length) { box.innerHTML = '<div class="card"><h2>Timers</h2><div class="empty"><b>Nothing in the oven</b>Load one or several items at once — each gets its own timer.</div><div class="grid2"><button class="btn primary" onclick="openLoad()">Load oven</button><button class="btn" onclick="openCustomTimer()">Custom timer</button></div></div>'; return; }
+  box.innerHTML = '<div class="sec-title" style="margin-top:0">Timers <span class="row" style="gap:6px"><button class="btn sm primary" onclick="openLoad()">+ Load oven</button><button class="btn sm ghost" onclick="openCustomTimer()">Custom</button></span></div>' + list.map(t => {
     const left = t.endsAt - now(), pct = Math.max(0, Math.min(100, (1 - left / t.dur) * 100));
     const cls = left <= 0 ? 'done' : left <= 120000 ? 'soon' : '';
     const kindPill = { thaw:'blue', proof:'amber', bake:'green', custom:'' }[t.kind] || '';
-    return '<div class="timer ' + cls + '"><div class="row"><span class="pill ' + kindPill + '">' + esc(t.kind) + '</span><div class="grow ellip" style="font-weight:700">' + esc(t.label) + '</div>' + (t.tempNote ? '<span class="pill amber">' + esc(t.tempNote) + '</span>' : '') + '</div>' +
+    return '<div class="timer ' + cls + '" style="--c:' + esc(t.color || 'var(--bdr)') + '"><div class="row"><span class="pill ' + kindPill + '">' + esc(t.kind) + '</span><div class="grow ellip" style="font-weight:700">' + esc(t.label) + '</div>' + (t.tempNote ? '<span class="pill amber">' + esc(t.tempNote) + '</span>' : '') + '</div>' +
       '<div class="t mono">' + fmtDur(left) + '</div><div class="bar ' + (cls === 'soon' ? 'amber' : '') + '"><i style="width:' + pct + '%"></i></div>' +
       '<div class="row" style="margin-top:10px;gap:8px"><button class="btn sm" onclick="snooze(\'' + t.id + '\')">+1 min</button><span class="xs muted grow">ends ' + fmtClock(new Date(t.endsAt)).hm + (t.hint ? ' · ' + esc(t.hint) : '') + '</span><button class="btn sm ' + (left <= 0 ? 'primary' : 'ghost') + '" onclick="ackTimer(\'' + t.id + '\',' + (t.kind === 'bake' && !!t.taskId) + ')">' + (left <= 0 ? 'Done' : 'Finish') + '</button></div></div>';
   }).join('');
 }
 
 /* ---- timers ---- */
-function startTimer(o) {
+function startTimer(o, quiet) {
   const dur = Math.max(1, o.minutes) * 60000;
-  store.timers.push({ id: uid(), label: o.label, kind: o.kind || 'custom', itemId: o.itemId || null, taskId: o.taskId || null, startedAt: now(), endsAt: now() + dur, dur, tempNote: o.tempNote || '', hint: o.hint || '', fired: false });
-  save('timers'); unlockAudio(); updateWake(); render();
-  toast(o.label + ' · ' + o.minutes + ' min');
+  const it = o.itemId ? store.items[o.itemId] : null;
+  store.timers.push({ id: uid(), label: o.label, short: o.short || (it ? it.say : '') || o.label, say: o.say || (it ? it.say : '') || '', color: it ? itemColor(it) : '', sheets: o.sheets || 0,
+    kind: o.kind || 'custom', itemId: o.itemId || null, taskId: o.taskId || null, startedAt: now(), endsAt: now() + dur, dur, tempNote: o.tempNote || '', hint: o.hint || '', fired: false });
+  if (o.kind === 'bake') bumpStats(it, o.sheets || 1);
+  if (!quiet) { save('timers'); unlockAudio(); updateWake(); render(); toast(o.label + ' · ' + o.minutes + ' min'); }
+}
+/* lifetime stats — every bake timer adds its sheets (and pieces when the
+   item has a per-sheet count) */
+function bumpStats(it, sheets) {
+  const s = store.stats; s.loads = (s.loads || 0) + 1; s.sheets = (s.sheets || 0) + sheets;
+  const pcs = it && Number(it.batch) > 1 ? Number(it.batch) * sheets : 0; s.pieces = (s.pieces || 0) + pcs;
+  s.days = s.days || {}; s.days[todayKey()] = true; if (!s.since) s.since = now();
+  if (it) { s.items = s.items || {}; const r = s.items[it.id] || { name: it.name, sheets: 0, pieces: 0, loads: 0 }; r.name = it.name; r.sheets += sheets; r.pieces += pcs; r.loads += 1; s.items[it.id] = r; }
+  save('stats');
+}
+
+/* ---- load the oven: several items in at once, one timer each ---- */
+let loadSel = {};   // key → { taskId?, itemId, sheets, on }
+function loadKey(t, it) { return t ? 'task:' + t.id : 'item:' + it.id; }
+function openLoad(pre) {
+  loadSel = {};
+  (pre || []).forEach(k => { const [kind, id] = k.split(':'); if (kind === 'task') { const t = store.tasks.list.find(x => x.id === id); if (t) loadSel[k] = { taskId: t.id, itemId: t.itemId, sheets: Math.max(1, (t.batches || 1) - (t.done || 0)), on: true }; } else if (store.items[id]) loadSel[k] = { itemId: id, sheets: 1, on: true }; });
+  $('#load-search').value = '';
+  renderLoad(); openSheet('sh-load');
+}
+function loadRowHtml(k, it, t, meta) {
+  const s = loadSel[k];
+  const on = s && s.on, n = s ? s.sheets : (t ? Math.max(1, (t.batches || 1) - (t.done || 0)) : 1);
+  return '<div class="load-row ' + (on ? 'on' : '') + '"><div class="box" onclick="loadToggle(\'' + k + '\')"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div><span class="dot" style="--c:' + itemColor(it) + '"></span>' +
+    '<div class="grow" onclick="loadToggle(\'' + k + '\')"><div class="nm ellip">' + esc(it.name) + '</div><div class="mt">' + esc(meta) + '</div></div>' +
+    '<div class="stepper"><button onclick="loadStep(\'' + k + '\',-1)">−</button><span>' + n + '</span><button onclick="loadStep(\'' + k + '\',1)">+</button></div></div>';
+}
+function renderLoad() {
+  const tasks = sortedTasks().filter(t => t.itemId && !taskDone(t) && store.items[t.itemId] && store.items[t.itemId].timeLo);
+  const inTask = new Set(tasks.map(t => t.itemId));
+  $('#load-list').innerHTML = tasks.length ? '<div class="sec-title" style="margin:4px 0">Today\'s list</div>' + tasks.map(t => { const it = store.items[t.itemId]; return loadRowHtml(loadKey(t), it, t, ((t.batches || 1) - (t.done || 0)) + ' sheet' + ((t.batches - t.done) === 1 ? '' : 's') + ' left · ' + (t.partial && it.temp ? (it.temp - 10) + '° partial' : (it.temp ? it.temp + '°' : '')) + ' · ' + fmtTime(it)); }).join('') : '<div class="xs muted" style="padding:6px 0">Nothing left on today\'s list.</div>';
+  const q = ($('#load-search').value || '').toLowerCase().trim();
+  const others = enabledItems().sort(sortItems).filter(it => it.timeLo && !inTask.has(it.id) && (!q || it.name.toLowerCase().includes(q) || it.cat.toLowerCase().includes(q)));
+  $('#load-other').innerHTML = others.map(it => loadRowHtml(loadKey(null, it), it, null, (it.temp ? it.temp + '° · ' : '') + fmtTime(it))).join('') || '<div class="xs muted" style="padding:6px 0">No matches.</div>';
+  const n = Object.values(loadSel).filter(s => s.on).length;
+  $('#load-start').textContent = n ? 'Start ' + n + ' timer' + (n > 1 ? 's' : '') : 'Start timers';
+  $('#load-start').disabled = !n;
+}
+function loadToggle(k) {
+  const [kind, id] = k.split(':');
+  if (loadSel[k]) loadSel[k].on = !loadSel[k].on;
+  else if (kind === 'task') { const t = store.tasks.list.find(x => x.id === id); if (t) loadSel[k] = { taskId: t.id, itemId: t.itemId, sheets: Math.max(1, (t.batches || 1) - (t.done || 0)), on: true }; }
+  else loadSel[k] = { itemId: id, sheets: 1, on: true };
+  renderLoad();
+}
+function loadStep(k, d) { if (!loadSel[k]) loadToggle(k); const s = loadSel[k]; s.sheets = Math.max(1, s.sheets + d); s.on = true; renderLoad(); }
+function startLoad() {
+  const picks = Object.values(loadSel).filter(s => s.on); if (!picks.length) return;
+  picks.forEach(s => {
+    const it = store.items[s.itemId], t = s.taskId ? store.tasks.list.find(x => x.id === s.taskId) : null; if (!it) return;
+    const temp = it.temp ? (t && t.partial ? it.temp - 10 : it.temp) : null;
+    startTimer({ label: it.name + ' · ' + s.sheets + ' sheet' + (s.sheets > 1 ? 's' : ''), minutes: it.timeLo, kind: 'bake', itemId: it.id, taskId: t ? t.id : null, sheets: s.sheets,
+      tempNote: temp ? temp + '°' : '', hint: (it.timeHi > it.timeLo ? 'check, up to ' + it.timeHi + ' min' : '') + (it.steam ? (it.timeHi > it.timeLo ? ' · ' : '') + 'steam ' + it.steam : '') }, true);
+  });
+  save('timers'); unlockAudio(); updateWake(); closeSheets(); go('today');
+  toast(picks.length + ' timer' + (picks.length > 1 ? 's' : '') + ' started');
 }
 function snooze(id) { const t = store.timers.find(x => x.id === id); if (!t) return; t.endsAt = Math.max(t.endsAt, now()) + 60000; t.dur += 60000; t.fired = false; stopAlarm(); save('timers'); render(); }
 function ackTimer(id, advance) {
@@ -561,7 +689,7 @@ function ackTimer(id, advance) {
     if (task) {
       if (t.kind === 'thaw') task.pulled = true;
       if (t.kind === 'proof') task.proofed = true;
-      if (t.kind === 'bake' && advance) task.done = Math.min((task.done || 0) + 1, task.batches || 1);
+      if (t.kind === 'bake' && advance) task.done = Math.min((task.done || 0) + (t.sheets || 1), task.batches || 1);
       save('tasks');
     }
   }
@@ -570,22 +698,42 @@ function ackTimer(id, advance) {
 function openCustomTimer() { $('#ct-label').value = ''; $('#ct-min').value = 15; openSheet('sh-timer'); }
 function startCustomTimer() { const m = parseFloat($('#ct-min').value); if (!m) return; startTimer({ label: $('#ct-label').value.trim() || 'Timer', minutes: m, kind: 'custom' }); closeSheets(); go('today'); }
 
-/* ---- alarm: web audio beep loop + vibration + notification ---- */
+/* ---- alarm: soft chime, then the phone says the item name three times
+   ("Muffins, muffins, muffins"), repeating every few seconds until she
+   taps. Vibration + notification too. ---- */
 let actx = null, alarmOn = false, alarmTimer = null;
-function unlockAudio() { try { if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === 'suspended') actx.resume(); } catch(e) {} }
-function beep() {
-  if (!actx || !store.settings.sound) return;
+function unlockAudio() { try { if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === 'suspended') actx.resume(); if ('speechSynthesis' in window && !unlockAudio.primed) { unlockAudio.primed = true; const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); } } catch(e) {} }
+function chime() {
+  if (!actx || !store.settings.sound || store.settings.chime === false) return;
   try {
-    const o = actx.createOscillator(), g = actx.createGain();
-    o.type = 'square'; o.frequency.value = 1050; g.gain.value = 0.0001;
-    o.connect(g); g.connect(actx.destination);
-    const t = actx.currentTime;
-    for (let i = 0; i < 3; i++) { g.gain.setValueAtTime(0.25, t + i * 0.22); g.gain.setValueAtTime(0.0001, t + i * 0.22 + 0.12); }
-    o.start(t); o.stop(t + 0.8);
+    const t0 = actx.currentTime;
+    [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => {          // C E G C — a gentle rising arpeggio
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = 'sine'; o.frequency.value = f; o.connect(g); g.connect(actx.destination);
+      const t = t0 + i * 0.16;
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.18, t + 0.03); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.9);
+      o.start(t); o.stop(t + 0.95);
+    });
   } catch(e) {}
 }
-function startAlarm() { if (alarmOn) return; alarmOn = true; unlockAudio(); beep(); try { navigator.vibrate && navigator.vibrate([300,150,300,150,600]); } catch(e) {} alarmTimer = setInterval(() => { beep(); try { navigator.vibrate && navigator.vibrate([300,150,300]); } catch(e) {} }, 1500); }
-function stopAlarm() { if (!alarmOn) return; alarmOn = false; clearInterval(alarmTimer); alarmTimer = null; try { navigator.vibrate && navigator.vibrate(0); } catch(e) {} }
+function speak(words) {
+  if (!store.settings.sound || store.settings.voice === false || !('speechSynthesis' in window) || !words) return;
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(words + '. ' + words + '. ' + words + '!');
+    u.rate = 0.95; u.pitch = 1.05; u.volume = 1; u.lang = 'en-US';
+    speechSynthesis.speak(u);
+  } catch(e) {}
+}
+function dueWords() {
+  const due = store.timers.filter(t => t.endsAt <= now());
+  const names = Array.from(new Set(due.map(t => t.say || t.short || t.label).filter(Boolean)));
+  return names.slice(0, 2).join(', and ');
+}
+function alarmOnce() { chime(); setTimeout(() => speak(dueWords()), store.settings.chime === false ? 0 : 650); try { navigator.vibrate && navigator.vibrate([250, 120, 250, 120, 500]); } catch(e) {} }
+function startAlarm() { if (alarmOn) return; alarmOn = true; unlockAudio(); alarmOnce(); alarmTimer = setInterval(alarmOnce, 5000); }
+function stopAlarm() { if (!alarmOn) return; alarmOn = false; clearInterval(alarmTimer); alarmTimer = null; try { speechSynthesis.cancel(); } catch(e) {} try { navigator.vibrate && navigator.vibrate(0); } catch(e) {} }
+function previewAlarm() { unlockAudio(); chime(); setTimeout(() => speak('Muffins'), store.settings.chime === false ? 0 : 650); }
 function notify(t) {
   if (!('Notification' in window) || Notification.permission !== 'granted') return;
   try { new Notification('Timer done: ' + t.label, { body: t.kind === 'bake' ? 'Take it out of the oven' : 'Ready for the next step', tag: t.id }); } catch(e) {}
@@ -614,7 +762,7 @@ function tick() {
   if (!store.timers.some(t => t.endsAt <= now())) stopAlarm();
   if (view === 'today') renderToday();
   else if (view === 'tasks' && store.timers.length) renderTasks();
-  renderBadges();
+  renderStrip(); renderBadges();
 }
 setInterval(tick, 1000);
 
@@ -645,14 +793,14 @@ function renderCount() {
     const v = store.counts.vals[it.id], ex = !!store.counts.exp[it.id], nd = need(it);
     if (nd && nd.n > 0) { needCount++; racks += nd.racks; }
     const parTxt = it.par == null || it.par === '' ? '<a class="xs" style="color:var(--amber);font-weight:700" onclick="openEditor(\'' + it.id + '\')">set par</a>' : '<span>par ' + esc(it.par) + (it.parBy ? ' by ' + it.parBy + 'AM' : '') + '</span>';
-    const needTxt = nd == null ? '' : nd.n > 0 ? '<span class="need">bake ' + nd.n + ' · ' + nd.racks + ' rack' + (nd.racks > 1 ? 's' : '') + '</span>' : '<span class="need zero">stocked</span>';
+    const needTxt = nd == null ? '' : nd.n > 0 ? '<span class="need">bake ' + nd.n + ' · ' + nd.racks + ' sheet' + (nd.racks > 1 ? 's' : '') + '</span>' : '<span class="need zero">stocked</span>';
     html += '<div class="cnt-row ' + (ex ? 'flag' : '') + '"><div class="grow"><div class="name">' + esc(it.name) + (it.verify ? ' <span class="verify">verify</span>' : '') + '</div><div class="sub">' + parTxt + needTxt + '</div></div>' +
       '<input class="input" type="number" inputmode="numeric" placeholder="—" value="' + (v ?? '') + '" oninput="setCount(\'' + it.id + '\',this.value)">' +
       '<button class="exp ' + (ex ? 'on' : '') + '" onclick="toggleExp(\'' + it.id + '\')">EXP</button></div>';
   });
   html += '</div>';
   $('#count-list').innerHTML = html;
-  $('#build-btn').textContent = needCount ? 'Build today\'s tasks · ' + needCount + ' item' + (needCount > 1 ? 's' : '') + ', ' + racks + ' rack' + (racks !== 1 ? 's' : '') : 'Build today\'s tasks';
+  $('#build-btn').textContent = needCount ? 'Build today\'s tasks · ' + needCount + ' item' + (needCount > 1 ? 's' : '') + ', ' + racks + ' sheet' + (racks !== 1 ? 's' : '') : 'Build today\'s tasks';
 }
 function touchCounts() { if (store.counts.date !== todayKey()) { store.counts = { date: todayKey(), vals: {}, exp: {} }; } }
 function setCount(id, v) { touchCounts(); store.counts.vals[id] = v === '' ? null : Number(v); save('counts'); renderCountRow(); }
@@ -720,7 +868,7 @@ function itemTaskHtml(t) {
   const done = taskDone(t), open = openTaskId === t.id;
   const running = store.timers.filter(x => x.taskId === t.id && x.endsAt > now());
   const pct = Math.min(100, (t.done || 0) / (t.batches || 1) * 100);
-  const sub = [ (t.pieces ? t.pieces + ' pcs · ' : '') + t.batches + ' rack' + (t.batches > 1 ? 's' : ''), thawLabel(it), it.proofMin ? 'proof ' + it.proofMin + 'm' : '', it.temp ? it.temp + '°' : '', fmtTime(it) ].filter(Boolean);
+  const sub = [ (t.pieces ? t.pieces + ' pcs · ' : '') + t.batches + ' sheet' + (t.batches > 1 ? 's' : ''), thawLabel(it), it.proofMin ? 'proof ' + it.proofMin + 'm' : '', it.temp ? it.temp + '°' : '', fmtTime(it) ].filter(Boolean);
   const steps = (it.steps || []).map((s, i) => '<div class="step ' + ((t.stepsDone || []).includes(i) ? 'on' : '') + '" onclick="toggleStep(\'' + t.id + '\',' + i + ')"><div class="sq">' + ((t.stepsDone || []).includes(i) ? '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#0b1a11" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>' : '') + '</div><div>' + esc(s) + '</div></div>').join('');
   const temp = it.temp ? (t.partial ? it.temp - 10 : it.temp) : null;
   const btns = [];
@@ -728,13 +876,13 @@ function itemTaskHtml(t) {
   if (it.proofMin) btns.push('<button class="btn ' + (t.proofed || (!t.pulled && it.thawType === 'timed') ? 'ghost' : 'primary') + '" onclick="startTaskTimer(\'' + t.id + '\',\'proof\')">Proof ' + it.proofMin + 'm' + (t.proofed ? ' ✓' : '') + '</button>');
   if (it.timeLo) btns.push('<button class="btn ' + (btns.length && !((t.pulled || it.thawType !== 'timed') && (t.proofed || !it.proofMin)) ? '' : 'primary') + '" onclick="startTaskTimer(\'' + t.id + '\',\'bake\')" ' + (done ? 'disabled' : '') + '>Bake ' + fmtTime(it) + '</button>');
   return '<div class="task ' + (done ? 'done' : '') + (open ? ' open' : '') + '" id="task-' + t.id + '">' +
-    '<div class="head" onclick="toggleOpen(\'' + t.id + '\')"><div class="chk"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div><div class="grow"><div class="title ellip">' + esc(t.title) + '</div><div class="sub">' + sub.map(esc).join(' · ') + (running.length ? ' · <span style="color:var(--green)">' + running[0].kind + ' ' + fmtDur(running[0].endsAt - now()) + '</span>' : '') + '</div></div><div class="mono sm dim">' + (t.done || 0) + '/' + t.batches + '</div></div>' +
+    '<div class="head" onclick="toggleOpen(\'' + t.id + '\')" style="border-left:4px solid ' + itemColor(it) + '"><div class="chk"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div><div class="grow"><div class="title ellip">' + esc(t.title) + '</div><div class="sub">' + sub.map(esc).join(' · ') + (running.length ? ' · <span style="color:var(--green)">' + running[0].kind + ' ' + fmtDur(running[0].endsAt - now()) + '</span>' : '') + '</div></div><div class="mono sm dim">' + (t.done || 0) + '/' + t.batches + '</div></div>' +
     '<div class="body">' +
       '<div class="bar"><i style="width:' + pct + '%"></i></div>' +
-      '<div class="row" style="justify-content:space-between"><span class="xs muted">racks done</span><div class="row" style="gap:6px"><button class="btn sm" onclick="bumpRack(\'' + t.id + '\',-1)">−</button><button class="btn sm primary" onclick="bumpRack(\'' + t.id + '\',1)">+ Rack done</button></div></div>' +
+      '<div class="row" style="justify-content:space-between"><span class="xs muted">sheets done</span><div class="row" style="gap:6px"><button class="btn sm" onclick="bumpRack(\'' + t.id + '\',-1)">−</button><button class="btn sm primary" onclick="bumpRack(\'' + t.id + '\',1)">+ Sheet done</button></div></div>' +
       (it.note ? '<div class="sm" style="margin-top:10px;color:var(--amber)">' + esc(it.note) + '</div>' : '') +
       '<div class="steps">' + (steps || '<div class="xs muted">No steps yet — add them in Bake.</div>') + '</div>' +
-      (it.temp ? '<div class="partial"><span>Partial rack? <b>' + temp + '°</b>' + (t.partial ? ' (−10°)' : '') + '</span><button class="switch ' + (t.partial ? 'on' : '') + '" onclick="togglePartial(\'' + t.id + '\')"></button></div>' : '') +
+      (it.temp ? '<div class="partial"><span>Partial load? <b>' + temp + '°</b>' + (t.partial ? ' (−10°)' : '') + '</span><button class="switch ' + (t.partial ? 'on' : '') + '" onclick="togglePartial(\'' + t.id + '\')"></button></div>' : '') +
       '<div class="tbtns">' + btns.join('') + '</div>' +
       '<div class="row" style="margin-top:12px;gap:8px"><button class="btn sm ghost" onclick="openDetail(\'' + it.id + '\')">Item details</button><button class="btn sm ghost" onclick="openEditor(\'' + it.id + '\')">Edit item</button><span class="grow"></span><button class="btn sm ghost" onclick="removeTask(\'' + t.id + '\')">Remove</button></div>' +
     '</div></div>';
@@ -756,10 +904,7 @@ function startTaskTimer(id, kind) {
   const t = store.tasks.list.find(x => x.id === id), it = t && store.items[t.itemId]; if (!it) return;
   if (kind === 'thaw') startTimer({ label: it.name + ' · thaw', minutes: it.thawMin, kind, itemId: it.id, taskId: id, hint: 'tacky to the touch' });
   else if (kind === 'proof') startTimer({ label: it.name + ' · proof', minutes: it.proofMin, kind, itemId: it.id, taskId: id });
-  else {
-    const temp = it.temp ? (t.partial ? it.temp - 10 : it.temp) : null;
-    startTimer({ label: it.name + ' · rack ' + ((t.done || 0) + 1) + '/' + t.batches, minutes: it.timeLo, kind: 'bake', itemId: it.id, taskId: id, tempNote: temp ? temp + '°' : '', hint: it.timeHi && it.timeHi > it.timeLo ? 'check, up to ' + it.timeHi + ' min' + (it.steam ? ' · steam ' + it.steam : '') : (it.steam ? 'steam ' + it.steam : '') });
-  }
+  else { openLoad(['task:' + id]); return; }   // bake goes through the oven-load picker so other items can ride along
   go('today');
 }
 function openPickItem() {
@@ -796,8 +941,8 @@ function openDetail(id) {
   const sp = (l, v) => '<div><div class="l">' + l + '</div><div class="v">' + (v == null || v === '' ? '—' : esc(v)) + '</div></div>';
   $('#dt-body').innerHTML =
     '<div class="row"><span class="pill">' + esc(it.cat) + '</span>' + (it.verify ? '<span class="verify">verify against the sheet</span>' : '') + '</div>' +
-    '<div class="spec">' + sp('Comes as', thawLabel(it)) + sp('Proof', it.proofMin ? it.proofMin + ' min' : '—') + sp('Steam', it.steam ? it.steam + ' s' : '—') + sp('Temp', it.temp ? it.temp + '°' : '—') + sp('Bake', fmtTime(it) || '—') + sp('Partial rack', it.temp ? (it.temp - 10) + '°' : '—') + '</div>' +
-    '<div class="spec">' + sp('Par', it.par) + sp('By', it.parBy ? it.parBy + ' AM' : 'anytime') + sp('Per rack', it.batch) + '</div>' +
+    '<div class="spec">' + sp('Comes as', thawLabel(it)) + sp('Proof', it.proofMin ? it.proofMin + ' min' : '—') + sp('Steam', it.steam ? it.steam + ' s' : '—') + sp('Temp', it.temp ? it.temp + '°' : '—') + sp('Bake', fmtTime(it) || '—') + sp('Partial load', it.temp ? (it.temp - 10) + '°' : '—') + '</div>' +
+    '<div class="spec">' + sp('Par', it.par) + sp('By', it.parBy ? it.parBy + ' AM' : 'anytime') + sp('Per sheet', it.batch) + '</div>' +
     (it.shelfDays ? '<div class="sm muted">Shelf life ' + esc(it.shelfDays) + ' day' + (it.shelfDays == 1 ? '' : 's') + '</div>' : '') +
     (it.note ? '<div class="sm" style="color:var(--amber)">' + esc(it.note) + '</div>' : '') +
     '<div class="sec-title" style="margin:6px 0 0">Steps</div>' +
@@ -805,7 +950,7 @@ function openDetail(id) {
     '<div class="grid2"><button class="btn" onclick="openEditor(\'' + it.id + '\')">Edit</button><button class="btn primary" onclick="quickBake(\'' + it.id + '\')" ' + (it.timeLo ? '' : 'disabled') + '>Bake timer ' + fmtTime(it) + '</button></div>';
   openSheet('sh-detail');
 }
-function quickBake(id) { const it = store.items[id]; if (!it) return; startTimer({ label: it.name, minutes: it.timeLo, kind: 'bake', itemId: id, tempNote: it.temp ? it.temp + '°' : '', hint: it.timeHi > it.timeLo ? 'check, up to ' + it.timeHi + ' min' : '' }); closeSheets(); go('today'); }
+function quickBake(id) { const t = store.tasks.list.find(x => x.itemId === id && !taskDone(x)); openLoad([t ? 'task:' + t.id : 'item:' + id]); }
 
 /* =====================================================================
    SETTINGS
@@ -816,20 +961,26 @@ function renderSettings() {
   $('#notes-ts').textContent = store.notesTs ? 'saved ' + new Date(store.notesTs).toLocaleString(undefined, { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }) : '';
   $('#set-ovens').value = s.ovens; $('#set-shelves').value = s.shelves;
   $('#sw-sound').classList.toggle('on', !!s.sound); $('#sw-wake').classList.toggle('on', !!s.wake);
+  $('#sw-voice').classList.toggle('on', s.voice !== false); $('#sw-chime').classList.toggle('on', s.chime !== false);
+  const st = store.stats || {};
+  $('#st-sheets').textContent = st.sheets || 0; $('#st-loads').textContent = st.loads || 0; $('#st-pieces').textContent = st.pieces || 0; $('#st-days').textContent = Object.keys(st.days || {}).length;
+  $('#stats-since').textContent = st.since ? 'since ' + new Date(st.since).toLocaleDateString(undefined, { month:'short', day:'numeric' }) : '';
+  const top = Object.values(st.items || {}).sort((a, b) => b.sheets - a.sheets).slice(0, 6);
+  $('#st-items').innerHTML = top.map(r => '<div class="stat"><span class="ellip">' + esc(r.name) + '</span><b>' + r.sheets + ' sheet' + (r.sheets === 1 ? '' : 's') + (r.pieces ? ' · ' + r.pieces + ' pcs' : '') + '</b></div>').join('') || '<div class="xs muted">Nothing baked yet.</div>';
   $('#notif-state').textContent = !('Notification' in window) ? 'not supported here' : Notification.permission === 'granted' ? 'on' : Notification.permission === 'denied' ? 'blocked in browser settings' : 'off';
   $('#deadline-list').innerHTML = (s.deadlines || []).map(d => '<div class="row" style="padding:6px 0"><input class="input grow" value="' + esc(d.label) + '" onchange="setDeadline(\'' + d.id + '\',\'label\',this.value)"><input class="input" type="time" style="width:140px;padding-left:8px;padding-right:6px" value="' + esc(d.time) + '" onchange="setDeadline(\'' + d.id + '\',\'time\',this.value)"><button class="btn sm ghost" onclick="removeDeadline(\'' + d.id + '\')">✕</button></div>').join('') || '<div class="xs muted">No deadlines.</div>';
   const items = liveItems().sort(sortItems);
   let html = '', cat = null;
   items.forEach(it => {
     if (it.cat !== cat) { cat = it.cat; html += '<div class="sec-title" style="margin:12px 0 2px">' + esc(cat) + '</div>'; }
-    const meta = [it.par != null && it.par !== '' ? 'par ' + it.par : '<span style="color:var(--amber)">no par</span>', it.batch > 1 ? it.batch + '/rack' : '', it.temp ? it.temp + '°' : '', fmtTime(it)].filter(Boolean).join(' · ');
+    const meta = [it.par != null && it.par !== '' ? 'par ' + it.par : '<span style="color:var(--amber)">no par</span>', it.batch > 1 ? it.batch + '/sheet' : '', it.temp ? it.temp + '°' : '', fmtTime(it)].filter(Boolean).join(' · ');
     html += '<div class="list-row"><div class="grow" onclick="openEditor(\'' + it.id + '\')"><div style="font-weight:600" class="ellip">' + esc(it.name) + (it.verify ? ' <span class="verify">verify</span>' : '') + '</div><div class="xs muted">' + meta + '</div></div><button class="switch ' + (it.enabled ? 'on' : '') + '" onclick="toggleItem(\'' + it.id + '\')"></button></div>';
   });
   $('#settings-items').innerHTML = html;
   $('#sync-detail').textContent = syncDetail;
 }
 function saveSettings() { store.settings.ovens = Math.max(1, parseInt($('#set-ovens').value) || 1); store.settings.shelves = Math.max(1, parseInt($('#set-shelves').value) || 1); save('settings'); }
-function toggleSetting(k, el) { store.settings[k] = !store.settings[k]; el.classList.toggle('on', store.settings[k]); save('settings'); if (k === 'wake') updateWake(); if (k === 'sound' && store.settings.sound) { unlockAudio(); beep(); } }
+function toggleSetting(k, el) { store.settings[k] = !(store.settings[k] !== false); el.classList.toggle('on', store.settings[k]); save('settings'); if (k === 'wake') updateWake(); if ((k === 'sound' || k === 'chime') && store.settings.sound && store.settings.chime !== false) { unlockAudio(); chime(); } if (k === 'voice' && store.settings.voice) { unlockAudio(); speak('Muffins'); } }
 function setDeadline(id, k, v) { const d = (store.settings.deadlines || []).find(x => x.id === id); if (d) { d[k] = v; save('settings'); } }
 function addDeadline() { store.settings.deadlines.push({ id: uid(), label: 'Deadline', time: '10:00' }); save('settings'); renderSettings(); }
 function removeDeadline(id) { store.settings.deadlines = store.settings.deadlines.filter(x => x.id !== id); save('settings'); renderSettings(); }
@@ -839,7 +990,7 @@ function saveNotes() { store.notes = $('#notes').value; clearTimeout(notesT); no
 function resetAll() {
   if (!confirm('Reset EVERYTHING on this device and in the cloud? Items go back to the cheat sheet, pars, notes, counts and tasks are erased.')) return;
   if (!confirm('Really? This cannot be undone.')) return;
-  store = { items: {}, itemsTs: {}, counts: { date: todayKey(), vals: {}, exp: {} }, countsTs: now(), tasks: { date: todayKey(), list: [] }, tasksTs: now(), timers: [], timersTs: now(), notes: '', notesTs: now(), settings: JSON.parse(JSON.stringify(DEFAULT_SETTINGS)), settingsTs: now() };
+  store = { items: {}, itemsTs: {}, counts: { date: todayKey(), vals: {}, exp: {} }, countsTs: now(), tasks: { date: todayKey(), list: [] }, tasksTs: now(), timers: [], timersTs: now(), notes: '', notesTs: now(), stats: { loads: 0, sheets: 0, pieces: 0, days: {}, items: {}, since: 0 }, statsTs: now(), settings: JSON.parse(JSON.stringify(DEFAULT_SETTINGS)), settingsTs: now() };
   ensureSeed(); Object.keys(store.items).forEach(k => store.itemsTs[k] = now()); persist(); schedulePush(); render(); toast('Reset');
 }
 
@@ -859,7 +1010,7 @@ function openEditor(id) {
   $('#ed-par').value = it.par ?? ''; $('#ed-parby').value = it.parBy ?? ''; $('#ed-batch').value = it.batch ?? 1; $('#ed-shelf').value = it.shelfDays ?? '';
   $('#ed-thawtype').value = it.thawType || 'none'; $('#ed-thawmin').value = it.thawMin || ''; $('#ed-proof').value = it.proofMin || ''; $('#ed-steam').value = it.steam || '';
   $('#ed-temp').value = it.temp || ''; $('#ed-tlo').value = it.timeLo || ''; $('#ed-thi').value = it.timeHi || '';
-  $('#ed-note').value = it.note || ''; $('#ed-steps').value = (it.steps || []).join('\n');
+  $('#ed-note').value = it.note || ''; $('#ed-say').value = it.say || ''; $('#ed-steps').value = (it.steps || []).join('\n');
   $('#ed-verify-row').hidden = !it.verify; $('#ed-delete').hidden = !id;
   edThawUI(); openSheet('sh-edit');
 }
@@ -874,6 +1025,7 @@ function saveEditor() {
   it.temp = num($('#ed-temp').value, 0); it.timeLo = num($('#ed-tlo').value, 0); it.timeHi = num($('#ed-thi').value, it.timeLo); if (it.timeHi < it.timeLo) it.timeHi = it.timeLo;
   it.note = $('#ed-note').value.trim(); it.steps = $('#ed-steps').value.split('\n').map(s => s.trim()).filter(Boolean);
   if (!it.steps.length) it.steps = bakeryDefaultSteps(it);
+  it.say = $('#ed-say').value.trim() || bakeryDefaultSay(it);
   store.items[it.id] = it; store.itemsTs[it.id] = now(); save('items');
   // keep task titles in sync
   store.tasks.list.forEach(t => { if (t.itemId === it.id) t.title = it.name; });
@@ -897,7 +1049,7 @@ let syncDb = null, syncPushTimer = null, applyingRemote = false, syncReady = fal
 const clientId = (() => { let id = localStorage.getItem('bakery-client-id'); if (!id) { id = uid(); localStorage.setItem('bakery-client-id', id); } return id; })();
 function setSync(state, txt, detail) { const el = $('#sync'); el.className = state; el.querySelector('span').textContent = txt; syncDetail = detail || txt; if (view === 'settings') $('#sync-detail').textContent = syncDetail; }
 function syncPayload() {
-  return JSON.parse(JSON.stringify({ items: store.items, itemsTs: store.itemsTs, counts: store.counts, countsTs: store.countsTs, tasks: store.tasks, tasksTs: store.tasksTs, timers: store.timers, timersTs: store.timersTs, notes: store.notes, notesTs: store.notesTs, settings: store.settings, settingsTs: store.settingsTs, clientId, updatedAt: now() }));
+  return JSON.parse(JSON.stringify({ items: store.items, itemsTs: store.itemsTs, counts: store.counts, countsTs: store.countsTs, tasks: store.tasks, tasksTs: store.tasksTs, timers: store.timers, timersTs: store.timersTs, notes: store.notes, notesTs: store.notesTs, stats: store.stats, statsTs: store.statsTs, settings: store.settings, settingsTs: store.settingsTs, clientId, updatedAt: now() }));
 }
 function schedulePush() {
   if (!syncDb || applyingRemote || !syncReady) return;
@@ -914,12 +1066,13 @@ function mergeRemote(r) {
   let changed = false;
   const ri = r.items || {}, rts = r.itemsTs || {};
   Object.keys(ri).forEach(k => { if ((rts[k] || 0) > (store.itemsTs[k] || 0)) { store.items[k] = ri[k]; if (!store.items[k].steps) store.items[k].steps = []; store.itemsTs[k] = rts[k]; changed = true; } });
-  ['counts', 'tasks', 'timers', 'notes', 'settings'].forEach(k => {
+  ['counts', 'tasks', 'timers', 'notes', 'stats', 'settings'].forEach(k => {
     if ((r[k + 'Ts'] || 0) > (store[k + 'Ts'] || 0)) {
       store[k] = r[k] != null ? r[k] : (k === 'timers' ? [] : k === 'notes' ? '' : store[k]);
       if (k === 'tasks' && !store.tasks.list) store.tasks.list = [];
       if (k === 'counts') { store.counts.vals = store.counts.vals || {}; store.counts.exp = store.counts.exp || {}; }
       if (k === 'settings') store.settings = Object.assign({}, DEFAULT_SETTINGS, store.settings);
+      if (k === 'stats') store.stats = Object.assign({ loads: 0, sheets: 0, pieces: 0, days: {}, items: {}, since: 0 }, store.stats || {});
       store[k + 'Ts'] = r[k + 'Ts']; changed = true;
     }
   });

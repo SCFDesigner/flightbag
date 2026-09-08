@@ -17,12 +17,34 @@ const BAKERY_CAT_PRIORITY = {
   'Cookies': 5, 'Pies': 6, 'Misc': 7
 };
 
+/* one colour per category — used on timer cards, the mini timer strip and
+   task rows so she can tell at a glance which timer is which */
+const BAKERY_CAT_COLORS = {
+  'Artisan Breads': '#f5d34a', 'Bread and Rolls': '#ff9a3c', 'Breakfast': '#5b9dff',
+  'Pastries': '#c88bff', 'Cookies': '#3fd6c4', 'Pies': '#ff6b81', 'Misc': '#9aa3ad'
+};
+function bakeryCatColor(cat) {
+  if (BAKERY_CAT_COLORS[cat]) return BAKERY_CAT_COLORS[cat];
+  let h = 0; for (const ch of String(cat)) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return 'hsl(' + (h % 360) + ' 70% 65%)';
+}
+/* what the alarm voice says — short, repeated. "Muffins #1 — Banana Nut…"
+   becomes "Muffins", "Croissants Butter" becomes "Croissants" */
+function bakeryDefaultSay(it) {
+  const byCat = { 'Breakfast': 'Muffins', 'Cookies': 'Cookies', 'Pies': 'Pies', 'Artisan Breads': 'Artisan bread' };
+  if (byCat[it.cat]) return byCat[it.cat];
+  let n = String(it.name || '').replace(/\(.*?\)/g, '').split(/—|-|,/)[0].trim();
+  n = n.replace(/^LDF\s+/i, '');
+  const w = n.split(/\s+/);
+  return (w.length > 2 ? w.slice(0, 2).join(' ') : n) || 'Timer';
+}
+
 function bakeryDefaultSteps(it) {
   const s = [];
   if (it.thawType === 'none') s.push('Pull from freezer');
   else if (it.thawType === 'overnight') s.push('Pull from cooler (broken out last night)');
   else s.push('Pull from freezer, slack ' + it.thawMin + ' min (tacky to the touch)');
-  s.push('Pan on lined sheets, load the rack');
+  s.push('Pan on lined sheets, load the oven rack');
   if (it.proofMin) s.push('Proof ' + it.proofMin + ' min');
   if (it.cat === 'Bread and Rolls') s.push('Score after proofing — use a cut glove');
   const temp = it.temp ? it.temp + '°' : '';
@@ -98,13 +120,15 @@ function bakerySeedItems() {
       enabled: r[10] === undefined ? true : !!r[10],
       par: null,          // how many should be on the floor — she fills this in
       parBy: r[0] === 'Artisan Breads' || r[0] === 'Breakfast' || r[0] === 'Pastries' ? '7' : '9',
-      batch: 1,           // pieces per rack — she fills this in
+      batch: 1,           // pieces per baking sheet — she fills this in
       shelfDays: null,    // shelf life in days — she fills this in
       order: i,
       note: r[11] || '',
-      steps: []
+      steps: [],
+      say: ''
     };
     it.steps = bakeryDefaultSteps(it);
+    it.say = bakeryDefaultSay(it);
     out[it.id] = it;
   });
   return out;
