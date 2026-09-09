@@ -16,126 +16,7 @@
    Raised faces: highlight on the lamp side, shadow opposite, drop shadow
    falls away from the lamp. Wells: the reverse.
    ===================================================================== */
-.skin {
-  --lx: 0; --ly: -1; --lamp-deg: 0;
-  --grain: 0.18; --grain-size: 140; --btn-grain: 1;
-  --face: 0.18; --edge: 0.6;
-  --bev-w: 2.5; --bev-amt: 0.55; --drop: 0.55;
-  --btn-bev-w: 2; --btn-bev-amt: 0.6; --btn-face: 0.28;
-  --well-w: 4; --well-amt: 0.65;
-  --glow: 12; --textglow: 1;
-  --screen: 1; --screen-bg: #070a08; --backlight: #3fd67f; --backlight-amt: 0.14; --scan: 0.12; --scan-gap: 3; --sheen: 0.08; --vignette: 0.4; --bezel: 7;
-  --noise-url: none;
-}
-.skin body, body.skin { background: var(--bg0); }
-/* backplate: a faint lamp falloff across the whole page */
-body.skin { background-image: radial-gradient(ellipse 120% 70% at calc(50% + var(--lx) * 30%) calc(20% + var(--ly) * 20%), rgba(255,255,255, calc(var(--face) * 0.25)), transparent 70%); background-attachment: fixed; }
-
-/* ---- raised faces: cards, kpi tiles, nav, header ---- */
-.skin .card, .skin .timer, .skin .task, .skin .kpi .card, .skin .dl, .skin .chip, .skin .load-row .num {
-  position: relative; isolation: isolate; overflow: hidden;
-  background-image: linear-gradient(calc((var(--lamp-deg) + 180) * 1deg), rgba(255,255,255, calc(var(--face) * 0.35)) 0%, rgba(255,255,255,0) 45%, rgba(0,0,0, calc(var(--face) * 0.8)) 100%);
-  border-color: rgba(255,255,255, calc(var(--edge) * 0.09));
-  box-shadow:
-    inset calc(var(--lx) * var(--bev-w) * -1px) calc(var(--ly) * var(--bev-w) * -1px) calc(var(--bev-w) * 1px) rgba(255,255,255, calc(var(--bev-amt) * 0.14)),
-    inset calc(var(--lx) * var(--bev-w) * 1px) calc(var(--ly) * var(--bev-w) * 1px) calc(var(--bev-w) * 1px) rgba(0,0,0, calc(var(--bev-amt) * 0.7)),
-    calc(var(--lx) * -8px) calc(var(--ly) * -8px) 22px rgba(0,0,0, calc(var(--drop) * 0.55)),
-    calc(var(--lx) * -2px) calc(var(--ly) * -2px) 4px rgba(0,0,0, calc(var(--drop) * 0.5));
-}
-.skin .timer { border-left-width: 4px; }          /* keep the colour bar */
-.skin .card::before, .skin .timer::before, .skin .task::before, .skin .dl::before, .skin .chip::before,
-.skin header::before, .skin nav::before, .skin .btn::before, .skin .exp::before, .skin .switch::before, .skin .pill::before {
-  content: ''; position: absolute; inset: -20%; z-index: -1; pointer-events: none;
-  background-image: var(--noise-url); background-size: calc(var(--grain-size) * 1px);
-  opacity: var(--grain); mix-blend-mode: overlay;
-}
-.skin .btn::before, .skin .exp::before, .skin .switch::before, .skin .pill::before { opacity: calc(var(--grain) * var(--btn-grain)); }
-.skin header, .skin nav { position: relative; isolation: isolate; overflow: hidden; }
-.skin nav { position: fixed; }
-.skin header { border-bottom-color: rgba(0,0,0, .6); box-shadow: 0 1px 0 rgba(255,255,255, calc(var(--edge) * 0.06)), 0 6px 18px rgba(0,0,0, calc(var(--drop) * 0.5)); background-image: linear-gradient(180deg, rgba(255,255,255, calc(var(--face) * 0.25)), transparent); }
-.skin nav { border-top-color: rgba(255,255,255, calc(var(--edge) * 0.08)); box-shadow: 0 -8px 24px rgba(0,0,0, calc(var(--drop) * 0.6)), inset 0 1px 0 rgba(255,255,255, calc(var(--edge) * 0.05)); }
-.skin nav button.on { text-shadow: 0 0 calc(var(--glow) * var(--textglow) * 1px) color-mix(in srgb, var(--green) 70%, transparent); }
-.skin nav button.on svg { filter: drop-shadow(0 0 calc(var(--glow) * var(--textglow) * 0.5px) color-mix(in srgb, var(--green) 80%, transparent)); }
-
-/* ---- buttons: a machined face that sits proud of the panel ---- */
-.skin .btn, .skin .exp {
-  position: relative; isolation: isolate; overflow: hidden;
-  background-image: linear-gradient(calc((var(--lamp-deg) + 180) * 1deg), rgba(255,255,255, calc(var(--btn-face) * 0.45)) 0%, rgba(255,255,255,0) 50%, rgba(0,0,0, calc(var(--btn-face) * 0.9)) 100%);
-  border-color: rgba(0,0,0, .55);
-  box-shadow:
-    inset calc(var(--lx) * var(--btn-bev-w) * -1px) calc(var(--ly) * var(--btn-bev-w) * -1px) calc(var(--btn-bev-w) * 0.8px) rgba(255,255,255, calc(var(--btn-bev-amt) * 0.16)),
-    inset calc(var(--lx) * var(--btn-bev-w) * 1px) calc(var(--ly) * var(--btn-bev-w) * 1px) calc(var(--btn-bev-w) * 0.8px) rgba(0,0,0, calc(var(--btn-bev-amt) * 0.75)),
-    calc(var(--lx) * -3px) calc(var(--ly) * -3px) 8px rgba(0,0,0, calc(var(--drop) * 0.6)),
-    0 0 0 1px rgba(0,0,0, .35);
-  text-shadow: 0 1px 0 rgba(0,0,0,.35);
-}
-.skin .btn:active, .skin .exp:active { transform: translate(calc(var(--lx) * -1px), calc(var(--ly) * -1px)) scale(.99); box-shadow: inset calc(var(--lx) * var(--btn-bev-w) * 1px) calc(var(--ly) * var(--btn-bev-w) * 1px) calc(var(--btn-bev-w) * 1px) rgba(0,0,0, .6), 0 0 0 1px rgba(0,0,0,.35); }
-.skin .btn.primary { background-color: color-mix(in srgb, var(--green) 88%, black); color: var(--on-green); text-shadow: 0 1px 0 rgba(255,255,255,.18); box-shadow:
-    inset calc(var(--lx) * var(--btn-bev-w) * -1px) calc(var(--ly) * var(--btn-bev-w) * -1px) calc(var(--btn-bev-w) * 0.8px) rgba(255,255,255, calc(var(--btn-bev-amt) * 0.35)),
-    inset calc(var(--lx) * var(--btn-bev-w) * 1px) calc(var(--ly) * var(--btn-bev-w) * 1px) calc(var(--btn-bev-w) * 0.8px) rgba(0,0,0, calc(var(--btn-bev-amt) * 0.5)),
-    calc(var(--lx) * -3px) calc(var(--ly) * -3px) 10px rgba(0,0,0, calc(var(--drop) * 0.6)),
-    0 0 calc(var(--glow) * 1px) color-mix(in srgb, var(--green) calc(var(--textglow) * 35%), transparent); }
-.skin .btn.ghost { background-color: transparent; background-image: none; box-shadow: inset 0 0 0 1px rgba(255,255,255, calc(var(--edge) * 0.10)), inset calc(var(--lx) * -1px) calc(var(--ly) * -1px) 0 rgba(255,255,255, calc(var(--edge) * 0.06)); border-color: transparent; }
-.skin .btn.ghost::before { opacity: 0; }
-.skin .btn.danger { background-color: color-mix(in srgb, var(--red) 22%, var(--bg2)); color: var(--red); }
-/* the "on" state glows like a lit legend, Hard Kick style */
-.skin .pill.green, .skin .exp.on, .skin .need, .skin .act { text-shadow: 0 0 calc(var(--glow) * var(--textglow) * 0.8px) color-mix(in srgb, currentColor 65%, transparent); }
-.skin .pill { position: relative; isolation: isolate; overflow: hidden; box-shadow: inset 0 1px 0 rgba(255,255,255, calc(var(--edge) * 0.07)), 0 1px 2px rgba(0,0,0, .4); }
-.skin .pill.amber { text-shadow: 0 0 calc(var(--glow) * var(--textglow) * 0.8px) color-mix(in srgb, var(--amber) 65%, transparent); }
-
-/* ---- wells: inputs, bars, count cells, switch track, steps ---- */
-.skin .input, .skin .bar, .skin .cnt-grid .cell, .skin .partial, .skin .spec div, .skin .step .sq, .skin .chk, .skin .load-row .box {
-  background-color: color-mix(in srgb, var(--bg0) 55%, var(--bg1));
-  background-image: none;
-  border-color: rgba(0,0,0, .6);
-  box-shadow:
-    inset calc(var(--lx) * var(--well-w) * -1px) calc(var(--ly) * var(--well-w) * -1px) calc(var(--well-w) * 1.4px) rgba(0,0,0, calc(var(--well-amt) * 0.75)),
-    inset calc(var(--lx) * var(--well-w) * 1px) calc(var(--ly) * var(--well-w) * 1px) calc(var(--well-w) * 1px) rgba(255,255,255, calc(var(--well-amt) * 0.07)),
-    0 1px 0 rgba(255,255,255, calc(var(--edge) * 0.06));
-}
-.skin .cnt-grid .cell.in { background: transparent; box-shadow: none; border: 0; }
-.skin .input:focus { border-color: color-mix(in srgb, var(--green) 70%, transparent); box-shadow: inset calc(var(--lx) * var(--well-w) * -1px) calc(var(--ly) * var(--well-w) * -1px) calc(var(--well-w) * 1.4px) rgba(0,0,0, calc(var(--well-amt) * 0.75)), 0 0 calc(var(--glow) * 1px) color-mix(in srgb, var(--green) 30%, transparent); }
-.skin .bar { height: 8px; border-radius: 4px; }
-.skin .bar > i { background-image: linear-gradient(180deg, rgba(255,255,255,.28), rgba(255,255,255,0) 55%, rgba(0,0,0,.25)); box-shadow: 0 0 calc(var(--glow) * 1px) color-mix(in srgb, var(--green) 55%, transparent), inset 0 -1px 0 rgba(0,0,0,.3); }
-.skin .bar.amber > i { box-shadow: 0 0 calc(var(--glow) * 1px) color-mix(in srgb, var(--amber) 55%, transparent); }
-.skin .switch { position: relative; isolation: isolate; overflow: hidden; background-color: color-mix(in srgb, var(--bg0) 55%, var(--bg1)); border-color: rgba(0,0,0,.6); box-shadow: inset calc(var(--lx) * var(--well-w) * -1px) calc(var(--ly) * var(--well-w) * -1px) calc(var(--well-w) * 1.2px) rgba(0,0,0, calc(var(--well-amt) * 0.7)), 0 1px 0 rgba(255,255,255, calc(var(--edge) * 0.06)); }
-.skin .switch::after { background-image: linear-gradient(calc((var(--lamp-deg) + 180) * 1deg), rgba(255,255,255,.35), rgba(255,255,255,0) 55%, rgba(0,0,0,.35)); box-shadow: calc(var(--lx) * -1px) calc(var(--ly) * -1px) 3px rgba(0,0,0,.6), inset calc(var(--lx) * -1px) calc(var(--ly) * -1px) 0 rgba(255,255,255,.25); }
-.skin .switch.on { background-color: color-mix(in srgb, var(--green) 55%, var(--bg0)); box-shadow: inset calc(var(--lx) * var(--well-w) * -1px) calc(var(--ly) * var(--well-w) * -1px) calc(var(--well-w) * 1.2px) rgba(0,0,0, calc(var(--well-amt) * 0.5)), 0 0 calc(var(--glow) * var(--textglow) * 0.8px) color-mix(in srgb, var(--green) 45%, transparent); }
-.skin .task.done .chk, .skin .step.on .sq { box-shadow: 0 0 calc(var(--glow) * var(--textglow) * 0.7px) color-mix(in srgb, var(--green) 60%, transparent), inset 0 1px 0 rgba(255,255,255,.3); }
-
-/* ---- the screen: clock + alarm hero as a backlit LCD behind glass ---- */
-.skin .screen {
-  position: relative; isolation: isolate; overflow: hidden;
-  background-color: var(--screen-bg);
-  background-image:
-    radial-gradient(ellipse 90% 80% at 50% 35%, color-mix(in srgb, var(--backlight) calc(var(--backlight-amt) * 100%), transparent), transparent 75%),
-    radial-gradient(ellipse 120% 100% at 50% 50%, transparent 55%, rgba(0,0,0, var(--vignette)) 100%);
-  border: calc(var(--bezel) * 1px) solid #15161a;
-  border-color: #191a1f #101115 #0c0d10 #191a1f;
-  box-shadow:
-    inset 0 0 0 1px rgba(0,0,0,.9),
-    inset 0 calc(var(--bezel) * 0.6px) calc(var(--bezel) * 1.6px) rgba(0,0,0,.7),
-    inset 0 calc(var(--bezel) * -0.3px) calc(var(--bezel) * 1px) rgba(255,255,255,.03),
-    0 0 0 1px rgba(255,255,255, calc(var(--edge) * 0.06)),
-    calc(var(--lx) * -8px) calc(var(--ly) * -8px) 22px rgba(0,0,0, calc(var(--drop) * 0.6));
-  color: color-mix(in srgb, var(--backlight) 85%, white);
-}
-.skin .screen::before { display: none; }
-.skin .screen::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 2;
-  background-image:
-    repeating-linear-gradient(180deg, rgba(0,0,0, var(--scan)) 0 1px, transparent 1px calc(var(--scan-gap) * 1px)),
-    linear-gradient(115deg, rgba(255,255,255, var(--sheen)) 0%, rgba(255,255,255, calc(var(--sheen) * 0.35)) 28%, transparent 45%);
-}
-.skin .screen #clock-big, .skin .screen .t { text-shadow: 0 0 calc(var(--glow) * 1.4px) color-mix(in srgb, var(--backlight) 70%, transparent), 0 0 2px color-mix(in srgb, var(--backlight) 60%, transparent); }
-.skin .screen #clock-big small, .skin .screen #clock-date, .skin .screen .dl .l { color: color-mix(in srgb, var(--backlight) 45%, #8a9); }
-.skin .screen .dl { background: rgba(0,0,0,.35); border-color: rgba(0,0,0,.5); box-shadow: inset 0 2px 6px rgba(0,0,0,.6); }
-.skin .screen .dl .v { color: color-mix(in srgb, var(--backlight) 85%, white); }
-.skin .screen .dl.soon .v { color: var(--amber); text-shadow: 0 0 10px color-mix(in srgb, var(--amber) 70%, transparent); }
-.skin #hero.screen.done { background-color: #1a0705; color: #ffb3ae; --backlight: #ff5d57; }
-.skin #hero.screen.soon { background-color: #1a1305; color: #ffe2a3; --backlight: #f2b342; }
-.skin #hero.screen .btn { background-color: rgba(0,0,0,.45); color: inherit; }
-.skin #hero.screen .btn.primary { background-color: color-mix(in srgb, var(--backlight) 80%, black); color: #fff; }
-
+/* Skin + theme rules come from index.html (fetched at load) so the lab can never drift from the app. */
 /* ---- lab-only chrome (not part of the app) ---- */
 .lab { display: flex; min-height: 100vh; background: #0a0a0c; color: #d0d0d6; font-family: -apple-system, system-ui, sans-serif; font-size: 13px; }
 .stage { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 22px 16px 40px; gap: 12px; min-width: 0; }
@@ -177,8 +58,8 @@ body.skin { background-image: radial-gradient(ellipse 120% 70% at calc(50% + var
           <div id="hero" class="soon on screen"><div class="k">Coming up</div><div class="n">Artisan Loaves · 15 pcs</div><div class="t">1:42</div><div class="sm" style="opacity:.8">Get ready to open the oven</div></div>
           <div class="card screen" id="clock-card"><div id="clock-big">4:38<small>AM</small></div><div id="clock-date">Tuesday, September 9</div><div id="deadlines"><div class="dl"><div class="l">7 AM shelf</div><div class="v">in 2h 22m</div></div><div class="dl soon"><div class="l">9 AM shelf</div><div class="v">in 42 min</div></div></div></div>
           <div class="sec-title" style="margin-top:0">Timers <span class="row" style="gap:6px"><button class="btn sm primary">+ Load oven</button><button class="btn sm ghost">Custom</button></span></div>
-          <div class="timer soon" style="--c:#f5d34a"><div class="row"><span class="pill green">bake</span><div class="grow ellip" style="font-weight:700">Artisan Loaves · 15 pcs</div><span class="pill amber">385°</span></div><div class="t mono" style="color:var(--amber)">1:42</div><div class="bar amber"><i style="width:88%"></i></div><div class="row" style="margin-top:10px;gap:8px"><button class="btn sm">+1 min</button><span class="xs muted grow">ends 4:40 · check, up to 16 min</span><button class="btn sm ghost">Finish</button></div></div>
-          <div class="timer" style="--c:#5b9dff"><div class="row"><span class="pill blue">thaw</span><div class="grow ellip" style="font-weight:700">Muffins #1 · thaw</div></div><div class="t mono">27:10</div><div class="bar"><i style="width:55%"></i></div><div class="row" style="margin-top:10px;gap:8px"><button class="btn sm">+1 min</button><span class="xs muted grow">ends 5:05 · tacky to the touch</span><button class="btn sm ghost">Finish</button></div></div>
+          <div class="timer soon" style="--c:#f5d34a"><div class="row"><span class="pill green">bake</span><div class="grow ellip" style="font-weight:700">Artisan Loaves · 15 pcs</div><span class="pill amber">385°</span></div><div class="tbody"><div class="ringwrap"><svg viewBox="0 0 72 72"><circle class="rbg" cx="36" cy="36" r="32"/><circle class="rfg" cx="36" cy="36" r="32" style="stroke-dasharray:177 201"/></svg><div class="rt mono">1:42<small>remaining</small></div></div><div class="tmain"><div class="t mono">1:42</div><div class="bar amber"><i style="width:88%"></i></div></div><div class="tmeta"><div><b>385°</b> oven</div><div><b>14 min</b> timer</div><div><b>15</b> pcs</div></div></div><div class="row" style="margin-top:10px;gap:8px"><button class="btn sm">+1 min</button><span class="xs muted grow">ends 4:40 · check, up to 16 min</span><button class="btn sm ghost">Finish</button></div></div>
+          <div class="timer" style="--c:#5b9dff"><div class="row"><span class="pill blue">thaw</span><div class="grow ellip" style="font-weight:700">Muffins #1 · thaw</div></div><div class="tbody"><div class="ringwrap"><svg viewBox="0 0 72 72"><circle class="rbg" cx="36" cy="36" r="32"/><circle class="rfg" cx="36" cy="36" r="32" style="stroke-dasharray:110 201"/></svg><div class="rt mono">27:10<small>remaining</small></div></div><div class="tmain"><div class="t mono">27:10</div><div class="bar"><i style="width:55%"></i></div></div><div class="tmeta"><div><b>60 min</b> timer</div><div>tacky to the touch</div></div></div><div class="row" style="margin-top:10px;gap:8px"><button class="btn sm">+1 min</button><span class="xs muted grow">ends 5:05</span><button class="btn sm ghost">Finish</button></div></div>
           <div class="kpi"><div class="card" style="min-width:0"><div class="l">Oven</div><div class="v ellip" style="font-size:15px;margin-top:6px">Artisan Loaves · 15 pcs</div><div class="mono sm dim">1:42 left</div></div><div class="card"><div class="l">Baked today</div><div class="v">24 / 89</div><div class="bar" style="margin-top:8px"><i style="width:27%"></i></div></div></div>
           <div class="card next-card"><h2>Next up<small>by 7 AM</small></h2><div class="name">Bake Muffins #1</div><div class="act">Bake 20 · 365°</div><div class="sm muted" style="margin-top:4px">Thaw 60m · 365° · 28-33 min</div><div class="row" style="margin-top:12px;gap:8px"><button class="btn primary grow">Load oven</button><button class="btn grow">Open</button></div></div>
 
@@ -215,6 +96,12 @@ body.skin { background-image: radial-gradient(ellipse 120% 70% at calc(50% + var
 'use strict';
 /* ---------- controls ---------- */
 const P = {
+  theme:       { v: 'charcoal', options: ['charcoal', 'warm'], label: 'Theme base', group: 'Theme', hint: 'warm adds the serif header + warm tints for things the sliders do not cover' },
+  text:        { v: '#f2f2f0', color: true, label: 'Text', group: 'Theme' },
+  fontDisplay: { v: 'System', options: ['System', 'Serif'], label: 'Display type', group: 'Theme', hint: 'clock, timers, headings' },
+  navPill:     { v: 0, min: 0, max: 1, step: 1, label: 'Nav pill (on/off)', group: 'Theme' },
+  ring:        { v: 0, min: 0, max: 1, step: 1, label: 'Ring timers (on/off)', group: 'Theme' },
+  clockCard:   { v: 1, min: 0, max: 1, step: 1, label: 'Clock card (on/off)', group: 'Theme' },
   lampDeg:     { v: 335, min: 0, max: 359, step: 1, label: 'Lamp angle°', group: 'Light', hint: '0 = top, clockwise' },
   face:        { v: 0.18, min: 0, max: 0.6, step: 0.01, label: 'Face shading', group: 'Light' },
   edge:        { v: 0.6, min: 0, max: 1, step: 0.01, label: 'Edge catch-light', group: 'Light' },
@@ -254,13 +141,16 @@ const P = {
   vignette:    { v: 0.4, min: 0, max: 1, step: 0.01, label: 'Vignette', group: 'Screen' },
   bezel:       { v: 7, min: 0, max: 16, step: 0.5, label: 'Bezel px', group: 'Screen' },
 };
+const CHARCOAL_BASE = { theme: 'charcoal', text: '#f2f2f0', fontDisplay: 'System', navPill: 0, ring: 0, clockCard: 1 };
 const PRESETS = {
-  'Collin 9/8': { lampDeg: 0, face: 0.06, edge: 0.76, bg0: '#0c0d0f', bg1: '#151618', bg3: '#25272c', green: '#3fd67f', grain: 0.36, grainSize: 55, grainFreq: 0.3, btnGrain: 1, bevW: 1.5, bevAmt: 0.12, drop: 1, btnBevW: 0.5, btnBevAmt: 0.12, btnFace: 0.08, wellW: 7.5, wellAmt: 0.09, r: 1, r2: 11, r3: 8, glow: 5, textglow: 0, screen: 1, screenBg: '#070a08', backlight: '#3fd67f', backlightAmt: 0.06, scan: 0.07, scanGap: 2, sheen: 0.02, vignette: 0.13, bezel: 3 },
-  'Hard Kick': { lampDeg: 335, face: 0.18, edge: 0.6, bg0: '#0c0d0f', bg1: '#151618', bg3: '#25272c', green: '#3fd67f', grain: 0.18, grainSize: 140, grainFreq: 0.9, btnGrain: 1, bevW: 2.5, bevAmt: 0.55, drop: 0.55, btnBevW: 2, btnBevAmt: 0.6, btnFace: 0.28, wellW: 4, wellAmt: 0.65, r: 16, r2: 11, r3: 8, glow: 12, textglow: 1, screen: 1, screenBg: '#070a08', backlight: '#3fd67f', backlightAmt: 0.14, scan: 0.12, scanGap: 3, sheen: 0.08, vignette: 0.4, bezel: 7 },
-  'Subtle':    { lampDeg: 340, face: 0.10, edge: 0.4, bg0: '#0c0d0f', bg1: '#151618', bg3: '#25272c', green: '#3fd67f', grain: 0.09, grainSize: 160, grainFreq: 0.9, btnGrain: 0.5, bevW: 1.5, bevAmt: 0.4, drop: 0.35, btnBevW: 1.5, btnBevAmt: 0.45, btnFace: 0.16, wellW: 2.5, wellAmt: 0.45, r: 16, r2: 11, r3: 8, glow: 8, textglow: 1, screen: 1, screenBg: '#0a0c0b', backlight: '#3fd67f', backlightAmt: 0.08, scan: 0.05, scanGap: 3, sheen: 0.04, vignette: 0.25, bezel: 5 },
-  'Flat':      { lampDeg: 0, face: 0, edge: 0, bg0: '#0c0d0f', bg1: '#151618', bg3: '#25272c', green: '#3fd67f', grain: 0, grainSize: 140, grainFreq: 0.9, btnGrain: 0, bevW: 0, bevAmt: 0, drop: 0, btnBevW: 0, btnBevAmt: 0, btnFace: 0, wellW: 0, wellAmt: 0, r: 16, r2: 11, r3: 8, glow: 0, textglow: 0, screen: 0, screenBg: '#151618', backlight: '#3fd67f', backlightAmt: 0, scan: 0, scanGap: 3, sheen: 0, vignette: 0, bezel: 0 },
+  'Warm Bakery': { theme: 'warm', text: '#efe6d8', fontDisplay: 'Serif', navPill: 1, ring: 1, clockCard: 0, lampDeg: 0, face: 0.10, edge: 0.5, bg0: '#161513', bg1: '#1f1d1a', bg3: '#302b26', green: '#d2a06a', grain: 0.14, grainSize: 120, grainFreq: 0.6, btnGrain: 0.6, bevW: 1.5, bevAmt: 0.3, drop: 0.7, btnBevW: 1, btnBevAmt: 0.35, btnFace: 0.18, wellW: 3, wellAmt: 0.4, r: 18, r2: 12, r3: 10, glow: 0, textglow: 0, screen: 1, screenBg: '#1f1d1a', backlight: '#d2a06a', backlightAmt: 0, scan: 0, scanGap: 3, sheen: 0, vignette: 0, bezel: 0 },
+  'Collin 9/8': { ...CHARCOAL_BASE, lampDeg: 0, face: 0.06, edge: 0.76, bg0: '#0c0d0f', bg1: '#151618', bg3: '#25272c', green: '#3fd67f', grain: 0.36, grainSize: 55, grainFreq: 0.3, btnGrain: 1, bevW: 1.5, bevAmt: 0.12, drop: 1, btnBevW: 0.5, btnBevAmt: 0.12, btnFace: 0.08, wellW: 7.5, wellAmt: 0.09, r: 1, r2: 11, r3: 8, glow: 5, textglow: 0, screen: 1, screenBg: '#070a08', backlight: '#3fd67f', backlightAmt: 0.06, scan: 0.07, scanGap: 2, sheen: 0.02, vignette: 0.13, bezel: 3 },
+  'Hard Kick': { ...CHARCOAL_BASE, lampDeg: 335, face: 0.18, edge: 0.6, bg0: '#0c0d0f', bg1: '#151618', bg3: '#25272c', green: '#3fd67f', grain: 0.18, grainSize: 140, grainFreq: 0.9, btnGrain: 1, bevW: 2.5, bevAmt: 0.55, drop: 0.55, btnBevW: 2, btnBevAmt: 0.6, btnFace: 0.28, wellW: 4, wellAmt: 0.65, r: 16, r2: 11, r3: 8, glow: 12, textglow: 1, screen: 1, screenBg: '#070a08', backlight: '#3fd67f', backlightAmt: 0.14, scan: 0.12, scanGap: 3, sheen: 0.08, vignette: 0.4, bezel: 7 },
+  'Subtle':    { ...CHARCOAL_BASE, lampDeg: 340, face: 0.10, edge: 0.4, bg0: '#0c0d0f', bg1: '#151618', bg3: '#25272c', green: '#3fd67f', grain: 0.09, grainSize: 160, grainFreq: 0.9, btnGrain: 0.5, bevW: 1.5, bevAmt: 0.4, drop: 0.35, btnBevW: 1.5, btnBevAmt: 0.45, btnFace: 0.16, wellW: 2.5, wellAmt: 0.45, r: 16, r2: 11, r3: 8, glow: 8, textglow: 1, screen: 1, screenBg: '#0a0c0b', backlight: '#3fd67f', backlightAmt: 0.08, scan: 0.05, scanGap: 3, sheen: 0.04, vignette: 0.25, bezel: 5 },
+  'Flat':      { ...CHARCOAL_BASE, lampDeg: 0, face: 0, edge: 0, bg0: '#0c0d0f', bg1: '#151618', bg3: '#25272c', green: '#3fd67f', grain: 0, grainSize: 140, grainFreq: 0.9, btnGrain: 0, bevW: 0, bevAmt: 0, drop: 0, btnBevW: 0, btnBevAmt: 0, btnFace: 0, wellW: 0, wellAmt: 0, r: 16, r2: 11, r3: 8, glow: 0, textglow: 0, screen: 0, screenBg: '#151618', backlight: '#3fd67f', backlightAmt: 0, scan: 0, scanGap: 3, sheen: 0, vignette: 0, bezel: 0 },
 };
 const g = k => P[k].v;
+const SERIF = "'Iowan Old Style','Palatino','Palatino Linotype','Georgia','Times New Roman',serif";
 const $ = s => document.querySelector(s);
 
 /* the grain: an SVG turbulence tile, greyscale, mid-grey biased so overlay
@@ -275,6 +165,11 @@ function applySkin() {
   const th = g('lampDeg') * Math.PI / 180; const lx = Math.sin(th), ly = -Math.cos(th);
   s.setProperty('--lx', lx.toFixed(3)); s.setProperty('--ly', ly.toFixed(3)); s.setProperty('--lamp-deg', g('lampDeg'));
   s.setProperty('--face', g('face')); s.setProperty('--edge', g('edge'));
+  root.classList.toggle('theme-warm', g('theme') === 'warm');
+  root.classList.toggle('ring', !!g('ring')); root.classList.toggle('plainclock', !g('clockCard'));
+  s.setProperty('--text', g('text')); s.setProperty('--font-display', g('fontDisplay') === 'Serif' ? SERIF : 'inherit');
+  s.setProperty('--nav-pill', g('navPill')); s.setProperty('--ring', g('ring')); s.setProperty('--clock-card', g('clockCard'));
+  if (g('theme') !== 'warm') s.setProperty('--ring-color', 'var(--c, var(--green))'); else s.removeProperty('--ring-color');
   s.setProperty('--bg0', g('bg0')); s.setProperty('--bg1', g('bg1')); s.setProperty('--bg3', g('bg3')); s.setProperty('--green', g('green'));
   s.setProperty('--green-dim', 'color-mix(in srgb, ' + g('green') + ' 16%, transparent)');
   s.setProperty('--grain', g('grain')); s.setProperty('--grain-size', g('grainSize')); s.setProperty('--btn-grain', g('btnGrain')); s.setProperty('--noise-url', noiseUrl(g('grainFreq')));
@@ -292,8 +187,8 @@ function applySkin() {
 function values() { const o = {}; Object.keys(P).forEach(k => o[k] = P[k].v); return o; }
 function cssOut() {
   const th = g('lampDeg') * Math.PI / 180;
-  const pairs = [['--lx', Math.sin(th).toFixed(3)], ['--ly', (-Math.cos(th)).toFixed(3)], ['--lamp-deg', g('lampDeg')], ['--face', g('face')], ['--edge', g('edge')], ['--bg0', g('bg0')], ['--bg1', g('bg1')], ['--bg3', g('bg3')], ['--green', g('green')], ['--grain', g('grain')], ['--grain-size', g('grainSize')], ['--grain-freq', g('grainFreq')], ['--btn-grain', g('btnGrain')], ['--bev-w', g('bevW')], ['--bev-amt', g('bevAmt')], ['--drop', g('drop')], ['--btn-bev-w', g('btnBevW')], ['--btn-bev-amt', g('btnBevAmt')], ['--btn-face', g('btnFace')], ['--well-w', g('wellW')], ['--well-amt', g('wellAmt')], ['--r', g('r') + 'px'], ['--r2', g('r2') + 'px'], ['--r3', g('r3') + 'px'], ['--glow', g('glow')], ['--textglow', g('textglow')], ['--screen', g('screen')], ['--screen-bg', g('screenBg')], ['--backlight', g('backlight')], ['--backlight-amt', g('backlightAmt')], ['--scan', g('scan')], ['--scan-gap', g('scanGap')], ['--sheen', g('sheen')], ['--vignette', g('vignette')], ['--bezel', g('bezel')]];
-  return '/* Bakery Shift look — ' + new Date().toLocaleString() + ' */\n.skin {\n' + pairs.map(p => '  ' + p[0] + ': ' + p[1] + ';').join('\n') + '\n}';
+  const pairs = [['--lx', Math.sin(th).toFixed(3)], ['--ly', (-Math.cos(th)).toFixed(3)], ['--lamp-deg', g('lampDeg')], ['--face', g('face')], ['--edge', g('edge')], ['--bg0', g('bg0')], ['--bg1', g('bg1')], ['--bg3', g('bg3')], ['--green', g('green')], ['--grain', g('grain')], ['--grain-size', g('grainSize')], ['--grain-freq', g('grainFreq')], ['--btn-grain', g('btnGrain')], ['--bev-w', g('bevW')], ['--bev-amt', g('bevAmt')], ['--drop', g('drop')], ['--btn-bev-w', g('btnBevW')], ['--btn-bev-amt', g('btnBevAmt')], ['--btn-face', g('btnFace')], ['--well-w', g('wellW')], ['--well-amt', g('wellAmt')], ['--r', g('r') + 'px'], ['--r2', g('r2') + 'px'], ['--r3', g('r3') + 'px'], ['--glow', g('glow')], ['--textglow', g('textglow')], ['--screen', g('screen')], ['--screen-bg', g('screenBg')], ['--backlight', g('backlight')], ['--backlight-amt', g('backlightAmt')], ['--scan', g('scan')], ['--scan-gap', g('scanGap')], ['--sheen', g('sheen')], ['--vignette', g('vignette')], ['--bezel', g('bezel')], ['--text', g('text')], ['--font-display', g('fontDisplay') === 'Serif' ? SERIF : 'inherit'], ['--nav-pill', g('navPill')], ['--ring', g('ring')], ['--clock-card', g('clockCard')]];
+  return '/* Bakery Shift look — ' + new Date().toLocaleString() + ' — theme base: ' + g('theme') + ' */\n.skin {\n' + pairs.map(p => '  ' + p[0] + ': ' + p[1] + ';').join('\n') + '\n}';
 }
 function buildPanel() {
   const panel = $('#ctl'); let html = '<h2>Presets</h2><div class="presets">' + Object.keys(PRESETS).map(n => '<button onclick="usePreset(\'' + n + '\')">' + n + '</button>').join('') + '</div>';
@@ -301,7 +196,8 @@ function buildPanel() {
   Object.keys(P).forEach(k => {
     const p = P[k];
     if (p.group !== grp) { grp = p.group; html += '<h2>' + grp + '</h2>'; }
-    if (p.color) html += '<div class="r"><label>' + p.label + '</label><input type="color" id="in-' + k + '" value="' + p.v + '" oninput="setP(\'' + k + '\', this.value)"><span class="v" id="v-' + k + '">' + p.v + '</span></div>';
+    if (p.options) html += '<div class="r" title="' + (p.hint || '') + '"><label>' + p.label + '</label><select id="in-' + k + '" onchange="setP(\'' + k + '\', this.value)" style="flex:1;background:#1a1a1f;color:#e6e6ea;border:1px solid #2a2a30;border-radius:4px;padding:3px">' + p.options.map(o => '<option' + (o === p.v ? ' selected' : '') + '>' + o + '</option>').join('') + '</select><span class="v" id="v-' + k + '"></span></div>';
+    else if (p.color) html += '<div class="r"><label>' + p.label + '</label><input type="color" id="in-' + k + '" value="' + p.v + '" oninput="setP(\'' + k + '\', this.value)"><span class="v" id="v-' + k + '">' + p.v + '</span></div>';
     else html += '<div class="r" title="' + (p.hint || '') + '"><label>' + p.label + '</label><input type="range" id="in-' + k + '" min="' + p.min + '" max="' + p.max + '" step="' + p.step + '" value="' + p.v + '" oninput="setP(\'' + k + '\', parseFloat(this.value))"><span class="v" id="v-' + k + '">' + p.v + '</span></div>';
   });
   html += '<h2>Save</h2><button class="wide" onclick="saveCloud()">Save look to cloud</button><button class="wide" onclick="loadCloud()">Load saved look</button><div class="status" id="status"></div><div class="note">Saving writes only to <code>bakery/look</code> — a separate node from the app data. Collin reads it from there and bakes the look into the app.</div><button class="wide" onclick="copyCss()">Copy CSS</button><textarea id="css-out" readonly></textarea>';

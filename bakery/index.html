@@ -30,6 +30,7 @@
   --nav-h:64px;
   --font:-apple-system,'SF Pro Display',system-ui,'Segoe UI',Roboto,sans-serif;
   --mono:'SF Mono',ui-monospace,Menlo,Consolas,monospace;
+  --font-display:inherit; --ok:var(--green);
 }
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 html,body { height:100%; }
@@ -42,12 +43,12 @@ input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-app
 /* ===== shell ===== */
 #app { display:flex; flex-direction:column; height:100vh; height:100dvh; }
 header { display:flex; align-items:center; justify-content:space-between; padding:calc(env(safe-area-inset-top) + 10px) var(--pad) 10px; background:var(--bg0); border-bottom:1px solid var(--bdr); flex:0 0 auto; }
-header h1 { font-size:17px; font-weight:700; letter-spacing:-.01em; }
+header h1 { font-size:17px; font-weight:700; letter-spacing:-.01em; font-family:var(--font-display); }
 header h1 span { color:var(--text3); font-weight:500; }
 #hdr-clock { font-family:var(--mono); font-size:15px; color:var(--text2); }
 #sync { display:flex; align-items:center; gap:6px; font-size:var(--fs-xs); color:var(--text3); }
 #sync i { width:7px; height:7px; border-radius:50%; background:var(--text4); display:inline-block; }
-#sync.ok i { background:var(--green); } #sync.err i { background:var(--amber); }
+#sync.ok i { background:var(--ok); } #sync.err i { background:var(--amber); }
 main { flex:1 1 auto; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:var(--pad) var(--pad) calc(var(--nav-h) + env(safe-area-inset-bottom) + 24px); }
 .view { display:none; } .view.on { display:block; }
 
@@ -110,7 +111,7 @@ textarea.input { min-height:90px; resize:vertical; line-height:1.45; }
 
 /* ===== today ===== */
 #clock-card { text-align:center; padding:18px 14px 14px; }
-#clock-big { font-size:56px; font-weight:700; letter-spacing:-.03em; line-height:1; font-variant-numeric:tabular-nums; }
+#clock-big { font-size:56px; font-weight:700; letter-spacing:-.03em; line-height:1; font-variant-numeric:tabular-nums; font-family:var(--font-display); }
 #clock-big small { font-size:22px; color:var(--text3); font-weight:500; margin-left:4px; }
 #clock-date { color:var(--text3); font-size:var(--fs-sm); margin-top:6px; }
 #deadlines { display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; justify-content:center; }
@@ -120,7 +121,25 @@ textarea.input { min-height:90px; resize:vertical; line-height:1.45; }
 .dl.soon { border-color:var(--amber); } .dl.soon .v { color:var(--amber); }
 .dl.past { opacity:.5; }
 .timer { padding:14px; border-radius:var(--r); background:var(--bg1); border:1px solid var(--bdr); margin-bottom:var(--gap); }
-.timer .t { font-size:40px; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:-.02em; line-height:1; margin:8px 0 10px; }
+.timer .t { font-size:40px; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:-.02em; line-height:1; margin:8px 0 10px; font-family:var(--font-display); }
+/* ring timers (body.ring): the time sits inside an arc, details beside it */
+.tbody .ringwrap, .tbody .tmeta { display:none; }
+.ring .tbody { display:flex; align-items:center; gap:14px; margin:8px 0 4px; }
+.ring .tbody .tmain { display:none; }
+.ring .ringwrap { display:flex; position:relative; width:108px; height:108px; flex:0 0 auto; align-items:center; justify-content:center; }
+.ring .ringwrap svg { position:absolute; inset:0; width:100%; height:100%; }
+.ring .rbg { fill:none; stroke:rgba(255,255,255,.08); stroke-width:5; }
+.ring .rfg { fill:none; stroke:var(--ring-color, var(--c, var(--green))); stroke-width:5; stroke-linecap:round; transform:rotate(-90deg); transform-origin:50% 50%; transition:stroke-dasharray .6s linear; }
+.ring .rt { font-size:24px; font-weight:700; font-variant-numeric:tabular-nums; font-family:var(--font-display); letter-spacing:-.01em; line-height:1; text-align:center; }
+.ring .rt small { display:block; font-size:10px; font-weight:600; color:var(--text3); letter-spacing:.04em; margin-top:4px; font-family:var(--font); }
+.ring .tmeta { display:flex; flex-direction:column; gap:8px; font-size:var(--fs-sm); color:var(--text2); border-left:1px solid var(--bdr); padding-left:14px; min-width:0; }
+.ring .tmeta b { color:var(--text); font-weight:600; }
+.ring .timer.soon .rfg, .ring .timer.soon .rt { stroke:var(--amber); color:var(--amber); } .ring .timer.done .rfg, .ring .timer.done .rt { stroke:var(--red); color:var(--red); }
+/* plain clock (body.plainclock): the time floats on the backplate, no card */
+.plainclock #clock-card, .plainclock #clock-card.screen { background:transparent; border-color:transparent; box-shadow:none; color:var(--text); }
+.plainclock #clock-card::before, .plainclock #clock-card::after { display:none; }
+.plainclock .screen #clock-big { text-shadow:none; } .plainclock .screen #clock-big small, .plainclock .screen #clock-date { color:var(--text3); }
+.plainclock .screen .dl .l { color:var(--text3); } .plainclock .screen .dl .v { color:var(--text); }
 .timer.soon { border-color:var(--amber); box-shadow:0 0 0 1px var(--amber) inset; animation:pulse 1s infinite; }
 .timer.soon .t { color:var(--amber); }
 .timer.done { border-color:var(--red); background:var(--red-dim); }
@@ -131,11 +150,11 @@ textarea.input { min-height:90px; resize:vertical; line-height:1.45; }
 #hero.soon { background:var(--amber); color:#1a1305; }
 #hero.done { background:var(--red); color:#fff; }
 #hero .k { font-size:var(--fs-sm); font-weight:800; text-transform:uppercase; letter-spacing:.1em; opacity:.85; }
-#hero .n { font-size:26px; font-weight:800; margin:4px 0; letter-spacing:-.01em; }
-#hero .t { font-size:64px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:-.03em; line-height:1; margin:8px 0 14px; }
+#hero .n { font-size:26px; font-weight:800; margin:4px 0; letter-spacing:-.01em; font-family:var(--font-display); }
+#hero .t { font-size:64px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:-.03em; line-height:1; margin:8px 0 14px; font-family:var(--font-display); }
 #hero .btn { background:rgba(0,0,0,.25); color:inherit; border-color:transparent; font-size:var(--fs); min-height:46px; }
 #hero.done .btn.primary { background:#fff; color:var(--red); }
-.next-card .name { font-size:18px; font-weight:700; }
+.next-card .name { font-size:18px; font-weight:700; font-family:var(--font-display); }
 .next-card .act { color:var(--green); font-weight:600; margin-top:2px; }
 
 /* ===== count ===== */
@@ -249,10 +268,32 @@ textarea.input { min-height:90px; resize:vertical; line-height:1.45; }
   --r: 1px; --r2: 11px; --r3: 8px;
   --glow: 5; --textglow: 0;
   --screen-bg: #070a08; --backlight: #3fd67f; --backlight-amt: 0.06; --scan: 0.07; --scan-gap: 2; --sheen: 0.02; --vignette: 0.13; --bezel: 3;
+  --nav-pill: 0; --ring: 0; --clock-card: 1;
   --noise-url: none;
 }
+/* WARM BAKERY theme — copper on warm black, serif display type, ring timers,
+   pill nav, clock on the backplate. Picked in Settings → Look. */
+.theme-warm {
+  --bg0:#161513; --bg1:#1f1d1a; --bg2:#26231f; --bg3:#302b26; --bdr:#332f29; --bdr2:#433c34;
+  --text:#efe6d8; --text2:#b9ad9c; --text3:#877c6d; --text4:#5b5348;
+  --green:#d2a06a; --green-dim:rgba(210,160,106,.16); --on-green:#1d1509; --ok:#3fd67f;
+  --font-display:'Iowan Old Style','Palatino','Palatino Linotype','Georgia','Times New Roman',serif;
+  --grain:0.14; --grain-size:120; --grain-freq:0.6; --btn-grain:0.6;
+  --face:0.10; --edge:0.5; --bev-w:1.5; --bev-amt:0.3; --drop:0.7;
+  --btn-bev-w:1; --btn-bev-amt:0.35; --btn-face:0.18; --well-w:3; --well-amt:0.4;
+  --r:18px; --r2:12px; --r3:10px; --glow:0; --textglow:0;
+  --nav-pill:1; --ring:1; --clock-card:0; --ring-color:var(--green);
+  --screen-bg:#1f1d1a; --backlight:#d2a06a; --backlight-amt:0; --scan:0; --scan-gap:3; --sheen:0; --vignette:0; --bezel:0;
+}
+.theme-warm header h1 { font-weight:500; letter-spacing:.14em; text-transform:uppercase; font-size:15px; }
+.theme-warm header h1 span { color:var(--text3); }
+.theme-warm #clock-big { font-weight:500; letter-spacing:0; }
+.theme-warm #clock-big small { font-weight:500; font-family:var(--font-display); letter-spacing:.04em; }
+.theme-warm .sec-title, .theme-warm .card h2, .theme-warm .kpi .l, .theme-warm .cnt-grid .l { letter-spacing:.12em; }
+.theme-warm .timer .pill.green { background:var(--green-dim); color:var(--green); }
+.theme-warm #hero.screen.soon { background-color:#2a1e0e; } .theme-warm #hero.screen.done { background-color:#2a1210; }
 /* backplate: a faint lamp falloff across the whole page */
-body.skin { background-image: radial-gradient(ellipse 120% 70% at calc(50% + var(--lx) * 30%) calc(20% + var(--ly) * 20%), rgba(255,255,255, calc(var(--face) * 0.25)), transparent 70%); background-attachment: fixed; }
+body.skin, .phone.skin { background-image: radial-gradient(ellipse 120% 70% at calc(50% + var(--lx) * 30%) calc(20% + var(--ly) * 20%), rgba(255,255,255, calc(var(--face) * 0.25)), transparent 70%); background-attachment: fixed; }
 
 /* ---- raised faces: cards, kpi tiles, nav, header ---- */
 .skin .card, .skin .timer, .skin .task, .skin .kpi .card, .skin .dl, .skin .chip {
@@ -277,7 +318,7 @@ body.skin { background-image: radial-gradient(ellipse 120% 70% at calc(50% + var
 .skin nav { position: fixed; }
 .skin header { border-bottom-color: rgba(0,0,0, .6); box-shadow: 0 1px 0 rgba(255,255,255, calc(var(--edge) * 0.06)), 0 6px 18px rgba(0,0,0, calc(var(--drop) * 0.5)); background-image: linear-gradient(180deg, rgba(255,255,255, calc(var(--face) * 0.25)), transparent); }
 .skin nav { border-top-color: rgba(255,255,255, calc(var(--edge) * 0.08)); box-shadow: 0 -8px 24px rgba(0,0,0, calc(var(--drop) * 0.6)), inset 0 1px 0 rgba(255,255,255, calc(var(--edge) * 0.05)); }
-.skin nav button.on { text-shadow: 0 0 calc(var(--glow) * var(--textglow) * 1px) color-mix(in srgb, var(--green) 70%, transparent); }
+.skin nav button.on { background:color-mix(in srgb, var(--green) calc(var(--nav-pill) * 14%), transparent); border-radius:14px; margin:6px 4px; text-shadow: 0 0 calc(var(--glow) * var(--textglow) * 1px) color-mix(in srgb, var(--green) 70%, transparent); }
 .skin nav button.on svg { filter: drop-shadow(0 0 calc(var(--glow) * var(--textglow) * 0.5px) color-mix(in srgb, var(--green) 80%, transparent)); }
 
 /* ---- buttons: a machined face that sits proud of the panel ---- */
@@ -483,7 +524,8 @@ body.skin { background-image: radial-gradient(ellipse 120% 70% at calc(50% + var
       </div>
       <div class="card">
         <h2>Look</h2>
-        <div class="list-row"><div class="grow">Analogue panel look <div class="xs muted">grain, bevels, backlit clock</div></div><button class="switch" id="sw-skin" onclick="toggleSetting('skin',this)"></button></div>
+        <div class="list-row"><div class="grow">Theme</div><div class="row" style="gap:6px"><button class="btn sm" id="th-charcoal" onclick="setTheme('charcoal')">Charcoal</button><button class="btn sm" id="th-warm" onclick="setTheme('warm')">Warm Bakery</button></div></div>
+        <div class="list-row"><div class="grow">Analogue panel look <div class="xs muted">grain, bevels, wells</div></div><button class="switch" id="sw-skin" onclick="toggleSetting('skin',this)"></button></div>
       </div>
       <div class="card">
         <h2>Data</h2>
@@ -613,7 +655,7 @@ const todayKey = () => { const d = new Date(); return d.getFullYear() + '-' + St
 const uid = () => Math.random().toString(36).slice(2, 9);
 
 const DEFAULT_SETTINGS = {
-  ovens: 1, shelves: 12, sound: true, wake: true, voice: true, chime: true, skin: true,
+  ovens: 1, shelves: 12, sound: true, wake: true, voice: true, chime: true, skin: true, theme: 'charcoal',
   deadlines: [ { id:'d7', label:'7 AM shelf', time:'07:00' }, { id:'d9', label:'9 AM shelf', time:'09:00' } ]
 };
 
@@ -791,7 +833,9 @@ function renderTimers() {
     const cls = left <= 0 ? 'done' : left <= 120000 ? 'soon' : '';
     const kindPill = { thaw:'blue', proof:'amber', bake:'green', custom:'' }[t.kind] || '';
     return '<div class="timer ' + cls + '" style="--c:' + esc(t.color || 'var(--bdr)') + '"><div class="row"><span class="pill ' + kindPill + '">' + esc(t.kind) + '</span><div class="grow ellip" style="font-weight:700">' + esc(t.label) + '</div>' + (t.tempNote ? '<span class="pill amber">' + esc(t.tempNote) + '</span>' : '') + '</div>' +
-      '<div class="t mono">' + fmtDur(left) + '</div><div class="bar ' + (cls === 'soon' ? 'amber' : '') + '"><i style="width:' + pct + '%"></i></div>' +
+      '<div class="tbody"><div class="ringwrap"><svg viewBox="0 0 72 72"><circle class="rbg" cx="36" cy="36" r="32"/><circle class="rfg" cx="36" cy="36" r="32" style="stroke-dasharray:' + (pct / 100 * 201).toFixed(1) + ' 201"/></svg><div class="rt mono">' + fmtDur(left) + '<small>' + (left <= 0 ? 'done' : 'remaining') + '</small></div></div>' +
+        '<div class="tmain"><div class="t mono">' + fmtDur(left) + '</div><div class="bar ' + (cls === 'soon' ? 'amber' : '') + '"><i style="width:' + pct + '%"></i></div></div>' +
+        '<div class="tmeta">' + (t.tempNote ? '<div><b>' + esc(t.tempNote) + '</b> oven</div>' : '') + '<div><b>' + Math.round(t.dur / 60000) + ' min</b> timer</div>' + (t.pieces ? '<div><b>' + t.pieces + '</b> pcs</div>' : '') + '</div></div>' +
       '<div class="row" style="margin-top:10px;gap:8px"><button class="btn sm" onclick="snooze(\'' + t.id + '\')">+1 min</button><span class="xs muted grow">ends ' + fmtClock(new Date(t.endsAt)).hm + (t.hint ? ' · ' + esc(t.hint) : '') + '</span><button class="btn sm ' + (left <= 0 ? 'primary' : 'ghost') + '" onclick="ackTimer(\'' + t.id + '\',' + (t.kind === 'bake' && !!t.taskId) + ')">' + (left <= 0 ? 'Done' : 'Finish') + '</button></div></div>';
   }).join('');
 }
@@ -1256,6 +1300,7 @@ function renderSettings() {
   $('#set-ovens').value = s.ovens; $('#set-shelves').value = s.shelves;
   $('#sw-sound').classList.toggle('on', !!s.sound); $('#sw-wake').classList.toggle('on', !!s.wake);
   $('#sw-voice').classList.toggle('on', s.voice !== false); $('#sw-chime').classList.toggle('on', s.chime !== false); $('#sw-skin').classList.toggle('on', s.skin !== false);
+  $('#th-charcoal').classList.toggle('primary', (s.theme || 'charcoal') === 'charcoal'); $('#th-warm').classList.toggle('primary', s.theme === 'warm');
   const st = store.stats || {};
   $('#st-kinds').textContent = Object.keys(st.items || {}).length; $('#st-loads').textContent = st.loads || 0; $('#st-pieces').textContent = st.pieces || 0; $('#st-days').textContent = Object.keys(st.days || {}).length;
   $('#stats-since').textContent = st.since ? 'since ' + new Date(st.since).toLocaleDateString(undefined, { month:'short', day:'numeric' }) : '';
@@ -1281,11 +1326,17 @@ function noiseUrl(freq) {
   return 'url("data:image/svg+xml;utf8,' + encodeURIComponent(svg) + '")';
 }
 function applySkin() {
-  const on = store.settings.skin !== false;
+  const on = store.settings.skin !== false, warm = store.settings.theme === 'warm';
   document.body.classList.toggle('skin', on);
-  if (on) { const f = parseFloat(getComputedStyle(document.body).getPropertyValue('--grain-freq')) || 0.3; document.body.style.setProperty('--noise-url', noiseUrl(f)); }
-  const meta = document.querySelector('meta[name=theme-color]'); if (meta) meta.content = on ? '#0c0d0f' : '#0c0d0f';
+  document.body.classList.toggle('theme-warm', warm);
+  const cs = getComputedStyle(document.body);
+  if (on) { const f = parseFloat(cs.getPropertyValue('--grain-freq')) || 0.3; document.body.style.setProperty('--noise-url', noiseUrl(f)); }
+  // structural variants the theme asks for
+  document.body.classList.toggle('ring', parseFloat(cs.getPropertyValue('--ring')) > 0);
+  document.body.classList.toggle('plainclock', parseFloat(cs.getPropertyValue('--clock-card')) === 0);
+  const meta = document.querySelector('meta[name=theme-color]'); if (meta) meta.content = cs.getPropertyValue('--bg0').trim() || '#0c0d0f';
 }
+function setTheme(n) { store.settings.theme = n; save('settings'); applySkin(); renderSettings(); toast(n === 'warm' ? 'Warm Bakery' : 'Charcoal'); }
 function toggleSetting(k, el) { store.settings[k] = !(store.settings[k] !== false); el.classList.toggle('on', store.settings[k]); save('settings'); if (k === 'wake') updateWake(); if (k === 'skin') applySkin(); if ((k === 'sound' || k === 'chime') && store.settings.sound && store.settings.chime !== false) { unlockAudio(); chime(); } if (k === 'voice' && store.settings.voice) { unlockAudio(); speak('Muffins'); } }
 function setDeadline(id, k, v) { const d = (store.settings.deadlines || []).find(x => x.id === id); if (d) { d[k] = v; save('settings'); } }
 function addDeadline() { store.settings.deadlines.push({ id: uid(), label: 'Deadline', time: '10:00' }); save('settings'); renderSettings(); }
