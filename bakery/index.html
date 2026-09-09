@@ -227,9 +227,136 @@ textarea.input { min-height:90px; resize:vertical; line-height:1.45; }
 .stat b { font-variant-numeric:tabular-nums; }
 #toast { position:fixed; left:50%; bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 72px); transform:translateX(-50%); background:var(--bg3); color:var(--text); border:1px solid var(--bdr2); padding:10px 16px; border-radius:999px; font-size:var(--fs-sm); font-weight:600; z-index:60; opacity:0; transition:opacity .2s; pointer-events:none; white-space:nowrap; max-width:calc(100vw - 32px); overflow:hidden; text-overflow:ellipsis; }
 #toast.on { opacity:1; }
+
+/* =====================================================================
+   ANALOGUE SKIN — grain, one lamp, bevels, wells, backlit screen.
+   Designed in look.html (same folder); body.skin turns it on. The
+   variable block is the saved look; the rules below read only variables.
+   ===================================================================== */
+.skin {
+  /* Collin's pick, 2026-09-08 19:51 — tune in look.html, paste here */
+  --lx: 0; --ly: -1; --lamp-deg: 0;
+  --face: 0.06; --edge: 0.76;
+  --grain: 0.36; --grain-size: 55; --grain-freq: 0.3; --btn-grain: 1;
+  --bev-w: 1.5; --bev-amt: 0.12; --drop: 1;
+  --btn-bev-w: 0.5; --btn-bev-amt: 0.12; --btn-face: 0.08;
+  --well-w: 7.5; --well-amt: 0.09;
+  --r: 1px; --r2: 11px; --r3: 8px;
+  --glow: 5; --textglow: 0;
+  --screen-bg: #070a08; --backlight: #3fd67f; --backlight-amt: 0.06; --scan: 0.07; --scan-gap: 2; --sheen: 0.02; --vignette: 0.13; --bezel: 3;
+  --noise-url: none;
+}
+/* backplate: a faint lamp falloff across the whole page */
+body.skin { background-image: radial-gradient(ellipse 120% 70% at calc(50% + var(--lx) * 30%) calc(20% + var(--ly) * 20%), rgba(255,255,255, calc(var(--face) * 0.25)), transparent 70%); background-attachment: fixed; }
+
+/* ---- raised faces: cards, kpi tiles, nav, header ---- */
+.skin .card, .skin .timer, .skin .task, .skin .kpi .card, .skin .dl, .skin .chip {
+  position: relative; isolation: isolate; overflow: hidden;
+  background-image: linear-gradient(calc((var(--lamp-deg) + 180) * 1deg), rgba(255,255,255, calc(var(--face) * 0.35)) 0%, rgba(255,255,255,0) 45%, rgba(0,0,0, calc(var(--face) * 0.8)) 100%);
+  border-color: rgba(255,255,255, calc(var(--edge) * 0.09));
+  box-shadow:
+    inset calc(var(--lx) * var(--bev-w) * -1px) calc(var(--ly) * var(--bev-w) * -1px) calc(var(--bev-w) * 1px) rgba(255,255,255, calc(var(--bev-amt) * 0.14)),
+    inset calc(var(--lx) * var(--bev-w) * 1px) calc(var(--ly) * var(--bev-w) * 1px) calc(var(--bev-w) * 1px) rgba(0,0,0, calc(var(--bev-amt) * 0.7)),
+    calc(var(--lx) * -8px) calc(var(--ly) * -8px) 22px rgba(0,0,0, calc(var(--drop) * 0.55)),
+    calc(var(--lx) * -2px) calc(var(--ly) * -2px) 4px rgba(0,0,0, calc(var(--drop) * 0.5));
+}
+.skin .timer { border-left-width: 4px; }          /* keep the colour bar */
+.skin .card::before, .skin .timer::before, .skin .task::before, .skin .dl::before, .skin .chip::before,
+.skin header::before, .skin nav::before, .skin .btn::before, .skin .exp::before, .skin .switch::before, .skin .pill::before {
+  content: ''; position: absolute; inset: -20%; z-index: -1; pointer-events: none;
+  background-image: var(--noise-url); background-size: calc(var(--grain-size) * 1px);
+  opacity: var(--grain); mix-blend-mode: overlay;
+}
+.skin .btn::before, .skin .exp::before, .skin .switch::before, .skin .pill::before { opacity: calc(var(--grain) * var(--btn-grain)); }
+.skin header, .skin nav { position: relative; isolation: isolate; overflow: hidden; }
+.skin nav { position: fixed; }
+.skin header { border-bottom-color: rgba(0,0,0, .6); box-shadow: 0 1px 0 rgba(255,255,255, calc(var(--edge) * 0.06)), 0 6px 18px rgba(0,0,0, calc(var(--drop) * 0.5)); background-image: linear-gradient(180deg, rgba(255,255,255, calc(var(--face) * 0.25)), transparent); }
+.skin nav { border-top-color: rgba(255,255,255, calc(var(--edge) * 0.08)); box-shadow: 0 -8px 24px rgba(0,0,0, calc(var(--drop) * 0.6)), inset 0 1px 0 rgba(255,255,255, calc(var(--edge) * 0.05)); }
+.skin nav button.on { text-shadow: 0 0 calc(var(--glow) * var(--textglow) * 1px) color-mix(in srgb, var(--green) 70%, transparent); }
+.skin nav button.on svg { filter: drop-shadow(0 0 calc(var(--glow) * var(--textglow) * 0.5px) color-mix(in srgb, var(--green) 80%, transparent)); }
+
+/* ---- buttons: a machined face that sits proud of the panel ---- */
+.skin .btn, .skin .exp {
+  position: relative; isolation: isolate; overflow: hidden;
+  background-image: linear-gradient(calc((var(--lamp-deg) + 180) * 1deg), rgba(255,255,255, calc(var(--btn-face) * 0.45)) 0%, rgba(255,255,255,0) 50%, rgba(0,0,0, calc(var(--btn-face) * 0.9)) 100%);
+  border-color: rgba(0,0,0, .55);
+  box-shadow:
+    inset calc(var(--lx) * var(--btn-bev-w) * -1px) calc(var(--ly) * var(--btn-bev-w) * -1px) calc(var(--btn-bev-w) * 0.8px) rgba(255,255,255, calc(var(--btn-bev-amt) * 0.16)),
+    inset calc(var(--lx) * var(--btn-bev-w) * 1px) calc(var(--ly) * var(--btn-bev-w) * 1px) calc(var(--btn-bev-w) * 0.8px) rgba(0,0,0, calc(var(--btn-bev-amt) * 0.75)),
+    calc(var(--lx) * -3px) calc(var(--ly) * -3px) 8px rgba(0,0,0, calc(var(--drop) * 0.6)),
+    0 0 0 1px rgba(0,0,0, .35);
+  text-shadow: 0 1px 0 rgba(0,0,0,.35);
+}
+.skin .btn:active, .skin .exp:active { transform: translate(calc(var(--lx) * -1px), calc(var(--ly) * -1px)) scale(.99); box-shadow: inset calc(var(--lx) * var(--btn-bev-w) * 1px) calc(var(--ly) * var(--btn-bev-w) * 1px) calc(var(--btn-bev-w) * 1px) rgba(0,0,0, .6), 0 0 0 1px rgba(0,0,0,.35); }
+.skin .btn.primary { background-color: color-mix(in srgb, var(--green) 88%, black); color: var(--on-green); text-shadow: 0 1px 0 rgba(255,255,255,.18); box-shadow:
+    inset calc(var(--lx) * var(--btn-bev-w) * -1px) calc(var(--ly) * var(--btn-bev-w) * -1px) calc(var(--btn-bev-w) * 0.8px) rgba(255,255,255, calc(var(--btn-bev-amt) * 0.35)),
+    inset calc(var(--lx) * var(--btn-bev-w) * 1px) calc(var(--ly) * var(--btn-bev-w) * 1px) calc(var(--btn-bev-w) * 0.8px) rgba(0,0,0, calc(var(--btn-bev-amt) * 0.5)),
+    calc(var(--lx) * -3px) calc(var(--ly) * -3px) 10px rgba(0,0,0, calc(var(--drop) * 0.6)),
+    0 0 calc(var(--glow) * 1px) color-mix(in srgb, var(--green) calc(var(--textglow) * 35%), transparent); }
+.skin .btn.ghost { background-color: transparent; background-image: none; box-shadow: inset 0 0 0 1px rgba(255,255,255, calc(var(--edge) * 0.10)), inset calc(var(--lx) * -1px) calc(var(--ly) * -1px) 0 rgba(255,255,255, calc(var(--edge) * 0.06)); border-color: transparent; }
+.skin .btn.ghost::before { opacity: 0; }
+.skin .btn.danger { background-color: color-mix(in srgb, var(--red) 22%, var(--bg2)); color: var(--red); }
+/* the "on" state glows like a lit legend, Hard Kick style */
+.skin .pill.green, .skin .exp.on, .skin .need, .skin .act { text-shadow: 0 0 calc(var(--glow) * var(--textglow) * 0.8px) color-mix(in srgb, currentColor 65%, transparent); }
+.skin .pill { position: relative; isolation: isolate; overflow: hidden; box-shadow: inset 0 1px 0 rgba(255,255,255, calc(var(--edge) * 0.07)), 0 1px 2px rgba(0,0,0, .4); }
+.skin .pill.amber { text-shadow: 0 0 calc(var(--glow) * var(--textglow) * 0.8px) color-mix(in srgb, var(--amber) 65%, transparent); }
+
+/* ---- wells: inputs, bars, count cells, switch track, steps ---- */
+.skin .input, .skin .bar, .skin .cnt-grid .cell, .skin .partial, .skin .spec div, .skin .step .sq, .skin .chk, .skin .load-row .box {
+  background-color: color-mix(in srgb, var(--bg0) 55%, var(--bg1));
+  background-image: none;
+  border-color: rgba(0,0,0, .6);
+  box-shadow:
+    inset calc(var(--lx) * var(--well-w) * -1px) calc(var(--ly) * var(--well-w) * -1px) calc(var(--well-w) * 1.4px) rgba(0,0,0, calc(var(--well-amt) * 0.75)),
+    inset calc(var(--lx) * var(--well-w) * 1px) calc(var(--ly) * var(--well-w) * 1px) calc(var(--well-w) * 1px) rgba(255,255,255, calc(var(--well-amt) * 0.07)),
+    0 1px 0 rgba(255,255,255, calc(var(--edge) * 0.06));
+}
+.skin .cnt-grid .cell.in { background: transparent; box-shadow: none; border: 0; }
+.skin .input:focus { border-color: color-mix(in srgb, var(--green) 70%, transparent); box-shadow: inset calc(var(--lx) * var(--well-w) * -1px) calc(var(--ly) * var(--well-w) * -1px) calc(var(--well-w) * 1.4px) rgba(0,0,0, calc(var(--well-amt) * 0.75)), 0 0 calc(var(--glow) * 1px) color-mix(in srgb, var(--green) 30%, transparent); }
+.skin .bar { height: 8px; border-radius: 4px; }
+.skin .bar > i { background-image: linear-gradient(180deg, rgba(255,255,255,.28), rgba(255,255,255,0) 55%, rgba(0,0,0,.25)); box-shadow: 0 0 calc(var(--glow) * 1px) color-mix(in srgb, var(--green) 55%, transparent), inset 0 -1px 0 rgba(0,0,0,.3); }
+.skin .bar.amber > i { box-shadow: 0 0 calc(var(--glow) * 1px) color-mix(in srgb, var(--amber) 55%, transparent); }
+.skin .switch { position: relative; isolation: isolate; overflow: hidden; background-color: color-mix(in srgb, var(--bg0) 55%, var(--bg1)); border-color: rgba(0,0,0,.6); box-shadow: inset calc(var(--lx) * var(--well-w) * -1px) calc(var(--ly) * var(--well-w) * -1px) calc(var(--well-w) * 1.2px) rgba(0,0,0, calc(var(--well-amt) * 0.7)), 0 1px 0 rgba(255,255,255, calc(var(--edge) * 0.06)); }
+.skin .switch::after { background-image: linear-gradient(calc((var(--lamp-deg) + 180) * 1deg), rgba(255,255,255,.35), rgba(255,255,255,0) 55%, rgba(0,0,0,.35)); box-shadow: calc(var(--lx) * -1px) calc(var(--ly) * -1px) 3px rgba(0,0,0,.6), inset calc(var(--lx) * -1px) calc(var(--ly) * -1px) 0 rgba(255,255,255,.25); }
+.skin .switch.on { background-color: color-mix(in srgb, var(--green) 55%, var(--bg0)); box-shadow: inset calc(var(--lx) * var(--well-w) * -1px) calc(var(--ly) * var(--well-w) * -1px) calc(var(--well-w) * 1.2px) rgba(0,0,0, calc(var(--well-amt) * 0.5)), 0 0 calc(var(--glow) * var(--textglow) * 0.8px) color-mix(in srgb, var(--green) 45%, transparent); }
+.skin .task.done .chk, .skin .step.on .sq { box-shadow: 0 0 calc(var(--glow) * var(--textglow) * 0.7px) color-mix(in srgb, var(--green) 60%, transparent), inset 0 1px 0 rgba(255,255,255,.3); }
+
+/* ---- the screen: clock + alarm hero as a backlit LCD behind glass ---- */
+.skin .screen {
+  position: relative; isolation: isolate; overflow: hidden;
+  background-color: var(--screen-bg);
+  background-image:
+    radial-gradient(ellipse 90% 80% at 50% 35%, color-mix(in srgb, var(--backlight) calc(var(--backlight-amt) * 100%), transparent), transparent 75%),
+    radial-gradient(ellipse 120% 100% at 50% 50%, transparent 55%, rgba(0,0,0, var(--vignette)) 100%);
+  border: calc(var(--bezel) * 1px) solid #15161a;
+  border-color: #191a1f #101115 #0c0d10 #191a1f;
+  box-shadow:
+    inset 0 0 0 1px rgba(0,0,0,.9),
+    inset 0 calc(var(--bezel) * 0.6px) calc(var(--bezel) * 1.6px) rgba(0,0,0,.7),
+    inset 0 calc(var(--bezel) * -0.3px) calc(var(--bezel) * 1px) rgba(255,255,255,.03),
+    0 0 0 1px rgba(255,255,255, calc(var(--edge) * 0.06)),
+    calc(var(--lx) * -8px) calc(var(--ly) * -8px) 22px rgba(0,0,0, calc(var(--drop) * 0.6));
+  color: color-mix(in srgb, var(--backlight) 85%, white);
+}
+.skin .screen::before { display: none; }
+.skin .screen::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 2;
+  background-image:
+    repeating-linear-gradient(180deg, rgba(0,0,0, var(--scan)) 0 1px, transparent 1px calc(var(--scan-gap) * 1px)),
+    linear-gradient(115deg, rgba(255,255,255, var(--sheen)) 0%, rgba(255,255,255, calc(var(--sheen) * 0.35)) 28%, transparent 45%);
+}
+.skin .screen #clock-big, .skin .screen .t { text-shadow: 0 0 calc(var(--glow) * 1.4px) color-mix(in srgb, var(--backlight) 70%, transparent), 0 0 2px color-mix(in srgb, var(--backlight) 60%, transparent); }
+.skin .screen #clock-big small, .skin .screen #clock-date, .skin .screen .dl .l { color: color-mix(in srgb, var(--backlight) 45%, #8a9); }
+.skin .screen .dl { background: rgba(0,0,0,.35); border-color: rgba(0,0,0,.5); box-shadow: inset 0 2px 6px rgba(0,0,0,.6); }
+.skin .screen .dl .v { color: color-mix(in srgb, var(--backlight) 85%, white); }
+.skin .screen .dl.soon .v { color: var(--amber); text-shadow: 0 0 10px color-mix(in srgb, var(--amber) 70%, transparent); }
+.skin #hero.screen.done { background-color: #1a0705; color: #ffb3ae; --backlight: #ff5d57; }
+.skin #hero.screen.soon { background-color: #1a1305; color: #ffe2a3; --backlight: #f2b342; }
+.skin #hero.screen .btn { background-color: rgba(0,0,0,.45); color: inherit; }
+.skin #hero.screen .btn.primary { background-color: color-mix(in srgb, var(--backlight) 80%, black); color: #fff; }
+
 </style>
 </head>
-<body>
+<body class="skin">
 <div id="app">
   <header>
     <h1>Bakery <span id="hdr-sub">Today</span></h1>
@@ -244,7 +371,7 @@ textarea.input { min-height:90px; resize:vertical; line-height:1.45; }
     <!-- ================= TODAY ================= -->
     <section id="v-today" class="view on">
       <div id="hero"></div>
-      <div class="card" id="clock-card">
+      <div class="card screen" id="clock-card">
         <div id="clock-big">--:--<small>--</small></div>
         <div id="clock-date"></div>
         <div id="deadlines"></div>
@@ -348,6 +475,10 @@ textarea.input { min-height:90px; resize:vertical; line-height:1.45; }
         <h2>Items <button class="btn sm primary" onclick="openEditor(null)">+ Add item</button></h2>
         <div class="xs muted" style="margin-bottom:8px">Toggle what your store carries. Tap an item to set par, pieces per sheet, shelf life, temps and steps. <span class="verify">verify</span> marks values that were hard to read on the sheet photo.</div>
         <div id="settings-items"></div>
+      </div>
+      <div class="card">
+        <h2>Look</h2>
+        <div class="list-row"><div class="grow">Analogue panel look <div class="xs muted">grain, bevels, backlit clock</div></div><button class="switch" id="sw-skin" onclick="toggleSetting('skin',this)"></button></div>
       </div>
       <div class="card">
         <h2>Data</h2>
@@ -477,7 +608,7 @@ const todayKey = () => { const d = new Date(); return d.getFullYear() + '-' + St
 const uid = () => Math.random().toString(36).slice(2, 9);
 
 const DEFAULT_SETTINGS = {
-  ovens: 1, shelves: 12, sound: true, wake: true, voice: true, chime: true,
+  ovens: 1, shelves: 12, sound: true, wake: true, voice: true, chime: true, skin: true,
   deadlines: [ { id:'d7', label:'7 AM shelf', time:'07:00' }, { id:'d9', label:'9 AM shelf', time:'09:00' } ]
 };
 
@@ -641,12 +772,12 @@ function renderTimers() {
   const soon = list.find(t => t.endsAt > now() && t.endsAt - now() <= 120000);
   if (due.length) {
     const t = due[0];
-    hero.className = 'done on';
+    hero.className = 'done on screen';
     hero.innerHTML = '<div class="k">Timer done</div><div class="n">' + esc(t.label) + '</div><div class="t">' + fmtDur(t.endsAt - now()) + '</div>' +
       '<div class="row" style="gap:8px">' + (t.kind === 'bake' && t.taskId ? '<button class="btn primary grow" onclick="ackTimer(\'' + t.id + '\',true)">Out of the oven</button>' : '<button class="btn primary grow" onclick="ackTimer(\'' + t.id + '\',true)">Done</button>') +
       '<button class="btn" onclick="snooze(\'' + t.id + '\')">+1 min</button></div>';
   } else if (soon) {
-    hero.className = 'soon on';
+    hero.className = 'soon on screen';
     hero.innerHTML = '<div class="k">Coming up</div><div class="n">' + esc(soon.label) + '</div><div class="t">' + fmtDur(soon.endsAt - now()) + '</div><div class="sm" style="opacity:.8">Get ready to open the oven</div>';
   } else { hero.className = ''; hero.innerHTML = ''; }
   if (!list.length) { box.innerHTML = '<div class="card"><h2>Timers</h2><div class="empty"><b>Nothing in the oven</b>Load one or several items at once — each gets its own timer.</div><div class="grid2"><button class="btn primary" onclick="openLoad()">Load oven</button><button class="btn" onclick="openCustomTimer()">Custom timer</button></div></div>'; return; }
@@ -1119,7 +1250,7 @@ function renderSettings() {
   $('#notes-ts').textContent = store.notesTs ? 'saved ' + new Date(store.notesTs).toLocaleString(undefined, { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }) : '';
   $('#set-ovens').value = s.ovens; $('#set-shelves').value = s.shelves;
   $('#sw-sound').classList.toggle('on', !!s.sound); $('#sw-wake').classList.toggle('on', !!s.wake);
-  $('#sw-voice').classList.toggle('on', s.voice !== false); $('#sw-chime').classList.toggle('on', s.chime !== false);
+  $('#sw-voice').classList.toggle('on', s.voice !== false); $('#sw-chime').classList.toggle('on', s.chime !== false); $('#sw-skin').classList.toggle('on', s.skin !== false);
   const st = store.stats || {};
   $('#st-kinds').textContent = Object.keys(st.items || {}).length; $('#st-loads').textContent = st.loads || 0; $('#st-pieces').textContent = st.pieces || 0; $('#st-days').textContent = Object.keys(st.days || {}).length;
   $('#stats-since').textContent = st.since ? 'since ' + new Date(st.since).toLocaleDateString(undefined, { month:'short', day:'numeric' }) : '';
@@ -1138,7 +1269,19 @@ function renderSettings() {
   $('#sync-detail').textContent = syncDetail;
 }
 function saveSettings() { store.settings.ovens = Math.max(1, parseInt($('#set-ovens').value) || 1); store.settings.shelves = Math.max(1, parseInt($('#set-shelves').value) || 1); save('settings'); }
-function toggleSetting(k, el) { store.settings[k] = !(store.settings[k] !== false); el.classList.toggle('on', store.settings[k]); save('settings'); if (k === 'wake') updateWake(); if ((k === 'sound' || k === 'chime') && store.settings.sound && store.settings.chime !== false) { unlockAudio(); chime(); } if (k === 'voice' && store.settings.voice) { unlockAudio(); speak('Muffins'); } }
+/* the analogue skin: grain tile is an SVG turbulence filter built once from
+   --grain-freq so the CSS stays image-free; body.skin switches it all on */
+function noiseUrl(freq) {
+  const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><filter id="n" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="' + freq + '" numOctaves="3" stitchTiles="stitch" seed="7"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncR type="linear" slope="1.6" intercept="-0.3"/><feFuncG type="linear" slope="1.6" intercept="-0.3"/><feFuncB type="linear" slope="1.6" intercept="-0.3"/></feComponentTransfer></filter><rect width="100%" height="100%" filter="url(#n)"/></svg>';
+  return 'url("data:image/svg+xml;utf8,' + encodeURIComponent(svg) + '")';
+}
+function applySkin() {
+  const on = store.settings.skin !== false;
+  document.body.classList.toggle('skin', on);
+  if (on) { const f = parseFloat(getComputedStyle(document.body).getPropertyValue('--grain-freq')) || 0.3; document.body.style.setProperty('--noise-url', noiseUrl(f)); }
+  const meta = document.querySelector('meta[name=theme-color]'); if (meta) meta.content = on ? '#0c0d0f' : '#0c0d0f';
+}
+function toggleSetting(k, el) { store.settings[k] = !(store.settings[k] !== false); el.classList.toggle('on', store.settings[k]); save('settings'); if (k === 'wake') updateWake(); if (k === 'skin') applySkin(); if ((k === 'sound' || k === 'chime') && store.settings.sound && store.settings.chime !== false) { unlockAudio(); chime(); } if (k === 'voice' && store.settings.voice) { unlockAudio(); speak('Muffins'); } }
 function setDeadline(id, k, v) { const d = (store.settings.deadlines || []).find(x => x.id === id); if (d) { d[k] = v; save('settings'); } }
 function addDeadline() { store.settings.deadlines.push({ id: uid(), label: 'Deadline', time: '10:00' }); save('settings'); renderSettings(); }
 function removeDeadline(id) { store.settings.deadlines = store.settings.deadlines.filter(x => x.id !== id); save('settings'); renderSettings(); }
@@ -1259,6 +1402,7 @@ function initSync() {
    INIT
    ===================================================================== */
 ensureSeed();
+applySkin();
 document.addEventListener('touchstart', unlockAudio, { once: true, passive: true });
 document.addEventListener('click', unlockAudio, { once: true });
 initSync();
