@@ -225,7 +225,7 @@ textarea.input { min-height:90px; resize:vertical; line-height:1.45; }
 .stat { display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid var(--bdr); font-size:var(--fs-sm); }
 .stat:last-child { border-bottom:0; }
 .stat b { font-variant-numeric:tabular-nums; }
-#toast { position:fixed; left:50%; bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 72px); transform:translateX(-50%); background:var(--bg3); color:var(--text); border:1px solid var(--bdr2); padding:10px 16px; border-radius:999px; font-size:var(--fs-sm); font-weight:600; z-index:60; opacity:0; transition:opacity .2s; pointer-events:none; white-space:nowrap; }
+#toast { position:fixed; left:50%; bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 72px); transform:translateX(-50%); background:var(--bg3); color:var(--text); border:1px solid var(--bdr2); padding:10px 16px; border-radius:999px; font-size:var(--fs-sm); font-weight:600; z-index:60; opacity:0; transition:opacity .2s; pointer-events:none; white-space:nowrap; max-width:calc(100vw - 32px); overflow:hidden; text-overflow:ellipsis; }
 #toast.on { opacity:1; }
 </style>
 </head>
@@ -288,10 +288,14 @@ textarea.input { min-height:90px; resize:vertical; line-height:1.45; }
       <div class="card">
         <div class="sm dim" style="font-weight:700;margin-bottom:6px">Add a task</div>
         <div id="task-add">
-          <input class="input grow" id="task-new" placeholder="e.g. Markdown Manager by 9" enterkeyhint="done">
+          <input class="input grow" id="task-new" placeholder="e.g. Wipe down proofer by 9" enterkeyhint="done">
           <button class="btn" onclick="addCustomTask()">Add</button>
         </div>
-        <button class="btn ghost block" style="margin-top:8px" onclick="openPickItem()">+ Add an item to bake</button>
+        <div class="xs muted" style="margin-top:6px">Type "by 7" or "by 9" to put it under that deadline.</div>
+        <div class="grid2" style="margin-top:10px">
+          <button class="btn" onclick="openPresets()">The usual tasks</button>
+          <button class="btn ghost" onclick="openPickItem()">+ Item to bake</button>
+        </div>
       </div>
     </section>
 
@@ -434,6 +438,16 @@ textarea.input { min-height:90px; resize:vertical; line-height:1.45; }
     <div id="load-other"></div>
   </div>
   <div class="sh-foot"><button class="btn ghost grow" onclick="closeSheets()">Cancel</button><button class="btn primary grow" id="load-start" onclick="startLoad()">Start timers</button></div>
+</div>
+
+<!-- the usual opening-shift tasks, pick what your store does -->
+<div class="sheet" id="sh-presets">
+  <div class="sh-head"><h3>The usual tasks</h3><button class="btn sm ghost" onclick="closeSheets()">Close</button></div>
+  <div class="sh-body" style="gap:4px">
+    <div class="xs muted" style="margin-bottom:6px">From the opener's deadline card. Tick what your store does — they come back every morning until you turn "daily" off on the task.</div>
+    <div id="preset-list"></div>
+  </div>
+  <div class="sh-foot"><button class="btn ghost grow" onclick="closeSheets()">Cancel</button><button class="btn primary grow" id="preset-add" onclick="addPresets()">Add</button></div>
 </div>
 
 <!-- custom timer -->
@@ -586,18 +600,31 @@ function renderToday() {
   } else if (!nx) {
     nc.innerHTML = '<h2>Next up</h2><div class="empty"><b>All done</b>Every task on the list is complete.</div>';
   } else {
-    const it = nx.itemId ? store.items[nx.itemId] : null;
-    nc.innerHTML = '<h2>Next up</h2><div class="name">' + esc(nx.title) + '</div><div class="act">' + esc(nextAction(nx)) + '</div>' +
+    const it = nx.itemId ? store.items[nx.itemId] : null, verb = nextVerb(nx);
+    nc.innerHTML = '<h2>Next up' + (taskWhen(nx) ? '<small>by ' + taskWhen(nx) + ' AM</small>' : '') + '</h2><div class="name">' + esc(taskTitle(nx)) + '</div><div class="act">' + esc(nextAction(nx)) + '</div>' +
       (it ? '<div class="sm muted" style="margin-top:4px">' + esc(thawLabel(it)) + (it.proofMin ? ' · proof ' + it.proofMin + 'm' : '') + (it.temp ? ' · ' + it.temp + '°' : '') + (it.steam ? ' · steam ' + it.steam : '') + (fmtTime(it) ? ' · ' + fmtTime(it) : '') + '</div>' : '') +
-      '<div class="row" style="margin-top:12px;gap:8px"><button class="btn primary grow" onclick="openTask(\'' + nx.id + '\')">Open task</button><button class="btn grow" onclick="openLoad()">Load oven</button></div>';
+      '<div class="row" style="margin-top:12px;gap:8px">' + (verb ? '<button class="btn primary grow" onclick="quickAct(\'' + nx.id + '\')">' + esc(verb.label) + '</button>' : '<button class="btn primary grow" onclick="toggleCustom(\'' + nx.id + '\'); renderToday()">Mark done</button>') + '<button class="btn grow" onclick="openTask(\'' + nx.id + '\')">Open</button></div>';
   }
 }
 function nextTask() {
   const list = sortedTasks();
   return list.find(t => !taskDone(t) && !store.timers.some(x => x.taskId === t.id && x.endsAt > now())) || list.find(t => !taskDone(t)) || null;
 }
+/* the single next thing to do on an item task, as a button label */
+function nextVerb(t) {
+  if (!t.itemId) return null;
+  const it = store.items[t.itemId]; if (!it || taskDone(t)) return null;
+  if (store.timers.some(x => x.taskId === t.id && x.endsAt > now())) return null;
+  if (!t.pulled && it.thawType === 'timed' && it.thawMin) return { kind: 'thaw', label: 'Start thaw ' + it.thawMin + 'm' };
+  if (!t.proofed && it.proofMin) return { kind: 'proof', label: 'Start proof ' + it.proofMin + 'm' };
+  if (it.timeLo) return { kind: 'bake', label: 'Load oven' };
+  return null;
+}
+function quickAct(id) { const t = store.tasks.list.find(x => x.id === id); const v = t && nextVerb(t); if (!v) { openTask(id); return; } startTaskTimer(id, v.kind); }
+function taskTitle(t) { return t.itemId ? 'Bake ' + ((store.items[t.itemId] || {}).name || t.title) : t.title; }
+function taskWhen(t) { return t.itemId ? ((store.items[t.itemId] || {}).parBy || '') : (t.when || ''); }
 function nextAction(t) {
-  if (!t.itemId) return t.when ? 'Due ' + t.when : 'Custom task';
+  if (!t.itemId) return t.when ? 'Do by ' + t.when + ' AM' : 'Custom task';
   const it = store.items[t.itemId]; if (!it) return '';
   const running = store.timers.find(x => x.taskId === t.id && x.endsAt > now());
   if (running) return running.kind[0].toUpperCase() + running.kind.slice(1) + ' running · ' + fmtDur(running.endsAt - now());
@@ -640,7 +667,7 @@ function startTimer(o, quiet) {
   store.timers.push({ id: uid(), label: o.label, short: o.short || (it ? it.say : '') || o.label, say: o.say || (it ? it.say : '') || '', color: it ? itemColor(it) : '', pieces: o.pieces || 0,
     kind: o.kind || 'custom', itemId: o.itemId || null, taskId: o.taskId || null, startedAt: now(), endsAt: now() + dur, dur, tempNote: o.tempNote || '', hint: o.hint || '', fired: false });
   if (o.kind === 'bake') bumpStats(it, o.pieces || 0);
-  if (!quiet) { save('timers'); unlockAudio(); updateWake(); render(); toast(o.label + ' · ' + o.minutes + ' min'); }
+  if (!quiet) { save('timers'); unlockAudio(); updateWake(); render(); toast((it ? it.say : o.label) + (o.kind !== 'custom' && o.kind !== 'bake' ? ' · ' + o.kind : '') + ' · ' + o.minutes + ' min'); }
 }
 /* lifetime stats — every oven load adds its pieces */
 function bumpStats(it, pieces) {
@@ -725,7 +752,7 @@ function ackTimer(id, advance) {
     if (task) {
       if (t.kind === 'thaw') task.pulled = true;
       if (t.kind === 'proof') task.proofed = true;
-      if (t.kind === 'bake' && advance) { task.baked = (task.baked || 0) + (t.pieces || 0); if (taskDone(task)) toast(task.title + ' complete'); }
+      if (t.kind === 'bake' && advance) { task.baked = (task.baked || 0) + (t.pieces || 0); if (taskDone(task)) toast(taskTitle(task) + ' complete'); }
       save('tasks');
     }
   }
@@ -916,11 +943,18 @@ function newItemTask(it, pieces) {
    TASKS
    ===================================================================== */
 function taskDone(t) { return t.itemId ? (t.need || 0) > 0 && (t.baked || 0) >= (t.need || 0) : !!t.checked; }
+/* the list reads top to bottom like the morning: everything due by 7, then
+   by 9, then anytime. Inside a group, bakes in the schedule's oven order,
+   then the other jobs in the order she added them. */
+const WHEN_ORDER = { '7': 1, '9': 2, '': 3 };
+const WHEN_LABEL = { '7': 'By 7 AM', '9': 'By 9 AM', '': 'Anytime' };
 function sortedTasks() {
   return store.tasks.list.slice().sort((a, b) => {
+    const wa = WHEN_ORDER[taskWhen(a)] || 3, wb = WHEN_ORDER[taskWhen(b)] || 3;
+    if (wa !== wb) return wa - wb;
     const ia = a.itemId ? store.items[a.itemId] : null, ib = b.itemId ? store.items[b.itemId] : null;
-    const pa = ia ? catOrder(ia.cat) : 40, pb = ib ? catOrder(ib.cat) : 40;
-    return pa - pb || (ia && ib ? sortItems(ia, ib) : 0) || (a.created || 0) - (b.created || 0);
+    if (!!ia !== !!ib) return ia ? -1 : 1;
+    return (ia && ib ? catOrder(ia.cat) - catOrder(ib.cat) || sortItems(ia, ib) : 0) || (a.created || 0) - (b.created || 0);
   });
 }
 let openTaskId = null;
@@ -933,18 +967,50 @@ function renderTasks() {
   $('#tasks-sub').textContent = tot ? dn + ' of ' + tot + ' done' + (stale ? ' · Count → New day to reset' : '') : 'Count the floor and build the list, or add tasks below.';
   $('#tasks-pct').textContent = tot ? Math.round(dn / tot * 100) + '%' : '';
   $('#tasks-bar').style.width = (tot ? dn / tot * 100 : 0) + '%';
-  if (!tot) { $('#task-list').innerHTML = '<div class="empty"><b>Nothing on the list</b>Build it from the Count tab, or add tasks by hand.</div>'; return; }
-  $('#task-list').innerHTML = list.map(t => t.itemId ? itemTaskHtml(t) : customTaskHtml(t)).join('');
+  if (!tot) { $('#task-list').innerHTML = '<div class="empty"><b>Nothing on the list</b>Count the floor and the bakes appear here. Add the usual tasks below.</div>'; return; }
+  let html = '', grp = null;
+  list.forEach(t => {
+    const w = taskWhen(t);
+    if (w !== grp) { grp = w; const n = list.filter(x => taskWhen(x) === w).length, d = list.filter(x => taskWhen(x) === w && taskDone(x)).length; html += '<div class="sec-title">' + WHEN_LABEL[w] + '<small>' + d + ' / ' + n + '</small></div>'; }
+    html += t.itemId ? itemTaskHtml(t) : customTaskHtml(t);
+  });
+  $('#task-list').innerHTML = html;
 }
 function customTaskHtml(t) {
-  return '<div class="task ' + (t.checked ? 'done' : '') + '" id="task-' + t.id + '"><div class="head"><div class="chk"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div><div class="grow" onclick="toggleCustom(\'' + t.id + '\')" style="min-height:26px;display:flex;align-items:center"><div class="title">' + esc(t.title) + '</div></div>' +
-    '<button class="pill ' + (t.keep ? 'green' : '') + '" onclick="toggleKeep(\'' + t.id + '\')" title="repeat every day">' + (t.keep ? 'daily ✓' : 'daily') + '</button><button class="btn sm ghost" onclick="removeTask(\'' + t.id + '\')">✕</button></div></div>';
+  return '<div class="task ' + (t.checked ? 'done' : '') + '" id="task-' + t.id + '"><div class="head" style="align-items:flex-start"><div class="chk" onclick="toggleCustom(\'' + t.id + '\')" style="margin-top:1px"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div>' +
+    '<div class="grow"><div class="title" onclick="toggleCustom(\'' + t.id + '\')">' + esc(t.title) + '</div>' +
+      '<div class="row" style="gap:6px;margin-top:6px"><button class="pill" onclick="cycleWhen(\'' + t.id + '\')" title="deadline">' + (t.when ? 'by ' + t.when + ' AM' : 'anytime') + '</button>' +
+      '<button class="pill ' + (t.keep ? 'green' : '') + '" onclick="toggleKeep(\'' + t.id + '\')" title="repeat every day">' + (t.keep ? 'daily ✓' : 'daily') + '</button></div></div>' +
+    '<button class="btn sm ghost" onclick="removeTask(\'' + t.id + '\')">✕</button></div></div>';
 }
 function toggleKeep(id) { const t = store.tasks.list.find(x => x.id === id); if (!t) return; t.keep = !t.keep; save('tasks'); renderTasks(); toast(t.keep ? 'Comes back every day' : 'Today only'); }
+function cycleWhen(id) { const t = store.tasks.list.find(x => x.id === id); if (!t) return; t.when = { '': '7', '7': '9', '9': '' }[t.when || ''] ; save('tasks'); renderTasks(); }
+/* "The usual tasks" picker */
+let presetSel = {};
+function presetOnList(p) { return store.tasks.date === todayKey() && store.tasks.list.some(t => !t.itemId && (t.presetId === p.id || t.title === p.title)); }
+function openPresets() { presetSel = {}; renderPresets(); openSheet('sh-presets'); }
+function renderPresets() {
+  let html = '', grp = null;
+  BAKERY_PRESET_TASKS.forEach(p => {
+    if (p.when !== grp) { grp = p.when; html += '<div class="sec-title" style="margin:8px 0 2px">' + WHEN_LABEL[p.when] + '</div>'; }
+    const have = presetOnList(p), on = have || !!presetSel[p.id];
+    html += '<div class="load-row ' + (on ? 'on' : '') + '" style="' + (have ? 'opacity:.45' : '') + '" onclick="' + (have ? '' : 'togglePreset(\'' + p.id + '\')') + '"><div class="box"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div><div class="grow"><div class="nm" style="font-weight:500">' + esc(p.title) + '</div>' + (have ? '<div class="mt">already on today\'s list</div>' : '') + '</div></div>';
+  });
+  $('#preset-list').innerHTML = html;
+  const n = Object.values(presetSel).filter(Boolean).length;
+  $('#preset-add').textContent = n ? 'Add ' + n + ' task' + (n > 1 ? 's' : '') : 'Add'; $('#preset-add').disabled = !n;
+}
+function togglePreset(id) { presetSel[id] = !presetSel[id]; renderPresets(); }
+function addPresets() {
+  rollTasks(); let added = 0;
+  BAKERY_PRESET_TASKS.forEach(p => { if (presetSel[p.id] && !presetOnList(p)) { store.tasks.list.push({ id: uid(), itemId: null, presetId: p.id, title: p.title, when: p.when, checked: false, keep: true, created: now() }); added++; } });
+  if (added) save('tasks');
+  closeSheets(); renderTasks(); toast(added ? added + ' added · daily' : 'Nothing new');
+}
 function itemTaskHtml(t) {
   const it = store.items[t.itemId];
   if (!it) return '';
-  const done = taskDone(t), open = openTaskId === t.id;
+  const done = taskDone(t), open = openTaskId === t.id, verb = nextVerb(t);
   const running = store.timers.filter(x => x.taskId === t.id && x.endsAt > now());
   const ov = inOven(t), left = taskLeft(t), baked = t.baked || 0;
   const pct = Math.min(100, baked / (t.need || 1) * 100), pctOven = Math.min(100 - pct, ov / (t.need || 1) * 100);
@@ -956,7 +1022,8 @@ function itemTaskHtml(t) {
   if (it.proofMin) btns.push('<button class="btn ' + (t.proofed || (!t.pulled && it.thawType === 'timed') ? 'ghost' : 'primary') + '" onclick="startTaskTimer(\'' + t.id + '\',\'proof\')">Proof ' + it.proofMin + 'm' + (t.proofed ? ' ✓' : '') + '</button>');
   if (it.timeLo) btns.push('<button class="btn ' + (btns.length && !((t.pulled || it.thawType !== 'timed') && (t.proofed || !it.proofMin)) ? '' : 'primary') + '" onclick="startTaskTimer(\'' + t.id + '\',\'bake\')" ' + (done ? 'disabled' : '') + '>Bake ' + fmtTime(it) + '</button>');
   return '<div class="task ' + (done ? 'done' : '') + (open ? ' open' : '') + '" id="task-' + t.id + '">' +
-    '<div class="head" onclick="toggleOpen(\'' + t.id + '\')" style="border-left:4px solid ' + itemColor(it) + '"><div class="chk"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div><div class="grow"><div class="title ellip">' + esc(t.title) + '</div><div class="sub">' + sub.map(esc).join(' · ') + '</div>' + (running.length ? '<div class="xs" style="color:var(--green);font-weight:600;margin-top:2px">' + running.map(r => r.kind + ' ' + fmtDur(r.endsAt - now())).join(' · ') + '</div>' : '') + '</div><div class="mono sm dim">' + baked + '/' + t.need + '</div></div>' +
+    '<div class="head" onclick="toggleOpen(\'' + t.id + '\')" style="border-left:4px solid ' + itemColor(it) + '"><div class="chk"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div><div class="grow"><div class="title ellip">' + esc(taskTitle(t)) + '</div><div class="sub">' + sub.map(esc).join(' · ') + '</div>' + (running.length ? '<div class="xs" style="color:var(--green);font-weight:600;margin-top:2px">' + running.map(r => r.kind + ' ' + fmtDur(r.endsAt - now())).join(' · ') + '</div>' : '') + '</div>' +
+      (verb ? '<button class="btn sm primary" style="flex:0 0 auto" onclick="event.stopPropagation(); quickAct(\'' + t.id + '\')">' + esc(verb.kind === 'bake' ? 'Bake' : verb.label.replace(/^Start (\w)/, (m, c) => c.toUpperCase())) + '</button>' : '<div class="mono sm dim">' + baked + '/' + t.need + '</div>') + '</div>' +
     '<div class="body">' +
       '<div class="bar" style="position:relative"><i style="width:' + pct + '%"></i><i style="position:absolute;left:' + pct + '%;top:0;width:' + pctOven + '%;background:var(--amber);opacity:.7"></i></div>' +
       '<div class="row" style="justify-content:space-between;gap:8px"><span class="xs muted grow">' + (it.thawType !== 'none' ? esc(thawLabel(it)) + (it.proofMin ? ' · proof ' + it.proofMin + 'm' : '') : 'Frozen → oven') + '</span><input class="input" type="number" inputmode="numeric" placeholder="pcs" id="addb-' + t.id + '" style="width:74px;padding:6px 4px;text-align:center;min-height:34px"><button class="btn sm primary" onclick="addBaked(\'' + t.id + '\')">+ Baked</button><button class="btn sm ghost" onclick="addBaked(\'' + t.id + '\',true)" title="undo">−</button></div>' +
@@ -978,14 +1045,15 @@ function addBaked(id, undo) {
   if (!(n > 0)) return;
   t.baked = Math.max(0, (t.baked || 0) + (undo ? -n : n));
   if (!undo) bumpStats(store.items[t.itemId], n);
-  save('tasks'); renderTasks(); if (taskDone(t)) toast(t.title + ' complete');
+  save('tasks'); renderTasks(); if (taskDone(t)) toast(taskTitle(t) + ' complete');
 }
 function toggleCustom(id) { const t = store.tasks.list.find(x => x.id === id); if (!t) return; t.checked = !t.checked; save('tasks'); renderTasks(); }
 function removeTask(id) { store.tasks.list = store.tasks.list.filter(x => x.id !== id); store.timers = store.timers.filter(x => x.taskId !== id); save('tasks'); save('timers'); updateWake(); renderTasks(); }
 function addCustomTask() {
   const inp = $('#task-new'), title = inp.value.trim(); if (!title) return;
   rollTasks();
-  store.tasks.list.push({ id: uid(), itemId: null, title, checked: false, keep: false, created: now() });
+  const m = title.match(/\bby\s*(7|9)\s*(?:am)?\b/i);   // "Markdown Manager by 9" → the By 9 AM group
+  store.tasks.list.push({ id: uid(), itemId: null, title, when: m ? m[1] : '', checked: false, keep: false, created: now() });
   inp.value = ''; save('tasks'); renderTasks();
 }
 $('#task-new').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addCustomTask(); } });

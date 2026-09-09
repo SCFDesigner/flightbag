@@ -105,6 +105,26 @@ const BAKERY_SEED_ROWS = [
   ['Misc', 'Stuffing Cubes', 'none', 0, 0, 225, 0, 0, 0, false, true, 'Bake at 225°-250° until completely dry']
 ];
 
+/* the usual non-baking jobs of the opening shift, from the "Deadline 7AM /
+   9AM" card and the Opening Shift schedule page. She picks the ones her
+   store does; they come back every day until she turns "daily" off.
+   when: '7' = must be done by 7 AM, '9' = by 9 AM, '' = any time. */
+const BAKERY_PRESET_TASKS = [
+  { id: 'shrink',    when: '7', title: 'Scan shrink · pull day-old items for recovery' },
+  { id: 'singles',   when: '7', title: 'Pull, package & label yesterday’s single rolls, muffins, pastries' },
+  { id: 'recovery',  when: '7', title: 'Bread production recovery on the shelf' },
+  { id: 'conv7',     when: '7', title: 'Convert & package yesterday’s artisan, French bread, baguettes' },
+  { id: 'slack',     when: '7', title: 'Pull muffin breakout to slack (50–60 min)' },
+  { id: 'pandough',  when: '7', title: 'Pan & prep thawed dough (rolls, French, chop bread) → proofer' },
+  { id: 'markdown',  when: '9', title: 'Complete Markdown Manager' },
+  { id: 'breakout',  when: '9', title: 'Freezer → cooler: break out tomorrow’s dough & pastries' },
+  { id: 'conv9',     when: '9', title: 'Complete conversions & rewraps' },
+  { id: 'scanthaw',  when: '9', title: 'Scan Thaw, Date & Stock — Retail Ready' },
+  { id: 'spotcheck', when: '',  title: 'Spot check & set production for tomorrow' },
+  { id: 'package',   when: '',  title: 'Package & label as product cools' },
+  { id: 'clean',     when: '',  title: 'Clean & sanitize bakery area' }
+];
+
 function bakerySlug(name) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40);
 }
