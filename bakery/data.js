@@ -33,9 +33,9 @@ function bakeryCatColor(cat) {
 function bakeryDefaultSay(it) {
   const byCat = { 'Breakfast': 'Muffins', 'Cookies': 'Cookies', 'Pies': 'Pies', 'Artisan Breads': 'Artisan bread' };
   if (byCat[it.cat]) return byCat[it.cat];
-  let n = String(it.name || '').replace(/\(.*?\)/g, '').split(/—|-|,/)[0].trim();
-  n = n.replace(/^LDF\s+/i, '');
-  const w = n.split(/\s+/);
+  let n = String(it.name || '').replace(/\(.*?\)/g, '').split(/—|,|\s-\s|\s(?:and|or|&|with)\s/i)[0].trim();
+  n = n.replace(/^LDF\s+/i, '').replace(/\s+#\d+$/, '');
+  const w = n.split(/\s+/).filter(Boolean);
   return (w.length > 2 ? w.slice(0, 2).join(' ') : n) || 'Timer';
 }
 

@@ -138,15 +138,17 @@ textarea.input { min-height:90px; resize:vertical; line-height:1.45; }
 .next-card .act { color:var(--green); font-weight:600; margin-top:2px; }
 
 /* ===== count ===== */
-.cnt-row { padding:12px 0; border-bottom:1px solid var(--bdr); border-left:3px solid var(--c, transparent); padding-left:10px; margin-left:-14px; padding-left:11px; }
+.cnt-card { padding:0; overflow:hidden; }
+.cnt-row { padding:12px 14px 12px 11px; border-bottom:1px solid var(--bdr); border-left:3px solid var(--c, transparent); }
 .cnt-row:last-child { border-bottom:0; }
 .cnt-row .top { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
 .cnt-row .name { font-weight:600; line-height:1.25; }
-.cnt-row .input { text-align:center; padding:8px 4px; font-weight:700; font-variant-numeric:tabular-nums; min-height:44px; font-size:17px; }
+.cnt-row .input { text-align:center; padding:6px 4px; font-weight:700; font-variant-numeric:tabular-nums; min-height:46px; font-size:17px; }
 .cnt-row.flag .input { border-color:var(--red); }
 .cnt-grid { display:grid; grid-template-columns:1fr 1.2fr 1fr 1fr; gap:6px; }
 .cnt-grid .cell { background:var(--bg2); border-radius:var(--r2); padding:6px 6px 7px; text-align:center; min-height:64px; display:flex; flex-direction:column; justify-content:center; }
-.cnt-grid .cell.in { background:transparent; padding:0; }
+.cnt-grid .cell.in { background:transparent; padding:0; justify-content:flex-start; }
+.cnt-grid .cell.in .l { margin-bottom:4px; }
 .cnt-grid .l { font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text3); margin-bottom:2px; }
 .cnt-grid .v { font-size:17px; font-weight:700; font-variant-numeric:tabular-nums; line-height:1.1; }
 .cnt-grid .s { font-size:10px; color:var(--text3); margin-top:2px; }
@@ -223,7 +225,7 @@ textarea.input { min-height:90px; resize:vertical; line-height:1.45; }
 .stat { display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid var(--bdr); font-size:var(--fs-sm); }
 .stat:last-child { border-bottom:0; }
 .stat b { font-variant-numeric:tabular-nums; }
-#toast { position:fixed; left:50%; bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 14px); transform:translateX(-50%); background:var(--bg3); color:var(--text); border:1px solid var(--bdr2); padding:10px 16px; border-radius:999px; font-size:var(--fs-sm); font-weight:600; z-index:60; opacity:0; transition:opacity .2s; pointer-events:none; white-space:nowrap; }
+#toast { position:fixed; left:50%; bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 72px); transform:translateX(-50%); background:var(--bg3); color:var(--text); border:1px solid var(--bdr2); padding:10px 16px; border-radius:999px; font-size:var(--fs-sm); font-weight:600; z-index:60; opacity:0; transition:opacity .2s; pointer-events:none; white-space:nowrap; }
 #toast.on { opacity:1; }
 </style>
 </head>
@@ -482,7 +484,11 @@ function ensureSeed() {
   const seed = bakerySeedItems();
   let changed = false;
   Object.values(seed).forEach(s => { if (!store.items[s.id]) { store.items[s.id] = s; store.itemsTs[s.id] = store.itemsTs[s.id] || 1; changed = true; } });
-  liveItems().forEach(it => { if (!it.say) it.say = bakeryDefaultSay(it); });
+  liveItems().forEach(it => { if (!it.sayCustom) it.say = bakeryDefaultSay(it); });
+  // a new day: yesterday's count and list roll over on their own (daily
+  // custom tasks survive), and any timer older than six hours is junk
+  rollTasks(); if (store.counts.date !== todayKey()) store.counts = { date: todayKey(), vals: {}, exp: {} };
+  store.timers = (store.timers || []).filter(t => t.endsAt > now() - 6 * 3600000);
   store.stats = Object.assign({ loads: 0, pieces: 0, days: {}, items: {}, since: 0 }, store.stats || {});
   // v1.1 tracked sheets; v1.2 tracks pieces. Convert anything still in sheets.
   (store.tasks.list || []).forEach(t => { if (t.itemId && t.need == null) { const b = Number((store.items[t.itemId] || {}).batch) || 1; t.need = t.pieces || (t.batches || 1) * b; t.baked = (t.done || 0) * b; delete t.batches; delete t.done; delete t.pieces; } });
@@ -552,7 +558,7 @@ function renderBadges() {
 function pad2(n) { return String(n).padStart(2, '0'); }
 function fmtClock(d) { let h = d.getHours(); const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12; return { hm: h + ':' + pad2(d.getMinutes()), s: pad2(d.getSeconds()), ap }; }
 function fmtDur(ms) { const neg = ms < 0; ms = Math.abs(ms); const s = Math.round(ms / 1000); const m = Math.floor(s / 60), r = s % 60; return (neg ? '-' : '') + m + ':' + pad2(r); }
-function fmtLong(ms) { const m = Math.round(ms / 60000); if (Math.abs(m) < 60) return m + ' min'; const h = Math.floor(Math.abs(m) / 60), r = Math.abs(m) % 60; return (m < 0 ? '-' : '') + h + 'h ' + (r ? r + 'm' : ''); }
+function fmtLong(ms) { const m = Math.round(ms / 60000); if (Math.abs(m) < 60) return m + ' min'; const h = Math.floor(Math.abs(m) / 60), r = Math.abs(m) % 60; return (m < 0 ? '-' : '') + h + 'h' + (r ? ' ' + r + 'm' : ''); }
 function deadlineAt(dl) { const [h, m] = (dl.time || '00:00').split(':').map(Number); const d = new Date(); d.setHours(h, m, 0, 0); return d.getTime(); }
 
 function renderToday() {
@@ -648,7 +654,7 @@ function bumpStats(it, pieces) {
    for each, one timer each ---- */
 let loadSel = {};   // key → { taskId?, itemId, pieces, on }
 function loadKey(t, it) { return t ? 'task:' + t.id : 'item:' + it.id; }
-function loadDefault(t, it) { return t ? taskLeft(t) || (t.need || 0) : (Number(it.batch) > 1 ? Number(it.batch) : 0); }
+function loadDefault(t, it) { return t ? taskLeft(t) : (Number(it.batch) > 1 ? Number(it.batch) : 0); }
 function loadEntry(k) {
   const [kind, id] = k.split(':');
   if (kind === 'task') { const t = store.tasks.list.find(x => x.id === id); return t ? { taskId: t.id, itemId: t.itemId, pieces: loadDefault(t, store.items[t.itemId]), on: true } : null; }
@@ -701,7 +707,7 @@ function startLoad() {
     const it = store.items[s.itemId]; let t = s.taskId ? store.tasks.list.find(x => x.id === s.taskId) : null; if (!it) return;
     // baking something that isn't on the list yet → put it on the list so the
     // count page and the checklist both see it
-    if (!t) { if (store.tasks.date !== todayKey()) store.tasks = { date: todayKey(), list: [] }; t = store.tasks.list.find(x => x.itemId === it.id); if (!t) { t = newItemTask(it, Number(s.pieces)); t.auto = false; store.tasks.list.push(t); } else if (!t.auto) t.need = (t.need || 0) + Number(s.pieces); save('tasks'); }
+    if (!t) { rollTasks(); t = store.tasks.list.find(x => x.itemId === it.id); if (!t) { t = newItemTask(it, Number(s.pieces)); t.auto = false; store.tasks.list.push(t); } else if (!t.auto) t.need = (t.need || 0) + Number(s.pieces); save('tasks'); }
     const temp = it.temp ? (t && t.partial ? it.temp - 10 : it.temp) : null;
     startTimer({ label: it.name + ' · ' + s.pieces + ' pcs', minutes: it.timeLo, kind: 'bake', itemId: it.id, taskId: t ? t.id : null, pieces: Number(s.pieces),
       tempNote: temp ? temp + '°' : '', hint: (it.timeHi > it.timeLo ? 'check, up to ' + it.timeHi + ' min' : '') + (it.steam ? (it.timeHi > it.timeLo ? ' · ' : '') + 'steam ' + it.steam : '') }, true);
@@ -786,6 +792,7 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 function tick() {
   const c = fmtClock(new Date());
   $('#hdr-clock').textContent = c.hm;
+  if (store.tasks.date !== todayKey() && rollTasks()) { store.counts = { date: todayKey(), vals: {}, exp: {} }; persist(); render(); }
   let fire = false;
   store.timers.forEach(t => { if (t.endsAt <= now() && !t.fired) { t.fired = true; fire = true; notify(t); } });
   if (fire) { persist(); startAlarm(); if (view !== 'today') go('today'); }
@@ -799,9 +806,13 @@ setInterval(tick, 1000);
 /* =====================================================================
    COUNT
    ===================================================================== */
-function rollDay() {
+/* first touch of a new day: the list starts fresh, but custom tasks marked
+   "daily" carry over unchecked */
+function rollTasks(force) {
   const tk = todayKey();
-  if (store.counts.date !== tk && store.tasks.date !== tk) return false;
+  if (!force && store.tasks.date === tk && store.tasks.list) return false;
+  const kept = (store.tasks.list || []).filter(t => !t.itemId && t.keep).map(t => Object.assign({}, t, { checked: false }));
+  store.tasks = { date: tk, list: kept };
   return true;
 }
 function need(it) {
@@ -815,47 +826,69 @@ function need(it) {
 function inOven(t) { return store.timers.filter(x => x.kind === 'bake' && x.taskId === t.id && x.endsAt > now()).reduce((a, x) => a + (x.pieces || 0), 0); }
 function taskLeft(t) { return Math.max(0, (t.need || 0) - (t.baked || 0) - inOven(t)); }
 function taskFor(it) { return store.tasks.date === todayKey() ? store.tasks.list.find(t => t.itemId === it.id) : null; }
+/* one item's numbers for the Count page: par, what she counted, what has
+   come out of the oven, what is in the oven, and what is still to bake */
+function countStat(it) {
+  const v = store.counts.vals[it.id], ex = !!store.counts.exp[it.id], nd = need(it), t = taskFor(it);
+  const hasPar = it.par != null && it.par !== '';
+  const n = t ? (t.need || 0) : (nd ? nd.n : 0), baked = t ? (t.baked || 0) : 0, ov = t ? inOven(t) : 0;
+  return { v, ex, nd, t, hasPar, n, baked, ov, left: Math.max(0, n - baked - ov) };
+}
+function countRowHtml(it) {
+  const c = countStat(it);
+  const parCell = c.hasPar ? '<div class="v">' + esc(it.par) + '</div><div class="s">' + (it.parBy ? 'by ' + it.parBy + ' AM' : 'target') + '</div>' : '<a class="setpar" onclick="openEditor(\'' + it.id + '\')">set par</a>';
+  const bakedCell = c.baked || c.ov ? '<div class="v green">' + c.baked + (c.baked > c.n && c.n ? '<span class="s" style="color:var(--green)"> +' + (c.baked - c.n) + '</span>' : '') + '</div><div class="s"' + (c.ov ? ' style="color:var(--amber)"' : '') + '>' + (c.ov ? c.ov + ' in oven' : 'out of oven') + '</div>' : '<div class="v dim">—</div><div class="s">out of oven</div>';
+  let leftCell;
+  if (!c.hasPar) leftCell = '<div class="v dim">—</div><div class="s">no par</div>';
+  else if (c.v == null && !c.ex && !c.t) leftCell = '<div class="v dim">—</div><div class="s">count first</div>';
+  else if (c.n === 0) leftCell = '<div class="v dim">stocked</div><div class="s">at par</div>';
+  else if (c.left === 0) leftCell = c.ov ? '<div class="v amber">' + c.ov + '</div><div class="s">in oven</div>' : '<div class="v green">done</div><div class="s">need ' + c.n + '</div>';
+  else leftCell = '<div class="v">' + c.left + '</div><div class="s">' + (Number(it.batch) > 1 ? '≈' + Math.ceil(c.left / it.batch) + ' sheet' + (Math.ceil(c.left / it.batch) > 1 ? 's' : '') : (c.baked || c.ov ? 'of ' + c.n : 'to bake')) + '</div>';
+  return '<div class="cnt-row ' + (c.ex ? 'flag' : '') + '" data-id="' + it.id + '" style="--c:' + itemColor(it) + '"><div class="top"><div class="name grow">' + esc(it.name) + (it.verify ? ' <span class="verify">verify</span>' : '') + '</div><button class="exp ' + (c.ex ? 'on' : '') + '" onclick="toggleExp(\'' + it.id + '\')" title="shelf stock expired — pull it">EXP</button></div>' +
+    '<div class="cnt-grid">' +
+      '<div class="cell"><div class="l">Par</div>' + parCell + '</div>' +
+      '<div class="cell in"><div class="l">' + (c.ex ? '<span style="color:var(--red)">Expired → 0</span>' : 'On floor') + '</div><input class="input" type="number" inputmode="numeric" placeholder="—" aria-label="on the floor" value="' + (c.v ?? '') + '" oninput="setCount(\'' + it.id + '\',this.value)"></div>' +
+      '<div class="cell"><div class="l">Baked</div>' + bakedCell + '</div>' +
+      '<div class="cell"><div class="l">Left</div>' + leftCell + '</div>' +
+    '</div></div>';
+}
+function countBuildBtn() {
+  let needItems = 0, leftPcs = 0;
+  enabledItems().forEach(it => { const c = countStat(it); if (c.n > 0) { needItems++; leftPcs += c.left; } });
+  $('#build-btn').textContent = needItems ? 'Open today\'s list · ' + needItems + ' item' + (needItems > 1 ? 's' : '') + ', ' + leftPcs + ' pcs left' : 'Open today\'s list';
+}
 function renderCount() {
   const tk = todayKey();
   $('#count-date').textContent = store.counts.date === tk ? 'Today · ' + new Date().toLocaleDateString(undefined, {weekday:'short', month:'short', day:'numeric'}) : 'From ' + store.counts.date + ' — tap New day to start fresh';
   const items = enabledItems().sort(sortItems);
   if (!items.length) { $('#count-list').innerHTML = '<div class="empty"><b>No items enabled</b>Turn some on in Settings.</div>'; return; }
-  let html = '', cat = null, needItems = 0, leftPcs = 0;
+  let html = '', cat = null;
   items.forEach(it => {
-    if (it.cat !== cat) { cat = it.cat; html += (html ? '</div>' : '') + '<div class="sec-title">' + esc(cat) + '</div><div class="card" style="padding:0 14px">'; }
-    const v = store.counts.vals[it.id], ex = !!store.counts.exp[it.id], nd = need(it), t = taskFor(it);
-    const hasPar = it.par != null && it.par !== '';
-    const n = t ? (t.need || 0) : (nd ? nd.n : 0), baked = t ? (t.baked || 0) : 0, ov = t ? inOven(t) : 0, left = Math.max(0, n - baked - ov);
-    if (n > 0) { needItems++; leftPcs += left; }
-    // four numbers per item: par (target), floor (her count), baked (out of the oven), left (still to bake)
-    const parCell = hasPar ? '<div class="v">' + esc(it.par) + '</div><div class="s">' + (it.parBy ? 'by ' + it.parBy + ' AM' : 'target') + '</div>' : '<a class="setpar" onclick="openEditor(\'' + it.id + '\')">set par</a>';
-    const bakedCell = baked || ov ? '<div class="v green">' + baked + (baked > n && n ? '<span class="s" style="color:var(--green)"> +' + (baked - n) + '</span>' : '') + '</div><div class="s' + (ov ? ' amber' : '') + '"' + (ov ? ' style="color:var(--amber)"' : '') + '>' + (ov ? ov + ' in oven' : 'out of oven') + '</div>' : '<div class="v dim">—</div><div class="s">out of oven</div>';
-    let leftCell;
-    if (!hasPar) leftCell = '<div class="v dim">—</div><div class="s">no par</div>';
-    else if (v == null && !ex && !t) leftCell = '<div class="v dim">—</div><div class="s">count first</div>';
-    else if (n === 0) leftCell = '<div class="v dim">stocked</div><div class="s">at par</div>';
-    else if (left === 0) leftCell = ov ? '<div class="v amber">' + ov + '</div><div class="s">in oven</div>' : '<div class="v green">done</div><div class="s">need ' + n + '</div>';
-    else leftCell = '<div class="v">' + left + '</div><div class="s">' + (baked || ov ? 'of ' + n : 'to bake') + (Number(it.batch) > 1 ? ' · ≈' + Math.ceil(left / it.batch) + ' sh' : '') + '</div>';
-    html += '<div class="cnt-row ' + (ex ? 'flag' : '') + '" style="--c:' + itemColor(it) + '"><div class="top"><div class="name grow">' + esc(it.name) + (it.verify ? ' <span class="verify">verify</span>' : '') + '</div><button class="exp ' + (ex ? 'on' : '') + '" onclick="toggleExp(\'' + it.id + '\')" title="shelf stock expired — pull it">EXP</button></div>' +
-      '<div class="cnt-grid">' +
-        '<div class="cell"><div class="l">Par</div>' + parCell + '</div>' +
-        '<div class="cell in"><input class="input" type="number" inputmode="numeric" placeholder="floor" aria-label="on the floor" value="' + (v ?? '') + '" oninput="setCount(\'' + it.id + '\',this.value)"><div class="l" style="margin-top:3px">' + (ex ? '<span style="color:var(--red)">expired → 0</span>' : 'On floor') + '</div></div>' +
-        '<div class="cell"><div class="l">Baked</div>' + bakedCell + '</div>' +
-        '<div class="cell"><div class="l">Left</div>' + leftCell + '</div>' +
-      '</div></div>';
+    if (it.cat !== cat) { cat = it.cat; html += (html ? '</div>' : '') + '<div class="sec-title">' + esc(cat) + '</div><div class="card cnt-card">'; }
+    html += countRowHtml(it);
   });
-  html += '</div>';
-  $('#count-list').innerHTML = html;
-  $('#build-btn').textContent = needItems ? 'Open today\'s list · ' + needItems + ' item' + (needItems > 1 ? 's' : '') + ', ' + leftPcs + ' pcs left' : 'Open today\'s list';
+  $('#count-list').innerHTML = html + '</div>';
+  countBuildBtn();
+}
+/* refresh one row's numbers in place while she types — the input itself is
+   left alone so the keyboard stays open */
+function refreshCountRow(id) {
+  const it = store.items[id], row = document.querySelector('.cnt-row[data-id="' + id + '"]');
+  if (!it || !row) { renderCount(); return; }
+  const tmp = document.createElement('div'); tmp.innerHTML = countRowHtml(it); const fresh = tmp.firstElementChild;
+  row.className = fresh.className;
+  const oc = row.querySelectorAll('.cnt-grid > .cell'), nc = fresh.querySelectorAll('.cnt-grid > .cell');
+  nc.forEach((c, i) => { if (!oc[i]) return; if (c.classList.contains('in')) { oc[i].querySelector('.l').innerHTML = c.querySelector('.l').innerHTML; } else oc[i].innerHTML = c.innerHTML; });
+  const ob = row.querySelector('.exp'), nb = fresh.querySelector('.exp'); if (ob && nb) ob.className = nb.className;
+  countBuildBtn();
 }
 function touchCounts() { if (store.counts.date !== todayKey()) { store.counts = { date: todayKey(), vals: {}, exp: {} }; } }
-function setCount(id, v) { touchCounts(); store.counts.vals[id] = v === '' ? null : Number(v); save('counts'); syncTasksFromCount(); renderCountRow(); }
-function toggleExp(id) { touchCounts(); store.counts.exp[id] = !store.counts.exp[id]; save('counts'); syncTasksFromCount(); renderCount(); }
-let rcT = null; function renderCountRow() { clearTimeout(rcT); rcT = setTimeout(() => { const a = document.activeElement; const s = $('#main').scrollTop; renderCount(); $('#main').scrollTop = s; }, 700); }
+function setCount(id, v) { touchCounts(); store.counts.vals[id] = v === '' ? null : Number(v); save('counts'); syncTasksFromCount(); refreshCountRow(id); }
+function toggleExp(id) { touchCounts(); store.counts.exp[id] = !store.counts.exp[id]; save('counts'); syncTasksFromCount(); refreshCountRow(id); }
 function newDay() {
-  if (!confirm('Start a new day? Clears the floor count and today\'s task list. Items, pars and notes are kept.')) return;
+  if (!confirm('Start a new day? Clears the floor count, today\'s list and any running timers. Daily tasks, items, pars and notes are kept.')) return;
   store.counts = { date: todayKey(), vals: {}, exp: {} }; save('counts');
-  store.tasks = { date: todayKey(), list: store.tasks.list.filter(t => !t.itemId && t.keep) }; save('tasks');
+  rollTasks(true); save('tasks');
   store.timers = []; save('timers'); stopAlarm(); updateWake();
   render(); toast('New day');
 }
@@ -863,9 +896,7 @@ function newDay() {
    with need = par − counted, updated live as she types. Tasks she added by
    hand (auto:false) keep their own need. */
 function syncTasksFromCount() {
-  const tk = todayKey();
-  if (store.tasks.date !== tk) store.tasks = { date: tk, list: [] };
-  let changed = false;
+  let changed = rollTasks();
   enabledItems().forEach(it => {
     const nd = need(it), ex = store.tasks.list.find(t => t.itemId === it.id);
     if (nd && nd.n > 0) {
@@ -906,8 +937,10 @@ function renderTasks() {
   $('#task-list').innerHTML = list.map(t => t.itemId ? itemTaskHtml(t) : customTaskHtml(t)).join('');
 }
 function customTaskHtml(t) {
-  return '<div class="task ' + (t.checked ? 'done' : '') + '" id="task-' + t.id + '"><div class="head"><button class="chk" onclick="toggleCustom(\'' + t.id + '\')"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button><div class="grow"><div class="title">' + esc(t.title) + '</div>' + (t.when ? '<div class="sub">due ' + esc(t.when) + '</div>' : '') + '</div><button class="btn sm ghost" onclick="removeTask(\'' + t.id + '\')">✕</button></div></div>';
+  return '<div class="task ' + (t.checked ? 'done' : '') + '" id="task-' + t.id + '"><div class="head"><div class="chk"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div><div class="grow" onclick="toggleCustom(\'' + t.id + '\')" style="min-height:26px;display:flex;align-items:center"><div class="title">' + esc(t.title) + '</div></div>' +
+    '<button class="pill ' + (t.keep ? 'green' : '') + '" onclick="toggleKeep(\'' + t.id + '\')" title="repeat every day">' + (t.keep ? 'daily ✓' : 'daily') + '</button><button class="btn sm ghost" onclick="removeTask(\'' + t.id + '\')">✕</button></div></div>';
 }
+function toggleKeep(id) { const t = store.tasks.list.find(x => x.id === id); if (!t) return; t.keep = !t.keep; save('tasks'); renderTasks(); toast(t.keep ? 'Comes back every day' : 'Today only'); }
 function itemTaskHtml(t) {
   const it = store.items[t.itemId];
   if (!it) return '';
@@ -923,7 +956,7 @@ function itemTaskHtml(t) {
   if (it.proofMin) btns.push('<button class="btn ' + (t.proofed || (!t.pulled && it.thawType === 'timed') ? 'ghost' : 'primary') + '" onclick="startTaskTimer(\'' + t.id + '\',\'proof\')">Proof ' + it.proofMin + 'm' + (t.proofed ? ' ✓' : '') + '</button>');
   if (it.timeLo) btns.push('<button class="btn ' + (btns.length && !((t.pulled || it.thawType !== 'timed') && (t.proofed || !it.proofMin)) ? '' : 'primary') + '" onclick="startTaskTimer(\'' + t.id + '\',\'bake\')" ' + (done ? 'disabled' : '') + '>Bake ' + fmtTime(it) + '</button>');
   return '<div class="task ' + (done ? 'done' : '') + (open ? ' open' : '') + '" id="task-' + t.id + '">' +
-    '<div class="head" onclick="toggleOpen(\'' + t.id + '\')" style="border-left:4px solid ' + itemColor(it) + '"><div class="chk"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div><div class="grow"><div class="title ellip">' + esc(t.title) + '</div><div class="sub">' + sub.map(esc).join(' · ') + (running.length ? ' · <span style="color:var(--green)">' + running[0].kind + ' ' + fmtDur(running[0].endsAt - now()) + '</span>' : '') + '</div></div><div class="mono sm dim">' + baked + '/' + t.need + '</div></div>' +
+    '<div class="head" onclick="toggleOpen(\'' + t.id + '\')" style="border-left:4px solid ' + itemColor(it) + '"><div class="chk"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div><div class="grow"><div class="title ellip">' + esc(t.title) + '</div><div class="sub">' + sub.map(esc).join(' · ') + '</div>' + (running.length ? '<div class="xs" style="color:var(--green);font-weight:600;margin-top:2px">' + running.map(r => r.kind + ' ' + fmtDur(r.endsAt - now())).join(' · ') + '</div>' : '') + '</div><div class="mono sm dim">' + baked + '/' + t.need + '</div></div>' +
     '<div class="body">' +
       '<div class="bar" style="position:relative"><i style="width:' + pct + '%"></i><i style="position:absolute;left:' + pct + '%;top:0;width:' + pctOven + '%;background:var(--amber);opacity:.7"></i></div>' +
       '<div class="row" style="justify-content:space-between;gap:8px"><span class="xs muted grow">' + (it.thawType !== 'none' ? esc(thawLabel(it)) + (it.proofMin ? ' · proof ' + it.proofMin + 'm' : '') : 'Frozen → oven') + '</span><input class="input" type="number" inputmode="numeric" placeholder="pcs" id="addb-' + t.id + '" style="width:74px;padding:6px 4px;text-align:center;min-height:34px"><button class="btn sm primary" onclick="addBaked(\'' + t.id + '\')">+ Baked</button><button class="btn sm ghost" onclick="addBaked(\'' + t.id + '\',true)" title="undo">−</button></div>' +
@@ -951,15 +984,16 @@ function toggleCustom(id) { const t = store.tasks.list.find(x => x.id === id); i
 function removeTask(id) { store.tasks.list = store.tasks.list.filter(x => x.id !== id); store.timers = store.timers.filter(x => x.taskId !== id); save('tasks'); save('timers'); updateWake(); renderTasks(); }
 function addCustomTask() {
   const inp = $('#task-new'), title = inp.value.trim(); if (!title) return;
-  if (store.tasks.date !== todayKey()) store.tasks = { date: todayKey(), list: [] };
-  store.tasks.list.push({ id: uid(), itemId: null, title, checked: false, created: now() });
+  rollTasks();
+  store.tasks.list.push({ id: uid(), itemId: null, title, checked: false, keep: false, created: now() });
   inp.value = ''; save('tasks'); renderTasks();
 }
 $('#task-new').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addCustomTask(); } });
 function startTaskTimer(id, kind) {
   const t = store.tasks.list.find(x => x.id === id), it = t && store.items[t.itemId]; if (!it) return;
-  if (kind === 'thaw') startTimer({ label: it.name + ' · thaw', minutes: it.thawMin, kind, itemId: it.id, taskId: id, hint: 'tacky to the touch' });
-  else if (kind === 'proof') startTimer({ label: it.name + ' · proof', minutes: it.proofMin, kind, itemId: it.id, taskId: id });
+  if (kind !== 'bake' && store.timers.some(x => x.taskId === id && x.kind === kind && x.endsAt > now())) { toast(kind[0].toUpperCase() + kind.slice(1) + ' timer already running'); go('today'); return; }
+  if (kind === 'thaw') startTimer({ label: it.name + ' · thaw', minutes: it.thawMin, kind, itemId: it.id, taskId: id, hint: 'tacky to the touch', say: it.say + ' thawed' });
+  else if (kind === 'proof') startTimer({ label: it.name + ' · proof', minutes: it.proofMin, kind, itemId: it.id, taskId: id, say: it.say + ' proofed' });
   else { openLoad(['task:' + id]); return; }   // bake goes through the oven-load picker so other items can ride along
   go('today');
 }
@@ -970,7 +1004,7 @@ function openPickItem() {
 }
 function addItemTask() {
   const it = store.items[$('#pick-item').value]; if (!it) return;
-  if (store.tasks.date !== todayKey()) store.tasks = { date: todayKey(), list: [] };
+  rollTasks();
   const pcs = parseInt($('#pick-racks').value); if (!(pcs > 0)) { toast('How many pieces?'); return; }
   const ex = store.tasks.list.find(t => t.itemId === it.id);
   if (ex) { ex.need = (ex.need || 0) + pcs; ex.auto = false; } else { const t = newItemTask(it, pcs); t.auto = false; store.tasks.list.push(t); }
@@ -1076,12 +1110,14 @@ function saveEditor() {
   const name = $('#ed-name').value.trim(); if (!name) { toast('Name required'); return; }
   const it = editId ? store.items[editId] : { id: bakerySlug(name) + '-' + uid().slice(0, 4), order: 500 + liveItems().length, verify: false };
   it.name = name; it.cat = $('#ed-cat').value === '__new' ? 'Misc' : $('#ed-cat').value; it.enabled = $('#ed-enabled').classList.contains('on');
-  it.par = $('#ed-par').value === '' ? null : num($('#ed-par').value, null); it.parBy = $('#ed-parby').value; it.batch = Math.max(1, num($('#ed-batch').value, 1)); // 1 = unknown, only used as a sheet hint it.shelfDays = $('#ed-shelf').value === '' ? null : num($('#ed-shelf').value, null);
+  it.par = $('#ed-par').value === '' ? null : num($('#ed-par').value, null); it.parBy = $('#ed-parby').value;
+  it.batch = Math.max(1, num($('#ed-batch').value, 1));   // 1 = unknown; only used as a sheet hint
+  it.shelfDays = $('#ed-shelf').value === '' ? null : num($('#ed-shelf').value, null);
   it.thawType = $('#ed-thawtype').value; it.thawMin = it.thawType === 'timed' ? num($('#ed-thawmin').value, 0) : 0; it.proofMin = num($('#ed-proof').value, 0); it.steam = num($('#ed-steam').value, 0);
   it.temp = num($('#ed-temp').value, 0); it.timeLo = num($('#ed-tlo').value, 0); it.timeHi = num($('#ed-thi').value, it.timeLo); if (it.timeHi < it.timeLo) it.timeHi = it.timeLo;
   it.note = $('#ed-note').value.trim(); it.steps = $('#ed-steps').value.split('\n').map(s => s.trim()).filter(Boolean);
   if (!it.steps.length) it.steps = bakeryDefaultSteps(it);
-  it.say = $('#ed-say').value.trim() || bakeryDefaultSay(it);
+  const sayIn = $('#ed-say').value.trim(); it.sayCustom = !!sayIn && sayIn !== bakeryDefaultSay(it); it.say = sayIn || bakeryDefaultSay(it);
   store.items[it.id] = it; store.itemsTs[it.id] = now(); save('items');
   // keep task titles in sync
   store.tasks.list.forEach(t => { if (t.itemId === it.id) t.title = it.name; });
@@ -1091,6 +1127,7 @@ function deleteItem() {
   if (!editId || !confirm('Delete this item?')) return;
   store.items[editId].deleted = true; store.itemsTs[editId] = now(); save('items');
   store.tasks.list = store.tasks.list.filter(t => t.itemId !== editId); save('tasks');
+  store.timers = store.timers.filter(t => t.itemId !== editId); save('timers'); updateWake();
   closeSheets(); render();
 }
 
