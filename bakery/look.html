@@ -100,7 +100,7 @@ const P = {
   text:        { v: '#f2f2f0', color: true, label: 'Text', group: 'Theme' },
   fontDisplay: { v: 'System', options: ['System', 'Serif'], label: 'Display type', group: 'Theme', hint: 'clock, timers, headings' },
   navPill:     { v: 0, min: 0, max: 1, step: 1, label: 'Nav pill (on/off)', group: 'Theme' },
-  ring:        { v: 0, min: 0, max: 1, step: 1, label: 'Ring timers (on/off)', group: 'Theme' },
+  ring:        { v: 1, min: 0, max: 1, step: 1, label: 'Ring timers (on/off)', group: 'Theme' },
   clockCard:   { v: 1, min: 0, max: 1, step: 1, label: 'Clock card (on/off)', group: 'Theme' },
   lampDeg:     { v: 335, min: 0, max: 359, step: 1, label: 'Lamp angle°', group: 'Light', hint: '0 = top, clockwise' },
   face:        { v: 0.18, min: 0, max: 0.6, step: 0.01, label: 'Face shading', group: 'Light' },
@@ -141,9 +141,9 @@ const P = {
   vignette:    { v: 0.4, min: 0, max: 1, step: 0.01, label: 'Vignette', group: 'Screen' },
   bezel:       { v: 7, min: 0, max: 16, step: 0.5, label: 'Bezel px', group: 'Screen' },
 };
-const CHARCOAL_BASE = { theme: 'charcoal', text: '#f2f2f0', fontDisplay: 'System', navPill: 0, ring: 0, clockCard: 1 };
+const CHARCOAL_BASE = { theme: 'charcoal', text: '#f2f2f0', fontDisplay: 'System', navPill: 0, ring: 1, clockCard: 1 };
 const PRESETS = {
-  'Warm Bakery': { theme: 'warm', text: '#efe6d8', fontDisplay: 'Serif', navPill: 1, ring: 1, clockCard: 0, lampDeg: 0, face: 0.10, edge: 0.5, bg0: '#161513', bg1: '#1f1d1a', bg3: '#302b26', green: '#d2a06a', grain: 0.14, grainSize: 120, grainFreq: 0.6, btnGrain: 0.6, bevW: 1.5, bevAmt: 0.3, drop: 0.7, btnBevW: 1, btnBevAmt: 0.35, btnFace: 0.18, wellW: 3, wellAmt: 0.4, r: 18, r2: 12, r3: 10, glow: 0, textglow: 0, screen: 1, screenBg: '#1f1d1a', backlight: '#d2a06a', backlightAmt: 0, scan: 0, scanGap: 3, sheen: 0, vignette: 0, bezel: 0 },
+  'Warm Bakery': { theme: 'warm', text: '#efe6d8', fontDisplay: 'Serif', navPill: 0, ring: 1, clockCard: 0, lampDeg: 0, face: 0.10, edge: 0.5, bg0: '#121212', bg1: '#181716', bg3: '#302b26', green: '#b08454', grain: 0.14, grainSize: 120, grainFreq: 0.6, btnGrain: 0.6, bevW: 1, bevAmt: 0.3, drop: 0.7, btnBevW: 1, btnBevAmt: 0.35, btnFace: 0.14, wellW: 3, wellAmt: 0.4, r: 0, r2: 6, r3: 10, glow: 0, textglow: 0, screen: 0, screenBg: '#1f1d1a', backlight: '#d2a06a', backlightAmt: 0, scan: 0, scanGap: 3, sheen: 0, vignette: 0, bezel: 0 },
   'Collin 9/8': { ...CHARCOAL_BASE, lampDeg: 0, face: 0.06, edge: 0.76, bg0: '#0c0d0f', bg1: '#151618', bg3: '#25272c', green: '#3fd67f', grain: 0.36, grainSize: 55, grainFreq: 0.3, btnGrain: 1, bevW: 1.5, bevAmt: 0.12, drop: 1, btnBevW: 0.5, btnBevAmt: 0.12, btnFace: 0.08, wellW: 7.5, wellAmt: 0.09, r: 1, r2: 11, r3: 8, glow: 5, textglow: 0, screen: 1, screenBg: '#070a08', backlight: '#3fd67f', backlightAmt: 0.06, scan: 0.07, scanGap: 2, sheen: 0.02, vignette: 0.13, bezel: 3 },
   'Hard Kick': { ...CHARCOAL_BASE, lampDeg: 335, face: 0.18, edge: 0.6, bg0: '#0c0d0f', bg1: '#151618', bg3: '#25272c', green: '#3fd67f', grain: 0.18, grainSize: 140, grainFreq: 0.9, btnGrain: 1, bevW: 2.5, bevAmt: 0.55, drop: 0.55, btnBevW: 2, btnBevAmt: 0.6, btnFace: 0.28, wellW: 4, wellAmt: 0.65, r: 16, r2: 11, r3: 8, glow: 12, textglow: 1, screen: 1, screenBg: '#070a08', backlight: '#3fd67f', backlightAmt: 0.14, scan: 0.12, scanGap: 3, sheen: 0.08, vignette: 0.4, bezel: 7 },
   'Subtle':    { ...CHARCOAL_BASE, lampDeg: 340, face: 0.10, edge: 0.4, bg0: '#0c0d0f', bg1: '#151618', bg3: '#25272c', green: '#3fd67f', grain: 0.09, grainSize: 160, grainFreq: 0.9, btnGrain: 0.5, bevW: 1.5, bevAmt: 0.4, drop: 0.35, btnBevW: 1.5, btnBevAmt: 0.45, btnFace: 0.16, wellW: 2.5, wellAmt: 0.45, r: 16, r2: 11, r3: 8, glow: 8, textglow: 1, screen: 1, screenBg: '#0a0c0b', backlight: '#3fd67f', backlightAmt: 0.08, scan: 0.05, scanGap: 3, sheen: 0.04, vignette: 0.25, bezel: 5 },

@@ -31,6 +31,8 @@
   --font:-apple-system,'SF Pro Display',system-ui,'Segoe UI',Roboto,sans-serif;
   --mono:'SF Mono',ui-monospace,Menlo,Consolas,monospace;
   --font-display:inherit; --ok:var(--green);
+  /* structural variants, read by applySkin(): ring timers everywhere, clock in a card, no nav pill, LCD screen on */
+  --ring:1; --clock-card:1; --nav-pill:0; --screen:1;
 }
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 html,body { height:100%; }
@@ -268,21 +270,21 @@ textarea.input { min-height:90px; resize:vertical; line-height:1.45; }
   --r: 1px; --r2: 11px; --r3: 8px;
   --glow: 5; --textglow: 0;
   --screen-bg: #070a08; --backlight: #3fd67f; --backlight-amt: 0.06; --scan: 0.07; --scan-gap: 2; --sheen: 0.02; --vignette: 0.13; --bezel: 3;
-  --nav-pill: 0; --ring: 0; --clock-card: 1;
   --noise-url: none;
 }
 /* WARM BAKERY theme — copper on warm black, serif display type, ring timers,
    pill nav, clock on the backplate. Picked in Settings → Look. */
 .theme-warm {
-  --bg0:#161513; --bg1:#1f1d1a; --bg2:#26231f; --bg3:#302b26; --bdr:#332f29; --bdr2:#433c34;
+  /* Collin's pick, 2026-09-09 00:17 — tune in look.html (Warm Bakery preset), paste here */
+  --bg0:#121212; --bg1:#181716; --bg2:#201f1d; --bg3:#302b26; --bdr:#2b2926; --bdr2:#3a3733;
   --text:#efe6d8; --text2:#b9ad9c; --text3:#877c6d; --text4:#5b5348;
-  --green:#d2a06a; --green-dim:rgba(210,160,106,.16); --on-green:#1d1509; --ok:#3fd67f;
+  --green:#b08454; --green-dim:rgba(176,132,84,.18); --on-green:#1d1509; --ok:#3fd67f;
   --font-display:'Iowan Old Style','Palatino','Palatino Linotype','Georgia','Times New Roman',serif;
   --grain:0.14; --grain-size:120; --grain-freq:0.6; --btn-grain:0.6;
-  --face:0.10; --edge:0.5; --bev-w:1.5; --bev-amt:0.3; --drop:0.7;
-  --btn-bev-w:1; --btn-bev-amt:0.35; --btn-face:0.18; --well-w:3; --well-amt:0.4;
-  --r:18px; --r2:12px; --r3:10px; --glow:0; --textglow:0;
-  --nav-pill:1; --ring:1; --clock-card:0; --ring-color:var(--green);
+  --face:0.10; --edge:0.5; --bev-w:1; --bev-amt:0.3; --drop:0.7;
+  --btn-bev-w:1; --btn-bev-amt:0.35; --btn-face:0.14; --well-w:3; --well-amt:0.4;
+  --r:0px; --r2:6px; --r3:10px; --glow:0; --textglow:0;
+  --nav-pill:0; --ring:1; --clock-card:0; --screen:0; --ring-color:var(--green);
   --screen-bg:#1f1d1a; --backlight:#d2a06a; --backlight-amt:0; --scan:0; --scan-gap:3; --sheen:0; --vignette:0; --bezel:0;
 }
 .theme-warm header h1 { font-weight:500; letter-spacing:.14em; text-transform:uppercase; font-size:15px; }
@@ -781,7 +783,7 @@ function renderToday() {
     const it = nx.itemId ? store.items[nx.itemId] : null, verb = nextVerb(nx);
     nc.innerHTML = '<h2>Next up' + (taskWhen(nx) ? '<small>by ' + taskWhen(nx) + ' AM</small>' : '') + '</h2><div class="name">' + esc(taskTitle(nx)) + '</div><div class="act">' + esc(nextAction(nx)) + '</div>' +
       (it ? '<div class="sm muted" style="margin-top:4px">' + esc(thawLabel(it)) + (it.proofMin ? ' · proof ' + it.proofMin + 'm' : '') + (it.temp ? ' · ' + it.temp + '°' : '') + (it.steam ? ' · steam ' + it.steam : '') + (fmtTime(it) ? ' · ' + fmtTime(it) : '') + '</div>' : '') +
-      '<div class="row" style="margin-top:12px;gap:8px">' + (verb ? '<button class="btn primary grow" onclick="quickAct(\'' + nx.id + '\')">' + esc(verb.label) + '</button>' : '<button class="btn primary grow" onclick="toggleCustom(\'' + nx.id + '\'); renderToday()">Mark done</button>') + '<button class="btn grow" onclick="openTask(\'' + nx.id + '\')">Open</button></div>';
+      '<div class="row" style="margin-top:12px;gap:8px">' + (verb ? '<button class="btn primary grow" onclick="quickAct(\'' + nx.id + '\')">' + esc(verb.label) + '</button>' : nx.itemId ? '' : '<button class="btn primary grow" onclick="toggleCustom(\'' + nx.id + '\'); renderToday()">Mark done</button>') + '<button class="btn grow" onclick="openTask(\'' + nx.id + '\')">Open</button></div>';
   }
 }
 function nextTask() {
@@ -819,12 +821,12 @@ function renderTimers() {
   const soon = list.find(t => t.endsAt > now() && t.endsAt - now() <= 120000);
   if (due.length) {
     const t = due[0];
-    hero.className = 'done on screen';
+    hero.className = 'done on' + (SCREEN_ON ? ' screen' : '');
     hero.innerHTML = '<div class="k">Timer done</div><div class="n">' + esc(t.label) + '</div><div class="t">' + fmtDur(t.endsAt - now()) + '</div>' +
       '<div class="row" style="gap:8px">' + (t.kind === 'bake' && t.taskId ? '<button class="btn primary grow" onclick="ackTimer(\'' + t.id + '\',true)">Out of the oven</button>' : '<button class="btn primary grow" onclick="ackTimer(\'' + t.id + '\',true)">Done</button>') +
       '<button class="btn" onclick="snooze(\'' + t.id + '\')">+1 min</button></div>';
   } else if (soon) {
-    hero.className = 'soon on screen';
+    hero.className = 'soon on' + (SCREEN_ON ? ' screen' : '');
     hero.innerHTML = '<div class="k">Coming up</div><div class="n">' + esc(soon.label) + '</div><div class="t">' + fmtDur(soon.endsAt - now()) + '</div><div class="sm" style="opacity:.8">Get ready to open the oven</div>';
   } else { hero.className = ''; hero.innerHTML = ''; }
   if (!list.length) { box.innerHTML = '<div class="card"><h2>Timers</h2><div class="empty"><b>Nothing in the oven</b>Load one or several items at once — each gets its own timer.</div><div class="grid2"><button class="btn primary" onclick="openLoad()">Load oven</button><button class="btn" onclick="openCustomTimer()">Custom timer</button></div></div>'; return; }
@@ -1325,6 +1327,7 @@ function noiseUrl(freq) {
   const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><filter id="n" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="' + freq + '" numOctaves="3" stitchTiles="stitch" seed="7"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncR type="linear" slope="1.6" intercept="-0.3"/><feFuncG type="linear" slope="1.6" intercept="-0.3"/><feFuncB type="linear" slope="1.6" intercept="-0.3"/></feComponentTransfer></filter><rect width="100%" height="100%" filter="url(#n)"/></svg>';
   return 'url("data:image/svg+xml;utf8,' + encodeURIComponent(svg) + '")';
 }
+let SCREEN_ON = true;
 function applySkin() {
   const on = store.settings.skin !== false, warm = store.settings.theme === 'warm';
   document.body.classList.toggle('skin', on);
@@ -1334,6 +1337,8 @@ function applySkin() {
   // structural variants the theme asks for
   document.body.classList.toggle('ring', parseFloat(cs.getPropertyValue('--ring')) > 0);
   document.body.classList.toggle('plainclock', parseFloat(cs.getPropertyValue('--clock-card')) === 0);
+  SCREEN_ON = parseFloat(cs.getPropertyValue('--screen')) !== 0;
+  $('#clock-card').classList.toggle('screen', SCREEN_ON); const h = $('#hero'); if (h.classList.contains('on')) h.classList.toggle('screen', SCREEN_ON);
   const meta = document.querySelector('meta[name=theme-color]'); if (meta) meta.content = cs.getPropertyValue('--bg0').trim() || '#0c0d0f';
 }
 function setTheme(n) { store.settings.theme = n; save('settings'); applySkin(); renderSettings(); toast(n === 'warm' ? 'Warm Bakery' : 'Charcoal'); }

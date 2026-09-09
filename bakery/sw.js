@@ -1,6 +1,6 @@
 /* Bakery Shift service worker — the app works with no signal in the store.
    Network first so an online phone picks up updates, cache fallback offline. */
-const CACHE = 'bakery-v10';
+const CACHE = 'bakery-v11';
 const CORE = ['./', './index.html', './data.js', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './favicon.png'];
 
 self.addEventListener('install', e => {
