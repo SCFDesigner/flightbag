@@ -5901,7 +5901,7 @@ function saveCurrentAircraft() {
 }
 
 // FSP Dispatch Prep hand-off. Payload: { tail, make, model, emptyWeight, emptyArm, emptyMoment,
-// instructor: { name, weight, bag }, maintenance: { hr50, hr100, ad1, ad2, annual, regist }, fetchedAt }. Values come from the school's FSP aircraft
+// instructor: { name, weight, bag }, maintenance: { hr50, hr100, ad1, ad2, annual, regist }, group, aircraftLabel, fetchedAt }. Values come from the school's FSP aircraft
 // record (empty weight/arm/moment) and the instructor's FSP profile; station arms and CG limits
 // stay the POH values already built into this page.
 function applyFspImport() {
@@ -5929,17 +5929,21 @@ function applyFspImport() {
         return true;
     };
 
-    const typeByModel = { '152': 'C-152', '172': 'C-172', 'P2006T': 'P2006T' };
-    const modelKey = Object.keys(typeByModel).find(k => String(data.model || '').toUpperCase().includes(k));
-    const type = modelKey && typeByModel[modelKey];
+    // Aircraft type from FSP model, scheduling group, or the calendar label. USAA names its 152s
+    // "IR-52" / "Cessna 152 Refurb" and 172s "IR-72" / "Cessna 172", so match those forms too.
+    const typeText = [data.model, data.group, data.aircraftLabel].filter(Boolean).join(' ');
+    const type = /P\s*2006\s*T/i.test(typeText) ? 'P2006T'
+        : /(?:^|[^\d])(?:C-?)?152\b|\bIR[-\s]?52\b/i.test(typeText) ? 'C-152'
+        : /(?:^|[^\d])(?:C-?)?172\b|\bIR[-\s]?72\b/i.test(typeText) ? 'C-172'
+        : null;
     const typeSelect = document.getElementById('aircraftType');
     let typeNote = '';
     if (type && typeSelect && [...typeSelect.options].some(o => o.value === type)) {
         typeSelect.value = type;
         typeSelect.dispatchEvent(new Event('change', { bubbles: true }));
         populateAircraftSpecificValues(type);
-    } else if (data.model) {
-        typeNote = ` Aircraft type "${data.make || ''} ${data.model}" is not built in — pick the type manually.`;
+    } else if (typeText) {
+        typeNote = ` Aircraft type "${typeText}" isn't built in — pick the type manually.`;
     }
 
     setField('tailNumber', data.tail);
