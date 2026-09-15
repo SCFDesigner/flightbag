@@ -5954,7 +5954,11 @@ function applyFspImport() {
 
     const instrNote = instr.name && !gotWeight ? ` ${instr.name}'s weight isn't published in FSP — enter it manually.` : '';
     const when = data.fetchedAt ? new Date(data.fetchedAt).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
-    showFspImportBanner(`Loaded ${data.tail || 'aircraft'} from Flight Schedule Pro${when ? ' (' + when + ')' : ''}.${typeNote}${instrNote}`, !!(typeNote || instrNote));
+    const what = data.tail
+        ? `${data.tail}${instr.name ? ' and ' + instr.name + "'s weights" : ''}`
+        : `${instr.name || 'instructor'}'s weight and bag weight`;
+    const bagNote = instr.name && gotWeight && (instr.bag === undefined || instr.bag === null) ? ` No bag weight in ${instr.name}'s FSP profile — enter it manually.` : '';
+    showFspImportBanner(`Loaded ${what} from Flight Schedule Pro${when ? ' (' + when + ')' : ''}.${typeNote}${instrNote}${bagNote}`, !!(typeNote || instrNote || bagNote));
 }
 
 function showFspImportBanner(message, warn) {
