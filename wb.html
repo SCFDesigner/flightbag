@@ -5901,7 +5901,7 @@ function saveCurrentAircraft() {
 }
 
 // FSP Dispatch Prep hand-off. Payload: { tail, make, model, emptyWeight, emptyArm, emptyMoment,
-// instructor: { name, weight, bag }, fetchedAt }. Values come from the school's FSP aircraft
+// instructor: { name, weight, bag }, maintenance: { hr50, hr100, ad1, ad2, annual, regist }, fetchedAt }. Values come from the school's FSP aircraft
 // record (empty weight/arm/moment) and the instructor's FSP profile; station arms and CG limits
 // stay the POH values already built into this page.
 function applyFspImport() {
@@ -5950,6 +5950,15 @@ function applyFspImport() {
     const gotWeight = setField('instructorWeight', instr.weight);
     setField('instructorBag', instr.bag);
 
+    // Maintenance: FSP "Maintenance Reminders (All Active Statuses)" → 50 Hr / 100 Hr / AD / AD / Annual / Regist.
+    const mx = data.maintenance || null;
+    let mxNote = '';
+    if (mx) {
+        const filled = ['hr50', 'hr100', 'ad1', 'ad2', 'annual', 'regist'].filter(id => mx[id] && setField(id, mx[id]));
+        const missing = [['hr50', '50 Hr'], ['hr100', '100 Hr'], ['ad1', 'AD'], ['annual', 'Annual'], ['regist', 'Registration']].filter(([id]) => !mx[id]).map(([, label]) => label);
+        mxNote = filled.length ? ` Maintenance: ${filled.length} field${filled.length === 1 ? '' : 's'} filled${missing.length ? ` (not in FSP: ${missing.join(', ')})` : ''}.` : ' No maintenance reminders came through from FSP.';
+    }
+
     if (typeof updateWeightBalanceCalculations === 'function') updateWeightBalanceCalculations();
 
     const instrNote = instr.name && !gotWeight ? ` ${instr.name}'s weight isn't published in FSP — enter it manually.` : '';
@@ -5958,7 +5967,7 @@ function applyFspImport() {
         ? `${data.tail}${instr.name ? ' and ' + instr.name + "'s weights" : ''}`
         : `${instr.name || 'instructor'}'s weight and bag weight`;
     const bagNote = instr.name && gotWeight && (instr.bag === undefined || instr.bag === null) ? ` No bag weight in ${instr.name}'s FSP profile — enter it manually.` : '';
-    showFspImportBanner(`Loaded ${what} from Flight Schedule Pro${when ? ' (' + when + ')' : ''}.${typeNote}${instrNote}${bagNote}`, !!(typeNote || instrNote || bagNote));
+    showFspImportBanner(`Loaded ${what} from Flight Schedule Pro${when ? ' (' + when + ')' : ''}.${mxNote}${typeNote}${instrNote}${bagNote}`, !!(typeNote || instrNote || bagNote));
 }
 
 function showFspImportBanner(message, warn) {
