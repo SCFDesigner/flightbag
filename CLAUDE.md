@@ -31,6 +31,7 @@ Never estimate, approximate, or invent values. If a number is in this tool, it h
 |------|---------|
 | `index.html` | Home — Pilot Study Tools launcher |
 | `wb.html` | Weight & Balance calculator (C-152 / C-172 / P2006T / custom). Layout order matches the flight school's paper form — do not reorder. |
+| `wb.html#fsp=…` | Hand-off from the FSP Dispatch Prep Firefox extension (`~/Desktop/mystuff/extension`): base64url JSON in the hash prefills aircraft type, tail, empty weight/arm/moment and instructor weight/bag (`applyFspImport()`). Station arms/CG limits stay POH values. |
 | `wbsync.js` | Firebase cross-device sync for wb.html (Recent Flights) |
 | `e6b.js` | E6B flight computer logic for wb.html (wind/WCA/GS, time-speed-distance, fuel, descent, PA/DA/TAS, conversions) |
 | `study.html` | Study hub |

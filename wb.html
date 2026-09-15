@@ -5231,6 +5231,10 @@ const P2006T_SE_PERFORMANCE = {
                 }
             }
 
+            // Honor #fsp=<base64url JSON> hand-offs from the FSP Dispatch Prep extension.
+            // Carried in the hash so the data never reaches the web server.
+            applyFspImport();
+
             // Initialize charts for both desktop and mobile
             setTimeout(() => {
                 updateCGLimitsDisplay();
@@ -5894,6 +5898,81 @@ function saveCurrentAircraft() {
     } catch (error) {
         showSettingsStatus('Error saving aircraft: ' + error.message, 'error');
     }
+}
+
+// FSP Dispatch Prep hand-off. Payload: { tail, make, model, emptyWeight, emptyArm, emptyMoment,
+// instructor: { name, weight, bag }, fetchedAt }. Values come from the school's FSP aircraft
+// record (empty weight/arm/moment) and the instructor's FSP profile; station arms and CG limits
+// stay the POH values already built into this page.
+function applyFspImport() {
+    const match = /(?:^#|&)fsp=([A-Za-z0-9_-]+)/.exec(window.location.hash);
+    if (!match) return;
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+    let data;
+    try {
+        const b64 = match[1].replace(/-/g, '+').replace(/_/g, '/');
+        const json = new TextDecoder().decode(Uint8Array.from(atob(b64), c => c.charCodeAt(0)));
+        data = JSON.parse(json);
+    } catch (err) {
+        console.error('FSP import: could not decode payload', err);
+        showFspImportBanner('Could not read the FSP hand-off link.', true);
+        return;
+    }
+    console.log('FSP import payload:', data);
+
+    const setField = (id, value) => {
+        const el = document.getElementById(id);
+        if (!el || value === undefined || value === null || value === '' || Number.isNaN(value)) return false;
+        el.value = value;
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+        return true;
+    };
+
+    const typeByModel = { '152': 'C-152', '172': 'C-172', 'P2006T': 'P2006T' };
+    const modelKey = Object.keys(typeByModel).find(k => String(data.model || '').toUpperCase().includes(k));
+    const type = modelKey && typeByModel[modelKey];
+    const typeSelect = document.getElementById('aircraftType');
+    let typeNote = '';
+    if (type && typeSelect && [...typeSelect.options].some(o => o.value === type)) {
+        typeSelect.value = type;
+        typeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        populateAircraftSpecificValues(type);
+    } else if (data.model) {
+        typeNote = ` Aircraft type "${data.make || ''} ${data.model}" is not built in — pick the type manually.`;
+    }
+
+    setField('tailNumber', data.tail);
+    setField('weight', data.emptyWeight);
+    setField('arm', data.emptyArm);
+    setField('moment', data.emptyMoment);
+    const instr = data.instructor || {};
+    const gotWeight = setField('instructorWeight', instr.weight);
+    setField('instructorBag', instr.bag);
+
+    if (typeof updateWeightBalanceCalculations === 'function') updateWeightBalanceCalculations();
+
+    const instrNote = instr.name && !gotWeight ? ` ${instr.name}'s weight isn't published in FSP — enter it manually.` : '';
+    const when = data.fetchedAt ? new Date(data.fetchedAt).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
+    showFspImportBanner(`Loaded ${data.tail || 'aircraft'} from Flight Schedule Pro${when ? ' (' + when + ')' : ''}.${typeNote}${instrNote}`, !!(typeNote || instrNote));
+}
+
+function showFspImportBanner(message, warn) {
+    const bar = document.createElement('div');
+    bar.setAttribute('role', 'status');
+    bar.style.cssText = `position:fixed;left:50%;top:12px;transform:translateX(-50%);z-index:9999;max-width:min(92vw,640px);
+        background:#30302e;color:#f0eee6;border:1px solid ${warn ? '#c9a24a' : '#d97757'};border-radius:8px;
+        padding:10px 14px;font:13px/1.4 'Courier New',monospace;box-shadow:0 6px 24px rgba(0,0,0,.4);display:flex;gap:12px;align-items:center;`;
+    const text = document.createElement('span');
+    text.textContent = message;
+    const close = document.createElement('button');
+    close.type = 'button';
+    close.textContent = 'Dismiss';
+    close.style.cssText = 'background:#3b3a37;color:#f0eee6;border:1px solid #45433e;border-radius:6px;padding:3px 8px;font:inherit;cursor:pointer;';
+    close.onclick = () => bar.remove();
+    bar.append(text, close);
+    document.body.appendChild(bar);
+    if (!warn) setTimeout(() => bar.remove(), 8000);
 }
 
 function loadSavedAircraft(aircraftName) {
