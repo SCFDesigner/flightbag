@@ -5946,6 +5946,14 @@ function applyFspImport() {
         typeNote = ` Aircraft type "${typeText}" isn't built in — pick the type manually.`;
     }
 
+    // Typical USAA training flight: a 3-hour block flies about 2.5 hr; the 152s are dispatched with 24.5 gal.
+    // Pre-filled every time so the sheet is ready to go — change them on the page when a flight differs.
+    const FSP_IMPORT_DEFAULTS = { time: 2.5, fuel: { 'C-152': 24.5 } };
+    const defaultNotes = [];
+    if (type && FSP_IMPORT_DEFAULTS.fuel[type] != null && setField('fuel', FSP_IMPORT_DEFAULTS.fuel[type])) defaultNotes.push(`${FSP_IMPORT_DEFAULTS.fuel[type]} gal fuel`);
+    if (setField('time', FSP_IMPORT_DEFAULTS.time)) defaultNotes.push(`${FSP_IMPORT_DEFAULTS.time} hr`);
+    const defaultsNote = defaultNotes.length ? ` Assumed ${defaultNotes.join(' and ')} — adjust if this flight differs.` : '';
+
     setField('tailNumber', data.tail);
     setField('weight', data.emptyWeight);
     setField('arm', data.emptyArm);
@@ -5971,7 +5979,7 @@ function applyFspImport() {
         ? `${data.tail}${instr.name ? ' and ' + instr.name + "'s weights" : ''}`
         : `${instr.name || 'instructor'}'s weight and bag weight`;
     const bagNote = instr.name && gotWeight && (instr.bag === undefined || instr.bag === null) ? ` No bag weight in ${instr.name}'s FSP profile — enter it manually.` : '';
-    showFspImportBanner(`Loaded ${what} from Flight Schedule Pro${when ? ' (' + when + ')' : ''}.${mxNote}${typeNote}${instrNote}${bagNote}`, !!(typeNote || instrNote || bagNote));
+    showFspImportBanner(`Loaded ${what} from Flight Schedule Pro${when ? ' (' + when + ')' : ''}.${defaultsNote}${mxNote}${typeNote}${instrNote}${bagNote}`, !!(typeNote || instrNote || bagNote));
 }
 
 function showFspImportBanner(message, warn) {
