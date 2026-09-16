@@ -21,7 +21,7 @@ Never estimate, approximate, or invent values. If a number is in this tool, it h
 - Cross-device flight sync via Firebase Realtime Database (`wbsync.js`, project `weight-and-balance-d5044`, no login)
 
 ## Git
-- Remote: `git@github.com:SCFDesigner/weight-balance-calculator.git` (SSH key not authorized on this machine — push over HTTPS with `-c credential.helper='!gh auth git-credential'`)
+- Remote: `https://github.com/SCFDesigner/flightbag.git` (repo was renamed from weight-balance-calculator; HTTPS with the repo-local `credential.helper = !gh auth git-credential` — the SSH key isn't authorized on this machine)
 - Branch: `main`
 - Note: the repo also hosts the unrelated `PEV1/` project on the same branch
 - Push after every implementation using `/usr/bin/git`
@@ -31,7 +31,8 @@ Never estimate, approximate, or invent values. If a number is in this tool, it h
 |------|---------|
 | `index.html` | Home — Pilot Study Tools launcher |
 | `wb.html` | Weight & Balance calculator (C-152 / C-172 / P2006T / custom). Layout order matches the flight school's paper form — do not reorder. |
-| `wb.html#fsp=…` | Hand-off from the FSP Dispatch Prep Firefox extension (`~/Desktop/mystuff/extension`): base64url JSON in the hash prefills aircraft type, tail, empty weight/arm/moment and instructor weight/bag (`applyFspImport()`). Station arms/CG limits stay POH values. |
+| `wb.html#fsp=…` | Hand-off from the FSP Dispatch Prep Firefox extension (`~/Desktop/mystuff/extension`): base64url JSON in the hash prefills aircraft type, tail, empty weight/arm/moment and instructor weight/bag (`applyFspImport()`), plus `FSP_IMPORT_DEFAULTS` (2.5 hr, 24.5 gal for C-152). Station arms/CG limits stay POH values. |
+| `icons/favicon.svg`, `icons/apple-touch-icon.png` | Tab / home-screen icon for every page (terracotta square, charcoal plane — deliberately the inverse of the My Stuff dashboard's charcoal/terracotta mountain). New pages need both `<link>` tags after `<title>`. |
 | `wbsync.js` | Firebase cross-device sync for wb.html (Recent Flights) |
 | `e6b.js` | E6B flight computer logic for wb.html (wind/WCA/GS, time-speed-distance, fuel, descent, PA/DA/TAS, conversions) |
 | `study.html` | Study hub |
