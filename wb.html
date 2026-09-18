@@ -1454,6 +1454,44 @@
             .settings-heading { margin-top: 6px; }
             .wx-links { width: 100%; }
         }
+
+        /* ── Fields & readouts (same look as the E6B) ──
+           Entry fields are wells pressed into the panel; results — clocks, the W&B table, limits, METAR,
+           V-speeds — are flat glass lit by the page's one lamp (theme --fb-glare, placed per element by
+           flightbag-theme.js via window.FB_GLASS below), so glass near the light shows a sheen and glass
+           far from it stays dark. Values glow in their own colour (status colours are kept). */
+        .input-field, .select-field {
+            background: linear-gradient(180deg, var(--fb-well-top) 0%, var(--fb-well) 45%, var(--fb-well) 100%);
+            border: 1px solid var(--fb-well-rim);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,.7), inset 0 1px 1px rgba(0,0,0,.8),
+                        inset 0 -1px 0 rgba(255,255,255,.03), 0 1px 0 rgba(255,255,255,.055);
+            transition: box-shadow var(--fb-ease), border-color var(--fb-ease);
+        }
+        .input-field::placeholder { color: var(--fb-dim); opacity: .55; }
+        .input-field:focus, .select-field:focus {
+            background: linear-gradient(180deg, var(--fb-well-top) 0%, var(--fb-well) 45%, var(--fb-well) 100%);
+            border-color: color-mix(in srgb, var(--fb-accent) 55%, var(--fb-well-rim));
+            box-shadow: inset 0 2px 4px rgba(0,0,0,.7), inset 0 1px 1px rgba(0,0,0,.8),
+                        inset 0 0 10px color-mix(in srgb, var(--fb-accent) 22%, transparent), 0 1px 0 rgba(255,255,255,.055);
+        }
+        .time-item, .info-item, .airspeed-item, .data-table {
+            background-color: #141312;
+            background-image: var(--fb-glare, none);
+            background-size: var(--fb-lamp-size, 100vw 100vh);
+            background-position: var(--fb-lamp-pos, 0 0);
+            background-repeat: no-repeat;
+            border: 1px solid rgba(255,255,255,.05);
+        }
+        .data-table { border-collapse: separate; border-spacing: 0; border-radius: var(--fb-radius-sm); overflow: hidden; }
+        .data-table th, .data-table td,
+        .data-table tr:nth-child(even) td { background-color: transparent; border: 0; border-bottom: 1px solid rgba(255,255,255,.045); }
+        .data-table tr:last-child td { border-bottom: 0; }
+        .data-table th { color: var(--fb-dim); border-bottom-color: rgba(255,255,255,.07); }
+        .data-table tr:nth-child(even) td { background-color: rgba(255,255,255,.012); }
+        .time-value, .info-value, .airspeed-item, .data-table td:not(:first-child) {
+            text-shadow: 0 0 6px color-mix(in srgb, currentColor 45%, transparent), 0 0 16px color-mix(in srgb, currentColor 16%, transparent);
+        }
+
     </style>
     <!-- Firebase (Realtime Database) for cross-device flight sync -->
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -7561,6 +7599,7 @@ function updateFormFieldsFromWeather(weatherData) {
   });
 })();
 </script>
+<script>window.FB_GLASS = '.time-item, .info-item, .airspeed-item, .data-table';   // readouts lit by the page lamp</script>
 <script src="theme/flightbag-theme.js"></script>
 </body>
 </html>

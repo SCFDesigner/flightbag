@@ -43,7 +43,8 @@
     if (frame) return;
     frame = requestAnimationFrame(() => {
       frame = 0;
-      for (const el of document.querySelectorAll('.fb-panel, .fb-glass')) {
+      // pages can light extra glass by selector (window.FB_GLASS), for elements they render later
+      for (const el of document.querySelectorAll('.fb-panel, .fb-glass' + (window.FB_GLASS ? ', ' + window.FB_GLASS : ''))) {
         const r = el.getBoundingClientRect();
         el.style.setProperty('--fb-lamp-pos', `${Math.round(-r.left - el.clientLeft)}px ${Math.round(-r.top - el.clientTop)}px`);
       }
