@@ -31,6 +31,11 @@
     const R = Math.hypot(vw, vh) * LOOK.lampRadius, sh = Math.round(128 * (1 - LOOK.lampShadow)), mid = 4 + LOOK.lampMid * 96;
     root.setProperty('--fb-lamp', `radial-gradient(circle ${Math.round(R)}px at ${Math.round(vw * LOOK.lampX)}px ${Math.round(vh * LOOK.lampY)}px, rgba(255,255,255,${a}) 4%, rgba(128,128,128,${a}) ${mid.toFixed(1)}%, rgba(${sh},${sh},${sh},${a}) 100%)`);
     root.setProperty('--fb-lamp-size', `${vw}px ${vh}px`);
+    // Glass (.fb-glass) reflects the same lamp: one glare centred on it that fades to nothing at the lamp's
+    // radius, so glass near the light shows a sheen and glass far from it stays dark.
+    const G = Math.round(R), g = LOOK.lampAmt * 2.2;
+    const stop = (k, p) => `rgba(255,255,255,${(g * k).toFixed(3)}) ${p}%`;
+    root.setProperty('--fb-glare', `radial-gradient(circle ${G}px at ${Math.round(vw * LOOK.lampX)}px ${Math.round(vh * LOOK.lampY)}px, ${stop(1, 0)}, ${stop(0.55, 40)}, ${stop(0.25, 72)}, ${stop(0, 100)})`);
   }
 
   let frame = 0;
@@ -38,7 +43,7 @@
     if (frame) return;
     frame = requestAnimationFrame(() => {
       frame = 0;
-      for (const el of document.querySelectorAll('.fb-panel')) {
+      for (const el of document.querySelectorAll('.fb-panel, .fb-glass')) {
         const r = el.getBoundingClientRect();
         el.style.setProperty('--fb-lamp-pos', `${Math.round(-r.left - el.clientLeft)}px ${Math.round(-r.top - el.clientTop)}px`);
       }

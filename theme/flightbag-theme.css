@@ -45,6 +45,14 @@ body.fb {
 }
 .fb-mono { font-family: var(--fb-mono); }
 
+/* ── glass (readouts): one glare from the page lamp, placed like the panels' lamp (flightbag-theme.js) ── */
+.fb-glass {
+  background-image: var(--fb-glare, none);
+  background-size: var(--fb-lamp-size, 100vw 100vh);
+  background-position: var(--fb-lamp-pos, 0 0);
+  background-repeat: no-repeat;
+}
+
 /* ── panels ── */
 .fb-panel {
   /* lamp (soft-light, one gradient for the page) · top catch-light · overlay grain */

@@ -54,12 +54,16 @@ body.fb {
 .e6b-fill svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .e6b-outs { margin-top: 6px; display: flex; flex-direction: column; gap: 4px; }
 /* Results are flat glass displays set flush in the panel (the inputs are the recessed wells): a dark
-   pane with a faint diagonal sheen, digits unlit while it's "—" and glowing once there is a result.
+   pane catching the page's one light (a glare placed per tile, so tiles near the lamp shine and far ones don't), digits unlit while it's "—" and glowing once there is a result.
    .lit is toggled by the readout script at the bottom. */
 .e6b-out, .xw-big {
   --glass: #141312;
-  --sheen: linear-gradient(115deg, rgba(255,255,255,0) 30%, rgba(255,255,255,.045) 44%, rgba(255,255,255,.012) 56%, rgba(255,255,255,0) 64%);
-  background: var(--sheen), var(--glass);
+  /* page-wide glare (theme .fb-glass: --fb-glare placed per tile) over the dark pane */
+  background-color: var(--glass);
+  background-image: var(--fb-glare, none), linear-gradient(transparent, transparent);
+  background-size: var(--fb-lamp-size, 100vw 100vh), 100% 100%;
+  background-position: var(--fb-lamp-pos, 0 0), 0 0;
+  background-repeat: no-repeat;
   border: 1px solid rgba(255,255,255,.05);
   border-radius: var(--fb-radius-sm);
   transition: border-color .25s ease, background .25s ease;
@@ -76,7 +80,7 @@ body.fb {
 }
 .e6b-out.lit, .xw-big.lit {
   border-color: color-mix(in srgb, var(--fb-accent) 20%, rgba(255,255,255,.05));
-  background: var(--sheen), radial-gradient(100% 140% at 50% 110%, color-mix(in srgb, var(--fb-accent) 7%, transparent), transparent 65%), var(--glass);
+  background-image: var(--fb-glare, none), radial-gradient(100% 140% at 50% 110%, color-mix(in srgb, var(--fb-accent) 7%, transparent), transparent 65%);
 }
 .e6b-out.lit > span:last-child, .xw-big.lit b {
   color: #f2a07f;
@@ -993,6 +997,7 @@ html.embed body.fb { padding: 0 0 max(6px, env(safe-area-inset-bottom)); backgro
     const m = raw.match(/^(-?[\d.,]+°?)\s*([^\d]*)$/);  // number + words (no second number)
     if (m && m[2]) span.innerHTML = `${m[1]}<span class="ro-u">${m[2].replace(/</g, '&lt;')}</span>`;
   }
+  document.querySelectorAll('.e6b-out, .xw-big').forEach(t => t.classList.add('fb-glass'));   // lit by the page lamp
   const spans = [...document.querySelectorAll('.e6b-out > span:last-child, .xw-big > b')];
   const mo = new MutationObserver(recs => recs.forEach(r => {
     const sp = r.target.nodeType === 1 ? r.target.closest('.e6b-out > span:last-child, .xw-big > b') : r.target.parentElement?.closest('.e6b-out > span:last-child, .xw-big > b');
