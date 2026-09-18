@@ -6,67 +6,90 @@
     <title>General Aviation Knowledge</title>
     <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <meta name="theme-color" content="#191918">
+    <link rel="stylesheet" href="theme/flightbag-theme.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0d0d0f; color: #e0e0e0; min-height: 100vh; }
-        .top-bar {
-            position: fixed; top: 0; left: 0; right: 0; height: 56px;
-            background: linear-gradient(135deg, #1a1a1e 0%, #111114 100%);
-            border-bottom: 1px solid #333;
-            display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 100;
+        body.fb {
+            min-height: 100vh;
+            padding: max(20px, env(safe-area-inset-top)) 16px max(32px, env(safe-area-inset-bottom));
+            display: flex; flex-direction: column; align-items: center;
         }
-        .back-btn { background: none; border: 1px solid #555; color: #e0e0e0; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.2s; }
-        .back-btn:hover { border-color: #4CAF50; color: #4CAF50; }
-        .top-bar h1 { font-size: 18px; font-family: 'Courier New', monospace; color: #f44336; letter-spacing: 2px; }
-        .spacer { width: 80px; }
-        .content { margin-top: 56px; padding: 28px 24px; max-width: 900px; margin-left: auto; margin-right: auto; }
-        .search-bar { background: #1a1a1e; border: 1px solid #444; color: #e0e0e0; padding: 10px 16px; border-radius: 8px; font-size: 14px; width: 100%; max-width: 400px; margin-bottom: 24px; }
-        .search-bar:focus { outline: none; border-color: #4CAF50; }
-        .gk-item { margin-bottom: 10px; border: 1px solid #333; border-radius: 8px; overflow: hidden; background: #1a1a1e; }
-        .gk-title {
-            padding: 14px 18px; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
-            background: linear-gradient(135deg, #1e1e22 0%, #18181c 100%); color: #e0e0e0; font-weight: bold; transition: background 0.2s;
-        }
-        .gk-title:hover { background: rgba(76,175,80,0.08); }
-        .expand-icon { font-size: 18px; font-weight: bold; color: #4CAF50; }
-        .gk-detail { padding: 0; background: #111114; border-top: 1px solid #2a2a2a; display: none; }
-        .gk-block { padding: 14px 18px; border-bottom: 1px solid #1e1e1e; }
+
+        /* ── header (shared by the Study tool: study / mnemonics / general_knowledge) ── */
+        .st-top { width: 100%; max-width: 900px; margin-bottom: 18px; }
+        .st-nav { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+        .st-nav .fb-home { min-height: 36px; }
+        .st-id { display: flex; align-items: center; gap: 14px; }
+        .st-mark { width: 40px; height: 40px; flex: none; border-radius: 9px; background: var(--fb-accent); display: grid; place-items: center; box-shadow: 0 4px 14px rgba(0, 0, 0, .35); }
+        .st-mark svg { width: 22px; height: 22px; stroke: var(--fb-bg); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .st-top h1 { font-size: 22px; font-weight: 300; letter-spacing: 6px; color: var(--fb-bright); text-transform: uppercase; }
+        .st-top p { font-size: var(--fb-fs-xs); letter-spacing: 2.5px; color: var(--fb-dim); text-transform: uppercase; margin-top: 4px; }
+
+        /* ── list panel ── */
+        .content { width: 100%; max-width: 900px; }
+        .content > .fb-head .search-bar { width: 100%; max-width: 280px; min-height: 36px; }
+        .st-list { padding: 6px 8px 10px; display: flex; flex-direction: column; gap: 2px; }
+        .gk-item { border-radius: var(--fb-radius-sm); }
+        .gk-item.open { background: color-mix(in srgb, var(--fb-cell) 55%, transparent); }
+        .gk-title { cursor: pointer; }
+        .gk-title .fb-row-t { white-space: normal; line-height: 1.35; }
+        .gk-title:focus-visible { outline: 1px solid var(--fb-accent); outline-offset: -1px; }
+        .gk-item.open .gk-title .fb-chev { transform: rotate(90deg); stroke: var(--fb-accent); }
+        .gk-title .fb-chev { transition: transform var(--fb-ease), stroke var(--fb-ease); }
+        .gk-detail { display: none; padding: 6px 12px 12px 50px; line-height: 1.6; }
+        .gk-detail { padding-top: 0; padding-bottom: 6px; }
+        .gk-block { padding: 10px 0; border-bottom: 1px solid var(--fb-line); }
         .gk-block:last-child { border-bottom: none; }
-        .gk-block h4 { color: #4CAF50; margin-bottom: 8px; font-size: 13px; font-family: 'Courier New', monospace; }
-        .gk-block p { font-size: 13px; color: #ccc; line-height: 1.6; margin: 4px 0; }
-        .gk-block p strong { color: #e0e0e0; }
-        .gk-block em { color: #777; font-style: italic; }
+        .gk-block h4 { color: var(--fb-accent); margin-bottom: 6px; font-size: var(--fb-fs-xs); letter-spacing: 2px; text-transform: uppercase; font-weight: 500; }
+        .gk-block p { font-size: var(--fb-fs-sm); color: var(--fb-text); line-height: 1.6; margin: 4px 0; }
+        .gk-block p strong { color: var(--fb-bright); font-weight: 600; }
+        .gk-block em { color: var(--fb-dim); font-style: italic; }
+        @media (max-width: 600px) {
+            .st-top h1 { font-size: 18px; letter-spacing: 4px; }
+            .gk-detail { padding-left: 12px; }
+            .content > .fb-head .search-bar { max-width: none; }
+        }
     </style>
 </head>
-<body>
-    <div class="top-bar">
-        <button class="back-btn" onclick="window.location.href='study.html'">← Hub</button>
-        <button class="back-btn" onclick="window.location.href='index.html'">⌂ Home</button>
-        <h1>GENERAL KNOWLEDGE</h1>
-        <div class="spacer"></div>
-    </div>
-    <div class="content">
-        <input type="text" class="search-bar" id="searchBar" placeholder="Search knowledge base..." oninput="filterItems()">
-        <div id="gkList">
+<body class="fb">
+    <header class="st-top">
+        <nav class="st-nav">
+            <a class="fb-home" href="study.html"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>Study Hub</a>
+            <a class="fb-home" href="index.html"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7M5 10v10h14V10"/></svg>Home</a>
+        </nav>
+        <div class="st-id">
+            <div class="st-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v18M4 21h16M3 8h18M6 8l-3 7a3 3 0 0 0 6 0zM18 8l-3 7a3 3 0 0 0 6 0z"/></svg></div>
+            <div>
+                <h1>General Knowledge</h1>
+                <p>Documents · airspace · regulations</p>
+            </div>
+        </div>
+    </header>
+    <main class="content fb-panel">
+        <div class="fb-head"><h2 class="fb-title"><svg viewBox="0 0 24 24"><path d="M4 5h6a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H4zM20 5h-6a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h7z"/></svg>Knowledge base</h2>
+            <input type="search" class="search-bar fb-input" id="searchBar" placeholder="Search knowledge base..." oninput="filterItems()">
+        </div>
+        <div id="gkList" class="st-list">
 
         <div class="gk-item">
-            <div class="gk-title" onclick="toggle('docs-currency')"><span>📋 Documents &amp; Currency</span><span class="expand-icon">+</span></div>
+            <div class="gk-title fb-row" role="button" tabindex="0" aria-expanded="false" aria-controls="docs-currency" onclick="toggle('docs-currency')"><span class="fb-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16c.6-1.4 1.7-2 3-2s2.4.6 3 2M14 10h4M14 14h4"/></svg></span><span class="fb-row-t">Documents &amp; Currency</span><span class="fb-row-tag"></span><svg class="fb-chev expand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
             <div id="docs-currency" class="gk-detail">
                 <div class="gk-block">
-                    <h4>👨‍✈️ Required Pilot Documents</h4>
+                    <h4>Required Pilot Documents</h4>
                     <p>• Valid Government Issued Photo I.D.</p>
                     <p>• Current Pilot's Certificate</p>
                     <p>• Current Medical Certificate</p>
                     <p>• Logbook (student pilots only)</p>
                 </div>
                 <div class="gk-block">
-                    <h4>⏰ Pilot Currency Requirements</h4>
+                    <h4>Pilot Currency Requirements</h4>
                     <p><strong>General:</strong> Flight Review, FAA Checkride, or WINGS program within preceding 24 calendar months</p>
                     <p><strong>With PAX:</strong> 3 T/O and LDGs within preceding 90 days (must be full stop if night or tailwheel)</p>
                     <p><strong>IFR Flight:</strong> 6 Instrument Approaches, Holding, Intercepting, and Tracking Course within preceding 6 months (or IPC)</p>
                 </div>
                 <div class="gk-block">
-                    <h4>🏥 Medical Certificates</h4>
+                    <h4>Medical Certificates</h4>
                     <p><strong>1st Class:</strong> Valid 12 calendar months (6 months if over 40)</p>
                     <p><strong>2nd Class:</strong> Valid 12 calendar months</p>
                     <p><strong>3rd Class:</strong> Valid 60 calendar months (24 months if over 40)</p>
@@ -76,10 +99,10 @@
         </div>
 
         <div class="gk-item">
-            <div class="gk-title" onclick="toggle('airspace')"><span>🗺️ Airspace &amp; Weather Minimums</span><span class="expand-icon">+</span></div>
+            <div class="gk-title fb-row" role="button" tabindex="0" aria-expanded="false" aria-controls="airspace" onclick="toggle('airspace')"><span class="fb-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg></span><span class="fb-row-t">Airspace &amp; Weather Minimums</span><span class="fb-row-tag"></span><svg class="fb-chev expand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
             <div id="airspace" class="gk-detail">
                 <div class="gk-block">
-                    <h4>🗺️ Airspace Dimensions</h4>
+                    <h4>Airspace Dimensions</h4>
                     <p><strong>Class A:</strong> FL180 to FL600, entire U.S., extends 12 NM off coastline</p>
                     <p><strong>Class B:</strong> Surface to 10,000 MSL in multiple shelves. Typically extends to 30 NM.</p>
                     <p><strong>Class C:</strong> Surface to 4,000 AGL with 1 shelf (lower shelf starts at 1,200 AGL). Typically extends to 10 NM.</p>
@@ -89,7 +112,7 @@
                     <p><em>*Hierarchy: A &gt; B &gt; C &gt; D &gt; E &gt; G</em></p>
                 </div>
                 <div class="gk-block">
-                    <h4>📡 Airspace Equipment Requirements</h4>
+                    <h4>Airspace Equipment Requirements</h4>
                     <p><strong>Class A:</strong> IFR flight plan, IFR equipment, IFR current</p>
                     <p><strong>Class B:</strong> Two-way radio, Mode C transponder, clearance into Class B</p>
                     <p><strong>Class C:</strong> Two-way radio, Mode C transponder, establish 2-way contact</p>
@@ -97,7 +120,7 @@
                     <p><strong>Class E &amp; G:</strong> None</p>
                 </div>
                 <div class="gk-block">
-                    <h4>☁️ VFR Weather Minimums</h4>
+                    <h4>VFR Weather Minimums</h4>
                     <p><strong>Class A:</strong> VFR N/A</p>
                     <p><strong>Class B:</strong> 3SM, Clear of clouds</p>
                     <p><strong>Class C &amp; D:</strong> 3SM, 1000 above / 500 below / 2000 horizontal (3-152)</p>
@@ -109,7 +132,7 @@
                     <p><strong>Class G night:</strong> 3SM, 1000/500/2000 (3-152)</p>
                 </div>
                 <div class="gk-block">
-                    <h4>⛰️ Minimum Safe Altitudes (91.119)</h4>
+                    <h4>Minimum Safe Altitudes (91.119)</h4>
                     <p><strong>Anywhere:</strong> Altitude allowing safe landing if powerplant fails without undue harm to persons or property</p>
                     <p><strong>Congested areas:</strong> 2000 ft horizontal, 1000 ft above highest obstacle</p>
                     <p><strong>Other than congested:</strong> 500 ft above the surface</p>
@@ -119,10 +142,10 @@
         </div>
 
         <div class="gk-item">
-            <div class="gk-title" onclick="toggle('regulations')"><span>⚖️ Regulations &amp; Procedures</span><span class="expand-icon">+</span></div>
+            <div class="gk-title fb-row" role="button" tabindex="0" aria-expanded="false" aria-controls="regulations" onclick="toggle('regulations')"><span class="fb-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M4 21h16M3 8h18M6 8l-3 7a3 3 0 0 0 6 0zM18 8l-3 7a3 3 0 0 0 6 0z"/></svg></span><span class="fb-row-t">Regulations &amp; Procedures</span><span class="fb-row-tag"></span><svg class="fb-chev expand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
             <div id="regulations" class="gk-detail">
                 <div class="gk-block">
-                    <h4>⚠️ Inoperative Equipment Test (91.213)</h4>
+                    <h4>Inoperative Equipment Test (91.213)</h4>
                     <p><strong>Step 1:</strong> VFR Day Type Certificate</p>
                     <p><strong>Step 2:</strong> Kinds of Operations List</p>
                     <p><strong>Step 3:</strong> 91.205 Requirements</p>
@@ -131,7 +154,7 @@
                     <p><em>*MEL items do NOT require the 4-step test. MELs are tail number specific.</em></p>
                 </div>
                 <div class="gk-block">
-                    <h4>🎛️ Instrument Cockpit Check</h4>
+                    <h4>Instrument Cockpit Check</h4>
                     <p><strong>Airspeed:</strong> Reading 0 kts</p>
                     <p><strong>Altimeter:</strong> +/- 75 ft of field elevation</p>
                     <p><strong>Attitude:</strong> Erect, bank no more than 5°</p>
@@ -141,7 +164,7 @@
                     <p><strong>Vertical Speed:</strong> Reads 0 fpm</p>
                 </div>
                 <div class="gk-block">
-                    <h4>⚖️ Aircraft Load Factors</h4>
+                    <h4>Aircraft Load Factors</h4>
                     <p><strong>Normal:</strong> +3.8 g / -1.52 g</p>
                     <p><strong>Utility:</strong> +4.4 g / -1.76 g</p>
                     <p><strong>Acrobatic:</strong> +6.0 g / -3.00 g</p>
@@ -150,10 +173,10 @@
         </div>
 
         <div class="gk-item">
-            <div class="gk-title" onclick="toggle('oxygen')"><span>🫁 Supplemental Oxygen (91.211)</span><span class="expand-icon">+</span></div>
+            <div class="gk-title fb-row" role="button" tabindex="0" aria-expanded="false" aria-controls="oxygen" onclick="toggle('oxygen')"><span class="fb-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8h11a3 3 0 1 0-3-3M3 12h16a3 3 0 1 1-3 3M3 16h8"/></svg></span><span class="fb-row-t">Supplemental Oxygen (91.211)</span><span class="fb-row-tag"></span><svg class="fb-chev expand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
             <div id="oxygen" class="gk-detail">
                 <div class="gk-block">
-                    <h4>🫁 Oxygen Requirements by Altitude</h4>
+                    <h4>Oxygen Requirements by Altitude</h4>
                     <p><strong>12,500 MSL:</strong> Minimum flight crew must use supplemental oxygen for any period greater than 30 minutes</p>
                     <p><strong>14,000 MSL:</strong> Minimum flight crew must use supplemental oxygen</p>
                     <p><strong>15,000 MSL:</strong> All flight crew must use supplemental oxygen. Passengers must be supplied with supplemental oxygen.</p>
@@ -162,24 +185,29 @@
         </div>
 
         </div><!-- end gkList -->
-    </div>
+    </main>
 
     <script>
     function toggle(id) {
         const detail = document.getElementById(id);
         const title = detail.previousElementSibling;
-        const icon = title.querySelector('.expand-icon');
         const open = detail.style.display === 'block';
         detail.style.display = open ? 'none' : 'block';
-        icon.textContent = open ? '+' : '−';
-        title.style.background = open ? '' : 'rgba(76,175,80,0.08)';
+        title.parentElement.classList.toggle('open', !open);
+        title.setAttribute('aria-expanded', String(!open));
     }
+    document.addEventListener('keydown', e => {
+        const t = e.target.closest && e.target.closest('.gk-title');
+        if (t && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); t.click(); }
+    });
     function filterItems() {
         const q = document.getElementById('searchBar').value.toLowerCase();
         document.querySelectorAll('.gk-item').forEach(item => {
             item.style.display = item.textContent.toLowerCase().includes(q) ? '' : 'none';
         });
+        if (window.FlightBagTheme) FlightBagTheme.place();
     }
     </script>
+    <script src="theme/flightbag-theme.js"></script>
 </body>
 </html>

@@ -5,201 +5,111 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#191918">
 <title>Study Hub</title>
 <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="theme/flightbag-theme.css">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  background: #262624;
+body.fb {
   min-height: 100vh;
-  font-family: 'Courier New', monospace;
-  color: #b5b3a9;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 32px 16px;
+  padding: max(20px, env(safe-area-inset-top)) 16px max(32px, env(safe-area-inset-bottom));
+  display: flex; flex-direction: column; align-items: center;
 }
 
-/* ── HEADER ── */
-header {
-  text-align: center;
-  margin-bottom: 48px;
-}
-header h1 {
-  font-size: clamp(22px, 5vw, 36px);
-  letter-spacing: 8px;
-  color: #f0eee6;
-  font-weight: normal;
-}
-header p {
-  font-size: 11px;
-  letter-spacing: 3px;
-  color: #7a786e;
-  margin-top: 8px;
-}
-header .back-link {
-  display: inline-block;
-  margin-top: 16px;
-  font-size: 10px;
-  letter-spacing: 2px;
-  color: #7a786e;
-  text-decoration: none;
-  transition: color 0.15s;
-}
-header .back-link:hover { color: #d97757; }
+/* ── header (shared by the Study tool: study / mnemonics / general_knowledge) ── */
+.st-top { width: 100%; max-width: 700px; margin-bottom: 18px; }
+.st-nav { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.st-nav .fb-home { min-height: 36px; }
+.st-id { display: flex; align-items: center; gap: 14px; }
+.st-mark { width: 40px; height: 40px; flex: none; border-radius: 9px; background: var(--fb-accent); display: grid; place-items: center; box-shadow: 0 4px 14px rgba(0, 0, 0, .35); }
+.st-mark svg { width: 22px; height: 22px; stroke: var(--fb-bg); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.st-top h1 { font-size: 22px; font-weight: 300; letter-spacing: 6px; color: var(--fb-bright); text-transform: uppercase; }
+.st-top p { font-size: var(--fb-fs-xs); letter-spacing: 2.5px; color: var(--fb-dim); text-transform: uppercase; margin-top: 4px; }
 
-/* ── GRID ── */
+/* ── grid of category panels ── */
 #study-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-  width: 100%;
-  max-width: 700px;
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;
+  width: 100%; max-width: 700px;
 }
+.tool-card { display: flex; flex-direction: column; min-width: 0; }
+.tool-card-desc { color: var(--fb-dim); font-size: var(--fb-fs-sm); line-height: 1.5; padding: 10px var(--fb-pad) 4px; }
+.ac-list { padding: 6px 8px 10px; display: flex; flex-direction: column; gap: 2px; }
+.fb-row.disabled { opacity: .4; pointer-events: none; cursor: default; }
 
-/* ── SECTION CARD ── */
-.tool-card {
-  background: #30302e;
-  border: 1px solid #3d3b37;
-  border-radius: 10px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-.tool-card-header {
-  padding: 20px 20px 14px;
-  border-bottom: 1px solid #3d3b37;
-}
-.tool-card-icon {
-  font-size: 20px;
-  margin-bottom: 8px;
-  color: #d97757;
-}
-.tool-card-title {
-  font-size: 13px;
-  letter-spacing: 4px;
-  color: #f0eee6;
-  font-weight: normal;
-}
-.tool-card-desc {
-  font-size: 10px;
-  letter-spacing: 1px;
-  color: #8a887c;
-  margin-top: 5px;
-  line-height: 1.5;
-}
-
-/* ── BUTTONS ── */
-.ac-list {
-  padding: 12px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  flex: 1;
-}
-.ac-btn {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 14px;
-  background: #2b2a28;
-  border: 1px solid #45433e;
-  border-radius: 6px;
-  color: #b5b3a9;
-  text-decoration: none;
-  font-family: 'Courier New', monospace;
-  font-size: 12px;
-  letter-spacing: 1px;
-  transition: border-color 0.15s, background 0.15s, color 0.15s;
-  cursor: pointer;
-}
-.ac-btn:hover {
-  border-color: #d97757;
-  background: rgba(217, 119, 87, 0.07);
-  color: #f0eee6;
-}
-.ac-btn:hover .ac-arrow { color: #d97757; }
-.ac-btn.disabled {
-  opacity: 0.28;
-  pointer-events: none;
-  cursor: default;
-}
-.ac-btn-name { flex: 1; }
-.ac-btn-sub  { font-size: 9px; color: #7a786e; letter-spacing: 1px; margin-right: 10px; }
-.ac-arrow    { color: #7a786e; font-size: 13px; transition: color 0.15s; }
-
-/* ── MOBILE ── */
 @media (max-width: 600px) {
-  #study-grid {
-    grid-template-columns: 1fr;
-    max-width: 480px;
-  }
-  header { margin-bottom: 32px; }
-  body { justify-content: flex-start; padding-top: 48px; }
+  #study-grid { grid-template-columns: 1fr; max-width: 520px; }
+  .st-top { max-width: 520px; }
+  .st-top h1 { font-size: 18px; letter-spacing: 4px; }
 }
 </style>
 </head>
-<body>
+<body class="fb">
 
-<header>
-  <h1>STUDY HUB</h1>
-  <p>SELECT A CATEGORY TO BEGIN</p>
-  <a class="back-link" href="index.html">← HOME</a>
+<header class="st-top">
+  <nav class="st-nav">
+    <a class="fb-home" href="index.html"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>Flight Bag</a>
+  </nav>
+  <div class="st-id">
+    <div class="st-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h6a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H4zM20 5h-6a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h7z"/></svg></div>
+    <div>
+      <h1>Study Hub</h1>
+      <p>Select a category to begin</p>
+    </div>
+  </div>
 </header>
 
-<div id="study-grid">
+<main id="study-grid">
 
   <!-- AIRCRAFT -->
-  <div class="tool-card">
-    <div class="tool-card-header">
-      <div class="tool-card-icon">✈</div>
-      <div class="tool-card-title">AIRCRAFT</div>
-      <div class="tool-card-desc">V-speeds, systems, checklists &amp; flashcards</div>
-    </div>
+  <section class="tool-card fb-panel">
+    <div class="fb-head"><h2 class="fb-title"><svg viewBox="0 0 24 24"><path d="M21 15l-8-4V5a1.5 1.5 0 0 0-3 0v6l-8 4v2l8-2v4l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-4l8 2z"/></svg>Aircraft</h2></div>
+    <p class="tool-card-desc">V-speeds, systems, checklists &amp; flashcards</p>
     <div class="ac-list">
-      <a class="ac-btn" href="p2006t_study.html">
-        <span class="ac-btn-name">Tecnam P2006T</span>
-        <span class="ac-btn-sub">TWIN · G1000</span>
-        <span class="ac-arrow">›</span>
+      <a class="fb-row" href="p2006t_study.html">
+        <span class="fb-ico"><svg viewBox="0 0 24 24"><path d="M21 15l-8-4V5a1.5 1.5 0 0 0-3 0v6l-8 4v2l8-2v4l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-4l8 2z"/></svg></span>
+        <span><div class="fb-row-t">Tecnam P2006T</div><div class="fb-row-s">Multi-engine study</div></span>
+        <span class="fb-row-tag">TWIN · G1000</span>
+        <svg class="fb-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
       </a>
-      <span class="ac-btn disabled">
-        <span class="ac-btn-name">Cessna 172</span>
-        <span class="ac-btn-sub">COMING SOON</span>
-        <span class="ac-arrow">›</span>
+      <span class="fb-row disabled" aria-disabled="true">
+        <span class="fb-ico"><svg viewBox="0 0 24 24"><path d="M21 15l-8-4V5a1.5 1.5 0 0 0-3 0v6l-8 4v2l8-2v4l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-4l8 2z"/></svg></span>
+        <span><div class="fb-row-t">Cessna 172</div><div class="fb-row-s">Coming soon</div></span>
+        <span class="fb-row-tag"></span>
+        <svg class="fb-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
       </span>
-      <span class="ac-btn disabled">
-        <span class="ac-btn-name">Cessna 152</span>
-        <span class="ac-btn-sub">COMING SOON</span>
-        <span class="ac-arrow">›</span>
+      <span class="fb-row disabled" aria-disabled="true">
+        <span class="fb-ico"><svg viewBox="0 0 24 24"><path d="M21 15l-8-4V5a1.5 1.5 0 0 0-3 0v6l-8 4v2l8-2v4l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-4l8 2z"/></svg></span>
+        <span><div class="fb-row-t">Cessna 152</div><div class="fb-row-s">Coming soon</div></span>
+        <span class="fb-row-tag"></span>
+        <svg class="fb-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
       </span>
     </div>
-  </div>
+  </section>
 
   <!-- RESOURCES -->
-  <div class="tool-card">
-    <div class="tool-card-header">
-      <div class="tool-card-icon">◉</div>
-      <div class="tool-card-title">RESOURCES</div>
-      <div class="tool-card-desc">Mnemonics, regulations &amp; general knowledge</div>
-    </div>
+  <section class="tool-card fb-panel">
+    <div class="fb-head"><h2 class="fb-title"><svg viewBox="0 0 24 24"><path d="M4 5h6a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H4zM20 5h-6a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h7z"/></svg>Resources</h2></div>
+    <p class="tool-card-desc">Mnemonics, regulations &amp; general knowledge</p>
     <div class="ac-list">
-      <a class="ac-btn" href="mnemonics.html">
-        <span class="ac-btn-name">Mnemonics</span>
-        <span class="ac-btn-sub">14 AIDS</span>
-        <span class="ac-arrow">›</span>
+      <a class="fb-row" href="mnemonics.html">
+        <span class="fb-ico"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg></span>
+        <span><div class="fb-row-t">Mnemonics</div><div class="fb-row-s">Memory aids</div></span>
+        <span class="fb-row-tag">14 AIDS</span>
+        <svg class="fb-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
       </a>
-      <a class="ac-btn" href="general_knowledge.html">
-        <span class="ac-btn-name">General Knowledge</span>
-        <span class="ac-btn-sub">REGS · AIRSPACE</span>
-        <span class="ac-arrow">›</span>
+      <a class="fb-row" href="general_knowledge.html">
+        <span class="fb-ico"><svg viewBox="0 0 24 24"><path d="M12 3v18M4 21h16M3 8h18M6 8l-3 7a3 3 0 0 0 6 0zM18 8l-3 7a3 3 0 0 0 6 0z"/></svg></span>
+        <span><div class="fb-row-t">General Knowledge</div><div class="fb-row-s">Documents, airspace, regs</div></span>
+        <span class="fb-row-tag">REGS · AIRSPACE</span>
+        <svg class="fb-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
       </a>
     </div>
-  </div>
+  </section>
 
-</div>
+</main>
 
+<script src="theme/flightbag-theme.js"></script>
 </body>
 </html>

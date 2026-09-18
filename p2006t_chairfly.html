@@ -9,43 +9,49 @@
 <title>Chairfly</title>
 <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="theme/flightbag-theme.css">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: #111; width: 100vw; height: 100vh; overflow: hidden; position: relative; }
+body { background: var(--fb-bg); width: 100vw; height: 100vh; overflow: hidden; position: relative; }
 
 /* ── AIRCRAFT SELECTION ── */
 #aircraft-select {
   position: fixed; inset: 0; z-index: 9990;
-  background: #0a0a0c;
+  background: var(--fb-bg);
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  font-family: 'Courier New', monospace;
-  gap: 32px;
+  font-family: var(--fb-font);
+  gap: 32px; padding: 16px; overflow-y: auto;
 }
-#aircraft-select h1 { font-size: 32px; letter-spacing: 6px; color: #4af; font-weight: normal; }
-#aircraft-select h2 { font-size: 11px; letter-spacing: 4px; color: #444; font-weight: normal; margin-top: -22px; }
-#aircraft-grid { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; max-width: 700px; }
+#aircraft-select .fb-home { position: absolute; top: max(14px, env(safe-area-inset-top)); left: max(16px, env(safe-area-inset-left)); min-height: 36px; }
+#aircraft-select h1 { font-size: var(--fb-fs-lg); letter-spacing: 6px; color: var(--fb-bright); font-weight: 500; display: flex; align-items: center; gap: 12px; }
+#aircraft-select h1 svg { width: 22px; height: 22px; stroke: var(--fb-accent); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+#aircraft-select h2 { font-size: var(--fb-fs-xs); letter-spacing: 2.5px; color: var(--fb-dim); font-weight: 500; margin-top: -22px; }
+#aircraft-grid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; max-width: 700px; }
 .ac-card {
-  width: 180px; padding: 20px 16px;
-  background: #0d0d10; border: 1px solid #2a2a2a; border-radius: 8px;
-  cursor: pointer; text-align: center;
-  transition: border-color 0.15s, background 0.15s;
+  width: 200px; padding: 18px 16px;
+  cursor: pointer; text-align: left;
+  transition: border-color var(--fb-ease);
   display: flex; flex-direction: column; gap: 6px;
 }
-.ac-card:hover { border-color: #4af; background: #0a1520; }
-.ac-card-name { font-size: 15px; color: #ddd; letter-spacing: 1px; }
-.ac-card-sub  { font-size: 10px; color: #555; letter-spacing: 2px; }
-.ac-card-tag  { font-size: 9px; color: #4af; letter-spacing: 1px; margin-top: 4px; }
+.ac-card:hover { border-color: var(--fb-accent); }
+.ac-card-name { font-size: var(--fb-fs-md); color: var(--fb-bright); font-weight: 500; }
+.ac-card-sub  { font-size: var(--fb-fs-xs); color: var(--fb-dim); letter-spacing: 2px; text-transform: uppercase; }
+.ac-card-tag  { font-size: var(--fb-fs-xs); color: var(--fb-accent); letter-spacing: 2px; margin-top: 8px; display: flex; align-items: center; gap: 4px; }
+.ac-card-tag svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; transition: transform var(--fb-ease); }
+.ac-card:hover .ac-card-tag svg { transform: translateX(3px); }
 
 /* ── PORTRAIT OVERLAY ── */
 #portrait-overlay {
   display: none;
   position: fixed; inset: 0; z-index: 9999;
-  background: #000;
+  background: var(--fb-bg);
   flex-direction: column;
   align-items: center; justify-content: center;
-  color: #fff; font-family: 'Courier New', monospace; text-align: center; gap: 18px;
+  color: var(--fb-text); font-family: var(--fb-font); text-align: center; gap: 18px;
 }
+#portrait-overlay .po-title { font-size: var(--fb-fs-sm); color: var(--fb-bright); letter-spacing: 2.5px; text-transform: uppercase; }
+#portrait-overlay .po-sub { font-size: var(--fb-fs-sm); color: var(--fb-dim); }
 #portrait-overlay svg { animation: rotate-hint 2s ease-in-out infinite; }
 @keyframes rotate-hint {
   0%,100% { transform: rotate(0deg); }
@@ -54,25 +60,41 @@ body { background: #111; width: 100vw; height: 100vh; overflow: hidden; position
 @media (orientation: portrait) {
   #portrait-overlay { display: flex; }
 }
-#app { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; overflow: hidden; color: #e0e0e0; font-family: 'Courier New', monospace; }
+#app { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; overflow: hidden; color: var(--fb-text); font-family: var(--fb-font); }
 
 /* ── TOP HALF ── */
-#top-half { flex: 0 0 56%; position: relative; overflow: hidden; border-bottom: 3px solid #222; }
+#top-half { flex: 0 0 56%; position: relative; overflow: hidden; border-bottom: 1px solid var(--fb-rim); }
 #sky-canvas { width: 100%; height: 100%; display: block; }
-#maneuver-title { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.65); border: 1px solid #4af; border-radius: 4px; padding: 5px 22px; font-size: 16px; color: #4af; letter-spacing: 1px; white-space: nowrap; z-index: 10; }
-#view-badge { position: absolute; top: 14px; right: 18px; background: rgba(0,0,0,0.5); border: 1px solid #555; border-radius: 3px; padding: 3px 10px; font-size: 12px; color: #aaa; z-index: 10; }
-#step-box { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.75); border: 1px solid #fa0; border-radius: 5px; padding: 7px 20px; font-size: 15px; color: #fa0; min-width: 360px; max-width: 65%; text-align: center; z-index: 10; min-height: 36px; }
+/* HUD chips over the sky view — translucent panel colour so the scene stays readable behind them */
+.hud { background: color-mix(in srgb, var(--fb-panel) 82%, transparent); border: 1px solid var(--fb-rim); border-radius: var(--fb-radius-sm); box-shadow: 0 2px 6px rgba(0,0,0,.25); z-index: 10; }
+#maneuver-title { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); padding: 6px 20px; font-size: var(--fb-fs-xs); font-weight: 500; color: var(--fb-bright); letter-spacing: 2.5px; white-space: nowrap; }
+#view-badge { position: absolute; top: 14px; right: 18px; padding: 4px 10px; font-size: var(--fb-fs-xs); letter-spacing: 2px; color: var(--fb-dim); }
+#step-box { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); border-color: color-mix(in srgb, var(--fb-accent) 55%, var(--fb-rim)); padding: 8px 20px; font-size: var(--fb-fs-md); color: var(--fb-bright); min-width: 360px; max-width: 65%; text-align: center; min-height: 36px; }
+#top-nav { position: absolute; top: 12px; left: 14px; z-index: 10; display: flex; gap: 6px; }
+#top-nav .fb-btn { background: color-mix(in srgb, var(--fb-panel) 82%, transparent); min-height: 30px; letter-spacing: 1px; }
+#top-nav .fb-btn svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+#top-nav .fb-home { color: var(--fb-text); letter-spacing: 1px; text-transform: none; font-size: var(--fb-fs-sm); }
+#top-nav .fb-home:hover { color: var(--fb-bright); }
+/* narrow landscape (phones): the nav chips and a centred title would collide — title goes top-right, badge below it */
+@media (max-width: 1000px) {
+  #maneuver-title { left: auto; right: 14px; transform: none; max-width: calc(100% - 420px); overflow: hidden; text-overflow: ellipsis; letter-spacing: 1.5px; padding: 6px 12px; }
+  #view-badge { top: 48px; right: 14px; }
+}
 
 /* ── BOTTOM HALF ── */
 #bottom-half { flex: 1; display: flex; flex-direction: row; overflow: hidden; min-height: 0; }
 
 /* Sidebar */
-#sidebar { width: 195px; min-width: 195px; background: #0d0d0d; border-right: 1px solid #2a2a2a; overflow-y: auto; padding: 4px 0; }
+/* side panels (maneuver list, callouts) sit inset like dashboard panels; the bezels stay flush */
+#bottom-half > .fb-panel { margin: 6px; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+#bottom-half .fb-head { padding: 7px 10px; flex-shrink: 0; flex-wrap: nowrap; }
+#sidebar-panel { width: 195px; min-width: 195px; }
+#sidebar { flex: 1; overflow-y: auto; padding: 4px; min-height: 0; }
 #sidebar::-webkit-scrollbar { width: 3px; }
-#sidebar::-webkit-scrollbar-thumb { background: #333; }
-.sidebar-item { padding: 6px 11px; font-size: 13px; cursor: pointer; border-left: 3px solid transparent; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: all 0.12s; }
-.sidebar-item:hover { background: #181818; color: #ccc; }
-.sidebar-item.active { border-left-color: #4af; color: #4af; background: #131c24; }
+#sidebar::-webkit-scrollbar-thumb { background: var(--fb-border); }
+.sidebar-item { padding: 7px 9px; font-size: var(--fb-fs-sm); cursor: pointer; border-left: 2px solid transparent; border-radius: 4px; color: var(--fb-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: background var(--fb-ease), color var(--fb-ease); }
+.sidebar-item:hover { background: var(--fb-cell); color: var(--fb-bright); }
+.sidebar-item.active { border-left-color: var(--fb-accent); color: var(--fb-accent); background: var(--fb-cell); }
 
 /* Bezel units — flex:1 each, PNG overlay */
 .bezel-unit { flex: 1; position: relative; overflow: hidden; min-width: 0; background: #0c0c0e; }
@@ -91,9 +113,11 @@ body { background: #111; width: 100vw; height: 100vh; overflow: hidden; position
   display: flex; flex-direction: column; overflow: hidden;
   background: #050608; z-index: 1;
 }
-.btn { background: #161618; border: 1px solid #383838; color: #aaa; padding: 3px 8px; border-radius: 3px; cursor: pointer; font-size: 11px; font-family: inherit; transition: all 0.12s; }
-.btn:hover { background: #1e1e22; border-color: #4af; color: #4af; }
-.btn.active { background: #08101e; border-color: #4af; color: #4af; }
+.btn { background: var(--fb-cell); border: 1px solid var(--fb-border); color: var(--fb-text); width: 32px; height: 30px; padding: 0; border-radius: var(--fb-radius-sm); cursor: pointer; font-family: inherit; display: inline-grid; place-items: center; transition: border-color var(--fb-ease), color var(--fb-ease); }
+.btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.btn svg.solid { fill: currentColor; stroke-width: 1.5; }
+.btn:hover { border-color: var(--fb-accent); color: var(--fb-bright); }
+.btn.active { border-color: var(--fb-accent); color: var(--fb-accent); }
 
 
 /* ── C-152 mode: clean panel, no G1000 chrome ── */
@@ -152,21 +176,21 @@ body.ac-c152 .cl-sec-title.emg { color: #8c2f24; }
 #mfd-body::-webkit-scrollbar-thumb { background: #1c1c1c; }
 
 /* Right Panel — Callouts & Controls */
-#right-panel { width: 215px; min-width: 215px; background: #080808; border-left: 1px solid #1a1a1a; display: flex; flex-direction: column; overflow: hidden; }
-#rp-header { background: #090909; border-bottom: 1px solid #1c1c1e; padding: 6px 10px; font-size: 10px; letter-spacing: 2px; color: #888; flex-shrink: 0; }
-#rp-callout { padding: 10px 10px; border-bottom: 1px solid #161618; flex-shrink: 0; }
-#rp-callout-text { font-size: 15px; color: #fa0; line-height: 1.5; min-height: 42px; }
-#rp-controls { position: absolute; top: 52px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; align-items: center; padding: 3px 8px; background: rgba(0,0,0,0.55); border: 1px solid #333; border-radius: 4px; z-index: 10; opacity: 0.65; transition: opacity 0.2s; }
+#right-panel { width: 215px; min-width: 215px; }
+#rp-callout { padding: 10px; border-bottom: 1px solid var(--fb-line); flex-shrink: 0; }
+#rp-callout-text { font-size: var(--fb-fs-md); color: var(--fb-bright); line-height: 1.45; min-height: 42px; }
+#rp-controls { position: absolute; top: 52px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; align-items: center; padding: 3px 6px; opacity: 0.75; transition: opacity var(--fb-ease); }
 #rp-controls:hover, #rp-controls:active { opacity: 1; }
-#rp-prog { flex: 1; height: 4px; background: #1e1e1e; border-radius: 2px; cursor: pointer; }
-#rp-prog-fill { height: 100%; background: #4af; border-radius: 2px; width: 0%; }
-#rp-time { font-size: 11px; color: #444; min-width: 36px; text-align: right; }
-#rp-steps { flex: 1; overflow-y: auto; padding: 8px 10px; }
+#rp-prog { flex: 1; height: 4px; background: var(--fb-cell); border-radius: 2px; cursor: pointer; }
+#rp-prog-fill { height: 100%; background: var(--fb-accent); border-radius: 2px; width: 0%; }
+#rp-time { font-size: var(--fb-fs-xs); font-family: var(--fb-mono); color: var(--fb-dim); min-width: 40px; text-align: right; padding-right: 2px; }
+#rp-steps { flex: 1; overflow-y: auto; padding: 8px; min-height: 0; }
 #rp-steps::-webkit-scrollbar { width: 3px; }
-#rp-steps::-webkit-scrollbar-thumb { background: #1e1e1e; }
-.rp-step { padding: 4px 6px; border-left: 2px solid #1e1e1e; margin-bottom: 4px; color: #3a3a3a; font-size: 13px; line-height: 1.4; transition: all 0.15s; }
-.rp-step.current { border-left-color: #fa0; color: #fa0; background: rgba(255,170,0,0.05); }
-.rp-step.done { border-left-color: #1e3a1e; color: #2a4a2a; }
+#rp-steps::-webkit-scrollbar-thumb { background: var(--fb-border); }
+.rp-step { padding: 4px 7px; border-left: 2px solid var(--fb-border); border-radius: 0 4px 4px 0; margin-bottom: 4px; color: var(--fb-dim); font-size: var(--fb-fs-sm); line-height: 1.4; transition: color var(--fb-ease), background var(--fb-ease), border-color var(--fb-ease); }
+.rp-step.current { border-left-color: var(--fb-accent); color: var(--fb-bright); background: var(--fb-cell); }
+.rp-step.done { border-left-color: color-mix(in srgb, var(--fb-ok) 55%, transparent); color: color-mix(in srgb, var(--fb-dim) 70%, transparent); }
+@media (prefers-reduced-motion: reduce) { .sidebar-item, .rp-step, #rp-controls, .ac-card, .btn { transition: none; } }
 
 
 /* MFD Checklist */
@@ -188,54 +212,58 @@ body.ac-c152 .cl-sec-title.emg { color: #8c2f24; }
 .cl-tab.emg.active { color: #f66; border-color: #f44; background: #1a0a0a; }
 </style>
 </head>
-<body>
+<body class="fb">
 <div id="aircraft-select">
-  <h1>CHAIRFLY</h1>
+  <a class="fb-home" href="index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Flight Bag</a>
+  <h1><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>CHAIRFLY</h1>
   <h2>SELECT AIRCRAFT</h2>
   <div id="aircraft-grid">
-    <div class="ac-card" onclick="selectAircraft('p2006t')">
+    <div class="ac-card fb-panel" onclick="selectAircraft('p2006t')">
       <div class="ac-card-name">Tecnam P2006T</div>
       <div class="ac-card-sub">TWIN · G1000</div>
-      <div class="ac-card-tag">▶ SELECT</div>
+      <div class="ac-card-tag">SELECT<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
     </div>
-    <div class="ac-card" onclick="selectAircraft('c152')">
+    <div class="ac-card fb-panel" onclick="selectAircraft('c152')">
       <div class="ac-card-name">Cessna 152</div>
       <div class="ac-card-sub">ASEL · STEAM GAUGES</div>
-      <div class="ac-card-tag">▶ SELECT</div>
+      <div class="ac-card-tag">SELECT<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
     </div>
   </div>
 </div>
 <div id="portrait-overlay">
   <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-    <rect x="16" y="4" width="32" height="56" rx="5" stroke="#4af" stroke-width="3"/>
-    <line x1="24" y1="52" x2="40" y2="52" stroke="#4af" stroke-width="3" stroke-linecap="round"/>
+    <rect x="16" y="4" width="32" height="56" rx="5" stroke="var(--fb-accent)" stroke-width="3"/>
+    <line x1="24" y1="52" x2="40" y2="52" stroke="var(--fb-accent)" stroke-width="3" stroke-linecap="round"/>
   </svg>
-  <div style="font-size:16px;color:#4af;letter-spacing:2px;">ROTATE DEVICE</div>
-  <div style="font-size:11px;color:#666;letter-spacing:1px;">Landscape orientation required</div>
+  <div class="po-title">Rotate device</div>
+  <div class="po-sub">Landscape orientation required</div>
 </div>
 <div id="app">
 
 <div id="top-half">
   <canvas id="sky-canvas"></canvas>
-  <div style="position:absolute;top:12px;left:14px;z-index:10;display:flex;gap:6px;">
-    <a href="index.html" style="background:rgba(0,0,0,0.55);border:1px solid #555;border-radius:4px;padding:4px 12px;font-size:12px;color:#aaa;text-decoration:none;letter-spacing:1px;" onmouseover="this.style.color='#fff';this.style.borderColor='#888'" onmouseout="this.style.color='#aaa';this.style.borderColor='#555'">← W&amp;B</a>
-    <a href="maneuvers.html" title="Study SEL maneuvers — steps, ACS limits, flashcards" style="background:rgba(0,0,0,0.55);border:1px solid #555;border-radius:4px;padding:4px 12px;font-size:12px;color:#aaa;text-decoration:none;letter-spacing:1px;" onmouseover="this.style.color='#8f6';this.style.borderColor='#8f6'" onmouseout="this.style.color='#aaa';this.style.borderColor='#555'">SEL MANEUVERS →</a>
-    <a id="ac-switch-btn" title="Switch aircraft" onclick="showAircraftSelect()" style="background:rgba(0,0,0,0.55);border:1px solid #555;border-radius:4px;padding:4px 12px;font-size:12px;color:#aaa;text-decoration:none;letter-spacing:1px;cursor:pointer;" onmouseover="this.style.color='#4af';this.style.borderColor='#4af'" onmouseout="this.style.color='#aaa';this.style.borderColor='#555'">✈ P2006T ⌄</a>
+  <div id="top-nav">
+    <a href="index.html" class="fb-btn fb-home" title="Flight Bag home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>W&amp;B</a>
+    <a href="maneuvers.html" class="fb-btn" title="Study SEL maneuvers — steps, ACS limits, flashcards">SEL MANEUVERS<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
+    <a id="ac-switch-btn" class="fb-btn" title="Switch aircraft" onclick="showAircraftSelect()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg><span class="ac-name">P2006T</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a>
   </div>
-  <div id="maneuver-title">SELECT A MANEUVER</div>
-  <div id="rp-controls">
-    <button class="btn" id="btn-play">▶</button>
-    <button class="btn" id="btn-stop">■</button>
+  <div id="maneuver-title" class="hud">SELECT A MANEUVER</div>
+  <div id="rp-controls" class="hud">
+    <button class="btn" id="btn-play" title="Play / pause" aria-label="Play / pause"><svg class="solid" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5l12 7-12 7z"/></svg></button>
+    <button class="btn" id="btn-stop" title="Stop" aria-label="Stop"><svg class="solid" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg></button>
     <div id="rp-prog"><div id="rp-prog-fill"></div></div>
     <span id="rp-time">0.0s</span>
-    <button class="btn" id="btn-fs" title="Fullscreen" style="font-size:14px;padding:3px 8px;">⛶</button>
+    <button class="btn" id="btn-fs" title="Fullscreen" aria-label="Fullscreen"></button>
   </div>
-  <div id="view-badge">SIDE VIEW</div>
-  <div id="step-box">—</div>
+  <div id="view-badge" class="hud">SIDE VIEW</div>
+  <div id="step-box" class="hud">—</div>
 </div>
 
 <div id="bottom-half">
-  <div id="sidebar" id="sidebar"></div>
+  <div id="sidebar-panel" class="fb-panel">
+    <div class="fb-head"><span class="fb-title"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Maneuvers</span></div>
+    <div id="sidebar"></div>
+  </div>
 
   <div class="bezel-unit" id="pfd-wrap">
     <canvas id="pfd-canvas"></canvas>
@@ -275,8 +303,8 @@ body.ac-c152 .cl-sec-title.emg { color: #8c2f24; }
     <img src="PFDMFD.png" class="bezel-img" draggable="false" alt="">
   </div>
 
-  <div id="right-panel">
-    <div id="rp-header">CALLOUTS &amp; STEPS</div>
+  <div id="right-panel" class="fb-panel">
+    <div id="rp-header" class="fb-head"><span class="fb-title"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>Callouts &amp; Steps</span></div>
     <div id="rp-callout">
       <div id="rp-callout-text">Select a maneuver to begin</div>
     </div>
@@ -292,6 +320,7 @@ document.getElementById('app').style.display = 'none';
 function showAircraftSelect() {
   stopAnim();
   document.getElementById('aircraft-select').style.display = 'flex';
+  if(window.FlightBagTheme) FlightBagTheme.place();
 }
 function selectAircraft(id) {
   ACTIVE_AC = (id === 'c152') ? 'c152' : 'p2006t';
@@ -303,10 +332,11 @@ function selectAircraft(id) {
   const mt = document.getElementById('mfd-title');
   if(mt) mt.textContent = ACTIVE_AC==='c152' ? 'USAA 152 — PAPER CHECKLIST' : 'G1000 — MFD';
   const ab = document.getElementById('ac-switch-btn');
-  if(ab) ab.textContent = ACTIVE_AC==='c152' ? '✈ C-152 ⌄' : '✈ P2006T ⌄';
+  if(ab) ab.querySelector('.ac-name').textContent = ACTIVE_AC==='c152' ? 'C-152' : 'P2006T';
   document.getElementById('aircraft-select').style.display = 'none';
   document.getElementById('app').style.display = '';
   resize();
+  if(window.FlightBagTheme) FlightBagTheme.place();
   selectManeuver(0);
 }
 
@@ -326,10 +356,11 @@ function showFsToast(){
   if(!t){
     t=document.createElement('div');
     t.id='fs-toast';
-    t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;border:1px solid #4af;color:#ccc;font-family:Courier New,monospace;font-size:13px;padding:10px 18px;border-radius:6px;z-index:9998;text-align:center;max-width:90vw;line-height:1.5;';
+    t.className='fb-panel';
+    t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);color:var(--fb-text);font-family:var(--fb-font);font-size:13px;padding:10px 18px;z-index:9998;text-align:center;max-width:90vw;line-height:1.5;';
     document.body.appendChild(t);
   }
-  t.innerHTML='Fullscreen not supported in this browser.<br><span style="color:#4af">Safari: Share → Add to Home Screen</span><br>for a permanent fullscreen experience.';
+  t.innerHTML='Fullscreen not supported in this browser.<br><span style="color:var(--fb-accent)">Safari: Share → Add to Home Screen</span><br>for a permanent fullscreen experience.';
   t.style.display='block';
   clearTimeout(t._to);
   t._to=setTimeout(()=>{ t.style.display='none'; }, 5000);
@@ -348,10 +379,13 @@ function toggleFullscreen(){ isFullscreen()?exitFullscreen():enterFullscreen(); 
 function updateFsBtn(){
   const btn=document.getElementById('btn-fs');
   if(!btn) return;
-  btn.textContent=isFullscreen()?'✕':'⛶';
+  btn.innerHTML=isFullscreen()
+    ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v3a2 2 0 0 1-2 2H3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M16 21v-3a2 2 0 0 1 2-2h3"/></svg>'
+    : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>';
   btn.classList.toggle('active',isFullscreen());
 }
 ['fullscreenchange','webkitfullscreenchange','mozfullscreenchange'].forEach(e=>document.addEventListener(e,updateFsBtn));
+updateFsBtn();
 
 // ─── ORIENTATION LOCK ────────────────────────────────────────
 (function(){
@@ -2467,5 +2501,6 @@ renderMFD();
 const _urlAc = new URLSearchParams(window.location.search).get('aircraft');
 if (_urlAc) selectAircraft(_urlAc);
 </script>
+<script src="theme/flightbag-theme.js"></script>
 </body>
 </html>

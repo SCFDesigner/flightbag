@@ -6,6 +6,7 @@
     <title>Weight & Balance Calculator</title>
     <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="theme/flightbag-theme.css">
     <style>
         * {
             margin: 0;
@@ -14,9 +15,9 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-            background-color: #262624;
-            color: #f0eee6;
+            font-family: var(--fb-font);
+            background-color: var(--fb-bg);
+            color: var(--fb-text);
             min-height: 100vh;
             display: flex;
             margin: 0;
@@ -44,21 +45,16 @@
         }
 
         .input-section {
-            background: #30302e;
-            border: 1px solid #3d3b37;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
+            --pp: 16px;
+            padding: var(--pp);
+            margin-bottom: 8px;
             overflow: hidden; /* keep inputs inside the panel when columns are resized */
         }
 
         /* Time panel styling */
         .time-panel {
-            background: #30302e;
-            border: 1px solid #3d3b37;
-            border-radius: 10px;
-            padding: 15px;
-            margin: 15px 0;
+            padding: 12px;
+            margin: 0 0 8px;
             box-sizing: border-box;
             width: 100%;
             min-height: fit-content;
@@ -73,25 +69,27 @@
         }
 
         .time-item {
-            background-color: #3b3a37;
-            border-radius: 8px;
+            background-color: var(--fb-cell);
+            border-radius: var(--fb-radius-sm);
             padding: 10px;
             text-align: center;
             box-sizing: border-box;
         }
 
         .time-label {
-            font-size: 11px;
-            color: #b5b3a9;
+            font-size: var(--fb-fs-xs);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--fb-dim);
             margin-bottom: 4px;
             font-weight: 500;
         }
 
         .time-value {
             font-size: 14px;
-            color: #d97757;
+            color: var(--fb-accent);
             font-weight: bold;
-            font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+            font-family: var(--fb-mono);
         }
 
         .input-group {
@@ -108,19 +106,22 @@
         }
 
         .input-label {
-            font-size: 14px;
+            font-size: var(--fb-fs-sm);
             font-weight: 500;
-            color: #d9d7cd;
+            color: var(--fb-text);
             min-width: 120px;
         }
+        .input-label a { color: var(--fb-accent); text-decoration: none; }
+        .input-label a:hover { text-decoration: underline; }
 
         .input-field {
-            background-color: #3b3a37;
-            border: 1px solid #45433e;
-            border-radius: 8px;
-            padding: 8px 12px;
-            color: #f0eee6;
-            font-size: 14px;
+            background-color: var(--fb-cell);
+            border: 1px solid var(--fb-border);
+            border-radius: var(--fb-radius-sm);
+            padding: 7px 10px;
+            color: var(--fb-bright);
+            font-family: var(--fb-mono);
+            font-size: var(--fb-fs-sm);
             flex: 0 1 110px;   /* nominal 110px, shrinks with the column instead of overflowing */
             min-width: 60px;
             max-width: 110px;
@@ -138,9 +139,9 @@
 
         .input-field:focus {
             outline: none;
-            border-color: #d97757;
-            background-color: #454340;
-            box-shadow: 0 0 0 2px rgba(217, 119, 87, 0.2);
+            border-color: var(--fb-accent);
+            background-color: var(--fb-cell);
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--fb-accent) 20%, transparent);
         }
 
 
@@ -160,29 +161,31 @@
         }
         .desktop-layout.e6b-open .e6b-column { display: block; }
         .e6b-section-title {
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 2px;
+            font-size: var(--fb-fs-xs);
+            font-weight: 500;
+            letter-spacing: 2.5px;
             text-transform: uppercase;
-            color: #918f84;
-            margin-bottom: 12px;
+            color: var(--fb-bright);
+            margin: calc(-1 * var(--pp, 16px)) calc(-1 * var(--pp, 16px)) 12px;
+            padding: 9px var(--pp, 16px);
+            border-bottom: 1px solid var(--fb-line);
         }
-        .e6b-hint { font-size: 11px; color: #918f84; margin-bottom: 10px; }
+        .e6b-hint { font-size: 11px; color: var(--fb-dim); margin-bottom: 10px; }
         .e6b-out {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background-color: #383734;
+            background-color: var(--fb-cell);
             border-radius: 6px;
             padding: 7px 12px;
-            font-size: 13px;
+            font-size: var(--fb-fs-sm);
             margin-bottom: 6px;
         }
-        .e6b-out span:first-child { color: #b5b3a9; }
+        .e6b-out span:first-child { color: var(--fb-text); }
         .e6b-out span:last-child {
-            color: #f0eee6;
+            color: var(--fb-accent);
             font-weight: 600;
-            font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+            font-family: var(--fb-mono);
         }
         .e6b-convrow {
             display: flex;
@@ -191,36 +194,38 @@
             margin-bottom: 8px;
         }
         .e6b-convrow .input-field { flex: 1 1 0; min-width: 0; max-width: none; width: auto; }
-        .e6b-convlbl { font-size: 11px; color: #918f84; min-width: 30px; }
+        .e6b-convlbl { font-size: 11px; font-family: var(--fb-mono); color: var(--fb-dim); min-width: 30px; }
 
         /* Unified buttons */
         .btn {
             display: block;
             width: 100%;
-            background: #3b3a37;
-            color: #f0eee6;
-            border: 1px solid #4a4844;
-            padding: 10px 15px;
-            border-radius: 8px;
+            min-height: 36px;
+            background: color-mix(in srgb, var(--fb-cell) 82%, transparent);
+            color: var(--fb-text);
+            border: 1px solid var(--fb-border);
+            padding: 8px 14px;
+            border-radius: var(--fb-radius-sm);
             cursor: pointer;
-            font-size: 14px;
+            font-size: var(--fb-fs-sm);
             font-family: inherit;
-            transition: border-color 0.15s ease, background 0.15s ease;
+            transition: border-color var(--fb-ease), color var(--fb-ease), background var(--fb-ease), filter var(--fb-ease);
         }
-        .btn:hover { border-color: #d97757; }
+        .btn:hover { border-color: var(--fb-accent); color: var(--fb-bright); }
+        .btn.active, .btn[aria-pressed="true"] { border-color: var(--fb-accent); color: var(--fb-accent); }
         .btn-primary {
-            background: #d97757;
-            border-color: #d97757;
-            color: #1f1e1b;
+            background: var(--fb-accent);
+            border-color: var(--fb-accent);
+            color: var(--fb-on-accent);
             font-weight: 600;
         }
-        .btn-primary:hover { background: #e08663; border-color: #e08663; }
-        .btn-danger { color: #d96257; border-color: #5c443f; }
-        .btn-danger:hover { border-color: #d96257; background: rgba(217, 98, 87, 0.08); }
+        .btn-primary:hover { background: var(--fb-accent); border-color: var(--fb-accent); color: var(--fb-on-accent); filter: brightness(1.08); }
+        .btn-danger { color: var(--fb-bad); border-color: color-mix(in srgb, var(--fb-bad) 40%, var(--fb-border)); }
+        .btn-danger:hover { border-color: var(--fb-bad); color: var(--fb-bad); background: color-mix(in srgb, var(--fb-bad) 8%, transparent); }
         .btn-inline { display: inline-block; width: auto; }
 
         .input-field::placeholder {
-            color: #888;
+            color: var(--fb-dim);
         }
 
         .main-content {
@@ -232,34 +237,33 @@
 
         .section-divider {
             height: 1px;
-            background-color: #45433e;
+            background-color: var(--fb-line);
             margin: 15px 0;
         }
 
         .right-panel {
-            background: #30302e;
-            border: 1px solid #3d3b37;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
+            --pp: 16px;
+            padding: var(--pp);
+            margin-bottom: 8px;
         }
 
         .tail-number-display {
             text-align: center;
             font-size: 24px;
             font-weight: bold;
-            font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-            color: #f0eee6;
-            margin-bottom: 10px;
+            font-family: var(--fb-mono);
+            color: var(--fb-bright);
+            letter-spacing: 1px;
+            margin-bottom: 6px;
         }
 
         .calculator-title {
             text-align: center;
-            font-size: 12px;
-            font-weight: 600;
+            font-size: var(--fb-fs-xs);
+            font-weight: 500;
             letter-spacing: 2.5px;
             text-transform: uppercase;
-            color: #918f84;
+            color: var(--fb-dim);
             margin-bottom: 20px;
         }
 
@@ -270,36 +274,45 @@
         }
 
         .data-table th {
-            background-color: #3b3a37;
-            color: #f0eee6;
+            background-color: var(--fb-cell);
+            color: var(--fb-dim);
             padding: 8px 12px;
             text-align: left;
-            font-weight: 600;
-            font-size: 14px;
-            border: 1px solid #45433e;
+            font-weight: 500;
+            font-size: var(--fb-fs-xs);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            border: 1px solid var(--fb-line);
         }
 
         .data-table td {
-            background-color: #2b2a28;
-            color: #d9d7cd;
+            background-color: color-mix(in srgb, var(--fb-bg) 55%, transparent);
+            color: var(--fb-text);
             padding: 8px 12px;
-            border: 1px solid #45433e;
-            font-size: 14px;
+            border: 1px solid var(--fb-line);
+            font-size: var(--fb-fs-sm);
         }
+        .data-table td:not(:first-child) { font-family: var(--fb-mono); color: var(--fb-bright); }
 
         .data-table tr:nth-child(even) td {
-            background-color: #383734;
+            background-color: color-mix(in srgb, var(--fb-cell) 70%, transparent);
         }
 
         .panel-title {
-            text-align: center;
-            font-size: 11px;
-            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            font-size: var(--fb-fs-xs);
+            font-weight: 500;
             letter-spacing: 2.5px;
             text-transform: uppercase;
-            color: #918f84;
-            margin-bottom: 15px;
+            color: var(--fb-bright);
+            margin: calc(-1 * var(--pp, 16px)) calc(-1 * var(--pp, 16px)) 14px;
+            padding: 9px var(--pp, 16px);
+            border-bottom: 1px solid var(--fb-line);
         }
+        .panel-title svg, .e6b-section-title svg { width: 15px; height: 15px; stroke: var(--fb-accent); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+        .e6b-column > .panel-title { margin: 4px 0 8px; padding: 0 2px 8px; border-bottom: 0; }
 
         .info-grid {
             display: grid;
@@ -312,20 +325,23 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background-color: #383734;
+            gap: 8px;
+            background-color: var(--fb-cell);
             padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 14px;
+            border-radius: var(--fb-radius-sm);
+            font-size: var(--fb-fs-sm);
         }
 
         .info-label {
-            color: #d9d7cd;
+            color: var(--fb-text);
             font-weight: 500;
         }
 
         .info-value {
-            color: #f0eee6;
-            font-weight: 600;
+            color: var(--fb-bright);
+            font-family: var(--fb-mono);
+            font-weight: 500;
+            text-align: right;
         }
 
         .airspeed-grid {
@@ -335,20 +351,18 @@
         }
 
         .airspeed-item {
-            background-color: #383734;
+            background-color: var(--fb-cell);
             padding: 6px 8px;
-            border-radius: 6px;
+            border-radius: var(--fb-radius-sm);
             text-align: center;
-            font-size: 12px;
-            color: #d9d7cd;
+            font-size: var(--fb-fs-sm);
+            font-family: var(--fb-mono);
+            color: var(--fb-text);
         }
 
         .time-panel {
-            background: #30302e;
-            border: 1px solid #3d3b37;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 20px;
+            padding: 12px;
+            margin-bottom: 8px;
         }
 
         .time-grid {
@@ -359,39 +373,42 @@
 
         .time-item {
             text-align: center;
-            background-color: #383734;
-            padding: 12px;
-            border-radius: 8px;
+            background-color: var(--fb-cell);
+            padding: 10px 12px;
+            border-radius: var(--fb-radius-sm);
         }
 
         .time-label {
-            font-size: 12px;
-            color: #b5b3a9;
+            font-size: var(--fb-fs-xs);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--fb-dim);
             margin-bottom: 5px;
             font-weight: 500;
         }
 
         .time-value {
             font-size: 18px;
-            color: #f0eee6;
+            color: var(--fb-accent);
             font-weight: 600;
-            font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+            font-family: var(--fb-mono);
         }
 
         .select-field {
-            background-color: #3b3a37;
-            border: 1px solid #45433e;
-            border-radius: 8px;
-            padding: 8px 12px;
-            color: #f0eee6;
-            font-size: 14px;
+            background-color: var(--fb-cell);
+            border: 1px solid var(--fb-border);
+            border-radius: var(--fb-radius-sm);
+            padding: 7px 10px;
+            color: var(--fb-bright);
+            font-family: inherit;
+            font-size: var(--fb-fs-sm);
             min-width: 110px;
             max-width: 110px;
             width: 110px;
             -webkit-appearance: none;
             -moz-appearance: none;
             appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='m6 9 6 6 6 6-6'/%3e%3cpath d='m18 15-6-6 6-6'/%3e%3c/svg%3e");
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2385837a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='m6 9 6 6 6-6'/%3e%3c/svg%3e");
             background-repeat: no-repeat;
             background-position: right 12px center;
             background-size: 12px;
@@ -400,8 +417,9 @@
         }
 
         .select-field:focus {
-            border-color: #d97757;
-            box-shadow: 0 0 8px rgba(0, 122, 204, 0.3);
+            border-color: var(--fb-accent);
+            outline: none;
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--fb-accent) 20%, transparent);
         }
 
         /* Bottom Navigation - Floating Style */
@@ -410,22 +428,22 @@
             bottom: 20px;
             left: 20px;
             right: 20px;
-            background: #30302e;
-            border: 1px solid #3d3b37;
+            background: var(--fb-panel);
+            border: 1px solid var(--fb-rim);
             display: flex;
             justify-content: space-around;
             padding: 15px 10px;
             border-radius: 50px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
             z-index: 1000;
-            border: 1px solid #45433e;
+            border: 1px solid var(--fb-border);
             backdrop-filter: blur(10px);
         }
 
         .nav-button {
             background: none;
             border: none;
-            color: #b5b3a9;
+            color: var(--fb-text);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -438,11 +456,11 @@
         }
 
         .nav-button:hover {
-            color: #d97757;
+            color: var(--fb-accent);
         }
 
         .nav-button.active {
-            color: #d97757;
+            color: var(--fb-accent);
         }
 
         .nav-icon {
@@ -468,9 +486,9 @@
         .performance-tooltip .tooltip-content {
             visibility: hidden;
             width: 300px;
-            background-color: #2b2a28;
-            color: #f0eee6;
-            border: 1px solid #45433e;
+            background-color: var(--fb-bg);
+            color: var(--fb-bright);
+            border: 1px solid var(--fb-border);
             border-radius: 6px;
             padding: 12px;
             position: absolute;
@@ -493,7 +511,7 @@
             margin-left: -5px;
             border-width: 5px;
             border-style: solid;
-            border-color: #2a2a2a transparent transparent transparent;
+            border-color: var(--fb-border) transparent transparent transparent;
         }
         
         .performance-tooltip:hover .tooltip-content {
@@ -503,22 +521,22 @@
         
         .tooltip-title {
             font-weight: bold;
-            color: #d97757;
+            color: var(--fb-accent);
             margin-bottom: 8px;
             font-size: 12px;
         }
         
         .tooltip-formula {
-            background-color: #2b2a28;
+            background-color: var(--fb-cell);
             padding: 6px;
             border-radius: 4px;
             margin: 4px 0;
-            font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+            font-family: var(--fb-mono);
             font-size: 10px;
         }
         
         .tooltip-note {
-            color: #b5b3a9;
+            color: var(--fb-text);
             font-style: italic;
             margin-top: 6px;
         }
@@ -540,10 +558,10 @@
             width: 100%;
             height: 0;
             padding-bottom: 62.5%; /* 16:10 aspect ratio (10/16 = 0.625) */
-            background-color: #2b2a28;
-            border-radius: 8px;
+            background-color: var(--fb-bg);
+            border-radius: var(--fb-radius-sm);
             overflow: hidden;
-            border: 1px solid #333;
+            border: 1px solid var(--fb-line);
         }
 
         .cg-chart-container canvas {
@@ -568,10 +586,10 @@
 
         .mnemonic-item {
             margin-bottom: 10px;
-            border: 1px solid #3d3b37;
+            border: 1px solid var(--fb-rim);
             border-radius: 6px;
             overflow: hidden;
-            background-color: #333;
+            background-color: var(--fb-cell);
         }
 
         .mnemonic-title {
@@ -580,9 +598,9 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #30302e;
-            border: 1px solid #3d3b37;
-            color: #d9d7cd;
+            background: var(--fb-panel);
+            border: 1px solid var(--fb-rim);
+            color: var(--fb-text);
             font-weight: bold;
             transition: background-color 0.2s ease;
         }
@@ -594,14 +612,14 @@
         .expand-icon {
             font-size: 18px;
             font-weight: bold;
-            color: #d97757;
+            color: var(--fb-accent);
         }
 
         .mnemonic-detail {
             padding: 15px;
-            background-color: #2b2a28;
-            border-top: 1px solid #444;
-            color: #b5b3a9;
+            background-color: var(--fb-bg);
+            border-top: 1px solid var(--fb-line);
+            color: var(--fb-text);
             line-height: 1.6;
         }
 
@@ -610,17 +628,17 @@
         }
 
         .mnemonic-detail strong {
-            color: #d97757;
+            color: var(--fb-accent);
         }
 
         .mnemonic-detail hr {
             border: none;
-            border-top: 1px solid #555;
+            border-top: 1px solid var(--fb-line);
             margin: 15px 0;
         }
 
         .mnemonic-detail em {
-            color: #aaa;
+            color: var(--fb-dim);
             font-style: italic;
         }
 
@@ -647,29 +665,7 @@
             max-width: none;
         }
 
-        /* Floating Settings Toggle */
-        .settings-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            background-color: #d97757;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            cursor: pointer;
-            z-index: 1000;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        .settings-toggle:hover {
-            background-color: #45a049;
-            transform: scale(1.1);
-        }
+        /* Floating desktop chips (E6B · Home · Settings) — themed in the Flight Bag block below */
 
         .grand-total {
             font-size: 24px;
@@ -681,21 +677,21 @@
         }
 
         .grand-total.green {
-            background-color: rgba(217, 119, 87, 0.2);
-            color: #d97757;
-            border: 2px solid #d97757;
+            background-color: color-mix(in srgb, var(--fb-ok) 18%, transparent);
+            color: var(--fb-ok);
+            border: 2px solid var(--fb-ok);
         }
 
         .grand-total.yellow {
-            background-color: rgba(255, 193, 7, 0.2);
-            color: #FFC107;
-            border: 2px solid #FFC107;
+            background-color: color-mix(in srgb, var(--fb-warn) 18%, transparent);
+            color: var(--fb-warn);
+            border: 2px solid var(--fb-warn);
         }
 
         .grand-total.red {
-            background-color: rgba(217, 98, 87, 0.2);
-            color: #d96257;
-            border: 2px solid #d96257;
+            background-color: color-mix(in srgb, var(--fb-bad) 18%, transparent);
+            color: var(--fb-bad);
+            border: 2px solid var(--fb-bad);
         }
 
         /* Mobile Responsive Styles */
@@ -705,7 +701,7 @@
                 padding: 0;
                 height: 100vh;
                 overflow: hidden;
-                background-color: #262624 !important;
+                background-color: var(--fb-bg) !important;
             }
 
             /* Override desktop column widths on mobile */
@@ -751,6 +747,7 @@
             /* Compact mobile panel spacing */
             .left-panel .input-section,
             .right-column .input-section {
+                --pp: 12px;
                 padding: 12px;
                 margin-bottom: 10px;
             }
@@ -762,13 +759,13 @@
 
             .left-panel .right-panel,
             .right-column .right-panel {
-                margin-bottom: 12px;
+                margin-bottom: 8px;
+                --pp: 12px;
                 padding: 12px;
             }
 
             .left-panel .panel-title,
             .right-column .panel-title {
-                font-size: 11px;
                 margin-bottom: 8px;
             }
 
@@ -778,6 +775,7 @@
             }
 
             .settings-panel .input-section {
+                --pp: 10px;
                 padding: 10px;
                 margin-bottom: 8px;
             }
@@ -857,7 +855,7 @@
 
             .time-item {
                 padding: 8px 6px;
-                background-color: #3b3a37;
+                background-color: var(--fb-cell);
                 border-radius: 6px;
                 text-align: center;
                 min-width: 0;
@@ -866,7 +864,7 @@
 
             .time-label {
                 font-size: 9px;
-                color: #b5b3a9;
+                color: var(--fb-text);
                 margin-bottom: 2px;
                 white-space: nowrap;
                 overflow: hidden;
@@ -876,8 +874,8 @@
             .time-value {
                 font-size: 11px;
                 font-weight: bold;
-                color: #d97757;
-                font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+                color: var(--fb-accent);
+                font-family: var(--fb-mono);
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
@@ -1067,16 +1065,11 @@
                 bottom: 15px !important; /* Floating above bottom */
                 left: 15px !important;
                 right: 15px !important;
-                background: #30302e;
-            border: 1px solid #3d3b37;
                 height: 70px;
                 z-index: 1000;
-                border-radius: 15px;
-                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 
-                           0 0 0 1px rgba(255, 255, 255, 0.1);
-                backdrop-filter: blur(10px);
-                border: 1px solid #3d3b37;
-                gap: 8px;
+                border-radius: 14px;
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, .035), 0 8px 32px rgba(0, 0, 0, 0.45);
+                gap: 6px;
                 padding: 8px;
             }
 
@@ -1094,24 +1087,25 @@
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                background: #30302e;
-                border: 1px solid #3d3b37;
-                border-radius: 10px;
-                color: #918f84;
+                background: var(--fb-cell);
+                border: 1px solid var(--fb-line);
+                border-radius: var(--fb-radius-sm);
+                color: var(--fb-dim);
+                font-family: inherit;
                 cursor: pointer;
                 padding: 8px 4px;
-                transition: border-color 0.15s ease, color 0.15s ease;
+                transition: border-color var(--fb-ease), color var(--fb-ease), background var(--fb-ease);
             }
 
             .mobile-nav-btn.active {
-                background: rgba(217, 119, 87, 0.12);
-                color: #f0eee6;
-                border: 1px solid #d97757;
+                background: var(--fb-panel);
+                color: var(--fb-accent);
+                border: 1px solid var(--fb-accent);
             }
 
             .mobile-nav-btn:hover {
-                color: #f0eee6;
-                border-color: #d97757;
+                color: var(--fb-bright);
+                border-color: var(--fb-accent);
             }
 
             .nav-icon {
@@ -1123,7 +1117,9 @@
             }
             
             .mobile-nav-btn div:last-child {
-                font-size: 11px;
+                font-size: var(--fb-fs-xs);
+                letter-spacing: 1.5px;
+                text-transform: uppercase;
                 font-weight: 500;
             }
 
@@ -1156,7 +1152,11 @@
 
             .column-resizer {
                 width: 6px;
-                background-color: #45433e;
+                background-color: transparent;
+                background-image: linear-gradient(var(--fb-line), var(--fb-line));
+                background-size: 1px 100%;
+                background-repeat: no-repeat;
+                background-position: center;
                 cursor: col-resize;
                 position: relative;
                 flex-shrink: 0;
@@ -1344,17 +1344,122 @@
                 min-width: 44px;
             }
         }
+
+        /* ── Flight Bag theme additions (theme/flightbag-theme.css supplies .fb-panel etc.) ── */
+        .float-chip {
+            position: fixed;
+            top: 20px;
+            height: 36px;
+            padding: 0 12px;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            z-index: 1000;
+            cursor: pointer;
+            background: color-mix(in srgb, var(--fb-panel) 92%, transparent);
+            border: 1px solid var(--fb-border);
+            border-radius: var(--fb-radius-sm);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, .25);
+            color: var(--fb-text);
+            font-family: var(--fb-font);
+            font-size: var(--fb-fs-xs);
+            font-weight: 500;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: border-color var(--fb-ease), color var(--fb-ease);
+        }
+        .float-chip:hover { border-color: var(--fb-accent); color: var(--fb-bright); }
+        .float-chip svg { width: 14px; height: 14px; stroke: var(--fb-accent); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+        .float-chip.fb-home svg { width: 12px; height: 12px; stroke: currentColor; stroke-width: 2.5; }
+        .float-chip.settings-toggle svg { width: 16px; height: 16px; stroke: var(--fb-text); }
+        .float-chip.settings-toggle:hover svg { stroke: var(--fb-accent); }
+        .desktop-layout.e6b-open ~ .e6b-toggle { border-color: var(--fb-accent); color: var(--fb-accent); }
+
+        .column-resizer:hover, .column-resizer.resizing { background-image: linear-gradient(var(--fb-accent), var(--fb-accent)); }
+
+        /* Current Conditions header: title + external links */
+        .wx-head { justify-content: space-between; flex-wrap: wrap; row-gap: 6px; }
+        .wx-head-title { display: inline-flex; align-items: center; gap: 9px; }
+        .wx-links { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+        .wx-link {
+            font-size: var(--fb-fs-xs); letter-spacing: .5px; text-transform: none;
+            padding: 3px 8px; border: 1px solid var(--fb-border); border-radius: 4px;
+            color: var(--fb-dim); text-decoration: none; white-space: nowrap;
+            background: color-mix(in srgb, var(--fb-cell) 82%, transparent);
+            transition: border-color var(--fb-ease), color var(--fb-ease);
+        }
+        .wx-link:hover { border-color: var(--fb-accent); color: var(--fb-accent); }
+
+        /* Settings column */
+        .settings-heading {
+            font-size: var(--fb-fs-lg); font-weight: 300; letter-spacing: 4px; text-transform: uppercase;
+            color: var(--fb-bright); margin: 4px 2px 12px;
+        }
+        h3.panel-title { font-size: var(--fb-fs-xs); }
+        .panel-title-text { display: inline-flex; align-items: center; gap: 9px; margin: 0; font: inherit; color: inherit; letter-spacing: inherit; }
+        .sub-heading { margin: 0; font-size: var(--fb-fs-xs); font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--fb-accent); }
+        .close-x {
+            background: none; border: 0; color: var(--fb-dim); font-size: 20px; line-height: 1; cursor: pointer;
+            min-width: 36px; min-height: 36px; border-radius: var(--fb-radius-sm);
+        }
+        .close-x:hover { color: var(--fb-bright); background: var(--fb-cell); }
+        /* Builder sub-sections sit inside a panel: cells, not panels */
+        #customAircraftBuilder .input-section {
+            background: color-mix(in srgb, var(--fb-cell) 60%, transparent);
+            border: 1px solid var(--fb-line);
+            border-radius: var(--fb-radius-sm);
+            --pp: 12px;
+            padding: 12px;
+        }
+
+        /* Recent Flights rows are rendered by wbsync.js with inline styles — re-theme them here */
+        #recentFlightsList > div[style*="border"] {
+            background: var(--fb-cell) !important;
+            border: 1px solid var(--fb-line) !important;
+            border-radius: var(--fb-radius-sm) !important;
+        }
+        #recentFlightsList > div > div > div:first-child { color: var(--fb-bright) !important; }
+        #recentFlightsList > div > div > div + div { color: var(--fb-dim) !important; font-family: var(--fb-mono); }
+        #recentFlightsList > div:not([style*="border"]) { color: var(--fb-dim) !important; }
+        #recentFlightsList button {
+            background: color-mix(in srgb, var(--fb-cell) 82%, transparent) !important;
+            color: var(--fb-text) !important;
+            border: 1px solid var(--fb-border) !important;
+            border-radius: var(--fb-radius-sm) !important;
+            font-family: inherit !important;
+            min-height: 36px;
+            transition: border-color var(--fb-ease), color var(--fb-ease);
+        }
+        #recentFlightsList button:hover { border-color: var(--fb-accent) !important; color: var(--fb-bright) !important; }
+        /* delete button: the trash emoji becomes a line-icon */
+        #recentFlightsList button[title="Delete"] {
+            font-size: 0 !important;
+            width: 36px;
+            background: center / 15px no-repeat url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c0584c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v6M14 11v6'/%3e%3c/svg%3e"), color-mix(in srgb, var(--fb-cell) 82%, transparent) !important;
+        }
+        #recentFlightsList button[title="Delete"]:hover { border-color: var(--fb-bad) !important; }
+
+        /* Performance tooltip */
+        .performance-tooltip .tooltip-content { background-color: var(--fb-panel); border-color: var(--fb-border); border-radius: var(--fb-radius-sm); }
+        .tooltip-title { color: var(--fb-accent); font-weight: 500; letter-spacing: .5px; }
+
+        @media (max-width: 768px) {
+            .right-column { min-width: 0; } /* desktop min-width (400px) overflowed a 375px phone by 25px */
+            .settings-heading { margin-top: 6px; }
+            .wx-links { width: 100%; }
+        }
     </style>
     <!-- Firebase (Realtime Database) for cross-device flight sync -->
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
 </head>
-<body>
+<body class="fb">
     <!-- Desktop Layout -->
     <div class="desktop-layout" style="display: flex; width: 100%; height: 100vh;">
         <div class="left-panel">
         <!-- Airport Code Section -->
-        <div class="input-section">
+        <div class="input-section fb-panel">
             <div class="input-group">
                 <label class="input-label">Airport Code</label>
                 <input type="text" class="input-field" id="airportCode" placeholder="KDFW" maxlength="4" style="text-transform: uppercase;" onchange="fetchWeatherData(this.value)">
@@ -1362,7 +1467,7 @@
         </div>
 
         <!-- Aircraft Type Section -->
-        <div class="input-section">
+        <div class="input-section fb-panel">
             <div class="input-group">
                 <label class="input-label">Aircraft Type</label>
                 <select class="select-field" id="aircraftType" onchange="populateAircraftSpecificValues(this.value)">
@@ -1376,22 +1481,22 @@
         </div>
 
         <!-- Custom Aircraft Section -->
-        <div class="input-section">
+        <div class="input-section fb-panel">
             <div class="input-group">
                 <button class="btn" type="button" onclick="showCustomAircraftBuilder()">Custom Aircraft</button>
             </div>
         </div>
 
         <!-- Section 1: Tail Number -->
-        <div class="input-section">
+        <div class="input-section fb-panel">
             <div class="input-group">
-                <label class="input-label"><a href="https://app.flightschedulepro.com/" target="_blank" style="color: #d97757; text-decoration: none;">Tail Number</a></label>
+                <label class="input-label"><a href="https://app.flightschedulepro.com/" target="_blank" style="color: var(--fb-accent); text-decoration: none;">Tail Number</a></label>
                 <input type="text" class="input-field" id="tailNumber" placeholder="">
             </div>
         </div>
 
         <!-- Section 2: Weight & Personal Info -->
-        <div class="input-section">
+        <div class="input-section fb-panel">
             <div class="input-group">
                 <label class="input-label">Weight</label>
                 <input type="number" class="input-field" id="weight" placeholder="">
@@ -1440,7 +1545,7 @@
         </div>
 
         <!-- Section 3: Maintenance -->
-        <div class="input-section">
+        <div class="input-section fb-panel">
             <div class="input-group">
                 <label class="input-label">50 Hr</label>
                 <input type="text" inputmode="decimal" class="input-field" id="hr50" placeholder="">
@@ -1468,9 +1573,9 @@
         </div>
 
         <!-- Section 4: Weather -->
-        <div class="input-section">
+        <div class="input-section fb-panel">
             <div class="input-group">
-                <label class="input-label"><a href="https://www.1800wxbrief.com" target="_blank" style="color: #d97757; text-decoration: none;">Weather Observation</a></label>
+                <label class="input-label"><a href="https://www.1800wxbrief.com" target="_blank" style="color: var(--fb-accent); text-decoration: none;">Weather Observation</a></label>
                 <input type="text" inputmode="numeric" class="input-field" id="weatherObs" placeholder="">
             </div>
             <div class="input-group">
@@ -1524,7 +1629,7 @@
         </div>
 
         <!-- Section 5: Runway & Performance -->
-        <div class="input-section">
+        <div class="input-section fb-panel">
             <div class="input-group">
                 <label class="input-label">Rwy Hdg</label>
                 <input type="number" class="input-field" id="runwayHeading" placeholder="">
@@ -1559,7 +1664,7 @@
     <!-- Right Column Container -->
     <div class="right-column">
         <!-- Zulu Time Calculator Panel -->
-        <div class="time-panel">
+        <div class="time-panel fb-panel">
             <div class="time-grid">
                 <div class="time-item">
                     <div class="time-label">Local Time</div>
@@ -1581,9 +1686,9 @@
         </div>
 
         <!-- Weight & Balance Calculator Panel -->
-        <div class="right-panel">
+        <div class="right-panel fb-panel">
             <div class="tail-number-display" id="tailNumberDisplay">N</div>
-            <div class="calculator-title">Weight & Balance Calculator - <span id="aircraftTypeDisplay" style="color: #b5b3a9;"></span></div>
+            <div class="calculator-title">Weight & Balance Calculator - <span id="aircraftTypeDisplay" style="color: var(--fb-accent); font-family: var(--fb-mono);"></span></div>
             
             <table class="data-table">
                 <thead>
@@ -1672,8 +1777,8 @@
         </div>
 
         <!-- Limits Panel -->
-        <div class="right-panel">
-            <div class="panel-title">Limits</div>
+        <div class="right-panel fb-panel">
+            <div class="panel-title"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M7 21h10M5 7h14M5 7l-3 7a3 3 0 0 0 6 0zM19 7l-3 7a3 3 0 0 0 6 0z"/></svg>Limits</div>
             <div class="info-grid">
                 <div class="info-item">
                     <span class="info-label">Max T/O Weight</span>
@@ -1709,9 +1814,9 @@
             <!-- CG Chart Container (Initially Hidden) -->
             <div id="cgChartContainer" style="display: none; margin-top: 15px;">
                 <canvas id="cgChart" width="300" height="200" style="
-                    border: 1px solid #3d3b37;
-                    border-radius: 4px;
-                    background-color: #2b2a28;
+                    border: 1px solid var(--fb-line);
+                    border-radius: var(--fb-radius-sm);
+                    background-color: var(--fb-bg);
                     width: 100%;
                     height: auto;
                 "></canvas>
@@ -1719,19 +1824,22 @@
         </div>
 
         <!-- METAR Panel -->
-        <div class="right-panel" id="metarPanel">
-            <div id="metarDisplay" style="font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-size: 12px; color: #c9c7ba; background-color: #2b2a28; border: 1px solid #3d3b37; padding: 10px; border-radius: 6px; word-wrap: break-word; line-height: 1.4;">
+        <div class="right-panel fb-panel" id="metarPanel">
+            <div class="panel-title"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg>METAR</div>
+            <div id="metarDisplay" style="font-family: var(--fb-mono); font-size: 12px; color: var(--fb-text); background-color: var(--fb-cell); border: 1px solid var(--fb-line); padding: 10px; border-radius: var(--fb-radius-sm); word-wrap: break-word; line-height: 1.4;">
                 No METAR data available
             </div>
         </div>
 
         <!-- Weather Panel -->
-        <div class="right-panel">
-            <div class="panel-title" style="display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap;">
-                <a href="https://aviationweather.gov/" target="_blank" rel="noopener" style="font-size:9px; padding:3px 7px; border:1px solid #45433e; border-radius:4px; color:#aaa; text-decoration:none; font-family:'Segoe UI',sans-serif; font-weight:normal; background:rgba(255,255,255,0.04); transition:all 0.2s; white-space:nowrap;" onmouseover="this.style.borderColor='#d97757';this.style.color='#d97757'" onmouseout="this.style.borderColor='#45433e';this.style.color='#aaa'">AviationWeather</a>
-                <a href="https://www.1800wxbrief.com/Website/#!/" target="_blank" rel="noopener" style="font-size:9px; padding:3px 7px; border:1px solid #45433e; border-radius:4px; color:#aaa; text-decoration:none; font-family:'Segoe UI',sans-serif; font-weight:normal; background:rgba(255,255,255,0.04); transition:all 0.2s; white-space:nowrap;" onmouseover="this.style.borderColor='#d97757';this.style.color='#d97757'" onmouseout="this.style.borderColor='#45433e';this.style.color='#aaa'">1800WxBrief</a>
-                <span style="color:#d97757;">Current Conditions</span>
-                <a href="https://plan.foreflight.com/map" target="_blank" rel="noopener" style="font-size:9px; padding:3px 7px; border:1px solid #45433e; border-radius:4px; color:#aaa; text-decoration:none; font-family:'Segoe UI',sans-serif; font-weight:normal; background:rgba(255,255,255,0.04); transition:all 0.2s; white-space:nowrap;" onmouseover="this.style.borderColor='#d97757';this.style.color='#d97757'" onmouseout="this.style.borderColor='#45433e';this.style.color='#aaa'">ForeFlight</a>
+        <div class="right-panel fb-panel">
+            <div class="panel-title wx-head">
+                <span class="wx-head-title"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8h10a3 3 0 1 0-3-3M3 12h15a3 3 0 1 1-3 3M3 16h7"/></svg>Current Conditions</span>
+                <span class="wx-links">
+                    <a class="wx-link" href="https://aviationweather.gov/" target="_blank" rel="noopener">AviationWeather</a>
+                    <a class="wx-link" href="https://www.1800wxbrief.com/Website/#!/" target="_blank" rel="noopener">1800WxBrief</a>
+                    <a class="wx-link" href="https://plan.foreflight.com/map" target="_blank" rel="noopener">ForeFlight</a>
+                </span>
             </div>
             <div class="info-grid">
                 <div class="info-item">
@@ -1778,8 +1886,8 @@
         </div>
 
         <!-- Performance Data Panel -->
-        <div class="right-panel">
-            <div class="panel-title">Performance Data</div>
+        <div class="right-panel fb-panel">
+            <div class="panel-title"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3 6 21M16 3l2 18M12 5v2M12 11v2M12 17v2"/></svg>Performance Data</div>
             <div class="info-grid">
                 <div class="info-item">
                     <span class="info-label">Expected Runway</span>
@@ -1868,8 +1976,8 @@
         </div>
 
         <!-- Maintenance Data Panel -->
-        <div class="right-panel">
-            <div class="panel-title">Maintenance Data</div>
+        <div class="right-panel fb-panel">
+            <div class="panel-title"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg>Maintenance Data</div>
             <div class="info-grid">
                 <div class="info-item">
                     <span class="info-label">50Hr</span>
@@ -1899,8 +2007,8 @@
         </div>
 
         <!-- Airspeeds Panel -->
-        <div class="right-panel">
-            <div class="panel-title">Aircraft Reference Speeds</div>
+        <div class="right-panel fb-panel">
+            <div class="panel-title"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 12l4-3M12 7v1M7 12h1M16 12h1"/></svg>Aircraft Reference Speeds</div>
             <div class="airspeed-grid">
                 <div class="airspeed-item">Vr</div>
                 <div class="airspeed-item">Vxse</div>
@@ -1932,10 +2040,10 @@
 
     <!-- E6B Flight Computer (Column) -->
     <div class="e6b-column">
-        <div class="panel-title" style="margin-top: 4px;">E6B Flight Computer</div>
+        <div class="panel-title"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><rect x="8" y="6" width="8" height="4" rx="1"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/></svg>E6B Flight Computer</div>
 
         <!-- Wind -->
-        <div class="input-section">
+        <div class="input-section fb-panel">
             <div class="e6b-section-title">Wind &amp; Groundspeed</div>
             <div class="input-group"><label class="input-label">Course (°T)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bCourse" data-panel="wind" placeholder="360"></div>
             <div class="input-group"><label class="input-label">TAS (kts)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bTas" data-panel="wind" placeholder="95"></div>
@@ -1952,7 +2060,7 @@
         </div>
 
         <!-- Time / Speed / Distance -->
-        <div class="input-section">
+        <div class="input-section fb-panel">
             <div class="e6b-section-title">Time · Speed · Distance</div>
             <div class="e6b-hint">Enter any two — the third computes.</div>
             <div class="input-group"><label class="input-label">GS (kts)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bTsdGs" data-panel="tsd" placeholder=""></div>
@@ -1962,7 +2070,7 @@
         </div>
 
         <!-- Fuel -->
-        <div class="input-section">
+        <div class="input-section fb-panel">
             <div class="e6b-section-title">Fuel</div>
             <div class="e6b-hint">Enter any two — the third computes.</div>
             <div class="input-group"><label class="input-label">Burn (GPH)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bFuelRate" data-panel="fuel" placeholder=""></div>
@@ -1973,7 +2081,7 @@
         </div>
 
         <!-- Descent -->
-        <div class="input-section">
+        <div class="input-section fb-panel">
             <div class="e6b-section-title">Descent Planning</div>
             <div class="input-group"><label class="input-label">Alt to Lose (ft)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bDesAlt" data-panel="descent" placeholder="3000"></div>
             <div class="input-group"><label class="input-label">Distance (NM)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bDesDist" data-panel="descent" placeholder="10"></div>
@@ -1984,7 +2092,7 @@
         </div>
 
         <!-- Altitude / TAS -->
-        <div class="input-section">
+        <div class="input-section fb-panel">
             <div class="e6b-section-title">Altitude &amp; TAS</div>
             <div class="input-group"><label class="input-label">Altimeter (inHg)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bAltim" data-panel="alt" placeholder="29.92" step="0.01"></div>
             <div class="input-group"><label class="input-label">Elevation (ft)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bElev" data-panel="alt" placeholder=""></div>
@@ -1998,7 +2106,7 @@
         </div>
 
         <!-- Cloud Base / Freezing Level -->
-        <div class="input-section">
+        <div class="input-section fb-panel">
             <div class="e6b-section-title">Cloud Base &amp; Freezing Level</div>
             <div class="input-group"><label class="input-label">Temp (°C)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bCbTemp" data-panel="cloud" placeholder="19"></div>
             <div class="input-group"><label class="input-label">Dew Point (°C)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bCbDew" data-panel="cloud" placeholder="5"></div>
@@ -2011,7 +2119,7 @@
         </div>
 
         <!-- Climb Gradient -->
-        <div class="input-section">
+        <div class="input-section fb-panel">
             <div class="e6b-section-title">Climb Gradient</div>
             <div class="e6b-hint">Enter GS plus either one — the rest compute.</div>
             <div class="input-group"><label class="input-label">GS (kts)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bClbGs" data-panel="climb" placeholder="70"></div>
@@ -2021,7 +2129,7 @@
         </div>
 
         <!-- Glide -->
-        <div class="input-section">
+        <div class="input-section fb-panel">
             <div class="e6b-section-title">Glide Distance</div>
             <div class="input-group"><label class="input-label">Height AGL (ft)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bGldAlt" data-panel="glide" placeholder="3000"></div>
             <div class="input-group"><label class="input-label">Glide (NM/1000ft)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bGldRatio" data-panel="glide" placeholder="" step="0.1"></div>
@@ -2030,7 +2138,7 @@
         </div>
 
         <!-- Conversions -->
-        <div class="input-section">
+        <div class="input-section fb-panel">
             <div class="e6b-section-title">Conversions</div>
             <div class="e6b-convrow"><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvKts" data-group="speed" data-unit="kts"><span class="e6b-convlbl">kts</span><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvMph" data-group="speed" data-unit="mph"><span class="e6b-convlbl">mph</span></div>
             <div class="e6b-convrow"><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvNm" data-group="dist" data-unit="nm"><span class="e6b-convlbl">NM</span><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvSm" data-group="dist" data-unit="sm"><span class="e6b-convlbl">SM</span><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvKm" data-group="dist" data-unit="km"><span class="e6b-convlbl">km</span></div>
@@ -2045,11 +2153,11 @@
 
     <!-- Settings Panel (Column D) -->
     <div class="settings-panel" style="padding: 20px; overflow-y: auto; height: 100vh;">
-        <h2 style="color: #d97757; margin-bottom: 20px; font-size: 18px;">Settings</h2>
+        <h2 class="settings-heading">Settings</h2>
         
         <!-- User Profile Section -->
-        <div class="input-section">
-            <h3 style="color: #d9d7cd; margin-bottom: 15px; font-size: 16px;">User Profile</h3>
+        <div class="input-section fb-panel">
+            <h3 class="panel-title"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>User Profile</h3>
             <div class="input-group">
                 <label class="input-label">My Weight (lbs)</label>
                 <input type="number" class="input-field" id="userWeight" placeholder="Enter weight">
@@ -2077,37 +2185,37 @@
         </div>
 
         <!-- Recent Flights Section (cross-device sync) -->
-        <div class="input-section">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-                <h3 style="color: #d9d7cd; margin: 0; font-size: 16px;">Recent Flights</h3>
-                <span id="wbSyncStatus" title="Cloud sync status" style="font-size: 11px; color: #888; display: inline-flex; align-items: center; gap: 5px;">
-                    <span id="wbSyncDot" style="width: 8px; height: 8px; border-radius: 50%; background: #888; display: inline-block;"></span>
+        <div class="input-section fb-panel">
+            <div class="panel-title" style="justify-content: space-between;">
+                <h3 class="panel-title-text"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a5 5 0 1 1 1-9.9A6 6 0 0 1 19 10a4 4 0 0 1-1 8z"/></svg>Recent Flights</h3>
+                <span id="wbSyncStatus" title="Cloud sync status" style="font-size: var(--fb-fs-xs); letter-spacing: 1px; text-transform: none; color: var(--fb-dim); display: inline-flex; align-items: center; gap: 5px;">
+                    <span id="wbSyncDot" style="width: 8px; height: 8px; border-radius: 50%; background: var(--fb-dim); display: inline-block;"></span>
                     <span id="wbSyncText">Connecting…</span>
                 </span>
             </div>
-            <p style="color: #999; font-size: 11px; margin: 0 0 12px 0; line-height: 1.4;">
+            <p style="color: var(--fb-dim); font-size: 11px; margin: 0 0 12px 0; line-height: 1.4;">
                 Save a flight here and it syncs to your other devices automatically. Open the same site on your phone to pick up where you left off.
             </p>
 
             <!-- Resume banner: appears when a newer in-progress flight exists on another device -->
-            <div id="wbResumeBanner" style="display: none; background: rgba(217, 119, 87, 0.12); border: 1px solid #d97757; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px;">
-                <div style="color: #cfe8ff; font-size: 12px; margin-bottom: 8px;" id="wbResumeText">You have an unsaved flight from another device.</div>
+            <div id="wbResumeBanner" style="display: none; background: color-mix(in srgb, var(--fb-accent) 12%, transparent); border: 1px solid var(--fb-accent); border-radius: var(--fb-radius-sm); padding: 10px 12px; margin-bottom: 12px;">
+                <div style="color: var(--fb-bright); font-size: 12px; margin-bottom: 8px;" id="wbResumeText">You have an unsaved flight from another device.</div>
                 <div style="display: flex; gap: 8px;">
                     <button class="btn btn-primary" style="flex: 1;" onclick="wbResumeLastFlight()">Resume it</button>
-                    <button onclick="wbDismissResume()" style="background: none; color: #9bb; border: 1px solid #456; padding: 7px 10px; border-radius: 6px; cursor: pointer; font-size: 12px;">Dismiss</button>
+                    <button class="btn btn-inline" onclick="wbDismissResume()">Dismiss</button>
                 </div>
             </div>
 
             <button class="btn btn-primary" style="margin-bottom: 12px;" onclick="wbSaveCurrentFlight()">Save This Flight</button>
 
             <div id="recentFlightsList" style="display: flex; flex-direction: column; gap: 8px;">
-                <div style="color: #777; font-size: 12px; text-align: center; padding: 8px;">No saved flights yet.</div>
+                <div style="color: var(--fb-dim); font-size: 12px; text-align: center; padding: 8px;">No saved flights yet.</div>
             </div>
         </div>
 
         <!-- Aircraft Management Section -->
-        <div class="input-section">
-            <h3 style="color: #d9d7cd; margin-bottom: 15px; font-size: 16px;">Aircraft Management</h3>
+        <div class="input-section fb-panel">
+            <h3 class="panel-title"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 21 12 18l1.5 3M12 3c-.8 0-1.5.7-1.5 1.5V9L3 13.5V15l7.5-2.2V17l-2 1.5V20L12 19l3.5 1v-1.5l-2-1.5v-4.2L21 15v-1.5L13.5 9V4.5C13.5 3.7 12.8 3 12 3z"/></svg>Aircraft Management</h3>
             <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px;">
                 <button class="btn btn-primary" onclick="saveCurrentAircraft()">Save Current Aircraft</button>
                 <button class="btn" onclick="showAircraftManager()">Manage Aircraft</button>
@@ -2116,29 +2224,27 @@
             </div>
             
             <!-- Aircraft Manager Modal -->
-            <div id="aircraftManager" style="display: none; background: #30302e;
-            border: 1px solid #3d3b37; border-radius: 8px; padding: 15px; margin-top: 10px; border: 1px solid #45433e;">
+            <div id="aircraftManager" style="display: none; background: var(--fb-cell); border: 1px solid var(--fb-line); border-radius: var(--fb-radius-sm); padding: 12px; margin-top: 10px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <h4 style="color: #d9d7cd; margin: 0;">Saved Aircraft</h4>
-                    <button onclick="hideAircraftManager()" style="background: none; border: none; color: #b5b3a9; font-size: 18px; cursor: pointer;">×</button>
+                    <h4 class="sub-heading">Saved Aircraft</h4>
+                    <button onclick="hideAircraftManager()" class="close-x" aria-label="Close">×</button>
                 </div>
                 <div id="aircraftList"></div>
             </div>
 
-            <div id="customAircraftManager" style="display: none; background: #30302e;
-            border: 1px solid #3d3b37; border-radius: 8px; padding: 15px; margin-top: 10px; border: 1px solid #45433e;">
+            <div id="customAircraftManager" style="display: none; background: var(--fb-cell); border: 1px solid var(--fb-line); border-radius: var(--fb-radius-sm); padding: 12px; margin-top: 10px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <h4 style="color: #d9d7cd; margin: 0;">Custom Aircraft</h4>
-                    <button onclick="hideCustomAircraftManager()" style="background: none; border: none; color: #b5b3a9; font-size: 18px; cursor: pointer;">×</button>
+                    <h4 class="sub-heading">Custom Aircraft</h4>
+                    <button onclick="hideCustomAircraftManager()" class="close-x" aria-label="Close">×</button>
                 </div>
                 <div id="customAircraftList"></div>
             </div>
             
             <!-- Custom Aircraft Builder Modal -->
-            <div id="customAircraftBuilder" style="display: none; background-color: #2b2a28; border-radius: 8px; padding: 15px; margin-top: 10px; border: 1px solid #45433e; max-height: 80vh; overflow-y: auto;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #555;">
-                    <h3 style="color: #d97757; margin: 0; font-size: 16px;">Custom Aircraft Builder</h3>
-                    <button onclick="hideCustomAircraftBuilder()" style="background: none; border: none; color: #b5b3a9; font-size: 20px; cursor: pointer; padding: 0; line-height: 1;">&times;</button>
+            <div id="customAircraftBuilder" style="display: none; background-color: var(--fb-bg); border-radius: var(--fb-radius-sm); padding: 12px; margin-top: 10px; border: 1px solid var(--fb-line); max-height: 80vh; overflow-y: auto;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--fb-line);">
+                    <h3 class="sub-heading">Custom Aircraft Builder</h3>
+                    <button onclick="hideCustomAircraftBuilder()" class="close-x" aria-label="Close">&times;</button>
                 </div>
                 <input type="hidden" id="customAircraftOriginalName" value="">
                 
@@ -2315,8 +2421,8 @@
 
                 <!-- CG Envelope Section -->
                 <div class="input-section">
-                    <h4 style="color: #d97757; margin-bottom: 10px; font-size: 14px;">CG Envelope Points</h4>
-                    <p style="color: #b5b3a9; font-size: 11px; margin-bottom: 15px;">Define the CG envelope by entering coordinate points (CG position, Weight). Points will be connected in order to form the envelope.</p>
+                    <h4 class="sub-heading" style="margin-bottom: 10px;">CG Envelope Points</h4>
+                    <p style="color: var(--fb-dim); font-size: 11px; margin-bottom: 15px;">Define the CG envelope by entering coordinate points (CG position, Weight). Points will be connected in order to form the envelope.</p>
                     
                     <div id="cgEnvelopePoints">
                         <div class="cg-point-row" style="display: flex; gap: 10px; margin-bottom: 8px; align-items: center;">
@@ -2376,11 +2482,11 @@
                         </div>
                     </div>
                     
-                    <button type="button" onclick="addCGPoint()" style="width: 100%; background-color: #d97757; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-top: 10px;">+ Add Point</button>
+                    <button class="btn" type="button" onclick="addCGPoint()" style="margin-top: 10px;">+ Add Point</button>
                     
                     <!-- Axis Configuration -->
-                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #555;">
-                        <h5 style="color: #d97757; margin-bottom: 10px; font-size: 12px;">Chart Axis Configuration</h5>
+                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--fb-line);">
+                        <h5 class="sub-heading" style="margin-bottom: 10px;">Chart Axis Configuration</h5>
                         <div style="display: flex; gap: 10px; margin-bottom: 10px;">
                             <div style="flex: 1;">
                                 <label class="input-label" style="font-size: 11px;">X-Axis Range (CG positions, comma-separated)</label>
@@ -2413,20 +2519,20 @@
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="input-section" style="border-top: 1px solid #555; padding-top: 15px; margin-top: 20px;">
+                <div class="input-section" style="margin-top: 12px;">
                     <div style="display: flex; gap: 10px; justify-content: space-between;">
-                        <button type="button" onclick="clearCustomAircraftForm()" style="flex: 1; background-color: #666; color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-size: 14px;">Clear</button>
-                        <button type="button" onclick="loadCustomAircraftTemplate()" style="flex: 1; background-color: #d97757; color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-size: 14px;">Template</button>
-                        <button class="btn" style="flex: 2;" type="button" onclick="saveCustomAircraft()">Save Aircraft</button>
+                        <button class="btn" type="button" onclick="clearCustomAircraftForm()" style="flex: 1;">Clear</button>
+                        <button class="btn" type="button" onclick="loadCustomAircraftTemplate()" style="flex: 1;">Template</button>
+                        <button class="btn btn-primary" style="flex: 2;" type="button" onclick="saveCustomAircraft()">Save Aircraft</button>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- App Information Section -->
-        <div class="input-section">
-            <h3 style="color: #d9d7cd; margin-bottom: 15px; font-size: 16px;">About</h3>
-            <p style="color: #b5b3a9; font-size: 12px; line-height: 1.4;">
+        <div class="input-section fb-panel">
+            <h3 class="panel-title"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>About</h3>
+            <p style="color: var(--fb-dim); font-size: 12px; line-height: 1.5;">
                 Weight & Balance Calculator<br>
                 Version 2.0<br>
                 Supports C-152, C-172, P2006T, and custom aircraft<br>
@@ -2445,77 +2551,24 @@
     </div> <!-- Close desktop-layout div -->
 
     <!-- Floating E6B Toggle (Desktop Only) -->
-    <div class="e6b-toggle" onclick="toggleE6BPanel()" title="E6B flight computer" style="
-        position: fixed;
-        top: 20px;
-        right: 190px;
-        height: 36px;
-        padding: 0 14px;
-        background: rgba(38, 38, 36, 0.92);
-        border: 1px solid #45433e;
-        border-radius: 8px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 7px;
-        z-index: 1000;
-        color: #b5b3a9;
-        font-size: 11px;
-        font-weight: 600;
-        letter-spacing: 2px;
-        transition: all 0.2s ease;
-    " onmouseover="this.style.borderColor='#d97757'; this.style.color='#f0eee6';" onmouseout="this.style.borderColor='#45433e'; this.style.color='#b5b3a9';">
+    <div class="e6b-toggle float-chip" onclick="toggleE6BPanel()" title="E6B flight computer" style="right: 178px;">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><rect x="8" y="6" width="8" height="4" rx="1"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/></svg>
         E6B
     </div>
 
-    <!-- Floating Home Link (Desktop Only) -->
-    <a class="home-chip" href="index.html" title="Back to Pilot Study Tools" style="
-        position: fixed;
-        top: 20px;
-        right: 80px;
-        height: 36px;
-        padding: 0 14px;
-        background: rgba(38, 38, 36, 0.92);
-        border: 1px solid #45433e;
-        border-radius: 8px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 7px;
-        z-index: 1000;
-        color: #b5b3a9;
-        font-size: 11px;
-        font-weight: 600;
-        letter-spacing: 2px;
-        text-decoration: none;
-        transition: all 0.2s ease;
-    " onmouseover="this.style.borderColor='#d97757'; this.style.color='#f0eee6';" onmouseout="this.style.borderColor='#45433e'; this.style.color='#b5b3a9';">
-        HOME
+    <!-- Floating Home Link (Desktop Only) — the page's back link to the Flight Bag home -->
+    <a class="home-chip float-chip fb-home" href="index.html" title="Back to Flight Bag" style="right: 64px;">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+        Home
     </a>
 
     <!-- Floating Settings Toggle (Desktop Only) -->
-    <div class="settings-toggle" onclick="toggleSettingsPanel()" title="Toggle settings panel" style="
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        width: 36px;
-        height: 36px;
-        background: rgba(38, 38, 36, 0.92);
-        border: 1px solid #45433e;
-        border-radius: 8px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 16px;
-        z-index: 1000;
-        transition: all 0.2s ease;
-    " onmouseover="this.style.borderColor='#d97757';" onmouseout="this.style.borderColor='#45433e';">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b5b3a9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <div class="settings-toggle float-chip" onclick="toggleSettingsPanel()" title="Toggle settings panel" style="right: 20px; width: 36px; padding: 0; justify-content: center;">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </div>
 
     <!-- Mobile Navigation (Mobile Only) -->
-    <div class="mobile-nav" style="
+    <div class="mobile-nav fb-panel" style="
         display: flex;
         overflow-x: auto;
         scrollbar-width: none;
@@ -2613,12 +2666,12 @@
                 container.style.display = 'block';
                 button.textContent = 'Hide Mnemonics';
                 button.style.background = 'linear-gradient(135deg, rgba(217, 119, 87, 0.3) 0%, rgba(217, 119, 87, 0.1) 100%)';
-                button.style.borderColor = '#d97757';
+                button.style.borderColor = 'var(--fb-accent)';
             } else {
                 container.style.display = 'none';
                 button.textContent = 'Mnemonics';
                 button.style.background = 'linear-gradient(135deg, rgba(217, 119, 87, 0.3) 0%, rgba(217, 119, 87, 0.1) 100%)';
-                button.style.borderColor = '#4a4844';
+                button.style.borderColor = 'var(--fb-border)';
             }
         }
 
@@ -2631,12 +2684,12 @@
                 container.style.display = 'block';
                 button.textContent = 'Hide General Knowledge';
                 button.style.background = 'linear-gradient(135deg, rgba(217, 119, 87, 0.3) 0%, rgba(217, 119, 87, 0.1) 100%)';
-                button.style.borderColor = '#d97757';
+                button.style.borderColor = 'var(--fb-accent)';
             } else {
                 container.style.display = 'none';
                 button.textContent = 'General Aviation Knowledge';
                 button.style.background = 'linear-gradient(135deg, rgba(149, 133, 201, 0.3) 0%, rgba(149, 133, 201, 0.1) 100%)';
-                button.style.borderColor = '#4a4844';
+                button.style.borderColor = 'var(--fb-border)';
             }
         }
 
@@ -3014,7 +3067,7 @@
             if (rearSeatRow) {
                 const isTwoSeatAircraft = aircraftType === 'C-152' || specs.seats === 2;
                 if (isTwoSeatAircraft) {
-                    rearSeatRow.style.backgroundColor = '#2a2a2a';
+                    rearSeatRow.style.backgroundColor = 'var(--fb-bg)';
                     rearSeatRow.style.opacity = '0.5';
                     const rearSeatCells = rearSeatRow.querySelectorAll('td');
                     rearSeatCells.forEach(cell => {
@@ -3042,7 +3095,7 @@
             if (baggage2Row) {
                 const isTwoSeatAircraft = aircraftType === 'C-152' || specs.seats === 2;
                 if (isTwoSeatAircraft) {
-                    baggage2Row.style.backgroundColor = '#2a2a2a';
+                    baggage2Row.style.backgroundColor = 'var(--fb-bg)';
                     baggage2Row.style.opacity = '0.5';
                     const baggage2Cells = baggage2Row.querySelectorAll('td');
                     baggage2Cells.forEach(cell => {
@@ -5561,7 +5614,7 @@ function updateCustomAircraftManager() {
     const names = Object.keys(customAircraft);
 
     if (names.length === 0) {
-        list.innerHTML = '<div style="color: #b5b3a9; font-size: 12px;">No custom aircraft saved.</div>';
+        list.innerHTML = '<div style="color: var(--fb-dim); font-size: 12px;">No custom aircraft saved.</div>';
         return;
     }
 
@@ -5573,20 +5626,20 @@ function updateCustomAircraftManager() {
         row.style.justifyContent = 'space-between';
         row.style.gap = '10px';
         row.style.padding = '8px 0';
-        row.style.borderBottom = '1px solid #555';
+        row.style.borderBottom = '1px solid var(--fb-line)';
 
         const title = document.createElement('div');
-        title.style.color = '#e0e0e0';
+        title.style.color = 'var(--fb-bright)';
         title.style.fontSize = '13px';
         title.textContent = name;
 
         const editBtn = document.createElement('button');
         editBtn.textContent = 'Edit';
-        editBtn.style.backgroundColor = '#d97757';
-        editBtn.style.color = 'white';
-        editBtn.style.border = 'none';
-        editBtn.style.padding = '8px 10px';
-        editBtn.style.borderRadius = '6px';
+        editBtn.style.backgroundColor = 'var(--fb-cell)';
+        editBtn.style.color = 'var(--fb-text)';
+        editBtn.style.border = '1px solid var(--fb-border)';
+        editBtn.style.padding = '8px 12px';
+        editBtn.style.borderRadius = 'var(--fb-radius-sm)';
         editBtn.style.cursor = 'pointer';
         editBtn.style.fontSize = '12px';
         editBtn.onclick = () => editCustomAircraft(name);
@@ -5824,20 +5877,20 @@ function showSettingsStatus(message, type) {
         // Set colors based on type
         switch(type) {
             case 'success':
-                statusDiv.style.backgroundColor = '#5f9e58';
-                statusDiv.style.color = 'white';
+                statusDiv.style.backgroundColor = 'color-mix(in srgb, var(--fb-ok) 22%, var(--fb-cell))';
+                statusDiv.style.color = 'var(--fb-bright)';
                 break;
             case 'error':
-                statusDiv.style.backgroundColor = '#c05a50';
-                statusDiv.style.color = 'white';
+                statusDiv.style.backgroundColor = 'color-mix(in srgb, var(--fb-bad) 22%, var(--fb-cell))';
+                statusDiv.style.color = 'var(--fb-bright)';
                 break;
             case 'info':
-                statusDiv.style.backgroundColor = '#d97757';
-                statusDiv.style.color = 'white';
+                statusDiv.style.backgroundColor = 'color-mix(in srgb, var(--fb-info) 22%, var(--fb-cell))';
+                statusDiv.style.color = 'var(--fb-bright)';
                 break;
             default:
-                statusDiv.style.backgroundColor = '#5a5852';
-                statusDiv.style.color = 'white';
+                statusDiv.style.backgroundColor = 'var(--fb-cell)';
+                statusDiv.style.color = 'var(--fb-bright)';
         }
                 
         // Auto-hide after 3 seconds
@@ -5987,15 +6040,15 @@ function applyFspImport() {
 function showFspImportBanner(message, warn) {
     const bar = document.createElement('div');
     bar.setAttribute('role', 'status');
-    bar.style.cssText = `position:fixed;left:50%;top:12px;transform:translateX(-50%);z-index:9999;max-width:min(92vw,640px);
-        background:#30302e;color:#f0eee6;border:1px solid ${warn ? '#c9a24a' : '#d97757'};border-radius:8px;
-        padding:10px 14px;font:13px/1.4 'Courier New',monospace;box-shadow:0 6px 24px rgba(0,0,0,.4);display:flex;gap:12px;align-items:center;`;
+    bar.style.cssText = `position:fixed;left:50%;top:12px;transform:translateX(-50%);z-index:9999;width:max-content;max-width:min(92vw,640px);box-sizing:border-box;
+        background:var(--fb-panel);color:var(--fb-bright);border:1px solid ${warn ? 'var(--fb-warn)' : 'var(--fb-accent)'};border-radius:var(--fb-radius);
+        padding:10px 14px;font:13px/1.4 var(--fb-font);box-shadow:0 6px 24px rgba(0,0,0,.4);display:flex;gap:12px;align-items:center;`;
     const text = document.createElement('span');
     text.textContent = message;
     const close = document.createElement('button');
     close.type = 'button';
     close.textContent = 'Dismiss';
-    close.style.cssText = 'background:#3b3a37;color:#f0eee6;border:1px solid #45433e;border-radius:6px;padding:3px 8px;font:inherit;cursor:pointer;';
+    close.style.cssText = 'background:var(--fb-cell);color:var(--fb-text);border:1px solid var(--fb-border);border-radius:var(--fb-radius-sm);padding:6px 12px;min-height:36px;font:inherit;font-size:var(--fb-fs-sm);cursor:pointer;flex:none;';
     close.onclick = () => bar.remove();
     bar.append(text, close);
     document.body.appendChild(bar);
@@ -6144,7 +6197,7 @@ function loadSavedAircraft(aircraftName) {
 
             console.log('Calling showSettingsStatus...');
             if (typeof showSettingsStatus === 'function') {
-                showSettingsStatus(`Aircraft "${aircraftName}" loaded successfully! 📂`, 'success');
+                showSettingsStatus(`Aircraft "${aircraftName}" loaded successfully!`, 'success');
             } else {
                 console.error('showSettingsStatus is not defined');
             }
@@ -6218,18 +6271,17 @@ function updateAircraftManager() {
 
         function createAircraftListContent() {
             if (Object.keys(savedAircraft).length === 0) {
-                return '<div style="color: #b5b3a9; text-align: center; padding: 20px;">No saved aircraft yet. Use "Save Current Aircraft" to add one.</div>';
+                return '<div style="color: var(--fb-dim); text-align: center; padding: 20px;">No saved aircraft yet. Use "Save Current Aircraft" to add one.</div>';
             }
 
             let content = '';
             Object.entries(savedAircraft).forEach(([name, aircraft]) => {
                 content += `
-                    <div style="background: #30302e;
-            border: 1px solid #3d3b37; border-radius: 6px; padding: 10px; margin-bottom: 8px; border: 1px solid #45433e;">
+                    <div style="background: var(--fb-panel); border: 1px solid var(--fb-line); border-radius: var(--fb-radius-sm); padding: 10px; margin-bottom: 8px;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div>
-                                <div style="font-weight: bold; color: #fff; margin-bottom: 4px;">${name}</div>
-                                <div style="font-size: 12px; color: #b5b3a9;">
+                                <div style="font-weight: 600; color: var(--fb-bright); margin-bottom: 4px;">${name}</div>
+                                <div style="font-size: 12px; color: var(--fb-dim);">
                                     ${aircraft.aircraftType} • ${aircraft.tailNumber}
                                     ${aircraft.weight ? ` • ${aircraft.weight} lbs` : ''}
                                 </div>
@@ -6267,7 +6319,7 @@ function updateAircraftManager() {
 
 function setDefaultAircraft(aircraftName) {
     document.getElementById('defaultAircraft').value = aircraftName;
-    showSettingsStatus(`"${aircraftName}" set as default aircraft! ⭐`, 'success');
+    showSettingsStatus(`"${aircraftName}" set as default aircraft!`, 'success');
 }
 
 function deleteAircraft(aircraftName) {
@@ -6703,29 +6755,29 @@ function displayCustomAircraftInfo(aircraft) {
     const performanceSection = document.querySelector('.info-grid');
     if (performanceSection && aircraft.vspeeds) {
         // Create custom performance display
-        let customInfo = '<div style="background: #30302e; border: 1px solid #3d3b37; padding: 15px; border-radius: 8px; margin-top: 10px;">';
-        customInfo += `<h4 style="color: #d97757; margin-bottom: 10px;">${aircraft.name} - Custom Aircraft</h4>`;
+        let customInfo = '<div style="background: var(--fb-cell); border: 1px solid var(--fb-line); padding: 12px; border-radius: var(--fb-radius-sm); margin-top: 10px;">';
+        customInfo += `<h4 class="sub-heading" style="margin-bottom: 10px;">${aircraft.name} - Custom Aircraft</h4>`;
         customInfo += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">';
         
         // V-speeds column
-        customInfo += '<div><h5 style="color: #d9d7cd; margin-bottom: 8px;">V-Speeds</h5>';
-        if (aircraft.vspeeds.vs0) customInfo += `<div style="color: #b5b3a9; font-size: 12px;">Vs0: ${aircraft.vspeeds.vs0} kts</div>`;
-        if (aircraft.vspeeds.vs1) customInfo += `<div style="color: #b5b3a9; font-size: 12px;">Vs1: ${aircraft.vspeeds.vs1} kts</div>`;
-        if (aircraft.vspeeds.vr) customInfo += `<div style="color: #b5b3a9; font-size: 12px;">Vr: ${aircraft.vspeeds.vr} kts</div>`;
-        if (aircraft.vspeeds.vx) customInfo += `<div style="color: #b5b3a9; font-size: 12px;">Vx: ${aircraft.vspeeds.vx} kts</div>`;
-        if (aircraft.vspeeds.vy) customInfo += `<div style="color: #b5b3a9; font-size: 12px;">Vy: ${aircraft.vspeeds.vy} kts</div>`;
-        if (aircraft.vspeeds.va) customInfo += `<div style="color: #b5b3a9; font-size: 12px;">Va: ${aircraft.vspeeds.va} kts</div>`;
-        if (aircraft.vspeeds.vno) customInfo += `<div style="color: #b5b3a9; font-size: 12px;">Vno: ${aircraft.vspeeds.vno} kts</div>`;
-        if (aircraft.vspeeds.vne) customInfo += `<div style="color: #b5b3a9; font-size: 12px;">Vne: ${aircraft.vspeeds.vne} kts</div>`;
+        customInfo += '<div><h5 style="color: var(--fb-bright); margin-bottom: 8px; font-weight: 500;">V-Speeds</h5>';
+        if (aircraft.vspeeds.vs0) customInfo += `<div style="color: var(--fb-text); font-size: 12px; font-family: var(--fb-mono);">Vs0: ${aircraft.vspeeds.vs0} kts</div>`;
+        if (aircraft.vspeeds.vs1) customInfo += `<div style="color: var(--fb-text); font-size: 12px; font-family: var(--fb-mono);">Vs1: ${aircraft.vspeeds.vs1} kts</div>`;
+        if (aircraft.vspeeds.vr) customInfo += `<div style="color: var(--fb-text); font-size: 12px; font-family: var(--fb-mono);">Vr: ${aircraft.vspeeds.vr} kts</div>`;
+        if (aircraft.vspeeds.vx) customInfo += `<div style="color: var(--fb-text); font-size: 12px; font-family: var(--fb-mono);">Vx: ${aircraft.vspeeds.vx} kts</div>`;
+        if (aircraft.vspeeds.vy) customInfo += `<div style="color: var(--fb-text); font-size: 12px; font-family: var(--fb-mono);">Vy: ${aircraft.vspeeds.vy} kts</div>`;
+        if (aircraft.vspeeds.va) customInfo += `<div style="color: var(--fb-text); font-size: 12px; font-family: var(--fb-mono);">Va: ${aircraft.vspeeds.va} kts</div>`;
+        if (aircraft.vspeeds.vno) customInfo += `<div style="color: var(--fb-text); font-size: 12px; font-family: var(--fb-mono);">Vno: ${aircraft.vspeeds.vno} kts</div>`;
+        if (aircraft.vspeeds.vne) customInfo += `<div style="color: var(--fb-text); font-size: 12px; font-family: var(--fb-mono);">Vne: ${aircraft.vspeeds.vne} kts</div>`;
         customInfo += '</div>';
         
         // Limits column
-        customInfo += '<div><h5 style="color: #d9d7cd; margin-bottom: 8px;">Limits</h5>';
-        customInfo += `<div style="color: #b5b3a9; font-size: 12px;">Max Weight: ${aircraft.maxWeight} lbs</div>`;
-        customInfo += `<div style="color: #b5b3a9; font-size: 12px;">Forward CG: ${aircraft.forwardCG} in</div>`;
-        customInfo += `<div style="color: #b5b3a9; font-size: 12px;">Aft CG: ${aircraft.aftCG} in</div>`;
-        if (aircraft.performance.serviceCeiling) customInfo += `<div style="color: #b5b3a9; font-size: 12px;">Service Ceiling: ${aircraft.performance.serviceCeiling} ft</div>`;
-        if (aircraft.performance.rateOfClimb) customInfo += `<div style="color: #b5b3a9; font-size: 12px;">Rate of Climb: ${aircraft.performance.rateOfClimb} fpm</div>`;
+        customInfo += '<div><h5 style="color: var(--fb-bright); margin-bottom: 8px; font-weight: 500;">Limits</h5>';
+        customInfo += `<div style="color: var(--fb-text); font-size: 12px; font-family: var(--fb-mono);">Max Weight: ${aircraft.maxWeight} lbs</div>`;
+        customInfo += `<div style="color: var(--fb-text); font-size: 12px; font-family: var(--fb-mono);">Forward CG: ${aircraft.forwardCG} in</div>`;
+        customInfo += `<div style="color: var(--fb-text); font-size: 12px; font-family: var(--fb-mono);">Aft CG: ${aircraft.aftCG} in</div>`;
+        if (aircraft.performance.serviceCeiling) customInfo += `<div style="color: var(--fb-text); font-size: 12px; font-family: var(--fb-mono);">Service Ceiling: ${aircraft.performance.serviceCeiling} ft</div>`;
+        if (aircraft.performance.rateOfClimb) customInfo += `<div style="color: var(--fb-text); font-size: 12px; font-family: var(--fb-mono);">Rate of Climb: ${aircraft.performance.rateOfClimb} fpm</div>`;
         customInfo += '</div>';
         
         customInfo += '</div></div>';
@@ -6751,17 +6803,19 @@ function showAircraftSavedPopup(aircraftName) {
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        background-color: #d97757;
-        color: white;
-        padding: 20px 30px;
-        border-radius: 10px;
-        font-size: 16px;
-        font-weight: bold;
+        background-color: var(--fb-panel);
+        color: var(--fb-bright);
+        border: 1px solid var(--fb-accent);
+        padding: 18px 28px;
+        border-radius: var(--fb-radius);
+        font-family: var(--fb-font);
+        font-size: 15px;
+        font-weight: 500;
         z-index: 10000;
         box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         text-align: center;
     `;
-    popup.innerHTML = `Aircraft Saved!<br><span style="font-size: 14px; font-weight: normal;">${aircraftName}</span>`;
+    popup.innerHTML = `Aircraft Saved!<br><span style="font-size: 13px; font-weight: normal; color: var(--fb-accent); font-family: var(--fb-mono);">${aircraftName}</span>`;
     
     document.body.appendChild(popup);
     
@@ -6928,9 +6982,7 @@ function toggleCGEnvelope() {
         // Show the CG envelope
         container.style.display = 'block';
         button.textContent = 'Hide CG Envelope';
-        button.style.background = 'linear-gradient(135deg, rgba(217, 119, 87, 0.3) 0%, rgba(217, 119, 87, 0.1) 100%)';
-        button.style.borderColor = '#d97757';
-        button.style.boxShadow = '0 2px 4px rgba(217, 119, 87, 0.2)';
+        button.classList.add('active');
         
         // Draw the CG chart
         drawCGChartInLimitsPanel();
@@ -6938,9 +6990,7 @@ function toggleCGEnvelope() {
         // Hide the CG envelope
         container.style.display = 'none';
         button.textContent = 'Show CG Envelope';
-        button.style.background = 'linear-gradient(135deg, rgba(217, 119, 87, 0.3) 0%, rgba(217, 119, 87, 0.1) 100%)';
-        button.style.borderColor = '#4a4844';
-        button.style.boxShadow = '0 2px 4px rgba(217, 119, 87, 0.2)';
+        button.classList.remove('active');
     }
 }
 
@@ -6979,7 +7029,7 @@ async function fetchWeatherData(airportCode) {
         if (weatherData) {
             updateWeatherPanel(weatherData);
         } else {
-            updateWeatherPanel(null, 'Unable to fetch weather data for this airport');
+            updateWeatherPanel(null, 'No live weather for this airport — enter conditions by hand (1800wxbrief.com)');
         }
         
         // Update elevation data (separate from weather)
@@ -6995,96 +7045,56 @@ async function fetchWeatherData(airportCode) {
     }
 }
 
+// National Weather Service observations: official, free, and readable from a browser (CORS *), unlike
+// aviationweather.gov. Its 5-minute observations carry no text, so take the newest one that has the raw METAR.
+async function fetchNwsRawMetar(code) {
+    const res = await fetch(`https://api.weather.gov/stations/${encodeURIComponent(code)}/observations?limit=25`, {
+        headers: { Accept: 'application/geo+json' }, signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const hit = (data.features || []).map(f => f.properties || {}).find(p => p.rawMessage && p.rawMessage.trim());
+    if (!hit) return null;
+    const ageMin = (Date.now() - new Date(hit.timestamp)) / 60000;
+    if (ageMin > 180) { console.log(`NWS METAR for ${code} is ${Math.round(ageMin)} min old — ignoring`); return null; }
+    return hit.rawMessage.trim();
+}
+
 async function fetchWeatherFromAPIs(airportCode) {
     try {
         const upperCode = airportCode.toUpperCase();
         let weatherData = null;
+
+        try {
+            const raw = await fetchNwsRawMetar(upperCode);
+            if (raw) { weatherData = parseRawMETAR(raw); console.log('Current weather data from NWS:', weatherData); return weatherData; }
+        } catch (nwsError) {
+            console.log('NWS observations failed, trying AWC proxies...', nwsError.message);
+        }
         
-        // Try multiple CORS proxies with Aviation Weather Center
-        const proxies = [
-            'https://api.allorigins.win/raw?url=',
-            'https://corsproxy.io/?',
-            'https://api.codetabs.com/v1/proxy?quest='
-        ];
-        
+        // Fallbacks (non-US fields, NWS outage): AWC and NOAA text through public CORS proxies plus AWC direct,
+        // all at once — first good answer wins, nothing waits longer than 8 s.
         const awcUrl = `https://aviationweather.gov/api/data/metar?ids=${upperCode}&format=json`;
-        
-        for (const proxy of proxies) {
-            try {
-                const response = await fetch(proxy + encodeURIComponent(awcUrl));
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data && data.length > 0) {
-                        weatherData = convertAWCData(data[0]);
-                        console.log('Current weather data from AWC via', proxy, ':', weatherData);
-                        break;
-                    }
-                }
-            } catch (proxyError) {
-                console.log(`Proxy ${proxy} failed, trying next...`);
-            }
+        const noaaUrl = `https://tgftp.nws.noaa.gov/data/observations/metar/stations/${upperCode}.TXT`;
+        const proxies = ['https://api.allorigins.win/raw?url=', 'https://corsproxy.io/?', 'https://api.codetabs.com/v1/proxy?quest='];
+        const get = url => fetch(url, { signal: AbortSignal.timeout(8000) }).then(r => { if (!r.ok) throw new Error(r.status); return r; });
+        const fromAwc = url => get(url).then(r => r.json()).then(d => { if (!d?.length) throw new Error('empty'); return convertAWCData(d[0]); });
+        const fromNoaa = url => get(url).then(r => r.text()).then(t => { const l = t.trim().split('\n'); if (l.length < 2) throw new Error('empty'); return parseRawMETAR(l[1].trim()); });
+        try {
+            weatherData = await Promise.any([
+                ...proxies.map(p => fromAwc(p + encodeURIComponent(awcUrl))),
+                ...proxies.map(p => fromNoaa(p + encodeURIComponent(noaaUrl))),
+                fromAwc(awcUrl),
+            ]);
+            console.log('Current weather data from a fallback source:', weatherData);
+        } catch (fallbackError) {
+            console.log('All fallback weather sources failed');
         }
-        
-        // Try NOAA METAR text with proxies if AWC failed
+
+        // No live source answered: say so rather than filling the form with invented weather.
         if (!weatherData) {
-            const noaaUrl = `https://tgftp.nws.noaa.gov/data/observations/metar/stations/${upperCode}.TXT`;
-            
-            for (const proxy of proxies) {
-                try {
-                    const response = await fetch(proxy + encodeURIComponent(noaaUrl));
-                    
-                    if (response.ok) {
-                        const metarText = await response.text();
-                        const lines = metarText.trim().split('\n');
-                        if (lines.length >= 2) {
-                            const rawMetar = lines[1].trim();
-                            weatherData = parseRawMETAR(rawMetar);
-                            console.log('Current weather data from NOAA via', proxy, ':', weatherData);
-                            break;
-                        }
-                    }
-                } catch (noaaError) {
-                    console.log(`NOAA via ${proxy} failed...`);
-                }
-            }
-        }
-        
-        // Try direct fetch (might work for some browsers/environments)
-        if (!weatherData) {
-            try {
-                const response = await fetch(awcUrl);
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data && data.length > 0) {
-                        weatherData = convertAWCData(data[0]);
-                        console.log('Current weather data from AWC direct:', weatherData);
-                    }
-                }
-            } catch (directError) {
-                console.log('Direct AWC fetch failed...');
-            }
-        }
-        
-        // Try OpenWeatherMap API as fallback (free tier)
-        if (!weatherData) {
-            try {
-                // Note: This requires a free API key from openweathermap.org
-                // For now, we'll use it to demonstrate the structure
-                const owmUrl = `https://api.openweathermap.org/data/2.5/weather?q=${upperCode}&appid=YOUR_API_KEY&units=metric`;
-                console.log('OpenWeatherMap would require API key setup');
-            } catch (owmError) {
-                console.log('OpenWeatherMap not configured...');
-            }
-        }
-        
-        // Fallback: Enhanced mock data with disclaimer
-        if (!weatherData) {
-            weatherData = generateMockWeatherData(upperCode);
-            console.log('Using sample weather data (APIs unavailable):', weatherData);
-            updateWeatherPanel(weatherData, `Sample data for ${upperCode} - For current weather, check 1800wxbrief.com`);
-            return;
+            console.log(`No live weather for ${upperCode} from any source`);
+            return null;
         }
         
         return weatherData;
@@ -7425,101 +7435,6 @@ function updateFieldElevationFromAirport(elevationData) {
         console.error('Error updating field elevation:', error);
     }
 }
-function generateMockWeatherData(airportCode) {
-    // Ensure airport code is uppercase
-    const upperCode = airportCode.toUpperCase();
-    
-    const mockData = {
-        'KDFW': {
-            raw: 'KDFW 080253Z 18008KT 10SM FEW250 22/M02 A3012 RMK AO2 SLP220 T02221022',
-            visibility: { repr: '10 SM' },
-            temperature: { repr: '22°C', value: 22 },
-            dewpoint: { repr: '-2°C' },
-            altimeter: { repr: '30.12"', value: 30.12 },
-            wind_direction: { repr: '180°', value: 180 },
-            wind_speed: { repr: '8 kts', value: 8 },
-            elevation: { repr: '607 ft' }
-        },
-        'KDTO': {
-            raw: 'KDTO 080253Z 14005KT 10SM CLR 13/00 A3015 RMK AO2 SLP208 T01330000 51002',
-            visibility: { repr: '10 SM' },
-            temperature: { repr: '13°C', value: 13 },
-            dewpoint: { repr: '0°C' },
-            altimeter: { repr: '30.15"', value: 30.15 },
-            wind_direction: { repr: '140°', value: 140 },
-            wind_speed: { repr: '5 kts', value: 5 },
-            elevation: { repr: '700 ft' }
-        },
-        'KLAX': {
-            raw: 'KLAX 080253Z 25008KT 10SM FEW015 BKN250 18/14 A2995 RMK AO2 SLP142 T01830144',
-            visibility: { repr: '10 SM' },
-            temperature: { repr: '18°C', value: 18 },
-            dewpoint: { repr: '14°C' },
-            altimeter: { repr: '29.95"', value: 29.95 },
-            wind_direction: { repr: '250°', value: 250 },
-            wind_speed: { repr: '8 kts', value: 8 },
-            elevation: { repr: '125 ft' }
-        },
-        'KORD': {
-            raw: 'KORD 080253Z 27012KT 10SM BKN025 OVC035 08/04 A3018 RMK AO2 SLP225 T00830044',
-            visibility: { repr: '10 SM' },
-            temperature: { repr: '8°C', value: 8 },
-            dewpoint: { repr: '4°C' },
-            altimeter: { repr: '30.18"', value: 30.18 },
-            wind_direction: { repr: '270°', value: 270 },
-            wind_speed: { repr: '12 kts', value: 12 },
-            elevation: { repr: '672 ft' }
-        },
-        'KJFK': {
-            raw: 'KJFK 080253Z 28010KT 10SM FEW030 SCT250 12/07 A3020 RMK AO2 SLP230 T01220067',
-            visibility: { repr: '10 SM' },
-            temperature: { repr: '12°C', value: 12 },
-            dewpoint: { repr: '7°C' },
-            altimeter: { repr: '30.20"', value: 30.20 },
-            wind_direction: { repr: '280°', value: 280 },
-            wind_speed: { repr: '10 kts', value: 10 },
-            elevation: { repr: '13 ft' }
-        }
-    };
-    
-    // Return specific airport data or generate realistic generic data
-    if (mockData[upperCode]) {
-        return mockData[upperCode];
-    }
-    
-    // Generate realistic generic data for unknown airports
-    const currentTime = new Date();
-    const day = String(currentTime.getUTCDate()).padStart(2, '0');
-    const hour = String(currentTime.getUTCHours()).padStart(2, '0');
-    const minute = String(currentTime.getUTCMinutes()).padStart(2, '0');
-    const timeString = `${day}${hour}${minute}Z`;
-    
-    // Generate realistic but varied weather conditions
-    const windDirs = [360, 90, 180, 270, 140, 220, 310];
-    const windSpeeds = [0, 5, 8, 12, 15];
-    const temps = [8, 12, 18, 22, 25];
-    const altimeters = [29.92, 30.05, 30.12, 30.18, 30.25];
-    
-    const windDir = windDirs[Math.floor(Math.random() * windDirs.length)];
-    const windSpeed = windSpeeds[Math.floor(Math.random() * windSpeeds.length)];
-    const temp = temps[Math.floor(Math.random() * temps.length)];
-    const dewpoint = temp - Math.floor(Math.random() * 8) - 2; // Realistic dewpoint spread
-    const altimeter = altimeters[Math.floor(Math.random() * altimeters.length)];
-    
-    const windString = windSpeed === 0 ? '00000KT' : `${String(windDir).padStart(3, '0')}${String(windSpeed).padStart(2, '0')}KT`;
-    
-    return {
-        raw: `${upperCode} ${timeString} ${windString} 10SM CLR ${String(temp).padStart(2, '0')}/${String(dewpoint).padStart(2, '0')} A${Math.round(altimeter * 100)} RMK AO2`,
-        visibility: { repr: '10 SM' },
-        temperature: { repr: `${temp}°C`, value: temp },
-        dewpoint: { repr: `${dewpoint}°C` },
-        altimeter: { repr: `${altimeter.toFixed(2)}"`, value: altimeter },
-        wind_direction: { repr: windSpeed === 0 ? 'CALM' : `${windDir}°`, value: windDir },
-        wind_speed: { repr: windSpeed === 0 ? 'CALM' : `${windSpeed} kts`, value: windSpeed },
-        elevation: { repr: '1000 ft' }
-    };
-}
-
 function updateWeatherPanel(weatherData, errorMessage = null) {
     try {
         // Update METAR display panel
@@ -7527,10 +7442,10 @@ function updateWeatherPanel(weatherData, errorMessage = null) {
         if (metarDisplay) {
             if (errorMessage) {
                 metarDisplay.textContent = errorMessage;
-                metarDisplay.style.color = '#d9a545';
+                metarDisplay.style.color = 'var(--fb-warn)';
             } else if (weatherData && weatherData.raw) {
                 metarDisplay.textContent = weatherData.raw;
-                metarDisplay.style.color = '#c9c7ba';
+                metarDisplay.style.color = 'var(--fb-text)';
             }
         }
         
@@ -7727,5 +7642,6 @@ function updateFormFieldsFromWeather(weatherData) {
 <!-- Cross-device flight sync (Recent Flights) -->
 <script src="wbsync.js"></script>
 <script src="e6b.js"></script>
+<script src="theme/flightbag-theme.js"></script>
 </body>
 </html>

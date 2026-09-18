@@ -7,207 +7,186 @@
 <title>Hold Trainer</title>
 <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="theme/flightbag-theme.css">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg0: #262624;
-  --bg1: #30302e;
-  --bg2: #3b3a37;
-  --line: #45433e;
-  --text: #f0eee6;
-  --text2: #b5b3a9;
-  --text3: #918f84;
-  --accent: #d97757;
-  --ok: #6faf6a;
-  --warn: #d9a545;
-  --bad: #d96257;
-  --mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  /* holds.js writes inline font-family:var(--mono) — keep this alias */
+  --mono: var(--fb-mono);
 }
-body {
-  background: var(--bg0);
-  color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  min-height: 100vh;
-}
+body { min-height: 100vh; }
 header {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 14px 18px;
-  border-bottom: 1px solid var(--line);
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--fb-line);
 }
 header h1 {
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 3px;
-  color: var(--text);
-}
-.home-chip {
-  display: inline-flex;
+  font-size: var(--fb-fs-xs);
+  font-weight: 500;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--fb-bright);
+  display: flex;
   align-items: center;
-  height: 30px;
-  padding: 0 12px;
-  background: var(--bg1);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  color: var(--text2);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 2px;
-  text-decoration: none;
-  transition: border-color .15s, color .15s;
+  gap: 9px;
 }
-.home-chip:hover { border-color: var(--accent); color: var(--text); }
-.tabs { display: flex; gap: 6px; margin-left: auto; }
+header h1 svg, .card h2 svg, .card-ico { width: 15px; height: 15px; stroke: var(--fb-accent); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.fb-home { min-height: 36px; }
+.tabs { margin-left: auto; }
 .tab {
-  background: var(--bg1);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  color: var(--text2);
-  padding: 7px 16px;
-  font-size: 11px;
+  min-height: 32px;
+  padding: 0 14px;
   font-weight: 600;
   letter-spacing: 2px;
-  cursor: pointer;
-  transition: border-color .15s, color .15s, background .15s;
 }
-.tab:hover { border-color: var(--accent); color: var(--text); }
-.tab.active { background: rgba(217,119,87,.12); border-color: var(--accent); color: var(--text); }
 
 main {
   display: flex;
-  gap: 18px;
-  padding: 18px;
+  gap: 8px;
+  padding: 8px;
   max-width: 1100px;
   margin: 0 auto;
   align-items: flex-start;
 }
 .canvas-wrap {
   flex: 0 0 auto;
-  background: var(--bg1);
-  border: 1px solid var(--line);
-  border-radius: 10px;
   padding: 10px;
 }
-#holdCanvas { display: block; border-radius: 6px; background: #2b2a28; }
+#holdCanvas { display: block; border-radius: var(--fb-radius-sm); background: var(--fb-cell); max-width: 100%; }
 .side {
   flex: 1 1 0;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 8px;
 }
-.card {
-  background: var(--bg1);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 16px;
-}
+.card { padding: var(--fb-pad); }
 .card h2 {
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--fb-fs-xs);
+  font-weight: 500;
   letter-spacing: 2.5px;
   text-transform: uppercase;
-  color: var(--text3);
+  color: var(--fb-bright);
   margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
 }
-.card p { font-size: 13.5px; line-height: 1.55; color: var(--text2); margin-bottom: 8px; }
-.card p strong { color: var(--text); }
-.card p em { color: var(--accent); font-style: normal; font-weight: 600; }
+.card-head { display: flex; align-items: center; gap: 9px; margin-bottom: 10px; }
+.card p { font-size: 13.5px; line-height: 1.55; color: var(--fb-text); margin-bottom: 8px; }
+.card p strong { color: var(--fb-bright); }
+.card p em { color: var(--fb-accent); font-style: normal; font-weight: 600; }
 .btn {
-  display: inline-block;
-  background: var(--bg2);
-  color: var(--text);
-  border: 1px solid #4a4844;
-  padding: 9px 16px;
-  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  background: color-mix(in srgb, var(--fb-cell) 82%, transparent);
+  color: var(--fb-text);
+  border: 1px solid var(--fb-border);
+  padding: 6px 14px;
+  border-radius: var(--fb-radius-sm);
   cursor: pointer;
+  font: inherit;
   font-size: 13px;
-  font-family: inherit;
-  transition: border-color .15s, background .15s;
+  transition: border-color var(--fb-ease), color var(--fb-ease), background var(--fb-ease);
 }
-.btn:hover { border-color: var(--accent); }
-.btn-primary { background: var(--accent); border-color: var(--accent); color: #1f1e1b; font-weight: 600; }
-.btn-primary:hover { background: #e08663; }
+.btn:hover { border-color: var(--fb-accent); color: var(--fb-bright); }
+.btn-primary { background: var(--fb-accent); border-color: var(--fb-accent); color: var(--fb-on-accent); font-weight: 600; }
+.btn-primary:hover { color: var(--fb-on-accent); filter: brightness(1.08); }
 .btn:disabled { opacity: .35; cursor: default; }
-.btn:disabled:hover { border-color: #4a4844; }
+.btn:disabled:hover { border-color: var(--fb-border); color: var(--fb-text); }
 .btnrow { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
 .stepdots { display: flex; gap: 5px; align-items: center; margin-left: auto; }
-.stepdots span { width: 7px; height: 7px; border-radius: 50%; background: var(--bg2); border: 1px solid var(--line); }
-.stepdots span.on { background: var(--accent); border-color: var(--accent); }
+.stepdots span { width: 7px; height: 7px; border-radius: 50%; background: var(--fb-cell); border: 1px solid var(--fb-border); }
+.stepdots span.on { background: var(--fb-accent); border-color: var(--fb-accent); }
 
 .ctl { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-.ctl label { font-size: 12px; color: var(--text2); min-width: 118px; }
-.ctl input[type=range] { flex: 1; accent-color: var(--accent); }
+.ctl label { font-size: var(--fb-fs-sm); color: var(--fb-text); min-width: 118px; }
+.ctl input[type=range] { flex: 1; accent-color: var(--fb-accent); min-height: 36px; }
 .ctl .val {
-  font-family: var(--mono);
+  font-family: var(--fb-mono);
   font-size: 13px;
-  color: var(--text);
+  color: var(--fb-bright);
   min-width: 46px;
   text-align: right;
 }
-.seg { display: flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg { display: flex; gap: 2px; padding: 2px; background: var(--fb-cell); border: 1px solid var(--fb-line); border-radius: var(--fb-radius-sm); }
 .seg button {
-  background: var(--bg1);
-  color: var(--text2);
+  background: none;
+  color: var(--fb-dim);
   border: none;
-  padding: 7px 14px;
-  font-size: 12px;
+  border-radius: 4px;
+  min-height: 32px;
+  padding: 0 12px;
+  font: inherit;
+  font-size: var(--fb-fs-sm);
   cursor: pointer;
-  font-family: inherit;
+  transition: background var(--fb-ease), color var(--fb-ease);
 }
-.seg button.on { background: rgba(217,119,87,.15); color: var(--text); }
+.seg button:hover { color: var(--fb-bright); }
+.seg button.on { background: var(--fb-panel); color: var(--fb-accent); box-shadow: 0 1px 0 rgba(217, 119, 87, .6); }
 .entry-name {
-  font-family: var(--mono);
+  font-family: var(--fb-mono);
   font-size: 22px;
   font-weight: 700;
-  color: var(--accent);
+  color: var(--fb-accent);
   letter-spacing: 1px;
 }
 .legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 10px; }
-.legend i { font-style: normal; font-size: 11px; color: var(--text2); display: inline-flex; align-items: center; gap: 6px; }
+.legend i { font-style: normal; font-size: 11px; color: var(--fb-text); display: inline-flex; align-items: center; gap: 6px; }
 .legend b { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
 
 .answers { display: flex; gap: 8px; margin-top: 10px; }
-.answers .btn { flex: 1; text-align: center; font-weight: 600; }
-.answers .btn.good { border-color: var(--ok); background: rgba(111,175,106,.15); }
-.answers .btn.badpick { border-color: var(--bad); background: rgba(217,98,87,.12); }
-.quiz-q { font-size: 14.5px; line-height: 1.6; color: var(--text); }
-.quiz-q .mono { font-family: var(--mono); color: var(--warn); }
-.score { font-family: var(--mono); font-size: 12px; color: var(--text3); margin-top: 10px; }
-.feedback { font-size: 13px; margin-top: 10px; line-height: 1.5; color: var(--text2); display: none; }
+.answers .btn { flex: 1; text-align: center; font-weight: 600; font-family: var(--fb-mono); letter-spacing: .5px; }
+.answers .btn.good { border-color: var(--fb-ok); background: color-mix(in srgb, var(--fb-ok) 15%, transparent); color: var(--fb-bright); }
+.answers .btn.badpick { border-color: var(--fb-bad); background: color-mix(in srgb, var(--fb-bad) 14%, transparent); color: var(--fb-bright); }
+.quiz-q { font-size: 14.5px; line-height: 1.6; color: var(--fb-bright); }
+.quiz-q .mono { font-family: var(--fb-mono); color: var(--fb-warn); }
+.score { font-family: var(--fb-mono); font-size: var(--fb-fs-sm); color: var(--fb-dim); margin-top: 10px; }
+.feedback { font-size: 13px; margin-top: 10px; line-height: 1.5; color: var(--fb-text); display: none; }
 .feedback.show { display: block; }
-.feedback .yes { color: var(--ok); font-weight: 700; }
-.feedback .no { color: var(--bad); font-weight: 700; }
+.feedback .yes { color: var(--fb-ok); font-weight: 700; }
+.feedback .no { color: var(--fb-bad); font-weight: 700; }
 
 @media (max-width: 860px) {
   main { flex-direction: column; align-items: stretch; }
-  .canvas-wrap { align-self: center; }
+  .canvas-wrap { align-self: center; max-width: 100%; }
   header { flex-wrap: wrap; }
-  .tabs { margin-left: 0; width: 100%; }
-  .tab { flex: 1; text-align: center; }
+  .tabs { margin-left: 0; width: 100%; display: flex; }
+  .tab { flex: 1; text-align: center; min-height: 36px; }
+}
+@media (max-width: 480px) {
+  .ctl { flex-wrap: wrap; }
+  .ctl label { min-width: 0; flex: 1 1 100%; }
+  .seg { flex: 1; }
+  .seg button { flex: 1; }
 }
 </style>
 </head>
-<body>
+<body class="fb">
 
 <header>
-  <a class="home-chip" href="index.html">HOME</a>
-  <h1>HOLD TRAINER</h1>
-  <div class="tabs">
-    <button class="tab active" data-mode="learn" onclick="setMode('learn')">LEARN</button>
-    <button class="tab" data-mode="entries" onclick="setMode('entries')">ENTRIES</button>
-    <button class="tab" data-mode="practice" onclick="setMode('practice')">PRACTICE</button>
+  <a class="fb-home" href="index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Flight Bag</a>
+  <h1><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10a5 5 0 0 1 0 10H7a5 5 0 0 1 0-10z"/><circle cx="17" cy="12" r="1.5"/></svg>Hold Trainer</h1>
+  <div class="tabs fb-tabs" role="tablist">
+    <button class="tab fb-tab active" data-mode="learn" onclick="setMode('learn')">LEARN</button>
+    <button class="tab fb-tab" data-mode="entries" onclick="setMode('entries')">ENTRIES</button>
+    <button class="tab fb-tab" data-mode="practice" onclick="setMode('practice')">PRACTICE</button>
   </div>
 </header>
 
 <main>
-  <div class="canvas-wrap"><canvas id="holdCanvas" width="460" height="460"></canvas></div>
+  <div class="canvas-wrap fb-panel"><canvas id="holdCanvas" width="460" height="460"></canvas></div>
   <div class="side">
 
     <!-- LEARN -->
-    <div class="card" id="learnCard">
-      <div style="display:flex; align-items:center; margin-bottom:10px;">
+    <div class="card fb-panel" id="learnCard">
+      <div class="card-head">
+        <svg class="card-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/></svg>
         <h2 id="learnTitle" style="margin-bottom:0;">What is a hold?</h2>
         <div class="stepdots" id="learnDots"></div>
       </div>
@@ -220,8 +199,8 @@ main {
     </div>
 
     <!-- ENTRIES -->
-    <div class="card" id="entriesCard" style="display:none;">
-      <h2>Entry Explorer</h2>
+    <div class="card fb-panel" id="entriesCard" style="display:none;">
+      <h2><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg>Entry Explorer</h2>
       <div class="ctl">
         <label>Inbound course</label>
         <input type="range" id="ctlCourse" min="0" max="359" value="360" step="5">
@@ -252,8 +231,8 @@ main {
     </div>
 
     <!-- PRACTICE -->
-    <div class="card" id="practiceCard" style="display:none;">
-      <h2>Entry Quiz</h2>
+    <div class="card fb-panel" id="practiceCard" style="display:none;">
+      <h2><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 0 1 4.9.7c0 1.7-2.4 2.1-2.4 3.8"/><path d="M12 17h.01"/></svg>Entry Quiz</h2>
       <div class="quiz-q" id="quizText"></div>
       <div class="answers">
         <button class="btn" id="ansDirect" onclick="answer('DIRECT')">DIRECT</button>
@@ -267,8 +246,8 @@ main {
       <div class="score" id="scoreLine"></div>
     </div>
 
-    <div class="card" id="notesCard">
-      <h2>Quick Reference</h2>
+    <div class="card fb-panel" id="notesCard">
+      <h2><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg>Quick Reference</h2>
       <p><strong>Standard hold:</strong> right turns, 1-minute inbound legs at or below 14,000 MSL (1½ min above).</p>
       <p><strong>Entries (AIM 5-3-8):</strong> sectors set by a line 70° to the inbound course — <em>direct</em> 180°, <em>teardrop</em> 70°, <em>parallel</em> 110°.</p>
       <p><strong>Timing:</strong> start outbound timing abeam the fix (or wings-level). Adjust the outbound leg to make the inbound leg 1 minute.</p>
@@ -279,5 +258,16 @@ main {
 </main>
 
 <script src="holds.js"></script>
+<script>
+/* Flight Bag theme: re-place panel lighting after cards show/hide (visual only). */
+(function(){
+  const place = () => { if (window.FlightBagTheme) window.FlightBagTheme.place(); };
+  ['setMode','answer','nextQuestion'].forEach(n => {
+    const f = window[n];
+    if (typeof f === 'function') window[n] = function(){ const r = f.apply(this, arguments); place(); return r; };
+  });
+})();
+</script>
+<script src="theme/flightbag-theme.js"></script>
 </body>
 </html>

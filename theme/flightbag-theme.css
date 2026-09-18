@@ -1,0 +1,123 @@
+/* Flight Bag theme — shared by every page. Mirrors the My Stuff dashboard
+   (~/Desktop/mystuff/public/index.html): warm charcoal tokens, terracotta accent,
+   system sans UI + mono for numbers, and "hardware" panels (overlay grain, a top
+   catch-light, a dark rim, one soft light over the whole page — see flightbag-theme.js).
+   Pages opt in by linking this file + the script and tagging containers with .fb-panel. */
+:root {
+  --fb-bg: #191918;
+  --fb-panel: #1f201f;
+  --fb-cell: #282827;
+  --fb-border: #3a3935;
+  --fb-rim: #302f2c;              /* border mixed 18% toward black (dashboard look.outline) */
+  --fb-line: rgba(58, 57, 53, .7);
+  --fb-text: #b5b3a9;
+  --fb-dim: #85837a;
+  --fb-bright: #f0eee6;
+  --fb-accent: #d97757;
+  --fb-on-accent: #ffffff;
+  --fb-ok: #7fa36b;               /* VFR / good */
+  --fb-info: #6b8fb8;             /* MVFR / info */
+  --fb-bad: #c0584c;              /* IFR / error */
+  --fb-lifr: #b064a8;
+  --fb-warn: #c9a24a;
+  --fb-font: -apple-system, BlinkMacSystemFont, 'Inter', 'Helvetica Neue', sans-serif;
+  --fb-mono: 'JetBrains Mono', 'SF Mono', Menlo, ui-monospace, monospace;
+  --fb-radius: 10px;
+  --fb-radius-sm: 6px;
+  --fb-pad: 14px;
+  --fb-ease: 180ms cubic-bezier(.2, .7, .3, 1);
+  --fb-fs-xs: 10px;
+  --fb-fs-sm: 12px;
+  --fb-fs-md: 14px;
+  --fb-fs-lg: 18px;
+  color-scheme: dark;
+}
+
+body.fb {
+  background: var(--fb-bg);
+  color: var(--fb-text);
+  font-family: var(--fb-font);
+  font-size: var(--fb-fs-md);
+  -webkit-font-smoothing: antialiased;
+}
+.fb-mono { font-family: var(--fb-mono); }
+
+/* ── panels ── */
+.fb-panel {
+  /* lamp (soft-light, one gradient for the page) · top catch-light · overlay grain */
+  background-color: var(--fb-panel);
+  background-image: var(--fb-lamp, none), var(--fb-edge, none), var(--fb-grain, none);
+  background-blend-mode: soft-light, normal, overlay;
+  background-size: var(--fb-lamp-size, 100vw 100vh), 100% 100%, var(--fb-grain-size, 128px) var(--fb-grain-size, 128px);
+  background-position: var(--fb-lamp-pos, 0 0), 0 0, 0 0;
+  background-repeat: no-repeat, no-repeat, repeat;
+  border: 1px solid var(--fb-rim);
+  border-radius: var(--fb-radius);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .035), 0 2px 6px rgba(0, 0, 0, .18);
+}
+.fb-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
+  padding: 9px var(--fb-pad); border-bottom: 1px solid var(--fb-line);
+}
+.fb-title {
+  font-size: var(--fb-fs-xs); letter-spacing: 2.5px; text-transform: uppercase; font-weight: 500;
+  color: var(--fb-bright); display: flex; align-items: center; gap: 9px; margin: 0;
+}
+.fb-title svg { width: 15px; height: 15px; stroke: var(--fb-accent); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.fb-label { font-size: var(--fb-fs-xs); letter-spacing: 2.5px; text-transform: uppercase; color: var(--fb-dim); }
+.fb-body { padding: var(--fb-pad); }
+.fb-cell { background: var(--fb-cell); border-radius: var(--fb-radius-sm); }
+.fb-divider { height: 1px; background: var(--fb-line); border: 0; }
+
+/* ── controls ── */
+.fb-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap;
+  background: color-mix(in srgb, var(--fb-cell) 82%, transparent); color: var(--fb-text);
+  border: 1px solid var(--fb-border); border-radius: var(--fb-radius-sm);
+  padding: 6px 12px; font: inherit; font-size: var(--fb-fs-sm); cursor: pointer; text-decoration: none;
+  transition: border-color var(--fb-ease), color var(--fb-ease), background var(--fb-ease);
+}
+.fb-btn:hover { border-color: var(--fb-accent); color: var(--fb-bright); }
+.fb-btn.primary { background: var(--fb-accent); border-color: var(--fb-accent); color: var(--fb-on-accent); }
+.fb-btn.primary:hover { filter: brightness(1.08); }
+.fb-btn.small { padding: 3px 9px; font-size: var(--fb-fs-xs); }
+.fb-btn[aria-pressed="true"], .fb-btn.active { border-color: var(--fb-accent); color: var(--fb-accent); }
+.fb-btn:disabled { opacity: .5; cursor: default; }
+
+.fb-tabs { display: inline-flex; gap: 2px; padding: 2px; background: var(--fb-cell); border: 1px solid var(--fb-line); border-radius: var(--fb-radius-sm); }
+.fb-tab { background: none; border: 0; border-radius: 4px; padding: 3px 10px; font: inherit; font-size: var(--fb-fs-xs); color: var(--fb-dim); cursor: pointer; transition: background var(--fb-ease), color var(--fb-ease); }
+.fb-tab:hover { color: var(--fb-bright); }
+.fb-tab[aria-selected="true"], .fb-tab.active { background: var(--fb-panel); color: var(--fb-accent); box-shadow: 0 1px 0 rgba(217, 119, 87, .6); }
+
+.fb-input, .fb-select, .fb-textarea {
+  width: 100%; background: var(--fb-cell); color: var(--fb-bright); border: 1px solid var(--fb-border);
+  border-radius: var(--fb-radius-sm); font: inherit; font-size: var(--fb-fs-sm); padding: 7px 9px;
+}
+.fb-input:focus, .fb-select:focus, .fb-textarea:focus { outline: none; border-color: var(--fb-accent); }
+input[type="number"].fb-input { font-family: var(--fb-mono); }
+
+/* list row: icon · title/sub · chevron (dashboard "resources" rows) */
+.fb-row {
+  display: grid; grid-template-columns: 32px minmax(0, 1fr) auto 14px; gap: 10px; align-items: center;
+  padding: 7px 8px; border-radius: var(--fb-radius-sm); color: var(--fb-text); text-decoration: none;
+  transition: background var(--fb-ease);
+}
+.fb-row:hover { background: var(--fb-cell); }
+.fb-row .fb-ico { width: 32px; height: 32px; border-radius: 8px; background: var(--fb-cell); display: grid; place-items: center; }
+.fb-row:hover .fb-ico { background: var(--fb-panel); }
+.fb-row .fb-ico svg { width: 16px; height: 16px; stroke: var(--fb-accent); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.fb-row .fb-row-t { color: var(--fb-bright); font-size: var(--fb-fs-sm); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fb-row .fb-row-s { color: var(--fb-dim); font-size: var(--fb-fs-xs); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fb-row .fb-row-tag { font-family: var(--fb-mono); font-size: var(--fb-fs-xs); color: var(--fb-dim); letter-spacing: .5px; }
+.fb-row .fb-chev { width: 12px; height: 12px; stroke: var(--fb-dim); fill: none; stroke-width: 2.5; }
+.fb-row:hover .fb-chev { stroke: var(--fb-accent); }
+
+/* back link to the Flight Bag home */
+.fb-home {
+  display: inline-flex; align-items: center; gap: 6px; font-size: var(--fb-fs-xs); letter-spacing: 2px; text-transform: uppercase;
+  color: var(--fb-dim); text-decoration: none;
+}
+.fb-home:hover { color: var(--fb-accent); }
+.fb-home svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2.5; }
+
+@media (prefers-reduced-motion: reduce) { .fb-panel, .fb-btn, .fb-row, .fb-tab { transition: none; } }

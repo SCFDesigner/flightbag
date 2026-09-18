@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#191918">
+<title>E6B — Flight Bag</title>
+<link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="theme/flightbag-theme.css">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body.fb {
+  min-height: 100vh;
+  padding: max(28px, env(safe-area-inset-top)) 16px max(32px, env(safe-area-inset-bottom));
+  display: flex; flex-direction: column; align-items: center;
+}
+
+/* ── header ── */
+.fb-header { width: 100%; max-width: 1240px; display: flex; align-items: center; gap: 14px; margin-bottom: 22px; flex-wrap: wrap; }
+.fb-header .fb-home { min-height: 36px; }
+.fb-header h1 { font-size: 22px; font-weight: 300; letter-spacing: 6px; color: var(--fb-bright); text-transform: uppercase; }
+.fb-header p { font-size: var(--fb-fs-xs); letter-spacing: 2.5px; color: var(--fb-dim); text-transform: uppercase; margin-top: 4px; }
+.fb-header .titles { margin-right: auto; }
+
+/* ── weather source ── */
+.wx-bar { width: 100%; max-width: 1240px; margin-bottom: 8px; }
+.wx-bar .fb-body { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.wx-bar .fb-input { width: 88px; text-transform: uppercase; font-family: var(--fb-mono); min-height: 36px; }
+.wx-bar .fb-btn { min-height: 36px; }
+.wx-metar { flex: 1 1 320px; min-width: 0; font-family: var(--fb-mono); font-size: var(--fb-fs-sm); color: var(--fb-text); line-height: 1.45; overflow-wrap: anywhere; }
+.wx-metar.muted { color: var(--fb-dim); font-family: var(--fb-font); }
+.wx-metar.warn { color: var(--fb-warn); font-family: var(--fb-font); }
+
+/* ── calculator grid ── */
+#e6b-grid {
+  width: 100%; max-width: 1240px;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 8px; align-items: start;
+}
+.e6b-card { min-width: 0; scroll-margin-top: 16px; }
+.e6b-card:target { border-color: color-mix(in srgb, var(--fb-accent) 55%, var(--fb-rim)); }
+.e6b-card .fb-body { display: flex; flex-direction: column; gap: 6px; }
+.e6b-hint { font-size: var(--fb-fs-xs); color: var(--fb-dim); line-height: 1.5; }
+.e6b-in { display: grid; grid-template-columns: minmax(0, 1fr) 118px; align-items: center; gap: 10px; }
+.e6b-in label { font-size: var(--fb-fs-sm); color: var(--fb-text); }
+.e6b-in .fb-input { min-height: 36px; text-align: right; }
+.e6b-fill { align-self: flex-start; min-height: 36px; margin: 4px 0 2px; }
+.e6b-fill svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.e6b-outs { margin-top: 6px; display: flex; flex-direction: column; gap: 2px; }
+.e6b-out {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+  background: var(--fb-cell); border-radius: var(--fb-radius-sm); padding: 7px 10px;
+}
+.e6b-out span:first-child { font-size: var(--fb-fs-xs); letter-spacing: 1.5px; text-transform: uppercase; color: var(--fb-dim); }
+.e6b-out span:last-child { font-family: var(--fb-mono); font-size: var(--fb-fs-md); color: var(--fb-accent); text-align: right; }
+
+/* conversions */
+.e6b-convrow { display: flex; align-items: center; gap: 6px; }
+.e6b-convrow .fb-input { flex: 1 1 0; min-width: 0; min-height: 36px; text-align: right; }
+.e6b-convlbl { font-family: var(--fb-mono); font-size: var(--fb-fs-xs); color: var(--fb-dim); min-width: 30px; }
+
+@media (max-width: 700px) {
+  #e6b-grid { grid-template-columns: 1fr; max-width: 520px; }
+  .fb-header, .wx-bar { max-width: 520px; }
+  .fb-header h1 { font-size: 18px; letter-spacing: 4px; }
+}
+</style>
+</head>
+<body class="fb">
+
+<header class="fb-header">
+  <a class="fb-home" href="index.html"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>Flight Bag</a>
+  <div class="titles">
+    <h1>E6B</h1>
+    <p>Flight computer</p>
+  </div>
+</header>
+
+<!-- Weather source for the "Use Current Weather" buttons -->
+<section class="wx-bar fb-panel" aria-label="Current weather">
+  <div class="fb-head"><h2 class="fb-title"><svg viewBox="0 0 24 24"><path d="M7 18a5 5 0 1 1 1-9.9A6 6 0 0 1 19 10a4 4 0 0 1-1 8z"/></svg>Current Weather</h2></div>
+  <div class="fb-body">
+    <input type="text" class="fb-input" id="airportCode" maxlength="4" placeholder="KDTO" autocomplete="off" spellcheck="false" aria-label="Airport ICAO">
+    <button class="fb-btn" type="button" id="wxLoad">Get METAR</button>
+    <div class="wx-metar muted" id="metarDisplay">Loads when you tap “Use Current Weather”.</div>
+  </div>
+  <!-- Filled from the METAR / airport database; the E6B fill buttons (e6b.js) read these ids, same as on wb.html -->
+  <input type="hidden" id="windDirection"><input type="hidden" id="windSpeed">
+  <input type="hidden" id="temperature"><input type="hidden" id="dewpoint">
+  <input type="hidden" id="altimeter"><input type="hidden" id="fieldElevation">
+</section>
+
+<main id="e6b-grid">
+
+  <!-- WIND -->
+  <section class="e6b-card fb-panel" id="wind">
+    <div class="fb-head"><h2 class="fb-title"><svg viewBox="0 0 24 24"><path d="M3 8h11a3 3 0 1 0-3-3M3 12h16a3 3 0 1 1-3 3M3 16h8"/></svg>Wind &amp; Groundspeed</h2></div>
+    <div class="fb-body">
+      <div class="e6b-in"><label for="e6bCourse">Course (°T)</label><input type="number" inputmode="decimal" class="fb-input e6b-field" id="e6bCourse" data-panel="wind" placeholder="360"></div>
+      <div class="e6b-in"><label for="e6bTas">TAS (kts)</label><input type="number" inputmode="decimal" class="fb-input e6b-field" id="e6bTas" data-panel="wind" placeholder="95"></div>
+      <div class="e6b-in"><label for="e6bWindDir">Wind Dir (°)</label><input type="number" inputmode="decimal" class="fb-input e6b-field" id="e6bWindDir" data-panel="wind" placeholder="270"></div>
+      <div class="e6b-in"><label for="e6bWindSpd">Wind Speed (kts)</label><input type="number" inputmode="decimal" class="fb-input e6b-field" id="e6bWindSpd" data-panel="wind" placeholder="10"></div>
+      <div class="e6b-in"><label for="e6bVar">Variation (°W+ / E−)</label><input type="number" inputmode="decimal" class="fb-input e6b-field" id="e6bVar" data-panel="wind" placeholder="3"></div>
+      <button class="fb-btn e6b-fill" type="button" data-fill="wind"><svg viewBox="0 0 24 24"><path d="M7 18a5 5 0 1 1 1-9.9A6 6 0 0 1 19 10a4 4 0 0 1-1 8z"/></svg>Use Current Weather</button>
+      <div class="e6b-outs">
+        <div class="e6b-out"><span>WCA</span><span id="e6bOutWca">—</span></div>
+        <div class="e6b-out"><span>True Heading</span><span id="e6bOutHdg">—</span></div>
+        <div class="e6b-out"><span>Magnetic Heading</span><span id="e6bOutMh">—</span></div>
+        <div class="e6b-out"><span>Groundspeed</span><span id="e6bOutGs">—</span></div>
+        <div class="e6b-out"><span>Headwind</span><span id="e6bOutHw">—</span></div>
+        <div class="e6b-out"><span>Crosswind</span><span id="e6bOutXw">—</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIME · SPEED · DISTANCE -->
+  <section class="e6b-card fb-panel" id="tsd">
+    <div class="fb-head"><h2 class="fb-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg>Time · Speed · Distance</h2></div>
+    <div class="fb-body">
+      <div class="e6b-hint">Enter any two — the third computes.</div>
+      <div class="e6b-in"><label for="e6bTsdGs">GS (kts)</label><input type="number" inputmode="decimal" class="fb-input e6b-field" id="e6bTsdGs" data-panel="tsd" placeholder=""></div>
+      <div class="e6b-in"><label for="e6bTsdDist">Distance (NM)</label><input type="number" inputmode="decimal" class="fb-input e6b-field" id="e6bTsdDist" data-panel="tsd" placeholder=""></div>
+      <div class="e6b-in"><label for="e6bTsdTime">Time (min)</label><input type="number" inputmode="decimal" class="fb-input e6b-field" id="e6bTsdTime" data-panel="tsd" placeholder=""></div>
+      <div class="e6b-outs">
+        <div class="e6b-out"><span id="e6bTsdLabel">Result</span><span id="e6bTsdOut">—</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FUEL -->
+  <section class="e6b-card fb-panel" id="fuel">
+    <div class="fb-head"><h2 class="fb-title"><svg viewBox="0 0 24 24"><path d="M4 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16M3 21h12M4 10h10M14 8l3 2v8a2 2 0 0 0 4 0V9l-3-3"/></svg>Fuel</h2></div>
+    <div class="fb-body">
+      <div class="e6b-hint">Enter any two — the third computes.</div>
+      <div class="e6b-in"><label for="e6bFuelRate">Burn (GPH)</label><input type="number" inputmode="decimal" class="fb-input e6b-field" id="e6bFuelRate" data-panel="fuel" placeholder=""></div>
+      <div class="e6b-in"><label for="e6bFuelTime">Time (min)</label><input type="number" inputmode="decimal" class="fb-input e6b-field" id="e6bFuelTime" data-panel="fuel" placeholder=""></div>
+      <div class="e6b-in"><label for="e6bFuelAmt">Fuel (gal)</label><input type="number" inputmode="decimal" class="fb-input e6b-field" id="e6bFuelAmt" data-panel="fuel" placeholder=""></div>
+      <div class="e6b-outs">
+        <div class="e6b-out"><span id="e6bFuelLabel">Result</span><span id="e6bFuelOut">—</span></div>
+        <div class="e6b-out"><span>Weight</span><span id="e6bFuelLbs">—</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DESCENT -->
+  <section class="e6b-card fb-panel" id="descent">
+    <div class="fb-head"><h2 class="fb-title"><svg viewBox="0 0 24 24"><path d="M3 5l9 7 3-2 6 6M16 16h5v-5"/></svg>Descent Planning</h2></div>
+    <div class="fb-body">
+      <div class="e6b-in"><label for="e6bDesAlt">Alt to Lose (ft)</label><input type="number" inputmode="decimal" class="fb-input e6b-field" id="e6bDesAlt" data-panel="descent" placeholder="3000"></div>
+      <div class="e6b-in"><label for="e6bDesDist">Distance (NM)</label><input type="number" inputmode="decimal" class="fb-input e6b-field" id="e6bDesDist" data-panel="descent" placeholder="10"></div>
+      <div class="e6b-in"><label for="e6bDesGs">GS (kts)</label><input type="number" inputmode="decimal" class="fb-input e6b-field" id="e6bDesGs" data-panel="descent" placeholder="90"></div>
+      <div class="e6b-outs">
+        <div class="e6b-out"><span>Gradient</span><span id="e6bOutGrad">—</span></div>
+        <div class="e6b-out"><span>Descent Rate</span><span id="e6bOutFpm">—</span></div>
+        <div class="e6b-out"><span>Time</span><span id="e6bOutDesTime">—</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ALTITUDE & TAS -->
+  <section class="e6b-card fb-panel" id="altitude">
+    <div class="fb-head"><h2 class="fb-title"><svg viewBox="0 0 24 24"><path d="M3 20h18M6 16l4-5 3 3 5-7"/></svg>Altitude &amp; TAS</h2></div>
+    <div class="fb-body">
+      <div class="e6b-in"><label for="e6bAltim">Altimeter (inHg)</label><input type="number" inputmode="decimal" class="fb-input e6b-field" id="e6bAltim" data-panel="alt" placeholder="29.92" step="0.01"></div>
+      <div class="e6b-in"><label for="e6bElev">Elevation (ft)</label><input type="number" inputmode="decimal" class="fb-input e6b-field" id="e6bElev" data-panel="alt" placeholder=""></div>
+      <div class="e6b-in"><label for="e6bOat">OAT (°C)</label><input type="number" inputmode="decimal" class="fb-input e6b-field" id="e6bOat" data-panel="alt" placeholder="15"></div>
+      <div class="e6b-in"><label for="e6bCas">CAS (kts)</label><input type="number" inputmode="decimal" class="fb-input e6b-field" id="e6bCas" data-panel="alt" placeholder=""></div>
+      <button class="fb-btn e6b-fill" type="button" data-fill="alt"><svg viewBox="0 0 24 24"><path d="M7 18a5 5 0 1 1 1-9.9A6 6 0 0 1 19 10a4 4 0 0 1-1 8z"/></svg>Use Current Weather</button>
+      <div class="e6b-outs">
+        <div class="e6b-out"><span>Pressure Alt</span><span id="e6bOutPa">—</span></div>
+        <div class="e6b-out"><span>Density Alt</span><span id="e6bOutDa">—</span></div>
+        <div class="e6b-out"><span>ISA Deviation</span><span id="e6bOutIsaDev">—</span></div>
+        <div class="e6b-out"><span>TAS (approx)</span><span id="e6bOutTas">—</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CLOUD BASE & FREEZING LEVEL -->
+  <section class="e6b-card fb-panel" id="cloud">
+    <div class="fb-head"><h2 class="fb-title"><svg viewBox="0 0 24 24"><path d="M7 15a4 4 0 1 1 .8-7.9A5 5 0 0 1 17 9a3 3 0 0 1 0 6zM8 19h8M10 22h4"/></svg>Cloud Base &amp; Freezing Level</h2></div>
+    <div class="fb-body">
+      <div class="e6b-in"><label for="e6bCbTemp">Temp (°C)</label><input type="number" inputmode="decimal" class="fb-input e6b-field" id="e6bCbTemp" data-panel="cloud" placeholder="19"></div>
+      <div class="e6b-in"><label for="e6bCbDew">Dew Point (°C)</label><input type="number" inputmode="decimal" class="fb-input e6b-field" id="e6bCbDew" data-panel="cloud" placeholder="5"></div>
+      <div class="e6b-in"><label for="e6bCbElev">Elevation (ft)</label><input type="number" inputmode="decimal" class="fb-input e6b-field" id="e6bCbElev" data-panel="cloud" placeholder="642"></div>
+      <button class="fb-btn e6b-fill" type="button" data-fill="cloud"><svg viewBox="0 0 24 24"><path d="M7 18a5 5 0 1 1 1-9.9A6 6 0 0 1 19 10a4 4 0 0 1-1 8z"/></svg>Use Current Weather</button>
+      <div class="e6b-outs">
+        <div class="e6b-out"><span>Cloud Base AGL</span><span id="e6bOutCbAgl">—</span></div>
+        <div class="e6b-out"><span>Cloud Base MSL</span><span id="e6bOutCbMsl">—</span></div>
+        <div class="e6b-out"><span>Freezing Level</span><span id="e6bOutFrz">—</span></div>
+      </div>
+      <div class="e6b-hint">Estimates: base ≈ spread ÷ 2.5 °C × 1000 ft; freezing ≈ 2 °C / 1000 ft lapse. Verify with reported ceilings.</div>
+    </div>
+  </section>
+
+  <!-- CLIMB GRADIENT -->
+  <section class="e6b-card fb-panel" id="climb">
+    <div class="fb-head"><h2 class="fb-title"><svg viewBox="0 0 24 24"><path d="M3 19l9-7 3 2 6-6M16 8h5v5"/></svg>Climb Gradient</h2></div>
+    <div class="fb-body">
+      <div class="e6b-hint">Enter GS plus either one — the rest compute.</div>
+      <div class="e6b-in"><label for="e6bClbGs">GS (kts)</label><input type="number" inputmode="decimal" class="fb-input e6b-field" id="e6bClbGs" data-panel="climb" placeholder="70"></div>
+      <div class="e6b-in"><label for="e6bClbGrad">Required (ft/NM)</label><input type="number" inputmode="decimal" class="fb-input e6b-field" id="e6bClbGrad" data-panel="climb" placeholder="200"></div>
+      <div class="e6b-in"><label for="e6bClbFpm">Climb Rate (fpm)</label><input type="number" inputmode="decimal" class="fb-input e6b-field" id="e6bClbFpm" data-panel="climb" placeholder=""></div>
+      <div class="e6b-outs">
+        <div class="e6b-out"><span id="e6bClbLabel">Result</span><span id="e6bClbOut">—</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GLIDE -->
+  <section class="e6b-card fb-panel" id="glide">
+    <div class="fb-head"><h2 class="fb-title"><svg viewBox="0 0 24 24"><path d="M3 6l18 10M3 20h18M15 12.7V20"/></svg>Glide Distance</h2></div>
+    <div class="fb-body">
+      <div class="e6b-in"><label for="e6bGldAlt">Height AGL (ft)</label><input type="number" inputmode="decimal" class="fb-input e6b-field" id="e6bGldAlt" data-panel="glide" placeholder="3000"></div>
+      <div class="e6b-in"><label for="e6bGldRatio">Glide (NM/1000ft)</label><input type="number" inputmode="decimal" class="fb-input e6b-field" id="e6bGldRatio" data-panel="glide" placeholder="" step="0.1"></div>
+      <div class="e6b-outs">
+        <div class="e6b-out"><span>Glide Range</span><span id="e6bOutGld">—</span></div>
+      </div>
+      <div class="e6b-hint">Use your POH best-glide figure (no wind). Headwind shortens it.</div>
+    </div>
+  </section>
+
+  <!-- CONVERSIONS -->
+  <section class="e6b-card fb-panel" id="conversions">
+    <div class="fb-head"><h2 class="fb-title"><svg viewBox="0 0 24 24"><path d="M4 8h14l-3-3M20 16H6l3 3"/></svg>Conversions</h2></div>
+    <div class="fb-body">
+      <div class="e6b-convrow"><input type="number" inputmode="decimal" class="fb-input e6b-conv" id="cvKts" data-group="speed" data-unit="kts" aria-label="knots"><span class="e6b-convlbl">kts</span><input type="number" inputmode="decimal" class="fb-input e6b-conv" id="cvMph" data-group="speed" data-unit="mph" aria-label="mph"><span class="e6b-convlbl">mph</span></div>
+      <div class="e6b-convrow"><input type="number" inputmode="decimal" class="fb-input e6b-conv" id="cvNm" data-group="dist" data-unit="nm" aria-label="nautical miles"><span class="e6b-convlbl">NM</span><input type="number" inputmode="decimal" class="fb-input e6b-conv" id="cvSm" data-group="dist" data-unit="sm" aria-label="statute miles"><span class="e6b-convlbl">SM</span><input type="number" inputmode="decimal" class="fb-input e6b-conv" id="cvKm" data-group="dist" data-unit="km" aria-label="kilometres"><span class="e6b-convlbl">km</span></div>
+      <div class="e6b-convrow"><input type="number" inputmode="decimal" class="fb-input e6b-conv" id="cvGal" data-group="fuelw" data-unit="gal" aria-label="fuel gallons"><span class="e6b-convlbl">gal</span><input type="number" inputmode="decimal" class="fb-input e6b-conv" id="cvLbs" data-group="fuelw" data-unit="lbs" aria-label="fuel pounds"><span class="e6b-convlbl">lbs</span></div>
+      <div class="e6b-convrow"><input type="number" inputmode="decimal" class="fb-input e6b-conv" id="cvC" data-group="temp" data-unit="c" aria-label="Celsius"><span class="e6b-convlbl">°C</span><input type="number" inputmode="decimal" class="fb-input e6b-conv" id="cvF" data-group="temp" data-unit="f" aria-label="Fahrenheit"><span class="e6b-convlbl">°F</span></div>
+      <div class="e6b-convrow"><input type="number" inputmode="decimal" class="fb-input e6b-conv" id="cvFt" data-group="len" data-unit="ft" aria-label="feet"><span class="e6b-convlbl">ft</span><input type="number" inputmode="decimal" class="fb-input e6b-conv" id="cvM" data-group="len" data-unit="m" aria-label="metres"><span class="e6b-convlbl">m</span></div>
+      <div class="e6b-convrow"><input type="number" inputmode="decimal" class="fb-input e6b-conv" id="cvHg" data-group="press" data-unit="hg" step="0.01" aria-label="inches of mercury"><span class="e6b-convlbl">inHg</span><input type="number" inputmode="decimal" class="fb-input e6b-conv" id="cvMb" data-group="press" data-unit="mb" aria-label="millibars"><span class="e6b-convlbl">mb</span></div>
+      <div class="e6b-convrow"><input type="number" inputmode="decimal" class="fb-input e6b-conv" id="cvL" data-group="vol" data-unit="l" aria-label="litres"><span class="e6b-convlbl">L</span><input type="number" inputmode="decimal" class="fb-input e6b-conv" id="cvGal2" data-group="vol" data-unit="gal" aria-label="gallons"><span class="e6b-convlbl">gal</span></div>
+      <div class="e6b-convrow"><input type="number" inputmode="decimal" class="fb-input e6b-conv" id="cvKg" data-group="mass" data-unit="kg" aria-label="kilograms"><span class="e6b-convlbl">kg</span><input type="number" inputmode="decimal" class="fb-input e6b-conv" id="cvLb" data-group="mass" data-unit="lb" aria-label="pounds"><span class="e6b-convlbl">lbs</span></div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+/* Weather for the E6B "Use Current Weather" buttons. Same sources and parsing as wb.html
+   (fetchWeatherFromAPIs / convertAWCData / parseRawMETAR / fetchAirportElevation): AWC METAR JSON
+   through public CORS proxies, then NOAA raw METAR, then AWC direct; field elevation from the
+   OurAirports database. Unlike wb.html there is no sample-data fallback — if every source fails the
+   fields are left alone and the page says so. */
+(function () {
+  const AIRPORT_KEY = 'e6bAirport';
+  const DEFAULT_AIRPORT = 'KDTO';
+  const $ = id => document.getElementById(id);
+  const input = $('airportCode'), display = $('metarDisplay');
+
+  let saved = null;
+  try { saved = localStorage.getItem(AIRPORT_KEY); } catch (e) {}
+  input.value = (saved || DEFAULT_AIRPORT).toUpperCase();
+
+  const cache = {};          // ICAO -> { wx: Promise, elev: Promise }
+  let elevDb = null;         // Promise of { ICAO: elevation_ft }
+
+  function status(text, cls) { display.textContent = text; display.className = 'wx-metar' + (cls ? ' ' + cls : ''); }
+  function icao() { return (input.value || '').trim().toUpperCase(); }
+
+  function parseTempDew(raw) {
+    const m = raw.match(/\s(M?\d{2})\/(M?\d{2})\s/);
+    if (!m) return [null, null];
+    const v = s => s.startsWith('M') ? -parseInt(s.substring(1)) : parseInt(s);
+    return [v(m[1]), v(m[2])];
+  }
+
+  // wb.html convertAWCData (fields the E6B uses)
+  function fromAWC(d) {
+    const raw = d.rawOb || '';
+    const alt = raw.match(/\sA(\d{4})\s/);
+    const [t, dp] = parseTempDew(raw);
+    return { raw: d.rawOb || 'N/A', windDir: d.wdir || null, windSpd: d.wspd || null,
+             temp: t, dew: dp, altim: alt ? parseInt(alt[1]) / 100 : null };
+  }
+
+  // wb.html parseRawMETAR (fields the E6B uses)
+  function fromRaw(raw) {
+    const w = raw.match(/(\d{3})(\d{2,3})(G(\d{2,3}))?KT|(\d{5})KT/);
+    let wd = 0, ws = 0;
+    if (w) {
+      if (w[1] && w[2]) { wd = parseInt(w[1]); ws = parseInt(w[2]); }
+      else if (w[5]) { wd = parseInt(w[5].substring(0, 3)); ws = parseInt(w[5].substring(3)); }
+    }
+    const alt = raw.match(/A(\d{4})/);
+    const [t, dp] = parseTempDew(raw);
+    return { raw, windDir: wd, windSpd: ws, temp: t, dew: dp, altim: alt ? parseFloat((parseInt(alt[1]) / 100).toFixed(2)) : 30.00 };
+  }
+
+  // Each source gets 8 s so a dead proxy doesn't stall the button for minutes
+  const fetch = (url) => {
+    const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 8000);
+    return window.fetch(url, { signal: ctl.signal }).finally(() => clearTimeout(t));
+  };
+
+  // National Weather Service first: official, free, and browser-readable (CORS *). Its 5-minute observations
+  // carry no text, so take the newest one with the raw METAR (≤ 3 h old).
+  async function nwsRawMetar(code) {
+    const r = await fetch(`https://api.weather.gov/stations/${encodeURIComponent(code)}/observations?limit=25`);
+    if (!r.ok) return null;
+    const hit = ((await r.json()).features || []).map(f => f.properties || {}).find(p => p.rawMessage && p.rawMessage.trim());
+    if (!hit || (Date.now() - new Date(hit.timestamp)) / 60000 > 180) return null;
+    return hit.rawMessage.trim();
+  }
+
+  async function fetchMetar(code) {
+    try { const raw = await nwsRawMetar(code); if (raw) { console.log('[e6b] METAR via NWS'); return fromRaw(raw); } }
+    catch (e) { console.log('[e6b] NWS failed', e.message); }
+    // Fallbacks all at once (first good answer wins; each capped at 8 s by the fetch wrapper above)
+    const proxies = ['https://api.allorigins.win/raw?url=', 'https://corsproxy.io/?', 'https://api.codetabs.com/v1/proxy?quest='];
+    const awcUrl = `https://aviationweather.gov/api/data/metar?ids=${code}&format=json`;
+    const noaaUrl = `https://tgftp.nws.noaa.gov/data/observations/metar/stations/${code}.TXT`;
+    const ok = r => { if (!r.ok) throw new Error(r.status); return r; };
+    const awc = u => fetch(u).then(ok).then(r => r.json()).then(d => { if (!d?.length) throw new Error('empty'); return fromAWC(d[0]); });
+    const noaa = u => fetch(u).then(ok).then(r => r.text()).then(t => { const l = t.trim().split('\n'); if (l.length < 2) throw new Error('empty'); return fromRaw(l[1].trim()); });
+    try {
+      return await Promise.any([...proxies.map(p => awc(p + encodeURIComponent(awcUrl))), ...proxies.map(p => noaa(p + encodeURIComponent(noaaUrl))), awc(awcUrl)]);
+    } catch (e) { console.log('[e6b] all fallback sources failed'); }
+    return null;
+  }
+
+  function loadElevDb() {
+    if (!elevDb) elevDb = window.fetch('https://davidmegginson.github.io/ourairports-data/airports.csv')
+      .then(r => r.text())
+      .then(csv => {
+        const lines = csv.split('\n'), headers = lines[0].split(',');
+        const iI = headers.findIndex(h => h.includes('ident')), eI = headers.findIndex(h => h.includes('elevation_ft'));
+        const db = {};
+        for (let i = 1; i < lines.length; i++) {
+          const row = lines[i].split(',');
+          if (row.length > Math.max(iI, eI)) {
+            const id = row[iI]?.replace(/"/g, '').trim(), el = row[eI]?.replace(/"/g, '').trim();
+            if (id && el && !isNaN(el)) db[id] = parseInt(el);
+          }
+        }
+        console.log(`[e6b] ${Object.keys(db).length} airports in elevation db`);
+        return db;
+      })
+      .catch(e => { console.error('[e6b] elevation db failed', e); elevDb = null; return {}; });
+    return elevDb;
+  }
+
+  function get(code, needElev) {
+    const c = cache[code] || (cache[code] = {});
+    if (!c.wx) c.wx = fetchMetar(code).then(wx => { if (!wx) delete c.wx; return wx; });
+    if (needElev && !c.elev) c.elev = loadElevDb().then(db => db[code] ?? null);
+    return c;
+  }
+
+  // Write into the hidden fields the E6B fill functions read (wb.html updateFormFieldsFromWeather rules)
+  function setHidden(wx, elev) {
+    ['windDirection', 'windSpeed', 'temperature', 'dewpoint', 'altimeter', 'fieldElevation'].forEach(id => $(id).value = '');
+    if (wx) {
+      if (wx.windDir !== undefined && wx.windDir !== null) $('windDirection').value = wx.windDir;
+      if (wx.windSpd !== undefined && wx.windSpd !== null) $('windSpeed').value = wx.windSpd;
+      if (wx.temp !== null) $('temperature').value = wx.temp;
+      if (wx.dew !== null) $('dewpoint').value = wx.dew;
+      if (wx.altim !== null) $('altimeter').value = wx.altim.toFixed(2);
+    }
+    if (elev != null) $('fieldElevation').value = elev;
+  }
+
+  async function load(kind) {
+    const code = icao();
+    if (!/^[A-Z0-9]{3,4}$/.test(code)) { status('Enter a 3–4 letter airport identifier.', 'warn'); return false; }
+    try { localStorage.setItem(AIRPORT_KEY, code); } catch (e) {}
+    const needElev = kind === 'alt' || kind === 'cloud';
+    status(`Fetching ${code}…`, 'muted');
+    const c = get(code, needElev);
+    const [wx, elev] = await Promise.all([c.wx, needElev ? c.elev : (c.elev || null)]);
+    if (code !== icao()) return false; // airport changed while loading
+    if (!wx) { status(`No METAR for ${code} — weather sources unavailable. Enter values by hand.`, 'warn'); setHidden(null, elev); return !!elev; }
+    status(wx.raw + (elev != null ? `  ·  elev ${elev} ft` : ''));
+    setHidden(wx, elev);
+    return true;
+  }
+
+  const fill = { wind: () => window.e6bFillWind(), alt: () => window.e6bFillAlt(), cloud: () => window.e6bFillCloud() };
+  document.querySelectorAll('.e6b-fill').forEach(btn => btn.addEventListener('click', async () => {
+    const kind = btn.dataset.fill;
+    btn.disabled = true;
+    try { if (await load(kind)) fill[kind](); }
+    finally { btn.disabled = false; }
+  }));
+  $('wxLoad').addEventListener('click', () => load('metar'));
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') load('metar'); });
+  input.addEventListener('change', () => { input.value = icao(); });
+})();
+</script>
+<script src="e6b.js"></script>
+<script src="theme/flightbag-theme.js"></script>
+</body>
+</html>

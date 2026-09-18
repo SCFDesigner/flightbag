@@ -6,145 +6,151 @@
     <title>P2006T Multi-Engine Study</title>
     <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="theme/flightbag-theme.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #0d0d0f;
-            color: #e0e0e0;
             min-height: 100vh;
             overflow-x: hidden;
         }
+        .mono, .speed-val, .card-counter, .quiz-score { font-family: var(--fb-mono); }
+        .ico { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; vertical-align: -2px; }
 
         /* Top bar */
         .top-bar {
             position: fixed; top: 0; left: 0; right: 0;
             height: 56px;
-            background: linear-gradient(135deg, #1a1a1e 0%, #111114 100%);
-            border-bottom: 1px solid #333;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 20px; z-index: 100;
+            background: var(--fb-bg);
+            border-bottom: 1px solid var(--fb-line);
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+            padding: 0 16px; z-index: 100;
         }
-        .top-bar .back-btn {
-            background: none; border: 1px solid #555; color: #e0e0e0;
-            padding: 6px 14px; border-radius: 6px; cursor: pointer;
-            font-size: 13px; transition: all 0.2s;
-        }
-        .top-bar .back-btn:hover { border-color: #4CAF50; color: #4CAF50; }
+        .top-bar .top-links { display: flex; gap: 16px; align-items: center; }
+        .top-bar .fb-home { min-height: 36px; }
         .top-bar h1 {
-            font-size: 18px; font-family: 'Courier New', monospace;
-            color: #f44336; letter-spacing: 2px;
+            font-size: var(--fb-fs-sm); font-weight: 500; font-family: var(--fb-font);
+            color: var(--fb-bright); letter-spacing: 2.5px; text-transform: uppercase;
+            display: flex; align-items: center; gap: 9px; white-space: nowrap;
         }
+        .top-bar h1 svg { width: 16px; height: 16px; stroke: var(--fb-accent); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
         .top-bar .aircraft-badge {
-            background: rgba(76,175,80,0.15); border: 1px solid #4CAF50;
-            color: #4CAF50; padding: 4px 12px; border-radius: 20px;
-            font-size: 12px; font-weight: bold;
+            border: 1px solid var(--fb-accent); color: var(--fb-accent);
+            padding: 3px 10px; border-radius: var(--fb-radius-sm);
+            font-family: var(--fb-mono); font-size: var(--fb-fs-xs); letter-spacing: 1px;
         }
 
         /* Main tab bar */
         .tab-bar {
             position: fixed; top: 56px; left: 0; right: 0;
             height: 48px;
-            background: #1a1a1e;
-            border-bottom: 1px solid #333;
+            background: var(--fb-bg);
+            border-bottom: 1px solid var(--fb-line);
             display: flex; align-items: center;
-            padding: 0 10px; gap: 4px; z-index: 99;
+            padding: 0 12px; gap: 2px; z-index: 99;
             overflow-x: auto;
         }
         .tab-btn {
-            background: none; border: 1px solid transparent; color: #888888;
-            padding: 8px 18px; border-radius: 8px; cursor: pointer;
-            font-size: 13px; font-weight: 600; white-space: nowrap;
-            transition: all 0.2s;
+            background: none; border: 1px solid transparent; color: var(--fb-dim);
+            padding: 6px 14px; min-height: 36px; border-radius: var(--fb-radius-sm); cursor: pointer;
+            font: inherit; font-size: var(--fb-fs-sm); white-space: nowrap;
+            transition: background var(--fb-ease), color var(--fb-ease), border-color var(--fb-ease);
         }
-        .tab-btn:hover { color: #ffffff; background: rgba(255,255,255,0.05); }
+        .tab-btn:hover { color: var(--fb-bright); }
         .tab-btn.active {
-            color: #fff; background: rgba(76,175,80,0.2);
-            border-color: #4CAF50;
+            color: var(--fb-accent); background: var(--fb-cell);
+            border-color: var(--fb-line); box-shadow: 0 1px 0 rgba(217, 119, 87, .6);
         }
 
         /* Content area */
-        .content { margin-top: 104px; padding: 20px; padding-bottom: 40px; }
+        .content { margin-top: 104px; padding: 16px; padding-bottom: 40px; }
         .tab-page { display: none; }
         .tab-page.active { display: block; }
 
-        /* Sub-tab bar for Information page */
+        /* Sub-tab bar for Information page (fb-tabs look) */
         .sub-tab-bar {
-            display: flex; gap: 4px; margin-bottom: 20px;
-            flex-wrap: wrap;
+            display: inline-flex; gap: 2px; padding: 2px; margin-bottom: 16px; flex-wrap: wrap;
+            background: var(--fb-cell); border: 1px solid var(--fb-line); border-radius: var(--fb-radius-sm);
         }
         .sub-tab-btn {
-            background: rgba(255,255,255,0.05); border: 1px solid #444; color: #888888;
-            padding: 6px 14px; border-radius: 6px; cursor: pointer;
-            font-size: 12px; font-weight: 600; transition: all 0.2s;
+            background: none; border: 0; color: var(--fb-dim);
+            padding: 6px 12px; min-height: 36px; border-radius: 4px; cursor: pointer;
+            font: inherit; font-size: var(--fb-fs-sm); transition: background var(--fb-ease), color var(--fb-ease);
         }
-        .sub-tab-btn:hover { color: #ffffff; border-color: #888888; }
+        .sub-tab-btn:hover { color: var(--fb-bright); }
         .sub-tab-btn.active {
-            color: #fff; background: rgba(76,175,80,0.15);
-            border-color: #4CAF50;
+            color: var(--fb-accent); background: var(--fb-panel);
+            box-shadow: 0 1px 0 rgba(217, 119, 87, .6);
         }
         .sub-page { display: none; }
         .sub-page.active { display: block; }
 
+        /* Shared button look (fb-btn values) */
+        .card-controls button, .mode-toggle, .filter-pill, .quiz-cat-btn, .cl-mode-btn, .quiz-next-btn, .quiz-reset-btn, .fc-btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+            background: color-mix(in srgb, var(--fb-cell) 82%, transparent); color: var(--fb-text);
+            border: 1px solid var(--fb-border); border-radius: var(--fb-radius-sm);
+            padding: 6px 12px; min-height: 36px; font: inherit; font-size: var(--fb-fs-sm); cursor: pointer;
+            transition: border-color var(--fb-ease), color var(--fb-ease), background var(--fb-ease);
+        }
+        .card-controls button:hover, .mode-toggle:hover, .filter-pill:hover, .quiz-cat-btn:hover, .cl-mode-btn:hover, .quiz-reset-btn:hover, .fc-btn:hover {
+            border-color: var(--fb-accent); color: var(--fb-bright);
+        }
+        .mode-toggle.active, .filter-pill.active, .quiz-cat-btn.active, .cl-mode-btn.active, .fc-btn.act {
+            border-color: var(--fb-accent); color: var(--fb-accent);
+        }
+
         /* Flash card styles */
         .card-controls {
             display: flex; align-items: center; justify-content: center;
-            gap: 16px; margin-bottom: 20px;
+            gap: 8px; margin-bottom: 16px; flex-wrap: wrap;
         }
-        .card-controls button {
-            background: rgba(255,255,255,0.08); border: 1px solid #555;
-            color: #e0e0e0; padding: 8px 20px; border-radius: 8px;
-            cursor: pointer; font-size: 14px; transition: all 0.2s;
-        }
-        .card-controls button:hover { border-color: #4CAF50; color: #fff; }
-        .card-counter { color: #888888; font-size: 14px; font-family: 'Courier New', monospace; }
+        .card-counter { color: var(--fb-dim); font-size: var(--fb-fs-sm); min-width: 64px; text-align: center; }
 
         .flashcard {
             max-width: 700px; margin: 0 auto;
             min-height: 300px;
-            background: linear-gradient(135deg, #1e1e22 0%, #16161a 100%);
-            border: 1px solid #333; border-radius: 16px;
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
             padding: 40px; cursor: pointer;
-            transition: all 0.3s; position: relative;
-            user-select: none;
+            transition: border-color var(--fb-ease); position: relative;
+            user-select: none; color: var(--fb-bright);
         }
-        .flashcard:hover { border-color: #555; }
+        .flashcard:hover { border-color: var(--fb-border); }
         .flashcard .card-label {
-            position: absolute; top: 16px; left: 20px;
-            font-size: 11px; color: #666666; text-transform: uppercase;
-            letter-spacing: 1px;
+            position: absolute; top: 14px; left: 16px;
+            font-size: var(--fb-fs-xs); color: var(--fb-dim); text-transform: uppercase;
+            letter-spacing: 2.5px;
         }
         .flashcard .card-category {
-            position: absolute; top: 16px; right: 20px;
-            font-size: 10px; color: #4CAF50; background: rgba(76,175,80,0.1);
-            padding: 2px 8px; border-radius: 10px;
+            position: absolute; top: 12px; right: 16px;
+            font-size: var(--fb-fs-xs); color: var(--fb-accent); background: var(--fb-cell);
+            padding: 2px 8px; border-radius: var(--fb-radius-sm); letter-spacing: .5px;
         }
         .flashcard .card-text {
             font-size: 18px; text-align: center; line-height: 1.6;
         }
         .flashcard .card-text .hoverable {
-            color: #4CAF50; cursor: help; border-bottom: 1px dashed #4CAF50;
+            color: var(--fb-accent); cursor: help; border-bottom: 1px dashed var(--fb-accent);
             position: relative; display: inline-block;
         }
         .hoverable .hover-detail {
             display: none; position: absolute; bottom: 130%; left: 50%;
             transform: translateX(-50%); width: 320px;
-            background: #1a1a1e; border: 1px solid #4CAF50;
-            border-radius: 10px; padding: 14px; font-size: 13px;
-            color: #e0e0e0; line-height: 1.5; z-index: 50;
+            background: var(--fb-cell); border: 1px solid var(--fb-accent);
+            border-radius: var(--fb-radius); padding: 14px; font-size: 13px;
+            color: var(--fb-text); line-height: 1.5; z-index: 50;
             box-shadow: 0 8px 24px rgba(0,0,0,0.5);
             text-align: left;
         }
+        .hoverable .hover-detail b { color: var(--fb-bright); }
         .hoverable .hover-detail::after {
             content: ''; position: absolute; top: 100%; left: 50%;
             transform: translateX(-50%);
-            border: 8px solid transparent; border-top-color: #4CAF50;
+            border: 8px solid transparent; border-top-color: var(--fb-accent);
         }
         .hoverable:hover .hover-detail { display: block; }
-        .flashcard.flipped { background: linear-gradient(135deg, #1a2020 0%, #141a1a 100%); border-color: #4CAF50; }
-        .flashcard.flipped .card-label { color: #4CAF50; }
+        .flashcard.flipped { border-color: var(--fb-accent); }
+        .flashcard.flipped .card-label { color: var(--fb-accent); }
 
         /* Study mode (Q+A on one side) */
         .flashcard.study-mode {
@@ -153,193 +159,175 @@
         }
         .flashcard.study-mode .card-label { display: none; }
         .flashcard.study-mode .card-text { text-align: left; width: 100%; font-size: 15px; }
-        .study-question { color: #4CAF50; font-weight: 600; margin-bottom: 10px; font-size: 16px; }
-        .study-divider { border: none; border-top: 1px solid #333; margin: 10px 0; }
-        .study-answer { color: #e0e0e0; line-height: 1.7; }
-        .study-answer .hoverable { color: #4CAF50; cursor: help; border-bottom: 1px dashed #4CAF50; position: relative; display: inline-block; }
-
-        /* Mode toggle button */
-        .mode-toggle {
-            background: rgba(255,255,255,0.06); border: 1px solid #555;
-            color: #888888; padding: 5px 14px; border-radius: 20px;
-            cursor: pointer; font-size: 11px; transition: all 0.2s;
-        }
-        .mode-toggle:hover { border-color: #4CAF50; color: #fff; }
-        .mode-toggle.active { background: rgba(76,175,80,0.15); border-color: #4CAF50; color: #fff; }
+        .study-question { color: var(--fb-accent); font-weight: 600; margin-bottom: 10px; font-size: 16px; }
+        .study-divider { border: none; border-top: 1px solid var(--fb-line); margin: 10px 0; }
+        .study-answer { color: var(--fb-text); line-height: 1.7; }
+        .study-answer b { color: var(--fb-bright); }
+        .study-answer .hoverable { color: var(--fb-accent); cursor: help; border-bottom: 1px dashed var(--fb-accent); position: relative; display: inline-block; }
+        .card-hint { text-align: center; color: var(--fb-dim); font-size: var(--fb-fs-sm); margin-top: 12px; }
 
         /* Filter pills for flashcards */
         .filter-pills {
             display: flex; gap: 6px; justify-content: center;
-            margin-bottom: 16px; flex-wrap: wrap;
+            margin-bottom: 12px; flex-wrap: wrap;
         }
-        .filter-pill {
-            background: rgba(255,255,255,0.05); border: 1px solid #444;
-            color: #888888; padding: 4px 12px; border-radius: 20px;
-            cursor: pointer; font-size: 11px; transition: all 0.2s;
-        }
-        .filter-pill:hover { border-color: #888888; color: #ffffff; }
-        .filter-pill.active { background: rgba(76,175,80,0.15); border-color: #4CAF50; color: #fff; }
 
         /* Info section cards */
         .info-card {
-            background: linear-gradient(135deg, #1e1e22 0%, #16161a 100%);
-            border: 1px solid #333; border-radius: 12px;
-            padding: 20px; margin-bottom: 16px;
+            padding: 16px 18px; margin-bottom: 8px;
         }
         .info-card h3 {
-            color: #4CAF50; font-size: 15px; margin-bottom: 12px;
-            font-family: 'Courier New', monospace;
+            color: var(--fb-bright); font-size: var(--fb-fs-xs); font-weight: 500; margin-bottom: 12px;
+            text-transform: uppercase; letter-spacing: 2.5px;
+            display: flex; align-items: center; gap: 9px;
+        }
+        .info-card h3::before, .diagram-card h3::before {
+            content: ''; width: 3px; height: 12px; border-radius: 2px; background: var(--fb-accent); flex: none;
         }
         .info-card p, .info-card li {
-            color: #e0e0e0; font-size: 13px; line-height: 1.7; margin-bottom: 6px;
+            color: var(--fb-text); font-size: 13px; line-height: 1.7; margin-bottom: 6px;
         }
+        .info-card b, .diagram-card b { color: var(--fb-bright); }
         .info-card ul { padding-left: 20px; }
-        .info-card .highlight { color: #4CAF50; font-weight: bold; }
+        .info-card .highlight { color: var(--fb-accent); font-weight: 600; }
         .info-card .qa-pair {
-            background: rgba(255,255,255,0.03); border-left: 3px solid #4CAF50;
-            padding: 10px 14px; margin: 8px 0; border-radius: 0 8px 8px 0;
+            background: var(--fb-cell); border-left: 3px solid var(--fb-accent);
+            padding: 10px 14px; margin: 8px 0; border-radius: 0 var(--fb-radius-sm) var(--fb-radius-sm) 0;
         }
-        .info-card .qa-pair .q { color: #4CAF50; font-weight: bold; font-size: 13px; }
-        .info-card .qa-pair .a { color: #e0e0e0; margin-top: 4px; font-size: 13px; }
+        .info-card .qa-pair .q { color: var(--fb-accent); font-weight: 600; font-size: 13px; }
+        .info-card .qa-pair .a { color: var(--fb-text); margin-top: 4px; font-size: 13px; }
 
         /* Definitions list */
         .def-list { max-width: 800px; }
         .def-item {
-            background: linear-gradient(135deg, #1e1e22 0%, #16161a 100%);
-            border: 1px solid #333; border-radius: 10px;
-            padding: 14px 18px; margin-bottom: 8px;
+            padding: 12px 16px; margin-bottom: 8px;
         }
         .def-item .def-term {
-            color: #4CAF50; font-weight: bold; font-size: 14px; margin-bottom: 4px;
+            color: var(--fb-accent); font-weight: 600; font-size: 14px; margin-bottom: 4px;
         }
-        .def-item .def-desc { color: #e0e0e0; font-size: 13px; line-height: 1.5; }
+        .def-item .def-desc { color: var(--fb-text); font-size: 13px; line-height: 1.5; }
         .def-search {
-            background: #1a1a1e; border: 1px solid #444; color: #e0e0e0;
-            padding: 10px 16px; border-radius: 8px; font-size: 14px;
-            width: 100%; max-width: 400px; margin-bottom: 16px;
+            background: var(--fb-cell); border: 1px solid var(--fb-border); color: var(--fb-bright);
+            padding: 9px 12px; border-radius: var(--fb-radius-sm); font: inherit; font-size: 14px;
+            width: 100%; max-width: 400px; margin-bottom: 16px; min-height: 36px;
         }
-        .def-search:focus { outline: none; border-color: #4CAF50; }
+        .def-search:focus { outline: none; border-color: var(--fb-accent); }
 
         /* Airspeeds table */
+        .speed-heading { color: var(--fb-bright); font-size: var(--fb-fs-xs); font-weight: 500; letter-spacing: 2.5px; text-transform: uppercase; margin-bottom: 12px; }
         .speed-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 10px; max-width: 800px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 8px; max-width: 800px;
         }
         .speed-card {
-            background: linear-gradient(135deg, #1e1e22 0%, #16161a 100%);
-            border: 1px solid #333; border-radius: 10px;
-            padding: 14px; text-align: center;
+            padding: 12px; text-align: center;
         }
-        .speed-card .speed-name { color: #4CAF50; font-weight: bold; font-size: 14px; }
-        .speed-card .speed-val { color: #ffffff; font-size: 22px; font-weight: bold; font-family: 'Courier New', monospace; margin: 6px 0; }
-        .speed-card .speed-desc { color: #666666; font-size: 11px; }
+        .speed-card .speed-name { color: var(--fb-accent); font-weight: 600; font-size: 13px; }
+        .speed-card .speed-val { color: var(--fb-bright); font-size: 22px; font-weight: 600; margin: 6px 0; }
+        .speed-card .speed-desc { color: var(--fb-dim); font-size: 11px; }
 
         /* Quiz styles */
         .quiz-container { max-width: 700px; margin: 0 auto; }
         .quiz-header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 20px;
+            display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;
+            margin-bottom: 12px;
         }
         .quiz-score {
-            font-family: 'Courier New', monospace; font-size: 16px;
-            color: #4CAF50;
+            font-size: 15px;
+            color: var(--fb-accent);
         }
         .quiz-question {
-            background: linear-gradient(135deg, #1e1e22 0%, #16161a 100%);
-            border: 1px solid #333; border-radius: 12px;
-            padding: 24px; margin-bottom: 16px;
+            padding: 20px; margin-bottom: 8px;
         }
         .quiz-question .q-text {
-            font-size: 16px; color: #ffffff; margin-bottom: 16px; line-height: 1.5;
+            font-size: 16px; color: var(--fb-bright); margin-bottom: 16px; line-height: 1.5;
         }
         .quiz-question .q-num {
-            font-size: 11px; color: #666666; margin-bottom: 8px; text-transform: uppercase;
+            font-size: var(--fb-fs-xs); color: var(--fb-dim); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 2px;
         }
+        .quiz-final { font-family: var(--fb-mono); font-size: 28px; color: var(--fb-accent); }
+        .quiz-final-pct { font-family: var(--fb-mono); color: var(--fb-dim); font-size: 14px; }
         .quiz-option {
             display: block; width: 100%;
-            background: rgba(255,255,255,0.04); border: 1px solid #444;
-            color: #e0e0e0; padding: 12px 16px; border-radius: 8px;
-            cursor: pointer; font-size: 14px; text-align: left;
-            margin-bottom: 8px; transition: all 0.2s;
+            background: var(--fb-cell); border: 1px solid var(--fb-border);
+            color: var(--fb-text); padding: 11px 14px; min-height: 40px; border-radius: var(--fb-radius-sm);
+            cursor: pointer; font: inherit; font-size: 14px; text-align: left;
+            margin-bottom: 8px; transition: border-color var(--fb-ease), color var(--fb-ease), background var(--fb-ease);
         }
-        .quiz-option:hover { border-color: #888888; color: #ffffff; }
+        .quiz-option:hover { border-color: var(--fb-accent); color: var(--fb-bright); }
         .quiz-option.correct {
-            border-color: #4CAF50; background: rgba(76,175,80,0.15); color: #4CAF50;
+            border-color: var(--fb-ok); background: color-mix(in srgb, var(--fb-ok) 15%, var(--fb-cell)); color: var(--fb-ok);
         }
         .quiz-option.incorrect {
-            border-color: #f44336; background: rgba(244,67,54,0.15); color: #f44336;
+            border-color: var(--fb-bad); background: color-mix(in srgb, var(--fb-bad) 15%, var(--fb-cell)); color: var(--fb-bad);
         }
-        .quiz-option:disabled { cursor: default; opacity: 0.7; }
+        .quiz-option:disabled { cursor: default; opacity: 0.8; }
         .quiz-explanation {
-            margin-top: 12px; padding: 12px; background: rgba(255,255,255,0.04);
-            border-radius: 8px; font-size: 13px; color: #aaaaaa;
+            margin-top: 12px; padding: 12px; background: var(--fb-cell);
+            border-radius: var(--fb-radius-sm); font-size: 13px; color: var(--fb-text);
             display: none;
         }
-        .quiz-next-btn {
-            background: rgba(76,175,80,0.2); border: 1px solid #4CAF50;
-            color: #fff; padding: 10px 24px; border-radius: 8px;
-            cursor: pointer; font-size: 14px; display: none;
-        }
-        .quiz-next-btn:hover { background: rgba(76,175,80,0.35); }
+        .quiz-next-btn { background: var(--fb-accent); border-color: var(--fb-accent); color: var(--fb-on-accent); display: none; margin-left: auto; }
+        .quiz-next-btn:hover { filter: brightness(1.08); }
 
         /* Quiz category selection */
-        .quiz-cats { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
-        .quiz-cat-btn {
-            background: rgba(255,255,255,0.05); border: 1px solid #444;
-            color: #888888; padding: 6px 14px; border-radius: 6px;
-            cursor: pointer; font-size: 12px; transition: all 0.2s;
-        }
-        .quiz-cat-btn:hover { border-color: #888888; color: #ffffff; }
-        .quiz-cat-btn.active { background: rgba(76,175,80,0.15); border-color: #4CAF50; color: #fff; }
+        .quiz-cats { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; justify-content: center; }
 
         @media (max-width: 768px) {
-            .top-bar h1 { font-size: 14px; }
+            .top-bar h1 { font-size: var(--fb-fs-xs); letter-spacing: 1.5px; }
             .flashcard { min-height: 250px; padding: 24px; }
             .flashcard .card-text { font-size: 15px; }
             .content { padding: 12px; }
             .hoverable .hover-detail { width: 260px; }
         }
+        @media (max-width: 520px) {
+            .top-bar { padding: 0 12px; gap: 8px; }
+            .top-bar .top-links { gap: 12px; }
+            .top-bar h1 .h1-extra { display: none; }
+            .top-bar h1 svg { display: none; }
+        }
 
         /* ===== Checklists ===== */
         .cl-section-title {
-            color: #4CAF50; font-family: 'Courier New', monospace;
-            font-size: 12px; font-weight: bold; letter-spacing: 2px;
-            text-transform: uppercase; margin-bottom: 14px; margin-top: 4px;
-            padding-bottom: 8px; border-bottom: 1px solid #1e2e1e;
+            color: var(--fb-bright); font-family: var(--fb-font);
+            font-size: var(--fb-fs-xs); font-weight: 500; letter-spacing: 2.5px;
+            text-transform: uppercase; margin-bottom: 12px; margin-top: 4px;
+            padding-bottom: 8px; border-bottom: 1px solid var(--fb-line);
+            display: flex; align-items: center; gap: 8px;
         }
-        .cl-section-title.emg { color: #4CAF50; border-bottom-color: #1e2e1e; }
+        .cl-section-title .ico { stroke: var(--fb-accent); }
+        .cl-section-title.emg .ico { stroke: var(--fb-bad); }
         .checklist-grid {
             display: grid; grid-template-columns: repeat(3, 1fr);
-            gap: 12px; margin-bottom: 36px;
+            gap: 8px; margin-bottom: 32px;
         }
         .cl-panel {
-            background: linear-gradient(160deg, #1a1a1e 0%, #111114 100%);
-            border: 1px solid #333; border-radius: 10px; padding: 12px 14px;
+            padding: 12px 14px;
         }
         .cl-panel.emergency {
-            background: linear-gradient(160deg, #1a1010 0%, #140b0b 100%);
-            border-color: #3a1818;
+            border-color: color-mix(in srgb, var(--fb-bad) 35%, var(--fb-rim));
         }
         .cl-title {
-            color: #4CAF50; font-size: 10.5px; font-weight: bold;
-            font-family: 'Courier New', monospace; text-transform: uppercase;
-            letter-spacing: 0.5px; margin-bottom: 8px; padding-bottom: 5px;
-            border-bottom: 1px solid #1a2e1a;
+            color: var(--fb-accent); font-size: var(--fb-fs-xs); font-weight: 600;
+            font-family: var(--fb-font); text-transform: uppercase;
+            letter-spacing: 1.5px; margin-bottom: 8px; padding-bottom: 6px;
+            border-bottom: 1px solid var(--fb-line);
         }
-        .cl-panel.emergency .cl-title { color: #4CAF50; border-bottom-color: #2a2a2a; }
+        .cl-title-note { color: var(--fb-dim); font-weight: normal; text-transform: none; letter-spacing: 0; }
+        .cl-panel.emergency .cl-title { color: var(--fb-accent); border-bottom-color: var(--fb-line); }
         .cl-item {
             display: flex; gap: 6px; align-items: flex-start;
-            padding: 2px 0; font-size: 11px; color: #d0d0d0; line-height: 1.45;
+            padding: 2px 0; font-size: 12px; color: var(--fb-text); line-height: 1.45;
         }
-        .cl-item.emg { color: #d0d0d0; }
-        .cl-item b { color: #ffffff; }
-        .cl-item.emg b { color: #4CAF50; font-weight: bold; }
+        .cl-item.emg { color: var(--fb-text); }
+        .cl-item b { color: var(--fb-bright); }
+        .cl-item.emg b { color: var(--fb-accent); font-weight: 600; }
         .cl-num {
-            color: #555555; font-family: 'Courier New', monospace;
-            min-width: 22px; font-size: 10px; padding-top: 1px; flex-shrink: 0;
+            color: var(--fb-dim); font-family: var(--fb-mono);
+            min-width: 22px; font-size: 10px; padding-top: 2px; flex-shrink: 0;
         }
-        .cl-item.emg .cl-num { color: #666666; }
-        .cl-sub { padding: 1px 0 1px 28px; font-size: 10px; color: #666666; line-height: 1.4; }
+        .cl-item.emg .cl-num { color: var(--fb-dim); }
+        .cl-sub { padding: 1px 0 1px 28px; font-size: 11px; color: var(--fb-dim); line-height: 1.4; }
         @media (max-width: 900px) { .checklist-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 600px) { .checklist-grid { grid-template-columns: 1fr; } }
 
@@ -351,65 +339,53 @@
 
         /* Checklist mode toggle buttons */
         .cl-mode-btns {
-            display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;
+            display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;
         }
-        .cl-mode-btn {
-            background: rgba(255,255,255,0.05); border: 1px solid #444;
-            color: #888888; padding: 8px 20px; border-radius: 8px;
-            cursor: pointer; font-size: 13px; font-weight: bold;
-            font-family: 'Courier New', monospace; letter-spacing: 1px;
-            transition: all 0.2s;
-        }
-        .cl-mode-btn:hover { border-color: #888; color: #fff; }
-        .cl-mode-btn.active {
-            background: rgba(76,175,80,0.15); border-color: #4CAF50; color: #fff;
-        }
-        .cl-mode-btn.emg.active {
-            background: rgba(76,175,80,0.15); border-color: #4CAF50; color: #fff;
-        }
+        .cl-mode-btn .ico { stroke: currentColor; }
+        .cl-mode-btn.emg.active { border-color: var(--fb-bad); color: var(--fb-bad); }
         /* Asterisk highlight */
-        .cl-ast { color: #4CAF50; }
+        .cl-ast { color: var(--fb-accent); }
 
         /* ===== Systems Diagrams ===== */
         .diagram-section {
             max-width: 1100px; margin: 0 auto 32px auto;
         }
         .diagram-section-title {
-            color: #4CAF50; font-family: 'Courier New', monospace;
-            font-size: 20px; font-weight: bold; letter-spacing: 1px;
-            margin-bottom: 16px; padding-bottom: 8px;
-            border-bottom: 1px solid #2a4a2a;
+            color: var(--fb-bright); font-family: var(--fb-font);
+            font-size: var(--fb-fs-sm); font-weight: 500; letter-spacing: 2.5px; text-transform: uppercase;
+            margin-bottom: 8px; padding-bottom: 8px;
+            border-bottom: 1px solid var(--fb-line);
         }
+        .diagram-intro { color: var(--fb-dim); font-size: 13px; margin-bottom: 16px; }
         .diagram-card {
-            background: linear-gradient(135deg, #1e1e22 0%, #16161a 100%);
-            border: 1px solid #333; border-radius: 12px;
-            padding: 20px; margin-bottom: 16px;
+            padding: 16px 18px; margin-bottom: 8px;
         }
         .diagram-card h3 {
-            color: #4CAF50; font-size: 15px; margin-bottom: 12px;
-            font-family: 'Courier New', monospace;
+            color: var(--fb-bright); font-size: var(--fb-fs-xs); font-weight: 500; margin-bottom: 12px;
+            text-transform: uppercase; letter-spacing: 2.5px;
+            display: flex; align-items: center; gap: 9px;
         }
         .diagram-card h4 {
-            color: #81C784; font-size: 13px; margin: 14px 0 8px 0;
-            font-family: 'Courier New', monospace;
+            color: var(--fb-bright); font-size: 13px; font-weight: 600; margin: 14px 0 8px 0;
         }
         .diagram-card p, .diagram-card li {
-            color: #e0e0e0; font-size: 13px; line-height: 1.7; margin-bottom: 6px;
+            color: var(--fb-text); font-size: 13px; line-height: 1.7; margin-bottom: 6px;
         }
         .diagram-card ul { padding-left: 20px; }
-        .diagram-card .highlight { color: #4CAF50; font-weight: bold; }
+        .diagram-card .highlight { color: var(--fb-accent); font-weight: 600; }
+        .info-card h4 { color: var(--fb-bright); font-size: 13px; font-weight: 600; margin: 14px 0 8px; }
         .diagram-img-wrapper {
-            background: #111114; border: 1px solid #333;
-            border-radius: 10px; padding: 12px; margin: 16px 0;
+            background: var(--fb-bg); border: 1px solid var(--fb-line);
+            border-radius: var(--fb-radius); padding: 12px; margin: 16px 0;
             text-align: center; cursor: pointer;
-            transition: border-color 0.2s;
+            transition: border-color var(--fb-ease);
         }
-        .diagram-img-wrapper:hover { border-color: #4CAF50; }
+        .diagram-img-wrapper:hover { border-color: var(--fb-accent); }
         .diagram-img-wrapper img {
-            max-width: 100%; height: auto; border-radius: 6px;
+            max-width: 100%; height: auto; border-radius: var(--fb-radius-sm);
         }
         .diagram-img-caption {
-            color: #888; font-size: 11px; margin-top: 8px;
+            color: var(--fb-dim); font-size: 11px; margin-top: 8px;
             font-style: italic;
         }
         .diagram-img-wrapper.expanded {
@@ -425,42 +401,46 @@
             object-fit: contain;
         }
         .diagram-img-wrapper.expanded .diagram-img-caption {
-            color: #aaa; font-size: 13px;
+            color: var(--fb-text); font-size: 13px;
         }
 
-        /* Interactive diagram pins */
-        .dia-interactive{position:relative;background:#111114;border:1px solid #333;border-radius:8px;padding:0;margin:16px 0;overflow:hidden}
-        .dia-interactive img{display:block;width:100%;height:auto;border-radius:8px;filter:invert(0.88) hue-rotate(180deg);pointer-events:none}
-        .dia-pin{position:absolute;width:12px;height:12px;border-radius:50%;background:#4CAF50;border:2px solid rgba(0,0,0,0.5);cursor:pointer;transform:translate(-50%,-50%);z-index:10;transition:transform 0.15s,box-shadow 0.15s;box-shadow:0 0 6px rgba(76,175,80,0.4)}
-        .dia-pin:hover{transform:translate(-50%,-50%) scale(1.5);box-shadow:0 0 14px rgba(76,175,80,0.8)}
-        .dia-pin.blue{background:#4fc3f7;box-shadow:0 0 6px rgba(79,195,247,0.4)}
-        .dia-pin.blue:hover{box-shadow:0 0 14px rgba(79,195,247,0.8)}
-        .dia-pin.orange{background:#ffb74d;box-shadow:0 0 6px rgba(255,183,77,0.4)}
-        .dia-pin.orange:hover{box-shadow:0 0 14px rgba(255,183,77,0.8)}
-        .dia-pin.red{background:#ff6688;box-shadow:0 0 6px rgba(255,102,136,0.4)}
-        .dia-pin.red:hover{box-shadow:0 0 14px rgba(255,102,136,0.8)}
-        .dia-tip{position:absolute;background:rgba(10,10,14,0.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(76,175,80,0.25);border-radius:6px;padding:8px 12px;color:#e0e0e0;font-size:10px;line-height:1.5;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity 0.15s;z-index:20;transform:translate(-50%,-110%);left:50%;bottom:100%;margin-bottom:6px}
+        /* Interactive diagram pins (pin colours = component type, not theme) */
+        .dia-interactive{position:relative;background:var(--fb-bg);border:1px solid var(--fb-line);border-radius:var(--fb-radius-sm);padding:0;margin:16px 0;overflow:hidden}
+        .dia-interactive img{display:block;width:100%;height:auto;border-radius:var(--fb-radius-sm);filter:invert(0.88) hue-rotate(180deg);pointer-events:none}
+        .dia-pin{position:absolute;width:12px;height:12px;border-radius:50%;background:var(--fb-accent);border:2px solid rgba(0,0,0,0.5);cursor:pointer;transform:translate(-50%,-50%);z-index:10;transition:transform 0.15s,box-shadow 0.15s;box-shadow:0 0 6px rgba(217,119,87,0.4)}
+        .dia-pin:hover{transform:translate(-50%,-50%) scale(1.5);box-shadow:0 0 14px rgba(217,119,87,0.8)}
+        .dia-pin.blue{background:var(--fb-info);box-shadow:0 0 6px rgba(107,143,184,0.4)}
+        .dia-pin.blue:hover{box-shadow:0 0 14px rgba(107,143,184,0.8)}
+        .dia-pin.orange{background:var(--fb-warn);box-shadow:0 0 6px rgba(201,162,74,0.4)}
+        .dia-pin.orange:hover{box-shadow:0 0 14px rgba(201,162,74,0.8)}
+        .dia-pin.red{background:var(--fb-bad);box-shadow:0 0 6px rgba(192,88,76,0.4)}
+        .dia-pin.red:hover{box-shadow:0 0 14px rgba(192,88,76,0.8)}
+        .dia-tip{position:absolute;background:color-mix(in srgb, var(--fb-bg) 94%, transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--fb-border);border-radius:var(--fb-radius-sm);padding:8px 12px;color:var(--fb-text);font-size:10px;line-height:1.5;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity 0.15s;z-index:20;transform:translate(-50%,-110%);left:50%;bottom:100%;margin-bottom:6px}
         .dia-pin:hover .dia-tip{opacity:1;pointer-events:auto}
-        .dia-tip-title{color:#4CAF50;font-weight:700;font-size:11px;margin-bottom:2px}
-        .dia-tip-desc{color:#aaa;white-space:normal;max-width:240px}
+        .dia-tip-title{color:var(--fb-accent);font-weight:700;font-size:11px;margin-bottom:2px}
+        .dia-tip-desc{color:var(--fb-text);white-space:normal;max-width:240px}
 
-        /* Fuel burn calculator */
-        .fb-btn{padding:6px 0;border-radius:6px;border:1px solid #333;background:#1a1a1e;color:#888;font-size:11px;cursor:pointer;font-weight:400;flex:1;transition:all 0.2s}
-        .fb-btn:hover{border-color:#666;color:#e0e0e0}
-        .fb-btn.act{border-color:#4CAF50;background:rgba(76,175,80,0.12);color:#4CAF50;font-weight:600}
-        .fb-btn.act-warm{border-color:#ffb74d;background:rgba(255,183,77,0.12);color:#ffb74d;font-weight:600}
-        .fb-result{background:#1a1a1e;border:1px solid #333;border-radius:8px;padding:12px;text-align:center}
-        .fb-result-label{color:#666;font-size:9px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
-        .fb-result-val{font-size:20px;font-weight:700}
-        .fb-result-sub{color:#666;font-size:10px;margin-top:2px}
+        /* Fuel burn calculator (fc- prefix: .fb-* belongs to the shared theme) */
+        .fc-note{color:var(--fb-dim);font-size:11px;margin-bottom:14px}
+        .fc-label{color:var(--fb-dim);font-size:var(--fb-fs-xs);text-transform:uppercase;letter-spacing:2px;display:block;margin-bottom:6px}
+        .fc-btn{padding:6px 0;flex:1;font-family:var(--fb-mono);font-size:11px}
+        .fc-btn.act{background:color-mix(in srgb, var(--fb-accent) 12%, var(--fb-cell));font-weight:600}
+        .fc-btn.act-warm{border-color:var(--fb-warn);background:color-mix(in srgb, var(--fb-warn) 12%, var(--fb-cell));color:var(--fb-warn);font-weight:600}
+        .fc-result{background:var(--fb-cell);border-radius:var(--fb-radius-sm);padding:12px;text-align:center}
+        .fc-result-label{color:var(--fb-dim);font-size:9px;text-transform:uppercase;letter-spacing:2px;margin-bottom:4px}
+        .fc-result-val{font-size:20px;font-weight:600;font-family:var(--fb-mono);color:var(--fb-bright)}
+        .fc-result-val .unit{font-size:12px;color:var(--fb-dim)}
+        .fc-result-sub{color:var(--fb-dim);font-size:10px;margin-top:2px;font-family:var(--fb-mono)}
     </style>
 </head>
-<body>
+<body class="fb">
     <!-- Top Bar -->
     <div class="top-bar">
-        <button class="back-btn" onclick="window.location.href='study.html'">← Hub</button>
-        <button class="back-btn" onclick="window.location.href='index.html'">⌂ Home</button>
-        <h1>MULTI-ENGINE STUDY</h1>
+        <div class="top-links">
+            <a class="fb-home" href="study.html"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Hub</a>
+            <a class="fb-home" href="index.html"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Home</a>
+        </div>
+        <h1><svg viewBox="0 0 24 24"><path d="M12 3v18M3 13l9-3 9 3M9 20l3-1 3 1"/><path d="M6 11.5v3M18 11.5v3"/></svg>Multi-Engine<span class="h1-extra">&nbsp;Study</span></h1>
         <span class="aircraft-badge">P2006T</span>
     </div>
 
@@ -482,18 +462,18 @@
         <div id="tab-flashcards" class="tab-page active">
             <div class="filter-pills" id="cardFilters"></div>
             <div class="card-controls">
-                <button onclick="prevCard()">← Prev</button>
+                <button onclick="prevCard()"><svg class="ico" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Prev</button>
                 <span class="card-counter" id="cardCounter">1 / 1</span>
-                <button onclick="nextCard()">Next →</button>
-                <button onclick="shuffleCards()" style="margin-left:12px">🔀 Shuffle</button>
-                <button class="mode-toggle" id="modeToggle" onclick="toggleStudyMode()">📖 Study Mode</button>
+                <button onclick="nextCard()">Next<svg class="ico" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+                <button onclick="shuffleCards()"><svg class="ico" viewBox="0 0 24 24"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>Shuffle</button>
+                <button class="mode-toggle" id="modeToggle" onclick="toggleStudyMode()"><svg class="ico" viewBox="0 0 24 24"><path d="M2 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2zM22 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z"/></svg>Study Mode</button>
             </div>
-            <div class="flashcard" id="flashcard" onclick="flipCard()">
+            <div class="flashcard fb-panel" id="flashcard" onclick="flipCard()">
                 <div class="card-label" id="cardLabel">QUESTION</div>
                 <div class="card-category" id="cardCat"></div>
                 <div class="card-text" id="cardText"></div>
             </div>
-            <p style="text-align:center; color:#555; font-size:12px; margin-top:12px;" id="cardHint">Click card to flip · Hover highlighted terms for details</p>
+            <p class="card-hint" id="cardHint">Click card to flip · Hover highlighted terms for details</p>
         </div>
 
         <!-- ==================== INFORMATION ==================== -->
@@ -508,14 +488,14 @@
 
             <!-- Aerodynamics -->
             <div id="info-aero" class="sub-page active">
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>Aerodynamic Effects of Engine Failure</h3>
                     <p><span class="highlight">Pitch Down (Lateral Axis):</span> Loss of accelerated slipstream over the horizontal stabilizer causes it to produce less negative lift → aircraft pitches down. Compensate: increase back pressure on yoke.</p>
                     <p><span class="highlight">Roll Toward Dead Engine (Longitudinal Axis):</span> Loss of accelerated slipstream over the dead engine's wing causes loss of lift → roll toward dead engine. Compensate: bank slightly into operating engine.</p>
                     <p><span class="highlight">Yaw Toward Dead Engine (Vertical Axis):</span> Asymmetric thrust causes yaw toward dead engine. Windmilling prop creates significant drag. Compensate: rudder toward operating engine.</p>
                 </div>
 
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>The Critical Engine (PAST)</h3>
                     <p>The engine whose failure most adversely affects performance and handling. In most twins, the <span class="highlight">left engine</span> is critical.</p>
                     <ul>
@@ -526,12 +506,12 @@
                     </ul>
                 </div>
 
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>Asymmetrical Thrust</h3>
                     <p>Unequal thrust from engines creates yaw toward dead engine. Dead engine's windmilling prop adds significant drag, increasing yaw. Rudder toward operating engine counteracts yaw. More rudder needed as airspeed decreases — at Vmc, full rudder may be required.</p>
                 </div>
 
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>Zero Sideslip</h3>
                     <p><span class="highlight">Sideslip (undesirable):</span> Wings level + rudder to hold heading → sideward lift from vertical stabilizer → aircraft sideslips → increased drag → vicious cycle requiring more rudder.</p>
                     <p><span class="highlight">Zero sideslip (desirable):</span></p>
@@ -543,7 +523,7 @@
                     </ul>
                 </div>
 
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>Vmc — Minimum Controllable Airspeed</h3>
                     <p>Manufacturer-determined speed below which directional control cannot be maintained with critical engine inoperative and operating engine at takeoff power.</p>
                     <p><span class="highlight">Certification requirements:</span> Maintain heading within 20°; after recovery, maintain straight flight with ≤5° bank.</p>
@@ -561,21 +541,21 @@
                     <p>Vmc <span class="highlight">decreases</span> with altitude because the operating engine produces less power. Published as IAS; TAS at Vmc increases with altitude.</p>
                 </div>
 
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>Vmc Certification — CRM ALOFT (Detailed)</h3>
-                    <p style="color:#888;font-size:11px;margin-bottom:12px">Each factor below explains how it affects Vmc and single-engine performance. All conditions are set to produce the <b>highest</b> Vmc for certification purposes.</p>
+                    <p style="color:var(--fb-dim);font-size:11px;margin-bottom:12px">Each factor below explains how it affects Vmc and single-engine performance. All conditions are set to produce the <b>highest</b> Vmc for certification purposes.</p>
 
-                    <h4 style="color:#81C784;font-size:13px;margin:14px 0 8px;font-family:'Courier New',monospace;">C — Critical Engine Inoperative &amp; Windmilling</h4>
+                    <h4>C — Critical Engine Inoperative &amp; Windmilling</h4>
                     <p><span class="highlight">↑ Vmc · ↓ Performance</span></p>
                     <p>A windmilling prop creates more drag than a feathered one, increasing the yawing moment toward the dead engine. More rudder force is needed to counteract that yaw, so the minimum controllable speed goes up.</p>
                     <p>Feathered = less drag = less yaw = lower Vmc. Windmilling = max drag = max yaw = higher Vmc. Additionally, windmilling drag reduces total available thrust, degrading performance significantly compared to a feathered prop.</p>
 
-                    <h4 style="color:#81C784;font-size:13px;margin:14px 0 8px;font-family:'Courier New',monospace;">R — Rearward Center of Gravity</h4>
+                    <h4>R — Rearward Center of Gravity</h4>
                     <p><span class="highlight">↑ Vmc · ↑ Performance</span></p>
                     <p>CG position changes the moment arm to the rudder. <b>Forward CG</b> = longer arm = more rudder leverage = lower Vmc. <b>Rearward CG</b> = shorter arm = less rudder leverage = higher Vmc (Law of the Lever).</p>
                     <p>Performance improves with aft CG because the horizontal stabilizer produces less negative lift (less down force needed to balance), reducing induced drag.</p>
 
-                    <h4 style="color:#81C784;font-size:13px;margin:14px 0 8px;font-family:'Courier New',monospace;">M — Most Unfavorable Takeoff Weight</h4>
+                    <h4>M — Most Unfavorable Takeoff Weight</h4>
                     <p><span class="highlight">↑ Vmc · ↑ Performance</span></p>
                     <p>A <b>lighter</b> airplane is the most unfavorable weight for Vmc. Two reasons:</p>
                     <ul>
@@ -584,27 +564,27 @@
                     </ul>
                     <p>A lighter airplane = less resistance to yaw = higher Vmc. However, the lighter airplane has less induced drag and therefore better overall performance.</p>
 
-                    <h4 style="color:#81C784;font-size:13px;margin:14px 0 8px;font-family:'Courier New',monospace;">A — Airborne, Out of Ground Effect</h4>
+                    <h4>A — Airborne, Out of Ground Effect</h4>
                     <p><span class="highlight">↑ Vmc · ↓ Performance</span></p>
                     <p>Light twins are not required to determine Vmc on the ground. Out of ground effect, induced drag is higher → higher AOA required → P-factor and accelerated slipstream effects are more pronounced → greater rudder force needed → Vmc increases.</p>
                     <p>In ground effect, the downwash deflection reduces induced drag significantly, meaning the airplane performs much better and requires less rudder authority. Out of ground effect, total drag is higher and performance degrades.</p>
 
-                    <h4 style="color:#81C784;font-size:13px;margin:14px 0 8px;font-family:'Courier New',monospace;">L — Landing Gear Retracted</h4>
+                    <h4>L — Landing Gear Retracted</h4>
                     <p><span class="highlight">↑ Vmc · ↑ Performance</span></p>
                     <p>Extended gear provides three stabilizing effects that lower Vmc:</p>
-                    <ol style="padding-left:20px;color:#ccc;font-size:13px;line-height:1.8;">
+                    <ol style="padding-left:20px;color:var(--fb-text);font-size:13px;line-height:1.8;">
                         <li><b>Keel Effect:</b> Gear lowers the CG below the center of lift, increasing stability — like the keel of a boat holding it upright.</li>
                         <li><b>Drag behind CG:</b> Main gear drag acts behind the CG, reducing the effectiveness of the yawing moment from the dead engine — like a child dragging their feet on a bike for stability.</li>
                         <li><b>Weathervane Effect:</b> Wheels and doors align themselves with the relative wind, resisting the yaw toward the dead engine — like a weathervane pointing into wind.</li>
                     </ol>
                     <p>Gear retracted removes all three stabilizing effects → more rudder required → higher Vmc. But retracted gear also means less total drag → better performance.</p>
 
-                    <h4 style="color:#81C784;font-size:13px;margin:14px 0 8px;font-family:'Courier New',monospace;">O — Operating Engine at Takeoff/Max Power</h4>
+                    <h4>O — Operating Engine at Takeoff/Max Power</h4>
                     <p><span class="highlight">↑ Vmc · ↑ Performance</span></p>
                     <p>Full power on the operating engine creates the greatest asymmetric thrust → maximum yawing and rolling moment toward the dead engine. If the operating engine were at idle, there would be no yaw and no rudder needed.</p>
                     <p>For a normally aspirated engine, full power occurs at sea level with standard atmosphere. More power = more asymmetric force = higher Vmc. Obviously, more power also means better performance and slower descent rate OEI.</p>
 
-                    <h4 style="color:#81C784;font-size:13px;margin:14px 0 8px;font-family:'Courier New',monospace;">F — Flaps in Takeoff Position</h4>
+                    <h4>F — Flaps in Takeoff Position</h4>
                     <p><span class="highlight">↑ Vmc · ↑ Performance</span></p>
                     <p>Flap settings affect lift and drag differently:</p>
                     <ul>
@@ -615,10 +595,10 @@
                     <p>At low/takeoff flap settings, the accelerated slipstream effect is more pronounced (less drag behind CG to stabilize). At higher settings, drag aft of the CG creates a stabilizing effect similar to extended gear. More flaps = easier to control = lower Vmc. Takeoff flaps (low or nil) = harder to control = higher Vmc.</p>
                     <p>With little or no flaps, less drag means more available power → better performance.</p>
 
-                    <h4 style="color:#81C784;font-size:13px;margin:14px 0 8px;font-family:'Courier New',monospace;">T — Trimmed for Takeoff (Rudder)</h4>
+                    <h4>T — Trimmed for Takeoff (Rudder)</h4>
                     <p><span class="highlight">↑ Vmc · ↑ Performance</span></p>
                     <p>Three possible rudder trim configurations:</p>
-                    <ol style="padding-left:20px;color:#ccc;font-size:13px;line-height:1.8;">
+                    <ol style="padding-left:20px;color:var(--fb-text);font-size:13px;line-height:1.8;">
                         <li><b>Trimmed toward operating engine</b> (less foot pressure): Trim tab helps hold rudder in place but <b>decreases</b> total rudder effectiveness (lowers the rudder AOA). Less effective rudder → higher Vmc.</li>
                         <li><b>Trim neutral:</b> Tab acts as a rudder extension. Higher foot pressure required, but rudder AOA is higher → more effective → lower Vmc.</li>
                         <li><b>Trimmed toward inoperative engine</b> (most foot pressure): Dramatically increases rudder AOA → most effective. However, rudder pressure increases significantly. Certification limit: no more than <b>150 lbs</b> of force.</li>
@@ -626,13 +606,13 @@
                     <p>Takeoff trim (toward operating engine or neutral) limits rudder effectiveness, producing a higher Vmc. Less trim drag also means better performance.</p>
                 </div>
 
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>Single Engine Performance</h3>
                     <p>Loss of one engine = 50% power loss but <span class="highlight">≥80% performance loss</span> because remaining engine must overcome drag from failed engine.</p>
                     <p><span class="highlight">Best SE performance requires:</span> Max power on operating engine, minimum drag (gear up, flaps up, feather prop), zero sideslip.</p>
                 </div>
 
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>Flaps — General Effects</h3>
                     <ul>
                         <li>Low settings (5°–15°): significant lift increase, slight drag increase</li>
@@ -646,7 +626,7 @@
 
             <!-- Systems -->
             <div id="info-systems" class="sub-page">
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>Electrical System</h3>
                     <ul>
                         <li><span class="highlight">Primary power:</span> Two engine-driven generators (40A, 14.2–14.8 VDC each), operating in parallel with integrated voltage regulators and automatic overvoltage protection</li>
@@ -662,16 +642,16 @@
                     </ul>
                 </div>
 
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>Warning, Caution &amp; Advisory Lights</h3>
                     <ul>
-                        <li style="color:#ff6688"><span class="highlight">RED (Warning):</span> LH/RH OVERVOLT, MAIN/REAR DOOR OPEN, LH/RH LOW COOLANT, LH/RH ENGINE FIRE, LG TRANSITION</li>
-                        <li style="color:#ffb74d"><span class="highlight">AMBER (Caution):</span> LH/RH GENERATOR failure, EXT POWER connected, PITOT HEAT failure, GEAR PUMP ON</li>
-                        <li style="color:#4CAF50"><span class="highlight">GREEN (Advisory):</span> LH/RH FUEL PUMP ON, PITOT HEAT ON, 3× LG Down &amp; Locked</li>
+                        <li style="color:var(--fb-bad)"><span class="highlight">RED (Warning):</span> LH/RH OVERVOLT, MAIN/REAR DOOR OPEN, LH/RH LOW COOLANT, LH/RH ENGINE FIRE, LG TRANSITION</li>
+                        <li style="color:var(--fb-warn)"><span class="highlight">AMBER (Caution):</span> LH/RH GENERATOR failure, EXT POWER connected, PITOT HEAT failure, GEAR PUMP ON</li>
+                        <li style="color:var(--fb-ok)"><span class="highlight">GREEN (Advisory):</span> LH/RH FUEL PUMP ON, PITOT HEAT ON, 3× LG Down &amp; Locked</li>
                     </ul>
                 </div>
 
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>Engines</h3>
                     <ul>
                         <li><span class="highlight">Type:</span> Bombardier-Rotax 912 S3 — 4-stroke, 4-cylinder horizontally opposed, 1352 cc displacement</li>
@@ -686,7 +666,7 @@
                     </ul>
                 </div>
 
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>Cooling System</h3>
                     <ul>
                         <li>Closed liquid circuit for <span class="highlight">cylinder heads</span>; ram-air cooling for <span class="highlight">cylinders</span></li>
@@ -700,7 +680,7 @@
                     </ul>
                 </div>
 
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>Oil System</h3>
                     <ul>
                         <li>Dry sump forced lubrication; camshaft-driven oil pump with integrated pressure regulator</li>
@@ -713,7 +693,7 @@
                     </ul>
                 </div>
 
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>Propeller &amp; Governor</h3>
                     <ul>
                         <li><span class="highlight">Propeller:</span> MT MTV-21-A-C-F/CF178-05 — 2 wood/composite blades, aluminium hub, diameter 1780 mm (no reduction allowed)</li>
@@ -726,7 +706,7 @@
                     </ul>
                 </div>
 
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>Fuel System</h3>
                     <ul>
                         <li>Two integrated wing tanks: <span class="highlight">100L (26.42 gal) each</span> — 200L (52.8 gal) total</li>
@@ -743,7 +723,7 @@
                     </ul>
                 </div>
 
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>Fuel Delivery (Engine Side)</h3>
                     <ul>
                         <li>Flow: <span class="highlight">Tank → coarse filter → fire cock → fine filter → mechanical fuel pump → fuel manifold → two carburetors</span></li>
@@ -753,7 +733,7 @@
                     </ul>
                 </div>
 
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>Landing Gear</h3>
                     <ul>
                         <li>3 wheels; <span class="highlight">electro-hydraulic</span> retractable; 6 couples of micro-switches (2 per leg) for position detection</li>
@@ -765,11 +745,11 @@
                         <li>Set gear knob to DOWN before emergency extension so indication lights work normally</li>
                         <li>Indications: 3 green (down-locked), 1 red (transit), amber "GEAR PUMP ON" caution</li>
                         <li>Warning horn: gear UP + throttle idle or flaps LAND</li>
-                        <li style="color:#ff6688">After emergency extension, apply AMM restoration procedure</li>
+                        <li style="color:var(--fb-bad)">After emergency extension, apply AMM restoration procedure</li>
                     </ul>
                 </div>
 
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>Brake System</h3>
                     <ul>
                         <li>Independent hydraulic brake for each main wheel — no nose wheel brakes</li>
@@ -777,11 +757,11 @@
                         <li>Single <span class="highlight">vented oil reservoir (R-100)</span> feeds pilot-side cylinders, connected to copilot-side</li>
                         <li><span class="highlight">Parking brake:</span> PV-1 valve on cabin floor, operated by knob on central pedestal — traps pressure in lines</li>
                         <li>Brakes operable from both pilot and copilot pedals</li>
-                        <li style="color:#ff6688">Do NOT press opposite toe brake while steering until pedals realign — may damage mechanism</li>
+                        <li style="color:var(--fb-bad)">Do NOT press opposite toe brake while steering until pedals realign — may damage mechanism</li>
                     </ul>
                 </div>
 
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>Flight Controls &amp; Trim</h3>
                     <ul>
                         <li>Primary controls: ailerons, rudder, stabilator — manual via cables/pulleys/rods</li>
@@ -792,7 +772,7 @@
                     </ul>
                 </div>
 
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>Ignition System</h3>
                     <ul>
                         <li>Dual, breakerless <span class="highlight">capacitor discharge ignition (CDI)</span> with integrated generator</li>
@@ -800,11 +780,11 @@
                         <li>Energy stored in capacitors; external trigger coils actuate discharge to ignition coils</li>
                         <li><span class="highlight">Independent</span> from the main electrical generation/distribution system — switches control only engine electrical circuit</li>
                         <li>Firing order: <span class="highlight">1-4-2-3</span></li>
-                        <li style="color:#ff6688"><b>WARNING:</b> If ignition switches are ON, propeller movement can cause engine starting — hazard to nearby people</li>
+                        <li style="color:var(--fb-bad)"><b>WARNING:</b> If ignition switches are ON, propeller movement can cause engine starting — hazard to nearby people</li>
                     </ul>
                 </div>
 
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>Door Locking System</h3>
                     <ul>
                         <li><span class="highlight">Main door (forward, left):</span> Electro-mechanical lock engages when left engine running (via oil pressure switch)</li>
@@ -816,7 +796,7 @@
                     </ul>
                 </div>
 
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>Pedestal Controls</h3>
                     <ul>
                         <li><span class="highlight">Throttle levers:</span> LH and RH (with friction knob)</li>
@@ -828,7 +808,7 @@
                     </ul>
                 </div>
 
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>Preflight &amp; Towing</h3>
                     <ul>
                         <li>Tow using the <span class="highlight">nose gear tow bar</span></li>
@@ -842,18 +822,18 @@
 
             <!-- Procedures -->
             <div id="info-procedures" class="sub-page">
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>Normal Takeoff</h3>
                     <p>Use manufacturer's Vr or VLOF. If not published: minimum of Vmc or 1.05 × Vs0, whichever is greater.</p>
                     <p>P2006T: Rotate at <span class="highlight">65 KIAS</span>. Short field: use takeoff flaps, rotate at 65, climb at Vx (72 KIAS).</p>
                     <p>Critical speed on takeoff is Vmc — below it, directional control may be lost.</p>
                 </div>
 
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>Engine Failure After Takeoff</h3>
                     <p><span class="highlight">Immediate:</span> Maintain control, pitch for VYSE (84 KIAS)</p>
                     <p><span class="highlight">Procedure:</span></p>
-                    <ol style="padding-left:20px; color:#ccc; font-size:13px; line-height:1.8;">
+                    <ol style="padding-left:20px; color:var(--fb-text); font-size:13px; line-height:1.8;">
                         <li>Maintain directional control</li>
                         <li>Power up (max on operating engine)</li>
                         <li>Clean up (gear up, flaps up)</li>
@@ -865,9 +845,9 @@
                     </ol>
                 </div>
 
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>Engine Failure In Flight</h3>
-                    <ol style="padding-left:20px; color:#ccc; font-size:13px; line-height:1.8;">
+                    <ol style="padding-left:20px; color:var(--fb-text); font-size:13px; line-height:1.8;">
                         <li>Maintain control</li>
                         <li>Pitch for VYSE</li>
                         <li>Identify</li>
@@ -878,9 +858,9 @@
                     </ol>
                 </div>
 
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>Engine Restart</h3>
-                    <ol style="padding-left:20px; color:#ccc; font-size:13px; line-height:1.8;">
+                    <ol style="padding-left:20px; color:var(--fb-text); font-size:13px; line-height:1.8;">
                         <li>Fuel selector ON</li>
                         <li>Mixture RICH</li>
                         <li>Prop FULL FORWARD</li>
@@ -889,21 +869,21 @@
                     </ol>
                 </div>
 
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>Vmc Demonstration</h3>
                     <p><span class="highlight">Setup:</span> Safe altitude, takeoff config (gear up, flaps takeoff), takeoff power both engines.</p>
                     <p><span class="highlight">Procedure:</span> Reduce power on critical engine, maintain heading with rudder + bank into operating engine, slowly reduce airspeed.</p>
                     <p><span class="highlight">Recovery:</span> At first sign of loss of directional control (stall warning, rudder pedal to stop) → reduce power on operating engine → decrease AOA → recover to safe airspeed → reestablish normal flight.</p>
                 </div>
 
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>Landing</h3>
                     <p>Final approach (Flaps LND): <span class="highlight">80 KIAS</span>. Short final/short field: <span class="highlight">75 KIAS</span>. Touchdown: <span class="highlight">65 KIAS</span>.</p>
                     <p>Single engine final approach speed: <span class="highlight">84 KIAS</span>.</p>
                     <p>Do NOT alter airplane configuration on runway after landing unless clear operational need (gear retraction accidents happen during after-landing roll).</p>
                 </div>
 
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>Traffic Pattern Speeds</h3>
                     <ul>
                         <li>Downwind: <span class="highlight">100 KIAS</span></li>
@@ -915,18 +895,18 @@
                     </ul>
                 </div>
 
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>Steep Turns</h3>
                     <p>Recommended speed for steep turns: <span class="highlight">110 KIAS</span> (VA 122 KIAS max).</p>
                 </div>
 
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>Drag Demonstration</h3>
                     <p>Purpose: Show the effects of drag with gear and flaps changes on aircraft performance OEI.</p>
                     <p>Demonstrates the importance of cleaning up (gear up, flaps up) to minimize drag for best single-engine performance.</p>
                 </div>
 
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>Approach & Instrument Speeds</h3>
                     <ul>
                         <li>Holding: <span class="highlight">100 KIAS</span></li>
@@ -938,18 +918,18 @@
 
             <!-- Performance -->
             <div id="info-performance" class="sub-page">
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>Runway Requirements</h3>
                     <p><span class="highlight">Accelerate-Stop Distance:</span> Runway needed to accelerate to V1/VR, then (engine fails) bring to a complete stop.</p>
                     <p><span class="highlight">Accelerate-Go Distance:</span> Runway needed to accelerate to V1/VR, then (engine fails) continue takeoff and climb to 50 ft.</p>
                 </div>
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>P2006T Takeoff & Landing</h3>
                     <p>T/O distance over 50' obstacle at max gross, SL, std day: ~<span class="highlight">1,775 ft</span></p>
                     <p>Landing distance over 50' obstacle at max gross, SL, std day: ~<span class="highlight">1,705 ft</span></p>
                     <p>Cruise speed: ~141 KTAS. Range: ~690 NM.</p>
                 </div>
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>Weight & Balance</h3>
                     <p>Max takeoff weight: <span class="highlight">2,712 lbs</span> (SUPP G19 MTOW 1230kg)</p>
                     <p>Max landing weight: <span class="highlight">2,646 lbs</span></p>
@@ -957,7 +937,7 @@
                     <p>Forward CG limit: 16.5% MAC.</p>
                     <p>Demonstrated crosswind component: <span class="highlight">17 kts</span>.</p>
                 </div>
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>Unique P2006T Considerations</h3>
                     <p>Performance calculations likely include error due to <span class="highlight">metric units</span> in AFM.</p>
                     <p>Max operating altitude: <span class="highlight">14,000 ft</span>. Min operating temp: <span class="highlight">-25°C</span>.</p>
@@ -968,7 +948,7 @@
 
             <!-- Limitations -->
             <div id="info-limitations" class="sub-page">
-                <div class="info-card">
+                <div class="info-card fb-panel">
                     <h3>P2006T Operating Limitations</h3>
                     <ul>
                         <li>Approved for: <span class="highlight">Day and Night VFR and IFR</span></li>
@@ -1001,7 +981,7 @@
 
         <!-- ==================== AIRSPEEDS ==================== -->
         <div id="tab-airspeeds" class="tab-page">
-            <h3 style="color:#4CAF50; margin-bottom:16px; font-family:'Courier New',monospace;">P2006T V-Speeds</h3>
+            <h3 class="speed-heading">P2006T V-Speeds <span class="mono" style="color:var(--fb-dim);letter-spacing:0">KIAS</span></h3>
             <div class="speed-grid" id="speedGrid"></div>
         </div>
 
@@ -1011,8 +991,8 @@
             <div class="quiz-container" id="quizContainer">
                 <div class="quiz-header">
                     <span class="quiz-score" id="quizScore">Score: 0 / 0</span>
-                    <button class="quiz-next-btn" id="quizNextBtn" onclick="nextQuizQuestion()">Next Question →</button>
-                    <button onclick="resetQuiz()" style="background:none; border:1px solid #555; color:#aaa; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:12px;">Reset</button>
+                    <button class="quiz-next-btn" id="quizNextBtn" onclick="nextQuizQuestion()">Next Question<svg class="ico" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+                    <button class="quiz-reset-btn" onclick="resetQuiz()">Reset</button>
                 </div>
                 <div id="quizQuestionArea"></div>
             </div>
@@ -1022,16 +1002,16 @@
         <div id="tab-checklists" class="tab-page">
 
             <div class="cl-mode-btns">
-                <button id="btn-cl-normal" class="cl-mode-btn active" onclick="showCL('normal')">▸ Normal Procedures</button>
-                <button id="btn-cl-emg" class="cl-mode-btn emg" onclick="showCL('emg')">⚠ Emergency Procedures</button>
+                <button id="btn-cl-normal" class="cl-mode-btn active" onclick="showCL('normal')"><svg class="ico" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>Normal Procedures</button>
+                <button id="btn-cl-emg" class="cl-mode-btn emg" onclick="showCL('emg')"><svg class="ico" viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>Emergency Procedures</button>
             </div>
 
             <!-- NORMAL PROCEDURES -->
             <div id="cl-normal-section">
-            <div class="cl-section-title">▸ Normal Procedures</div>
+            <div class="cl-section-title"><svg class="ico" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>Normal Procedures</div>
             <div class="checklist-grid">
 
-                <div class="cl-panel">
+                <div class="cl-panel fb-panel">
                     <div class="cl-title">Before Starting Engine</div>
                     <div class="cl-item"><span class="cl-num">1.</span><span>Preflight Inspection – <b>COMPLETE</b></span></div>
                     <div class="cl-item"><span class="cl-num">2.</span><span>Pax Briefing / Control Exchange – <b>COMPLETE</b></span></div>
@@ -1052,8 +1032,8 @@
                     <div class="cl-item"><span class="cl-num">17.</span><span>Nav Lights – <b>ON</b> (night)</span></div>
                 </div>
 
-                <div class="cl-panel">
-                    <div class="cl-title">Starting Engine <span style="color:#3a6a3a; font-weight:normal; text-transform:none;">*one at a time</span></div>
+                <div class="cl-panel fb-panel">
+                    <div class="cl-title">Starting Engine <span class="cl-title-note">*one at a time</span></div>
                     <div class="cl-item"><span class="cl-num">18.</span><span>Gear Position – <b>3 GREEN</b></span></div>
                     <div class="cl-item"><span class="cl-num">19.</span><span>CAS / PFD Annunciations – <b>CONSIDER</b></span></div>
                     <div class="cl-item"><span class="cl-num">20.</span><span>Timer – <b>START</b></span></div>
@@ -1074,7 +1054,7 @@
                     <div class="cl-item"><span class="cl-num">35.</span><span>Ammeter &amp; Voltmeter – <b>CHECK MFD</b></span></div>
                 </div>
 
-                <div class="cl-panel">
+                <div class="cl-panel fb-panel">
                     <div class="cl-title">After Start</div>
                     <div class="cl-item"><span class="cl-num">36.</span><span>Fuel Selectors – RH→<b>LEFT</b>; LH→<b>RIGHT</b></span></div>
                     <div class="cl-item"><span class="cl-num">37.</span><span>Flaps – <b>UP</b></span></div>
@@ -1095,7 +1075,7 @@
                     <div class="cl-item"><span class="cl-num">52.</span><span>Taxi Check – <b>INSTRUMENTS IN LIMITS</b></span></div>
                 </div>
 
-                <div class="cl-panel">
+                <div class="cl-panel fb-panel">
                     <div class="cl-title">Engine Run-Up</div>
                     <div class="cl-item"><span class="cl-num">1.</span><span>Parking Brake – <b>SET</b></span></div>
                     <div class="cl-item"><span class="cl-num">2.</span><span>Tower/CTAF – <b>MONITOR</b></span></div>
@@ -1120,7 +1100,7 @@
                     <div class="cl-item"><span class="cl-num">19.</span><span>Friction Lock – <b>ADJUST</b></span></div>
                 </div>
 
-                <div class="cl-panel">
+                <div class="cl-panel fb-panel">
                     <div class="cl-title">Before Takeoff</div>
                     <div class="cl-item"><span class="cl-num">20.</span><span>T/O &amp; Emergency Briefing – <b>COMPLETE</b></span></div>
                     <div class="cl-item"><span class="cl-num">21.</span><span>Flight Instruments – <b>CHECK</b></span></div>
@@ -1142,7 +1122,7 @@
                     <div class="cl-item"><span class="cl-num">37.</span><span>Set Timer – <b>5 MINS</b></span></div>
                 </div>
 
-                <div class="cl-panel">
+                <div class="cl-panel fb-panel">
                     <div class="cl-title">Enroute Climb</div>
                     <div class="cl-item"><span class="cl-num">38.</span><span>Airborne – <b>Brakes apply</b></span></div>
                     <div class="cl-item"><span class="cl-num">39.</span><span>Out of usable runway – <b>GEAR UP</b></span></div>
@@ -1155,7 +1135,7 @@
                     <div class="cl-item"><span class="cl-num">46.</span><span>Landing &amp; Taxi Lights – <b>OFF</b></span></div>
                 </div>
 
-                <div class="cl-panel">
+                <div class="cl-panel fb-panel">
                     <div class="cl-title">Cruise</div>
                     <div class="cl-item"><span class="cl-num">1.</span><span>Power – <b>18"–25" Hg</b> &amp; <b>1900–2250 RPM</b></span></div>
                     <div class="cl-item"><span class="cl-num">2.</span><span>Fuel Pumps – Verify <b>OFF</b> (one at a time)</span></div>
@@ -1163,7 +1143,7 @@
                     <div class="cl-item"><span class="cl-num">4.</span><span>Fuel Balance – <b>AS REQUIRED</b> – Set Timer</span></div>
                 </div>
 
-                <div class="cl-panel">
+                <div class="cl-panel fb-panel">
                     <div class="cl-title">Descent</div>
                     <div class="cl-item"><span class="cl-num">5.</span><span>Power – <b>AS DESIRED</b></span></div>
                     <div class="cl-item"><span class="cl-num">6.</span><span>Carb Heat – <b>AS REQUIRED</b></span></div>
@@ -1171,7 +1151,7 @@
                     <div class="cl-item"><span class="cl-num">8.</span><span>Approach Briefing – <b>COMPLETE (WARNBIF)</b></span></div>
                 </div>
 
-                <div class="cl-panel">
+                <div class="cl-panel fb-panel">
                     <div class="cl-title">Before Landing</div>
                     <div class="cl-item"><span class="cl-num">9.</span><span>Seats, Belts, Doors – <b>ADJUST and LOCK</b></span></div>
                     <div class="cl-item"><span class="cl-num">10.</span><span>Rear Seats – <b>FULL AFT POSITION</b></span></div>
@@ -1189,7 +1169,7 @@
                     <div class="cl-item"><span class="cl-num">22.</span><span>GUMPS – <b>COMPLETE</b></span></div>
                 </div>
 
-                <div class="cl-panel">
+                <div class="cl-panel fb-panel">
                     <div class="cl-title">After Landing &amp; Clear of Runway</div>
                     <div class="cl-item"><span class="cl-num">23.</span><span>Throttle – <b>1200 RPM</b></span></div>
                     <div class="cl-item"><span class="cl-num">24.</span><span>Flaps – <b>UP</b></span></div>
@@ -1198,7 +1178,7 @@
                     <div class="cl-item"><span class="cl-num">27.</span><span>Fuel Pumps – <b>OFF</b> (one at a time)</span></div>
                 </div>
 
-                <div class="cl-panel">
+                <div class="cl-panel fb-panel">
                     <div class="cl-title">Engine Shutdown</div>
                     <div class="cl-item"><span class="cl-num">28.</span><span>Throttle – <b>IDLE</b> (1 min cool down)</span></div>
                     <div class="cl-item"><span class="cl-num">29.</span><span>Trims – <b>NEUTRAL</b></span></div>
@@ -1214,7 +1194,7 @@
                     <div class="cl-item"><span class="cl-num">39.</span><span>Fuel Selectors – <b>OFF</b></span></div>
                 </div>
 
-                <div class="cl-panel">
+                <div class="cl-panel fb-panel">
                     <div class="cl-title">Securing Aircraft</div>
                     <div class="cl-item"><span class="cl-num">40.</span><span>Cabin / Seats / Belts – <b>CLEAN/SECURE</b></span></div>
                     <div class="cl-item"><span class="cl-num">41.</span><span>Windows – <b>CLOSED</b></span></div>
@@ -1230,17 +1210,17 @@
 
             <!-- EMERGENCY PROCEDURES -->
             <div id="cl-emg-section" style="display:none">
-            <div class="cl-section-title emg">⚠ Emergency Procedures</div>
+            <div class="cl-section-title emg"><svg class="ico" viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>Emergency Procedures</div>
             <div class="checklist-grid">
 
-                <div class="cl-panel emergency">
+                <div class="cl-panel emergency fb-panel">
                     <div class="cl-title">Engine Failure – Takeoff Run</div>
                     <div class="cl-item emg"><span class="cl-num">1.</span><span>Throttle – <b>IDLE</b></span></div>
                     <div class="cl-item emg"><span class="cl-num">2.</span><span>Brakes – <b>APPLY MAXIMUM</b></span></div>
                     <div class="cl-item emg"><span class="cl-num">3.</span><span>Directional Control – <b>MAINTAIN</b></span></div>
                 </div>
 
-                <div class="cl-panel emergency">
+                <div class="cl-panel emergency fb-panel">
                     <div class="cl-title">Engine Failure – After T/O (Gear Down)</div>
                     <div class="cl-item emg"><span class="cl-num">1.</span><span>Airspeed – Pitch <b>BLUE LINE (84 KIAS)</b></span></div>
                     <div class="cl-item emg"><span class="cl-num">2.</span><span>Throttles – <b>FULL FORWARD</b></span></div>
@@ -1249,7 +1229,7 @@
                     <div class="cl-item emg"><span class="cl-num">5.</span><span>Throttles – <b>RETARD</b> for landing</span></div>
                 </div>
 
-                <div class="cl-panel emergency">
+                <div class="cl-panel emergency fb-panel">
                     <div class="cl-title">Engine Failure – After T/O (Gear Up)</div>
                     <div class="cl-item emg"><span class="cl-num">1.</span><span>Auto Pilot – <b>OFF</b></span></div>
                     <div class="cl-item emg"><span class="cl-num">2.</span><span>Airspeed – Pitch <b>BLUE LINE (84 KIAS)</b></span></div>
@@ -1262,7 +1242,7 @@
                     <div class="cl-item emg"><span class="cl-num">9.</span><span>Feather Procedure (below 3,000' AGL)</span></div>
                 </div>
 
-                <div class="cl-panel emergency">
+                <div class="cl-panel emergency fb-panel">
                     <div class="cl-title">Engine Failure – During Flight</div>
                     <div class="cl-item emg"><span class="cl-num">1.</span><span>Auto Pilot – <b>OFF</b></span></div>
                     <div class="cl-item emg"><span class="cl-num">2.</span><span>Airspeed – Pitch <b>BLUE LINE (84 KIAS)</b></span></div>
@@ -1275,7 +1255,7 @@
                     <div class="cl-item emg"><span class="cl-num">9.</span><span>Fuel Selector – <b>VERIFY CORRECT</b></span></div>
                 </div>
 
-                <div class="cl-panel emergency">
+                <div class="cl-panel emergency fb-panel">
                     <div class="cl-title">Fix Inoperative Engine (above 3000' AGL)</div>
                     <div class="cl-item emg"><span class="cl-num">1.</span><span>Fuel Selector – <b>SWITCH TANK</b> to Operative side</span></div>
                     <div class="cl-item emg"><span class="cl-num">2.</span><span>Carb Heat – <b>ON</b></span></div>
@@ -1286,7 +1266,7 @@
                     <div class="cl-item emg"><span class="cl-num">7.</span><span>Start Button – <b>ENGAGE</b></span></div>
                 </div>
 
-                <div class="cl-panel emergency">
+                <div class="cl-panel emergency fb-panel">
                     <div class="cl-title">Feathering / Securing INOP Engine</div>
                     <div class="cl-item emg"><span class="cl-num">1.</span><span>INOP Throttle – <b>IDENTIFY, VERIFY, CLOSED</b></span></div>
                     <div class="cl-item emg"><span class="cl-num">2.</span><span>INOP Prop – <b>IDENTIFY, VERIFY, FEATHER</b></span></div>
@@ -1299,7 +1279,7 @@
                     <div class="cl-item emg"><span class="cl-num">9.</span><span>OPER Fuel Selector – <b>AS REQUIRED / MONITOR</b></span></div>
                 </div>
 
-                <div class="cl-panel emergency">
+                <div class="cl-panel emergency fb-panel">
                     <div class="cl-title">Unfeathering (Restart)</div>
                     <div class="cl-item emg"><span class="cl-num">1.</span><span>Fuel Selectors – Qty Checked, <b>SET AS REQUIRED</b></span></div>
                     <div class="cl-item emg"><span class="cl-num">2.</span><span>Carb Heat – <b>ON</b> (if required)</span></div>
@@ -1313,11 +1293,11 @@
                     <div class="cl-item emg"><span class="cl-num">10.</span><span>Fuel Flow – <b>VERIFY</b></span></div>
                     <div class="cl-item emg"><span class="cl-num">11.</span><span>Throttle / Props – <b>AS REQUIRED</b></span></div>
                     <div class="cl-item emg"><span class="cl-num">12.</span><span>Field – <b>ON</b></span></div>
-                    <div class="cl-item emg" style="margin-top:5px; font-size:10.5px;"><span class="cl-num" style="color:#666;">↳</span><span><b>Fails:</b> Wait 2 min, Emg Batt ON, repeat 1–9</span></div>
-                    <div class="cl-item emg" style="font-size:10.5px;"><span class="cl-num" style="color:#666;">↳</span><span><b>Still fails:</b> Secure engine, Land ASAP</span></div>
+                    <div class="cl-item emg" style="margin-top:5px; font-size:10.5px;"><span class="cl-num">↳</span><span><b>Fails:</b> Wait 2 min, Emg Batt ON, repeat 1–9</span></div>
+                    <div class="cl-item emg" style="font-size:10.5px;"><span class="cl-num">↳</span><span><b>Still fails:</b> Secure engine, Land ASAP</span></div>
                 </div>
 
-                <div class="cl-panel emergency">
+                <div class="cl-panel emergency fb-panel">
                     <div class="cl-title">Gear Up Emergency Landing</div>
                     <div class="cl-item emg"><span class="cl-num">1.</span><span>Verify condition in AFM</span></div>
                     <div class="cl-item emg"><span class="cl-num">2.</span><span>Airspeed – <b>AS REQUIRED</b></span></div>
@@ -1332,7 +1312,7 @@
                     <div class="cl-item emg"><span class="cl-num">11.</span><span>After stop: Fields &amp; Master – <b>OFF</b></span></div>
                 </div>
 
-                <div class="cl-panel emergency">
+                <div class="cl-panel emergency fb-panel">
                     <div class="cl-title">Fire During Start (Ground)</div>
                     <div class="cl-item emg"><span class="cl-num">1.</span><span>Fuel Selectors – <b>BOTH OFF</b></span></div>
                     <div class="cl-item emg"><span class="cl-num">2.</span><span>Ignitions – <b>ALL OFF</b></span></div>
@@ -1344,7 +1324,7 @@
                     <div class="cl-item emg"><span class="cl-num">8.</span><span>Fire Extinguisher – <b>ACTIVATE</b></span></div>
                 </div>
 
-                <div class="cl-panel emergency">
+                <div class="cl-panel emergency fb-panel">
                     <div class="cl-title">Engine Fire In Flight</div>
                     <div class="cl-item emg"><span class="cl-num">1.</span><span>Cabin Heat &amp; Defrost – <b>BOTH OFF</b></span></div>
                     <div class="cl-item emg"><span class="cl-num">2.</span><span>Auto Pilot – <b>OFF</b></span></div>
@@ -1358,7 +1338,7 @@
                     <div class="cl-item emg"><span class="cl-num">10.</span><span>Land – <b>AS SOON AS PRACTICAL</b></span></div>
                 </div>
 
-                <div class="cl-panel emergency">
+                <div class="cl-panel emergency fb-panel">
                     <div class="cl-title">Propeller Overspeed</div>
                     <div class="cl-item emg"><span class="cl-num">1.</span><span>Throttle – <b>IDLE</b></span></div>
                     <div class="cl-item emg"><span class="cl-num">2.</span><span>Airspeed – <b>AT OR ABOVE 84 KIAS</b></span></div>
@@ -1370,7 +1350,7 @@
                     <div class="cl-item emg"><span class="cl-num">8.</span><span>Terminate flight – <b>ASAP</b></span></div>
                 </div>
 
-                <div class="cl-panel emergency">
+                <div class="cl-panel emergency fb-panel">
                     <div class="cl-title">Alternator Failure</div>
                     <div class="cl-item emg"><span class="cl-num">1.</span><span>Annunciation – <b>VERIFY FAILURE</b></span></div>
                     <div class="cl-item emg"><span class="cl-num">2.</span><span>FIELD LH/RH – <b>OFF</b></span></div>
@@ -1392,38 +1372,38 @@
         <div id="tab-systems-diagrams" class="tab-page">
             <div class="diagram-section">
                 <div class="diagram-section-title">P2006T Systems Diagrams — Interactive</div>
-                <p style="color:#888; font-size:13px; margin-bottom:24px;">Hover the colored pins on each diagram to see component details. Click any diagram wrapper to expand fullscreen.</p>
+                <p class="diagram-intro">Hover the colored pins on each diagram to see component details. Click any diagram wrapper to expand fullscreen.</p>
 
                 <!-- ===== FUEL SYSTEM ===== -->
-                <div class="diagram-card">
+                <div class="diagram-card fb-panel">
                     <h3>Fuel System</h3>
                     <div id="diaFuel"></div>
                     <p>Two integrated wing tanks (<span class="highlight">100L / 26.42 gal each</span>). Usable: 194.4L (51.35 gal). <span class="highlight">Cross-feed only, no transfer.</span> Each selector: Left, Right, Off (pull + rotate for Off). Gascolator at lowest point. Electric backup fuel pump.</p>
                 </div>
 
                 <!-- ===== HYDRAULIC / LANDING GEAR SYSTEM ===== -->
-                <div class="diagram-card">
+                <div class="diagram-card fb-panel">
                     <h3>Landing Gear System (Hydraulic)</h3>
                     <div id="diaHydraulic"></div>
                     <p><span class="highlight">Electro-hydraulic</span> retractable gear. Reversible pump for normal ops. Emergency: pressurized accumulator (min 20 bar) forces gear down through shuttle valves. Indications: 3 green, 1 red, amber GEAR PUMP ON.</p>
                 </div>
 
                 <!-- ===== BRAKE SYSTEM ===== -->
-                <div class="diagram-card">
+                <div class="diagram-card fb-panel">
                     <h3>Brake System</h3>
                     <div id="diaBrake"></div>
                     <p>Independent hydraulic brakes for each main wheel. Master cylinders on pilot and copilot pedals. Single vented reservoir. PV-1 parking valve on cabin floor.</p>
                 </div>
 
                 <!-- ===== COOLING SYSTEM ===== -->
-                <div class="diagram-card">
+                <div class="diagram-card fb-panel">
                     <h3>Liquid Cooling System</h3>
                     <div id="diaCooling"></div>
                     <p>Closed liquid circuit for cylinder heads; ram-air for cylinders. Flow: Radiator → water pump → cylinder heads → expansion tank → radiator. CT max 120°C, CHT max 135°C.</p>
                 </div>
 
                 <!-- ===== POWERPLANT ===== -->
-                <div class="diagram-card">
+                <div class="diagram-card fb-panel">
                     <h3>Powerplant</h3>
                     <p>The Tecnam P2006T is equipped with <span class="highlight">two Rotax 912S3 engines</span>, each producing <span class="highlight">73.5 kW (98.6 hp)</span>. Both engines rotate clockwise. Four-cylinder, four-stroke, horizontally opposed, 1352 cc displacement. Partially liquid cooled. Each engine uses two carburetors and an integrated reduction gearbox (2.27:1) with shock absorber.</p>
                     <h4>Engine Features</h4>
@@ -1436,7 +1416,7 @@
                 </div>
 
                 <!-- ===== PROPELLER SYSTEM ===== -->
-                <div class="diagram-card">
+                <div class="diagram-card fb-panel">
                     <h3>Propeller System</h3>
                     <ul>
                         <li><span class="highlight">Model:</span> MT MTV-21-A-C-F/CF178-05 — 2 wood/composite blades, aluminium hub</li>
@@ -1617,36 +1597,37 @@ function renderFuelCalc() {
   var endH = Math.floor(endHrs), endM = Math.round((endHrs - endH) * 60);
   var rangeNM = ktas * endHrs;
 
-  var h = '<div class="info-card" style="padding:18px 20px">' +
+  var h = '<div class="info-card fb-panel" style="padding:18px 20px">' +
     '<h3 style="margin-bottom:14px">Fuel Burn Calculator</h3>' +
-    '<p style="color:#666;font-size:10px;margin-bottom:14px">Cruise performance at 1150 kg (2535 lb), PA 0 ft. Fuel consumption is <b>per engine</b> from AFM chart.</p>' +
+    '<p class="fc-note">Cruise performance at 1150 kg (2535 lb), PA 0 ft. Fuel consumption is <b>per engine</b> from AFM chart.</p>' +
     '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px">' +
-    '<div style="flex:1;min-width:100px"><label style="color:#666;font-size:9px;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">RPM</label><div style="display:flex;gap:4px">';
+    '<div style="flex:1;min-width:100px"><label class="fc-label">RPM</label><div style="display:flex;gap:4px">';
   rpms.forEach(function(r) {
-    h += '<button class="fb-btn' + (r === fbRpm ? ' act' : '') + '" onclick="fbSetRpm(' + r + ')">' + r + '</button>';
+    h += '<button class="fc-btn' + (r === fbRpm ? ' act' : '') + '" onclick="fbSetRpm(' + r + ')">' + r + '</button>';
   });
-  h += '</div></div><div style="flex:1;min-width:120px"><label style="color:#666;font-size:9px;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">MAP (in.Hg)</label><div style="display:flex;gap:4px">';
+  h += '</div></div><div style="flex:1;min-width:120px"><label class="fc-label">MAP (in.Hg)</label><div style="display:flex;gap:4px">';
   maps.forEach(function(m) {
-    h += '<button class="fb-btn' + (m === fbMap ? ' act' : '') + '" onclick="fbSetMap(' + m + ')">' + m + '</button>';
+    h += '<button class="fc-btn' + (m === fbMap ? ' act' : '') + '" onclick="fbSetMap(' + m + ')">' + m + '</button>';
   });
-  h += '</div></div><div style="flex:1;min-width:160px"><label style="color:#666;font-size:9px;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Temperature</label><div style="display:flex;gap:4px">';
+  h += '</div></div><div style="flex:1;min-width:160px"><label class="fc-label">Temperature</label><div style="display:flex;gap:4px">';
   TEMP_LABELS.forEach(function(lbl, i) {
-    h += '<button class="fb-btn' + (i === fbTemp ? ' act-warm' : '') + '" onclick="fbSetTemp(' + i + ')">' + lbl + '</button>';
+    h += '<button class="fc-btn' + (i === fbTemp ? ' act-warm' : '') + '" onclick="fbSetTemp(' + i + ')">' + lbl + '</button>';
   });
   h += '</div></div></div>';
 
-  if (!d) { h += '<p style="color:#666">No data for this combination.</p></div>'; document.getElementById('fuelCalcContainer').innerHTML = h; return; }
+  if (!d) { h += '<p style="color:var(--fb-dim)">No data for this combination.</p></div>'; document.getElementById('fuelCalcContainer').innerHTML = h; return; }
 
   h += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px">' +
-    '<div class="fb-result"><div class="fb-result-label">Power</div><div class="fb-result-val" style="color:#e0e0e0">' + pwr + '<span style="font-size:12px;color:#666">%</span></div></div>' +
-    '<div class="fb-result"><div class="fb-result-label">True Airspeed</div><div class="fb-result-val" style="color:#e0e0e0">' + ktas + ' <span style="font-size:12px;color:#666">KTAS</span></div></div>' +
-    '<div class="fb-result"><div class="fb-result-label">Per Engine</div><div class="fb-result-val" style="color:#4fc3f7">' + peUshr.toFixed(1) + ' <span style="font-size:12px">gal/hr</span></div><div class="fb-result-sub">' + peLthr.toFixed(1) + ' lt/hr</div></div>' +
-    '<div class="fb-result"><div class="fb-result-label">Total (Both)</div><div class="fb-result-val" style="color:#ffb74d">' + totUshr.toFixed(1) + ' <span style="font-size:12px">gal/hr</span></div><div class="fb-result-sub">' + totLthr.toFixed(1) + ' lt/hr</div></div>' +
-    '<div class="fb-result"><div class="fb-result-label">Endurance</div><div class="fb-result-val" style="color:#4CAF50">' + endH + 'h ' + endM + 'm</div><div class="fb-result-sub">from ' + USABLE_FUEL_GAL + ' gal usable</div></div>' +
-    '<div class="fb-result"><div class="fb-result-label">Still-Air Range</div><div class="fb-result-val" style="color:#4CAF50">' + Math.round(rangeNM) + ' <span style="font-size:12px">NM</span></div><div class="fb-result-sub">no reserve</div></div>' +
+    '<div class="fc-result"><div class="fc-result-label">Power</div><div class="fc-result-val">' + pwr + '<span class="unit">%</span></div></div>' +
+    '<div class="fc-result"><div class="fc-result-label">True Airspeed</div><div class="fc-result-val">' + ktas + ' <span class="unit">KTAS</span></div></div>' +
+    '<div class="fc-result"><div class="fc-result-label">Per Engine</div><div class="fc-result-val" style="color:var(--fb-info)">' + peUshr.toFixed(1) + ' <span class="unit">gal/hr</span></div><div class="fc-result-sub">' + peLthr.toFixed(1) + ' lt/hr</div></div>' +
+    '<div class="fc-result"><div class="fc-result-label">Total (Both)</div><div class="fc-result-val" style="color:var(--fb-warn)">' + totUshr.toFixed(1) + ' <span class="unit">gal/hr</span></div><div class="fc-result-sub">' + totLthr.toFixed(1) + ' lt/hr</div></div>' +
+    '<div class="fc-result"><div class="fc-result-label">Endurance</div><div class="fc-result-val" style="color:var(--fb-accent)">' + endH + 'h ' + endM + 'm</div><div class="fc-result-sub">from ' + USABLE_FUEL_GAL + ' gal usable</div></div>' +
+    '<div class="fc-result"><div class="fc-result-label">Still-Air Range</div><div class="fc-result-val" style="color:var(--fb-accent)">' + Math.round(rangeNM) + ' <span class="unit">NM</span></div><div class="fc-result-sub">no reserve</div></div>' +
     '</div></div>';
 
   document.getElementById('fuelCalcContainer').innerHTML = h;
+  if (window.FlightBagTheme) FlightBagTheme.place();
 }
 
 // ===================== TAB SWITCHING =====================
@@ -1655,12 +1636,14 @@ function switchTab(tab) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('tab-' + tab).classList.add('active');
     event.target.classList.add('active');
+    if (window.FlightBagTheme) FlightBagTheme.place();
 }
 function switchInfoSub(sub) {
     document.querySelectorAll('.sub-page').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.sub-tab-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('info-' + sub).classList.add('active');
     event.target.classList.add('active');
+    if (window.FlightBagTheme) FlightBagTheme.place();
 }
 
 // ===================== CHECKLIST TOGGLE =====================
@@ -1681,6 +1664,7 @@ function showCL(mode) {
         btnNormal.classList.remove('active');
     }
     console.log('[CL] Switched to:', mode);
+    if (window.FlightBagTheme) FlightBagTheme.place();
 }
 
 // ===================== FLASH CARD DATA =====================
@@ -1857,13 +1841,14 @@ function renderCard() {
         document.getElementById('cardText').innerHTML = flipped ? c.a : c.q;
         fc.classList.toggle('flipped', flipped);
     }
+    if (window.FlightBagTheme) FlightBagTheme.place();
 }
 function flipCard() { if (studyMode) return; flipped = !flipped; renderCard(); }
 function toggleStudyMode() {
     studyMode = !studyMode;
     const btn = document.getElementById('modeToggle');
     btn.classList.toggle('active', studyMode);
-    btn.textContent = studyMode ? '🃏 Flip Mode' : '📖 Study Mode';
+    btn.innerHTML = studyMode ? '<svg class="ico" viewBox="0 0 24 24"><rect x="3" y="6" width="14" height="14" rx="2"/><path d="M7 3h12a2 2 0 0 1 2 2v12"/></svg>Flip Mode' : '<svg class="ico" viewBox="0 0 24 24"><path d="M2 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2zM22 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z"/></svg>Study Mode';
     document.getElementById('cardHint').textContent = studyMode
         ? 'Question and answer shown together · Hover highlighted terms for details'
         : 'Click card to flip · Hover highlighted terms for details';
@@ -1959,7 +1944,7 @@ const definitions = [
 function renderDefs() {
     const el = document.getElementById('defList');
     el.innerHTML = definitions.map(d =>
-        `<div class="def-item"><div class="def-term">${d.term}</div><div class="def-desc">${d.desc}</div></div>`
+        `<div class="def-item fb-panel"><div class="def-term">${d.term}</div><div class="def-desc">${d.desc}</div></div>`
     ).join('');
 }
 function filterDefs() {
@@ -1969,6 +1954,7 @@ function filterDefs() {
         const text = item.textContent.toLowerCase();
         item.style.display = text.includes(q) ? '' : 'none';
     });
+    if (window.FlightBagTheme) FlightBagTheme.place();
 }
 
 // ===================== AIRSPEEDS =====================
@@ -2019,7 +2005,7 @@ const speeds = [
 ];
 function renderSpeeds() {
     document.getElementById('speedGrid').innerHTML = speeds.map(s =>
-        `<div class="speed-card"><div class="speed-name">${s.name}</div><div class="speed-val">${s.val}</div><div class="speed-desc">${s.desc}</div></div>`
+        `<div class="speed-card fb-panel"><div class="speed-name">${s.name}</div><div class="speed-val">${s.val}</div><div class="speed-desc">${s.desc}</div></div>`
     ).join('');
 }
 
@@ -2156,17 +2142,18 @@ function renderQuiz() {
     document.getElementById('quizScore').textContent = `Score: ${quizCorrect} / ${quizTotal}`;
     document.getElementById('quizNextBtn').style.display = 'none';
     if (quizIdx >= quizFiltered.length) {
-        document.getElementById('quizQuestionArea').innerHTML = `<div class="quiz-question"><div class="q-text" style="text-align:center;">Quiz Complete!<br><br><span style="font-size:28px;color:#4CAF50;">${quizCorrect} / ${quizTotal}</span><br><span style="color:#888;font-size:14px;">${Math.round(quizCorrect/Math.max(quizTotal,1)*100)}%</span></div></div>`;
+        document.getElementById('quizQuestionArea').innerHTML = `<div class="quiz-question fb-panel"><div class="q-text" style="text-align:center;">Quiz Complete!<br><br><span class="quiz-final">${quizCorrect} / ${quizTotal}</span><br><span class="quiz-final-pct">${Math.round(quizCorrect/Math.max(quizTotal,1)*100)}%</span></div></div>`;
         return;
     }
     const q = quizFiltered[quizIdx];
     quizAnswered = false;
     document.getElementById('quizQuestionArea').innerHTML = `
-        <div class="quiz-question">
+        <div class="quiz-question fb-panel">
             <div class="q-num">Question ${quizIdx+1} of ${quizFiltered.length} · ${q.cat}</div>
             <div class="q-text">${q.q}</div>
             ${q.opts.map((o,i) => `<button class="quiz-option" onclick="answerQuiz(${i},${q.correct})">${o}</button>`).join('')}
         </div>`;
+    if (window.FlightBagTheme) FlightBagTheme.place();
 }
 function answerQuiz(selected, correct) {
     if (quizAnswered) return;
@@ -2219,5 +2206,6 @@ document.addEventListener('keydown', e => {
     if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flipCard(); }
 });
 </script>
+<script src="theme/flightbag-theme.js"></script>
 </body>
 </html>

@@ -17,7 +17,7 @@ Never estimate, approximate, or invent values. If a number is in this tool, it h
 ## Stack
 - Plain HTML / CSS / JavaScript — no frameworks, no build step
 - Each page is a self-contained `.html` file
-- Design language: warm charcoal palette (#262624 base, #30302e panels, #3b3a37 cells, #45433e borders), single terracotta accent #d97757, muted green/amber/red only for status, no emoji in UI (inline SVG icons), mono reserved for numeric readouts
+- Design language: the shared theme in `theme/flightbag-theme.css` + `theme/flightbag-theme.js` (mirrors the My Stuff dashboard, `~/Desktop/mystuff`). Every page links both and puts `class="fb"` on `<body>`. Tokens `--fb-*`: page #191918, panels #1f201f, cells #282827, borders #3a3935, rim #302f2c, text #b5b3a9 / dim #85837a / bright #f0eee6, terracotta accent #d97757; status only via --fb-ok/--fb-info/--fb-warn/--fb-bad. UI font = system sans (`--fb-font`), mono (`--fb-mono`) only for numbers/idents/readouts. Containers use `.fb-panel` (overlay grain + top catch-light + dark rim + one page-wide soft light positioned per panel by the script — a `background:` shorthand on the same element would wipe those layers; call `FlightBagTheme.place()` after showing/moving panels). Components: .fb-head/.fb-title, .fb-btn, .fb-tabs/.fb-tab, .fb-input, .fb-row, .fb-home (back link to index.html). No emoji in UI — inline line-style SVG icons. Instruments/charts keep their functional colours.
 - Cross-device flight sync via Firebase Realtime Database (`wbsync.js`, project `weight-and-balance-d5044`, no login)
 
 ## Git
@@ -29,7 +29,9 @@ Never estimate, approximate, or invent values. If a number is in this tool, it h
 ## File Map
 | File | Purpose |
 |------|---------|
-| `index.html` | Home — Pilot Study Tools launcher |
+| `index.html` | Home — "Flight Bag" launcher (reference implementation of the theme: tool panels with .fb-row links, UTC clock) |
+| `e6b.html` | Standalone E6B flight computer (ported from wb.html's E6B column; anchors #wind, #altitude) |
+| `theme/` | Shared Flight Bag theme (CSS tokens/components + grain/light runtime) |
 | `wb.html` | Weight & Balance calculator (C-152 / C-172 / P2006T / custom). Layout order matches the flight school's paper form — do not reorder. |
 | `wb.html#fsp=…` | Hand-off from the FSP Dispatch Prep Firefox extension (`~/Desktop/mystuff/extension`): base64url JSON in the hash prefills aircraft type, tail, empty weight/arm/moment and instructor weight/bag (`applyFspImport()`), plus `FSP_IMPORT_DEFAULTS` (2.5 hr, 24.5 gal for C-152). Station arms/CG limits stay POH values. |
 | `icons/favicon.svg`, `icons/apple-touch-icon.png` | Tab / home-screen icon for every page (terracotta square, charcoal plane — deliberately the inverse of the My Stuff dashboard's charcoal/terracotta mountain). New pages need both `<link>` tags after `<title>`. |

@@ -5,293 +5,216 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Pilot Study Tools</title>
+<meta name="theme-color" content="#191918">
+<title>Flight Bag</title>
 <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="theme/flightbag-theme.css">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  background: #262624;
+body.fb {
   min-height: 100vh;
-  font-family: 'Courier New', monospace;
-  color: #b5b3a9;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 32px 16px;
+  padding: max(28px, env(safe-area-inset-top)) 16px max(32px, env(safe-area-inset-bottom));
+  display: flex; flex-direction: column; align-items: center;
 }
 
-/* ── HEADER ── */
-header {
-  text-align: center;
-  margin-bottom: 48px;
-}
-header h1 {
-  font-size: clamp(22px, 5vw, 36px);
-  letter-spacing: 8px;
-  color: #f0eee6;
-  font-weight: normal;
-}
-header p {
-  font-size: 11px;
-  letter-spacing: 3px;
-  color: #7a786e;
-  margin-top: 8px;
-}
+/* ── header ── */
+.fb-header { width: 100%; max-width: 1240px; display: flex; align-items: center; gap: 14px; margin-bottom: 22px; }
+.fb-mark { width: 40px; height: 40px; flex: none; border-radius: 9px; background: var(--fb-accent); display: grid; place-items: center; box-shadow: 0 4px 14px rgba(0, 0, 0, .35); }
+.fb-mark svg { width: 24px; height: 24px; fill: var(--fb-bg); }
+.fb-header h1 { font-size: 22px; font-weight: 300; letter-spacing: 6px; color: var(--fb-bright); text-transform: uppercase; }
+.fb-header p { font-size: var(--fb-fs-xs); letter-spacing: 2.5px; color: var(--fb-dim); text-transform: uppercase; margin-top: 4px; }
+.fb-header .zulu { margin-left: auto; font-family: var(--fb-mono); font-size: var(--fb-fs-sm); color: var(--fb-accent); letter-spacing: 1px; }
 
-/* ── GRID ── */
+/* ── tool grid ── */
 #tool-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 20px;
-  width: 100%;
-  max-width: 1240px;
+  width: 100%; max-width: 1240px;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px;
 }
+.tool { display: flex; flex-direction: column; min-width: 0; }
+.tool .desc { color: var(--fb-dim); font-size: var(--fb-fs-sm); line-height: 1.5; padding: 10px var(--fb-pad) 4px; }
+.tool .rows { padding: 6px 8px 10px; display: flex; flex-direction: column; gap: 2px; }
 
-/* ── SECTION CARD ── */
-.tool-card {
-  background: #30302e;
-  border: 1px solid #3d3b37;
-  border-radius: 10px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-.tool-card-header {
-  padding: 20px 20px 14px;
-  border-bottom: 1px solid #3d3b37;
-}
-.tool-card-icon {
-  font-size: 20px;
-  margin-bottom: 8px;
-  color: #d97757;
-}
-.tool-card-title {
-  font-size: 13px;
-  letter-spacing: 4px;
-  color: #f0eee6;
-  font-weight: normal;
-}
-.tool-card-desc {
-  font-size: 10px;
-  letter-spacing: 1px;
-  color: #8a887c;
-  margin-top: 5px;
-  line-height: 1.5;
-}
-
-/* ── AIRCRAFT BUTTONS ── */
-.ac-list {
-  padding: 12px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  flex: 1;
-}
-.ac-btn {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 14px;
-  background: #2b2a28;
-  border: 1px solid #45433e;
-  border-radius: 6px;
-  color: #b5b3a9;
-  text-decoration: none;
-  font-family: 'Courier New', monospace;
-  font-size: 12px;
-  letter-spacing: 1px;
-  transition: border-color 0.15s, background 0.15s, color 0.15s;
-  cursor: pointer;
-}
-.ac-btn:hover {
-  border-color: #d97757;
-  background: rgba(217, 119, 87, 0.07);
-  color: #f0eee6;
-}
-.ac-btn:hover .ac-arrow { color: #d97757; }
-.ac-btn-name { flex: 1; }
-.ac-btn-sub  { font-size: 9px; color: #7a786e; letter-spacing: 1px; margin-right: 10px; }
-.ac-arrow    { color: #7a786e; font-size: 13px; transition: color 0.15s; }
-
-/* Color accents per section */
-.tool-card.study  .tool-card-icon { color: #d97757; }
-.tool-card.study  .ac-btn:hover   { border-color: #d97757; background: rgba(217, 119, 87, 0.07); }
-.tool-card.study  .ac-btn:hover .ac-arrow { color: #d97757; }
-
-.tool-card.wb     .tool-card-icon { color: #d97757; }
-.tool-card.wb     .ac-btn:hover   { border-color: #d97757; background: rgba(217, 119, 87, 0.07); }
-.tool-card.wb     .ac-btn:hover .ac-arrow { color: #d97757; }
-
-.tool-card.written .tool-card-icon { color: #d97757; }
-.tool-card.written .ac-btn:hover   { border-color: #d97757; background: rgba(217, 119, 87, 0.07); }
-.tool-card.written .ac-btn:hover .ac-arrow { color: #d97757; }
-
-.tool-card.cfi    .tool-card-icon { color: #d97757; }
-.tool-card.cfi    .ac-btn:hover   { border-color: #d97757; background: rgba(217, 119, 87, 0.07); }
-.tool-card.cfi    .ac-btn:hover .ac-arrow { color: #d97757; }
-
-.tool-card.chairfly .tool-card-icon { color: #d97757; }
-.tool-card.chairfly .ac-btn:hover   { border-color: #d97757; background: rgba(217, 119, 87, 0.07); }
-.tool-card.chairfly .ac-btn:hover .ac-arrow { color: #d97757; }
-
-.tool-card.navlog .tool-card-icon { color: #d97757; }
-.tool-card.navlog .ac-btn:hover   { border-color: #d97757; background: rgba(217, 119, 87, 0.07); }
-.tool-card.navlog .ac-btn:hover .ac-arrow { color: #d97757; }
-
-/* ── MOBILE ── */
 @media (max-width: 700px) {
-  #tool-grid {
-    grid-template-columns: 1fr;
-    max-width: 480px;
-  }
-  header { margin-bottom: 32px; }
-  body { justify-content: flex-start; padding-top: 48px; }
+  #tool-grid { grid-template-columns: 1fr; max-width: 520px; }
+  .fb-header { max-width: 520px; }
+  .fb-header h1 { font-size: 18px; letter-spacing: 4px; }
 }
-
 </style>
 </head>
-<body>
+<body class="fb">
 
-<header>
-  <h1>PILOT STUDY TOOLS</h1>
-  <p>SELECT A TOOL AND AIRCRAFT TO BEGIN</p>
+<header class="fb-header">
+  <div class="fb-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 15l-8-4V5a1.5 1.5 0 0 0-3 0v6l-8 4v2l8-2v4l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-4l8 2z"/></svg></div>
+  <div>
+    <h1>Flight Bag</h1>
+    <p>Study · plan · compute</p>
+  </div>
+  <span class="zulu" id="zulu" title="UTC">----Z</span>
 </header>
 
-<div id="tool-grid">
+<main id="tool-grid">
 
   <!-- STUDY -->
-  <div class="tool-card study">
-    <div class="tool-card-header">
-      <div class="tool-card-icon">✈</div>
-      <div class="tool-card-title">STUDY</div>
-      <div class="tool-card-desc">V-speeds, limitations, systems, mnemonics &amp; general knowledge</div>
-    </div>
-    <div class="ac-list">
-      <a class="ac-btn" href="study.html">
-        <span class="ac-btn-name">Open Study Hub</span>
-        <span class="ac-arrow">›</span>
+  <section class="tool fb-panel">
+    <div class="fb-head"><h2 class="fb-title"><svg viewBox="0 0 24 24"><path d="M4 5h6a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H4zM20 5h-6a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h7z"/></svg>Study</h2></div>
+    <p class="desc">V-speeds, limitations, systems, mnemonics &amp; general knowledge</p>
+    <div class="rows">
+      <a class="fb-row" href="study.html">
+        <span class="fb-ico"><svg viewBox="0 0 24 24"><path d="M4 5h6a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H4zM20 5h-6a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h7z"/></svg></span>
+        <span><div class="fb-row-t">Study Hub</div><div class="fb-row-s">Speeds, systems, mnemonics</div></span>
+        <span class="fb-row-tag"></span>
+        <svg class="fb-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
       </a>
-      <a class="ac-btn" href="holds.html">
-        <span class="ac-btn-name">Hold Trainer</span>
-        <span class="ac-btn-sub">IFR · ENTRIES</span>
-        <span class="ac-arrow">›</span>
+      <a class="fb-row" href="holds.html">
+        <span class="fb-ico"><svg viewBox="0 0 24 24"><path d="M7 6h10a4 4 0 0 1 0 8H7a4 4 0 0 1 0-8z"/><path d="M14 4l3 2-3 2M10 16l-3-2 3-2"/></svg></span>
+        <span><div class="fb-row-t">Hold Trainer</div><div class="fb-row-s">Entries &amp; timing</div></span>
+        <span class="fb-row-tag">IFR</span>
+        <svg class="fb-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
       </a>
     </div>
-  </div>
+  </section>
 
   <!-- WEIGHT & BALANCE -->
-  <div class="tool-card wb">
-    <div class="tool-card-header">
-      <div class="tool-card-icon">⚖</div>
-      <div class="tool-card-title">WEIGHT &amp; BALANCE</div>
-      <div class="tool-card-desc">CG envelope, performance &amp; loading calculator</div>
+  <section class="tool fb-panel">
+    <div class="fb-head"><h2 class="fb-title"><svg viewBox="0 0 24 24"><path d="M12 3v18M4 21h16M3 8h18M6 8l-3 7a3 3 0 0 0 6 0zM18 8l-3 7a3 3 0 0 0 6 0z"/></svg>Weight &amp; Balance</h2></div>
+    <p class="desc">CG envelope, performance &amp; loading calculator</p>
+    <div class="rows">
+      <a class="fb-row" href="wb.html?defaultAircraft=P2006T">
+        <span class="fb-ico"><svg viewBox="0 0 24 24"><path d="M21 15l-8-4V5a1.5 1.5 0 0 0-3 0v6l-8 4v2l8-2v4l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-4l8 2z"/></svg></span>
+        <span><div class="fb-row-t">Tecnam P2006T</div><div class="fb-row-s">Twin · G1000</div></span>
+        <span class="fb-row-tag">MEL</span>
+        <svg class="fb-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+      </a>
+      <a class="fb-row" href="wb.html?defaultAircraft=C-172">
+        <span class="fb-ico"><svg viewBox="0 0 24 24"><path d="M21 15l-8-4V5a1.5 1.5 0 0 0-3 0v6l-8 4v2l8-2v4l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-4l8 2z"/></svg></span>
+        <span><div class="fb-row-t">Cessna 172</div><div class="fb-row-s">Single</div></span>
+        <span class="fb-row-tag">SEL</span>
+        <svg class="fb-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+      </a>
+      <a class="fb-row" href="wb.html?defaultAircraft=C-152">
+        <span class="fb-ico"><svg viewBox="0 0 24 24"><path d="M21 15l-8-4V5a1.5 1.5 0 0 0-3 0v6l-8 4v2l8-2v4l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-4l8 2z"/></svg></span>
+        <span><div class="fb-row-t">Cessna 152</div><div class="fb-row-s">Single</div></span>
+        <span class="fb-row-tag">SEL</span>
+        <svg class="fb-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+      </a>
     </div>
-    <div class="ac-list">
-      <a class="ac-btn" href="wb.html?defaultAircraft=P2006T">
-        <span class="ac-btn-name">Tecnam P2006T</span>
-        <span class="ac-btn-sub">TWIN · G1000</span>
-        <span class="ac-arrow">›</span>
-      </a>
-      <a class="ac-btn" href="wb.html?defaultAircraft=C-172">
-        <span class="ac-btn-name">Cessna 172</span>
-        <span class="ac-btn-sub">SINGLE</span>
-        <span class="ac-arrow">›</span>
-      </a>
-      <a class="ac-btn" href="wb.html?defaultAircraft=C-152">
-        <span class="ac-btn-name">Cessna 152</span>
-        <span class="ac-btn-sub">SINGLE</span>
-        <span class="ac-arrow">›</span>
-      </a>
-    </div>
-  </div>
+  </section>
 
-  <!-- WRITTEN EXAMS -->
-  <div class="tool-card written">
-    <div class="tool-card-header">
-      <div class="tool-card-icon">✎</div>
-      <div class="tool-card-title">WRITTEN EXAMS</div>
-      <div class="tool-card-desc">FAA knowledge test prep &mdash; full question banks, figures &amp; timed tests</div>
-    </div>
-    <div class="ac-list">
-      <a class="ac-btn" href="written-exams.html?course=fia">
-        <span class="ac-btn-name">FIA</span>
-        <span class="ac-btn-sub">FLIGHT INSTR &middot; 713 Q</span>
-        <span class="ac-arrow">&rsaquo;</span>
+  <!-- E6B -->
+  <section class="tool fb-panel">
+    <div class="fb-head"><h2 class="fb-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>E6B</h2></div>
+    <p class="desc">Flight computer &mdash; wind triangle, time/speed/distance, fuel, descent, density altitude, cloud base &amp; climb gradient</p>
+    <div class="rows">
+      <a class="fb-row" href="e6b.html">
+        <span class="fb-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg></span>
+        <span><div class="fb-row-t">Flight Computer</div><div class="fb-row-s">Live weather fill-in</div></span>
+        <span class="fb-row-tag">E6B</span>
+        <svg class="fb-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
       </a>
-      <a class="ac-btn" href="written-exams.html?course=foi">
-        <span class="ac-btn-name">FOI</span>
-        <span class="ac-btn-sub">INSTRUCTING &middot; 400 Q</span>
-        <span class="ac-arrow">&rsaquo;</span>
+      <a class="fb-row" href="e6b.html#wind">
+        <span class="fb-ico"><svg viewBox="0 0 24 24"><path d="M3 8h11a3 3 0 1 0-3-3M3 12h16a3 3 0 1 1-3 3M3 16h8"/></svg></span>
+        <span><div class="fb-row-t">Wind &amp; Groundspeed</div><div class="fb-row-s">WCA, heading, crosswind</div></span>
+        <span class="fb-row-tag"></span>
+        <svg class="fb-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
       </a>
-      <a class="ac-btn" href="written-exams.html">
-        <span class="ac-btn-name">Choose course&hellip;</span>
-        <span class="ac-arrow">&rsaquo;</span>
-      </a>
-    </div>
-  </div>
-
-  <!-- CFI LESSONS -->
-  <div class="tool-card cfi">
-    <div class="tool-card-header">
-      <div class="tool-card-icon">◎</div>
-      <div class="tool-card-title">CFI LESSONS</div>
-      <div class="tool-card-desc">Lesson plans, teach scripts &amp; talk-track builder &mdash; all 14 areas of operation</div>
-    </div>
-    <div class="ac-list">
-      <a class="ac-btn" href="cfi/index.html">
-        <span class="ac-btn-name">Lesson Condenser</span>
-        <span class="ac-btn-sub">76 LESSONS &middot; LOCKED</span>
-        <span class="ac-arrow">&rsaquo;</span>
+      <a class="fb-row" href="e6b.html#altitude">
+        <span class="fb-ico"><svg viewBox="0 0 24 24"><path d="M3 20h18M6 16l4-5 3 3 5-7"/></svg></span>
+        <span><div class="fb-row-t">Density Altitude &amp; TAS</div><div class="fb-row-s">Pressure alt, ISA deviation</div></span>
+        <span class="fb-row-tag"></span>
+        <svg class="fb-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
       </a>
     </div>
-  </div>
+  </section>
 
   <!-- NAV LOG -->
-  <div class="tool-card navlog">
-    <div class="tool-card-header">
-      <div class="tool-card-icon">➤</div>
-      <div class="tool-card-title">NAV LOG</div>
-      <div class="tool-card-desc">Cross-country planner &mdash; POH climb &amp; cruise data, profile view, wind triangle &amp; fillable VFR nav log</div>
-    </div>
-    <div class="ac-list">
-      <a class="ac-btn" href="navlog.html">
-        <span class="ac-btn-name">Cessna 152</span>
-        <span class="ac-btn-sub">SINGLE</span>
-        <span class="ac-arrow">&rsaquo;</span>
+  <section class="tool fb-panel">
+    <div class="fb-head"><h2 class="fb-title"><svg viewBox="0 0 24 24"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg>Nav Log</h2></div>
+    <p class="desc">Cross-country planner &mdash; POH climb &amp; cruise data, profile view, wind triangle &amp; fillable VFR nav log</p>
+    <div class="rows">
+      <a class="fb-row" href="navlog.html">
+        <span class="fb-ico"><svg viewBox="0 0 24 24"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg></span>
+        <span><div class="fb-row-t">Cessna 152</div><div class="fb-row-s">Single</div></span>
+        <span class="fb-row-tag">SEL</span>
+        <svg class="fb-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
       </a>
     </div>
-  </div>
+  </section>
 
   <!-- CHAIRFLY -->
-  <div class="tool-card chairfly">
-    <div class="tool-card-header">
-      <div class="tool-card-icon">◈</div>
-      <div class="tool-card-title">CHAIRFLY</div>
-      <div class="tool-card-desc">Simulated G1000 cockpit, maneuver profiles &amp; SEL maneuver study</div>
+  <section class="tool fb-panel">
+    <div class="fb-head"><h2 class="fb-title"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4M7 10h3M14 10h3"/></svg>Chairfly</h2></div>
+    <p class="desc">Simulated G1000 cockpit, maneuver profiles &amp; SEL maneuver study</p>
+    <div class="rows">
+      <a class="fb-row" href="p2006t_chairfly.html?aircraft=p2006t">
+        <span class="fb-ico"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
+        <span><div class="fb-row-t">Tecnam P2006T</div><div class="fb-row-s">Twin · G1000</div></span>
+        <span class="fb-row-tag">MEL</span>
+        <svg class="fb-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+      </a>
+      <a class="fb-row" href="p2006t_chairfly.html?aircraft=c152">
+        <span class="fb-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 12l4-4"/></svg></span>
+        <span><div class="fb-row-t">Cessna 152</div><div class="fb-row-s">ASEL · steam gauges</div></span>
+        <span class="fb-row-tag">SEL</span>
+        <svg class="fb-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+      </a>
+      <a class="fb-row" href="maneuvers.html">
+        <span class="fb-ico"><svg viewBox="0 0 24 24"><path d="M4 18c4-10 12-10 16 0"/><path d="M12 8V4M9 5l3-2 3 2"/></svg></span>
+        <span><div class="fb-row-t">SEL Maneuvers</div><div class="fb-row-s">152 / 172</div></span>
+        <span class="fb-row-tag">31</span>
+        <svg class="fb-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+      </a>
     </div>
-    <div class="ac-list">
-      <a class="ac-btn" href="p2006t_chairfly.html?aircraft=p2006t">
-        <span class="ac-btn-name">Tecnam P2006T</span>
-        <span class="ac-btn-sub">TWIN · G1000</span>
-        <span class="ac-arrow">›</span>
+  </section>
+
+  <!-- WRITTEN EXAMS -->
+  <section class="tool fb-panel">
+    <div class="fb-head"><h2 class="fb-title"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Written Exams</h2></div>
+    <p class="desc">FAA knowledge test prep &mdash; full question banks, figures &amp; timed tests</p>
+    <div class="rows">
+      <a class="fb-row" href="written-exams.html?course=fia">
+        <span class="fb-ico"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span>
+        <span><div class="fb-row-t">FIA</div><div class="fb-row-s">Flight instructor</div></span>
+        <span class="fb-row-tag">713 Q</span>
+        <svg class="fb-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
       </a>
-      <a class="ac-btn" href="p2006t_chairfly.html?aircraft=c152">
-        <span class="ac-btn-name">Cessna 152</span>
-        <span class="ac-btn-sub">ASEL · STEAM</span>
-        <span class="ac-arrow">›</span>
+      <a class="fb-row" href="written-exams.html?course=foi">
+        <span class="fb-ico"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span>
+        <span><div class="fb-row-t">FOI</div><div class="fb-row-s">Fundamentals of instructing</div></span>
+        <span class="fb-row-tag">400 Q</span>
+        <svg class="fb-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
       </a>
-      <a class="ac-btn" href="maneuvers.html">
-        <span class="ac-btn-name">SEL Maneuvers</span>
-        <span class="ac-btn-sub">152 / 172 · 31 MNVRS</span>
-        <span class="ac-arrow">›</span>
+      <a class="fb-row" href="written-exams.html">
+        <span class="fb-ico"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg></span>
+        <span><div class="fb-row-t">Choose course…</div><div class="fb-row-s">All banks</div></span>
+        <span class="fb-row-tag"></span>
+        <svg class="fb-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
       </a>
     </div>
-  </div>
+  </section>
 
-</div>
+  <!-- CFI LESSONS -->
+  <section class="tool fb-panel">
+    <div class="fb-head"><h2 class="fb-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>CFI Lessons</h2></div>
+    <p class="desc">Lesson plans, teach scripts &amp; talk-track builder &mdash; all 14 areas of operation</p>
+    <div class="rows">
+      <a class="fb-row" href="cfi/index.html">
+        <span class="fb-ico"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>
+        <span><div class="fb-row-t">Lesson Condenser</div><div class="fb-row-s">Locked</div></span>
+        <span class="fb-row-tag">76</span>
+        <svg class="fb-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+      </a>
+    </div>
+  </section>
 
+</main>
+
+<script src="theme/flightbag-theme.js"></script>
+<script>
+// UTC clock in the header (Zulu is what the tools compute in)
+const zulu = document.getElementById('zulu');
+const tick = () => { zulu.textContent = new Date().toISOString().slice(11, 16).replace(':', '') + 'Z'; };
+tick(); setInterval(tick, 15000);
+</script>
 </body>
 </html>

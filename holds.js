@@ -6,7 +6,7 @@ const W = cv.width, H = cv.height;
 const FIX = {x: W/2, y: H/2 - 14};
 const LEG = 108;          // inbound/outbound leg length (px)
 const R   = 40;           // turn radius (px)
-const C = { bg:'#2b2a28', line:'#45433e', text:'#f0eee6', text2:'#b5b3a9', text3:'#918f84',
+const C = { bg:'#282827', line:'#45433e', text:'#f0eee6', text2:'#b5b3a9', text3:'#918f84',
             accent:'#d97757', warn:'#d9a545', blue:'#7fb3d9', ok:'#6faf6a' };
 
 const rad = d => d*Math.PI/180;

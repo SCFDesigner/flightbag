@@ -6,49 +6,71 @@
     <title>Mnemonics</title>
     <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <meta name="theme-color" content="#191918">
+    <link rel="stylesheet" href="theme/flightbag-theme.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0d0d0f; color: #e0e0e0; min-height: 100vh; }
-        .top-bar {
-            position: fixed; top: 0; left: 0; right: 0; height: 56px;
-            background: linear-gradient(135deg, #1a1a1e 0%, #111114 100%);
-            border-bottom: 1px solid #333;
-            display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 100;
+        body.fb {
+            min-height: 100vh;
+            padding: max(20px, env(safe-area-inset-top)) 16px max(32px, env(safe-area-inset-bottom));
+            display: flex; flex-direction: column; align-items: center;
         }
-        .back-btn { background: none; border: 1px solid #555; color: #e0e0e0; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.2s; }
-        .back-btn:hover { border-color: #4CAF50; color: #4CAF50; }
-        .top-bar h1 { font-size: 18px; font-family: 'Courier New', monospace; color: #f44336; letter-spacing: 2px; }
-        .spacer { width: 80px; }
-        .content { margin-top: 56px; padding: 28px 24px; max-width: 900px; margin-left: auto; margin-right: auto; }
-        .search-bar { background: #1a1a1e; border: 1px solid #444; color: #e0e0e0; padding: 10px 16px; border-radius: 8px; font-size: 14px; width: 100%; max-width: 400px; margin-bottom: 24px; }
-        .search-bar:focus { outline: none; border-color: #4CAF50; }
-        .mnemonic-item { margin-bottom: 10px; border: 1px solid #333; border-radius: 8px; overflow: hidden; background: #1a1a1e; }
-        .mnemonic-title {
-            padding: 14px 18px; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
-            background: linear-gradient(135deg, #1e1e22 0%, #18181c 100%); color: #e0e0e0; font-weight: bold; transition: background 0.2s;
+
+        /* ── header (shared by the Study tool: study / mnemonics / general_knowledge) ── */
+        .st-top { width: 100%; max-width: 900px; margin-bottom: 18px; }
+        .st-nav { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+        .st-nav .fb-home { min-height: 36px; }
+        .st-id { display: flex; align-items: center; gap: 14px; }
+        .st-mark { width: 40px; height: 40px; flex: none; border-radius: 9px; background: var(--fb-accent); display: grid; place-items: center; box-shadow: 0 4px 14px rgba(0, 0, 0, .35); }
+        .st-mark svg { width: 22px; height: 22px; stroke: var(--fb-bg); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .st-top h1 { font-size: 22px; font-weight: 300; letter-spacing: 6px; color: var(--fb-bright); text-transform: uppercase; }
+        .st-top p { font-size: var(--fb-fs-xs); letter-spacing: 2.5px; color: var(--fb-dim); text-transform: uppercase; margin-top: 4px; }
+
+        /* ── list panel ── */
+        .content { width: 100%; max-width: 900px; }
+        .content > .fb-head .search-bar { width: 100%; max-width: 280px; min-height: 36px; }
+        .st-list { padding: 6px 8px 10px; display: flex; flex-direction: column; gap: 2px; }
+        .mnemonic-item { border-radius: var(--fb-radius-sm); }
+        .mnemonic-item.open { background: color-mix(in srgb, var(--fb-cell) 55%, transparent); }
+        .mnemonic-title { cursor: pointer; }
+        .mnemonic-title .fb-row-t { white-space: normal; line-height: 1.35; }
+        .mnemonic-title:focus-visible { outline: 1px solid var(--fb-accent); outline-offset: -1px; }
+        .mnemonic-item.open .mnemonic-title .fb-chev { transform: rotate(90deg); stroke: var(--fb-accent); }
+        .mnemonic-title .fb-chev { transition: transform var(--fb-ease), stroke var(--fb-ease); }
+        .mnemonic-detail { display: none; padding: 6px 12px 12px 50px; line-height: 1.6; }
+        .mnemonic-detail p { margin: 5px 0; font-size: var(--fb-fs-sm); color: var(--fb-text); }
+        .mnemonic-detail strong { color: var(--fb-accent); font-family: var(--fb-mono); font-weight: 600; display: inline-block; min-width: 1.2em; }
+        .mnemonic-detail em { color: var(--fb-dim); font-style: italic; }
+        .mnemonic-detail hr { border: none; border-top: 1px solid var(--fb-line); margin: 12px 0; }
+        @media (max-width: 600px) {
+            .st-top h1 { font-size: 18px; letter-spacing: 4px; }
+            .mnemonic-detail { padding-left: 12px; }
+            .content > .fb-head .search-bar { max-width: none; }
         }
-        .mnemonic-title:hover { background: rgba(76,175,80,0.08); }
-        .expand-icon { font-size: 18px; font-weight: bold; color: #4CAF50; }
-        .mnemonic-detail { padding: 16px 18px; background: #111114; border-top: 1px solid #2a2a2a; color: #ccc; line-height: 1.7; display: none; }
-        .mnemonic-detail p { margin: 6px 0; font-size: 13px; }
-        .mnemonic-detail strong { color: #4CAF50; }
-        .mnemonic-detail em { color: #888; font-style: italic; }
-        .mnemonic-detail hr { border: none; border-top: 1px solid #2a2a2a; margin: 12px 0; }
     </style>
 </head>
-<body>
-    <div class="top-bar">
-        <button class="back-btn" onclick="window.location.href='study.html'">← Hub</button>
-        <button class="back-btn" onclick="window.location.href='index.html'">⌂ Home</button>
-        <h1>MNEMONICS</h1>
-        <div class="spacer"></div>
-    </div>
-    <div class="content">
-        <input type="text" class="search-bar" id="searchBar" placeholder="Search mnemonics..." oninput="filterMnemonics()">
-        <div id="mnemonicList">
+<body class="fb">
+    <header class="st-top">
+        <nav class="st-nav">
+            <a class="fb-home" href="study.html"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>Study Hub</a>
+            <a class="fb-home" href="index.html"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7M5 10v10h14V10"/></svg>Home</a>
+        </nav>
+        <div class="st-id">
+            <div class="st-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg></div>
+            <div>
+                <h1>Mnemonics</h1>
+                <p>Memory aids · tap to expand</p>
+            </div>
+        </div>
+    </header>
+    <main class="content fb-panel">
+        <div class="fb-head"><h2 class="fb-title"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg>Memory aids</h2>
+            <input type="search" class="search-bar fb-input" id="searchBar" placeholder="Search mnemonics..." oninput="filterMnemonics()">
+        </div>
+        <div id="mnemonicList" class="st-list">
 
         <div class="mnemonic-item">
-            <div class="mnemonic-title" onclick="toggle('aircraft-docs')"><span>✈️ Required Aircraft Documents (ARROW)</span><span class="expand-icon">+</span></div>
+            <div class="mnemonic-title fb-row" role="button" tabindex="0" aria-expanded="false" aria-controls="aircraft-docs" onclick="toggle('aircraft-docs')"><span class="fb-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg></span><span class="fb-row-t">Required Aircraft Documents (ARROW)</span><span class="fb-row-tag"></span><svg class="fb-chev expand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
             <div id="aircraft-docs" class="mnemonic-detail">
                 <p><strong>A</strong> – Airworthiness Certificate</p>
                 <p><strong>R</strong> – Registration</p>
@@ -59,7 +81,7 @@
         </div>
 
         <div class="mnemonic-item">
-            <div class="mnemonic-title" onclick="toggle('day-vfr')"><span>☀️ Required Equipment – Day VFR (91.205b) (ATOMS2 FLEAF)</span><span class="expand-icon">+</span></div>
+            <div class="mnemonic-title fb-row" role="button" tabindex="0" aria-expanded="false" aria-controls="day-vfr" onclick="toggle('day-vfr')"><span class="fb-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></span><span class="fb-row-t">Required Equipment – Day VFR (91.205b) (ATOMS2 FLEAF)</span><span class="fb-row-tag"></span><svg class="fb-chev expand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
             <div id="day-vfr" class="mnemonic-detail">
                 <p><strong>A</strong> – Airspeed Indicator</p>
                 <p><strong>A</strong> – Altimeter</p>
@@ -80,7 +102,7 @@
         </div>
 
         <div class="mnemonic-item">
-            <div class="mnemonic-title" onclick="toggle('ifr-equipment')"><span>🛩️ Required Equipment – IFR Flight (91.205d) (GRAB CARD)</span><span class="expand-icon">+</span></div>
+            <div class="mnemonic-title fb-row" role="button" tabindex="0" aria-expanded="false" aria-controls="ifr-equipment" onclick="toggle('ifr-equipment')"><span class="fb-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 12l4-4M7 12h1M12 7v1M16.5 12h.5"/></svg></span><span class="fb-row-t">Required Equipment – IFR Flight (91.205d) (GRAB CARD)</span><span class="fb-row-tag"></span><svg class="fb-chev expand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
             <div id="ifr-equipment" class="mnemonic-detail">
                 <p><strong>G</strong> – Generator / Alternator</p>
                 <p><strong>R</strong> – Radios (two-way) and Nav. Equipment</p>
@@ -95,7 +117,7 @@
         </div>
 
         <div class="mnemonic-item">
-            <div class="mnemonic-title" onclick="toggle('inspections')"><span>🔧 Required Inspections (GAVIATES)</span><span class="expand-icon">+</span></div>
+            <div class="mnemonic-title fb-row" role="button" tabindex="0" aria-expanded="false" aria-controls="inspections" onclick="toggle('inspections')"><span class="fb-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0 5 5L21 13l-8 8-3-3 8-8M14.7 6.3L16 5a4 4 0 0 0-5 5L3 18l3 3 8-8"/></svg></span><span class="fb-row-t">Required Inspections (GAVIATES)</span><span class="fb-row-tag"></span><svg class="fb-chev expand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
             <div id="inspections" class="mnemonic-detail">
                 <p><strong>G</strong> – GPS (every 28 days)</p>
                 <p><strong>A</strong> – Annual (every 12 calendar months)</p>
@@ -110,7 +132,7 @@
         </div>
 
         <div class="mnemonic-item">
-            <div class="mnemonic-title" onclick="toggle('preflight')"><span>📋 Pre-Flight Action (91.103) (WKRAFTN)</span><span class="expand-icon">+</span></div>
+            <div class="mnemonic-title fb-row" role="button" tabindex="0" aria-expanded="false" aria-controls="preflight" onclick="toggle('preflight')"><span class="fb-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4h6v3H9zM9 5H6a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-3M9 12h6M9 16h4"/></svg></span><span class="fb-row-t">Pre-Flight Action (91.103) (WKRAFTN)</span><span class="fb-row-tag"></span><svg class="fb-chev expand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
             <div id="preflight" class="mnemonic-detail">
                 <p><strong>W</strong> – Weather and Forecasts</p>
                 <p><strong>K</strong> – Known ATC Delays (IFR Flight)</p>
@@ -123,7 +145,7 @@
         </div>
 
         <div class="mnemonic-item">
-            <div class="mnemonic-title" onclick="toggle('vor-checks')"><span>📡 VOR Receiver Checks (91.171) (BAD VAG)</span><span class="expand-icon">+</span></div>
+            <div class="mnemonic-title fb-row" role="button" tabindex="0" aria-expanded="false" aria-controls="vor-checks" onclick="toggle('vor-checks')"><span class="fb-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12v9M8 21h8M8.5 8.5a5 5 0 0 0 0 7M15.5 8.5a5 5 0 0 1 0 7M5.6 5.6a9 9 0 0 0 0 12.8M18.4 5.6a9 9 0 0 1 0 12.8"/><circle cx="12" cy="12" r="1"/></svg></span><span class="fb-row-t">VOR Receiver Checks (91.171) (BAD VAG)</span><span class="fb-row-tag"></span><svg class="fb-chev expand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
             <div id="vor-checks" class="mnemonic-detail">
                 <p><strong>B</strong> – Bench (+/- 4°)</p>
                 <p><strong>A</strong> – Airway (+/- 6°)</p>
@@ -135,7 +157,7 @@
         </div>
 
         <div class="mnemonic-item">
-            <div class="mnemonic-title" onclick="toggle('clearance')"><span>📻 IFR Clearance (CRAFTT)</span><span class="expand-icon">+</span></div>
+            <div class="mnemonic-title fb-row" role="button" tabindex="0" aria-expanded="false" aria-controls="clearance" onclick="toggle('clearance')"><span class="fb-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M9 11h6M9 14h4"/></svg></span><span class="fb-row-t">IFR Clearance (CRAFTT)</span><span class="fb-row-tag"></span><svg class="fb-chev expand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
             <div id="clearance" class="mnemonic-detail">
                 <p><strong>C</strong> – Clearance limit</p>
                 <p><strong>R</strong> – Route of flight</p>
@@ -147,7 +169,7 @@
         </div>
 
         <div class="mnemonic-item">
-            <div class="mnemonic-title" onclick="toggle('lost')"><span>🧭 Lost Procedures VFR (5 C's)</span><span class="expand-icon">+</span></div>
+            <div class="mnemonic-title fb-row" role="button" tabindex="0" aria-expanded="false" aria-controls="lost" onclick="toggle('lost')"><span class="fb-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg></span><span class="fb-row-t">Lost Procedures VFR (5 C's)</span><span class="fb-row-tag"></span><svg class="fb-chev expand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
             <div id="lost" class="mnemonic-detail">
                 <p><strong>C</strong> – Climb</p>
                 <p><strong>C</strong> – Communicate</p>
@@ -158,7 +180,7 @@
         </div>
 
         <div class="mnemonic-item">
-            <div class="mnemonic-title" onclick="toggle('altitude-types')"><span>📏 Types of Altitudes (IPDAT)</span><span class="expand-icon">+</span></div>
+            <div class="mnemonic-title fb-row" role="button" tabindex="0" aria-expanded="false" aria-controls="altitude-types" onclick="toggle('altitude-types')"><span class="fb-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M8 7l4-4 4 4M8 17l4 4 4-4M4 12h3M17 12h3"/></svg></span><span class="fb-row-t">Types of Altitudes (IPDAT)</span><span class="fb-row-tag"></span><svg class="fb-chev expand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
             <div id="altitude-types" class="mnemonic-detail">
                 <p><strong>I</strong> – Indicated – Read off your Altimeter</p>
                 <p><strong>P</strong> – Pressure – Height above standard datum plane (29.92")</p>
@@ -169,7 +191,7 @@
         </div>
 
         <div class="mnemonic-item">
-            <div class="mnemonic-title" onclick="toggle('ifr-altitudes')"><span>🛩️ IFR Altitudes (MOMMAD)</span><span class="expand-icon">+</span></div>
+            <div class="mnemonic-title fb-row" role="button" tabindex="0" aria-expanded="false" aria-controls="ifr-altitudes" onclick="toggle('ifr-altitudes')"><span class="fb-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20l6-10 4 6 3-4 5 8z"/><path d="M3 6h18"/></svg></span><span class="fb-row-t">IFR Altitudes (MOMMAD)</span><span class="fb-row-tag"></span><svg class="fb-chev expand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
             <div id="ifr-altitudes" class="mnemonic-detail">
                 <p><strong>M</strong> – MEA – Minimum Enroute Altitude</p>
                 <p><strong>O</strong> – MOCA – Minimum Obstruction Clearance Altitude</p>
@@ -186,7 +208,7 @@
         </div>
 
         <div class="mnemonic-item">
-            <div class="mnemonic-title" onclick="toggle('gumps')"><span>🛬 Pre-Landing Check (GUMPS)</span><span class="expand-icon">+</span></div>
+            <div class="mnemonic-title fb-row" role="button" tabindex="0" aria-expanded="false" aria-controls="gumps" onclick="toggle('gumps')"><span class="fb-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M5 15l14 2M7 11l3 1 4-4 2 .5-2.5 5 4 1.2"/></svg></span><span class="fb-row-t">Pre-Landing Check (GUMPS)</span><span class="fb-row-tag"></span><svg class="fb-chev expand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
             <div id="gumps" class="mnemonic-detail">
                 <p><strong>G</strong> – Gas (fuel pump on)</p>
                 <p><strong>U</strong> – Undercarriage (Down and VERIFY 3-green)</p>
@@ -200,7 +222,7 @@
         </div>
 
         <div class="mnemonic-item">
-            <div class="mnemonic-title" onclick="toggle('night-vfr')"><span>🌙 Night VFR Equipment (FLAPS)</span><span class="expand-icon">+</span></div>
+            <div class="mnemonic-title fb-row" role="button" tabindex="0" aria-expanded="false" aria-controls="night-vfr" onclick="toggle('night-vfr')"><span class="fb-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4 6.5 6.5 0 0 0 20 14.5z"/></svg></span><span class="fb-row-t">Night VFR Equipment (FLAPS)</span><span class="fb-row-tag"></span><svg class="fb-chev expand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
             <div id="night-vfr" class="mnemonic-detail">
                 <p><strong>F</strong> – Fuses (1 set or 3 of each – in reach of pilot)</p>
                 <p><strong>L</strong> – Landing Light (for hire)</p>
@@ -211,7 +233,7 @@
         </div>
 
         <div class="mnemonic-item">
-            <div class="mnemonic-title" onclick="toggle('crmaloft')"><span>⚠️ Critical Engine Inoperative Vmc Factors (CRMALOFT)</span><span class="expand-icon">+</span></div>
+            <div class="mnemonic-title fb-row" role="button" tabindex="0" aria-expanded="false" aria-controls="crmaloft" onclick="toggle('crmaloft')"><span class="fb-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17v.5"/></svg></span><span class="fb-row-t">Critical Engine Inoperative Vmc Factors (CRMALOFT)</span><span class="fb-row-tag"></span><svg class="fb-chev expand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
             <div id="crmaloft" class="mnemonic-detail">
                 <p><strong>C</strong> – Critical Engine Inoperative (failed engine windmilling, creating high drag)</p>
                 <p><strong>R</strong> – Rearward Center of Gravity (reduces rudder effectiveness, increases Vmc)</p>
@@ -225,7 +247,7 @@
         </div>
 
         <div class="mnemonic-item">
-            <div class="mnemonic-title" onclick="toggle('past')"><span>🛩️ Critical Engine Determination (PAST)</span><span class="expand-icon">+</span></div>
+            <div class="mnemonic-title fb-row" role="button" tabindex="0" aria-expanded="false" aria-controls="past" onclick="toggle('past')"><span class="fb-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="1.5"/><path d="M12 10.5C10 7 10 4 12 3c2 1 2 4 0 7.5M13.3 12.8c3.8.2 6.4 1.7 6.4 3.9-1.9 1.2-4.5-.3-6.4-3.9M10.7 12.8c-3.8.2-6.4 1.7-6.4 3.9 1.9 1.2 4.5-.3 6.4-3.9"/></svg></span><span class="fb-row-t">Critical Engine Determination (PAST)</span><span class="fb-row-tag"></span><svg class="fb-chev expand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
             <div id="past" class="mnemonic-detail">
                 <p><strong>P</strong> – P-Factor (Asymmetric Thrust — descending blade produces more thrust; left engine's thrust arm farther from CG)</p>
                 <p><strong>A</strong> – Accelerated Slipstream (Roll — right engine creates accelerated airflow over wing; more lift farther from CG causes severe roll when left engine fails)</p>
@@ -235,7 +257,7 @@
         </div>
 
         <div class="mnemonic-item">
-            <div class="mnemonic-title" onclick="toggle('ccmals')"><span>🔄 Pre-Maneuver Checklist (CCMALS)</span><span class="expand-icon">+</span></div>
+            <div class="mnemonic-title fb-row" role="button" tabindex="0" aria-expanded="false" aria-controls="ccmals" onclick="toggle('ccmals')"><span class="fb-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8M4 4v4h4M4 13a8 8 0 0 0 14.3 4.9L20 16M20 20v-4h-4"/></svg></span><span class="fb-row-t">Pre-Maneuver Checklist (CCMALS)</span><span class="fb-row-tag"></span><svg class="fb-chev expand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
             <div id="ccmals" class="mnemonic-detail">
                 <p><strong>C</strong> – Clearing Turns (visually checking for traffic)</p>
                 <p><strong>C</strong> – Configuration (setting aircraft — flaps, power)</p>
@@ -247,25 +269,30 @@
         </div>
 
         </div><!-- end mnemonicList -->
-    </div>
+    </main>
 
     <script>
     function toggle(id) {
         const detail = document.getElementById(id);
         const title = detail.previousElementSibling;
-        const icon = title.querySelector('.expand-icon');
         const open = detail.style.display === 'block';
         detail.style.display = open ? 'none' : 'block';
-        icon.textContent = open ? '+' : '−';
-        title.style.background = open ? '' : 'rgba(76,175,80,0.08)';
+        title.parentElement.classList.toggle('open', !open);
+        title.setAttribute('aria-expanded', String(!open));
     }
+    document.addEventListener('keydown', e => {
+        const t = e.target.closest && e.target.closest('.mnemonic-title');
+        if (t && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); t.click(); }
+    });
     function filterMnemonics() {
         const q = document.getElementById('searchBar').value.toLowerCase();
         document.querySelectorAll('.mnemonic-item').forEach(item => {
             const text = item.textContent.toLowerCase();
             item.style.display = text.includes(q) ? '' : 'none';
         });
+        if (window.FlightBagTheme) FlightBagTheme.place();
     }
     </script>
+    <script src="theme/flightbag-theme.js"></script>
 </body>
 </html>
