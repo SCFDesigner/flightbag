@@ -134,6 +134,8 @@ main { padding: 8px; }
 .answers .btn { flex: 1; text-align: center; font-weight: 600; font-family: var(--fb-mono); letter-spacing: .5px; }
 .answers .btn.good { border-color: var(--fb-ok); background: color-mix(in srgb, var(--fb-ok) 15%, transparent); color: var(--fb-bright); }
 .answers .btn.badpick { border-color: var(--fb-bad); background: color-mix(in srgb, var(--fb-bad) 14%, transparent); color: var(--fb-bright); }
+.ctl.quiz-opt { margin-bottom: 10px; flex-wrap: nowrap; }
+.ctl.quiz-opt label { min-width: 0; flex: none; font-size: var(--fb-fs-sm); color: var(--fb-dim); }
 .quiz-q { font-size: 14.5px; line-height: 1.6; color: var(--fb-bright); }
 .quiz-q .mono { font-family: var(--fb-mono); color: var(--fb-warn); }
 .score { font-family: var(--fb-mono); font-size: var(--fb-fs-sm); color: var(--fb-dim); margin-top: 10px; }
@@ -284,6 +286,13 @@ main { padding: 8px; }
     <!-- PRACTICE -->
     <section class="card" id="practiceCard" style="display:none;">
       <h2><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 0 1 4.9.7c0 1.7-2.4 2.1-2.4 3.8"/><path d="M12 17h.01"/></svg>Entry Quiz</h2>
+      <div class="ctl ctl-turns quiz-opt">
+        <label>Pattern</label>
+        <div class="seg">
+          <button id="patOn" class="on" onclick="setShowPattern(true)">Shown</button>
+          <button id="patOff" onclick="setShowPattern(false)">Hidden</button>
+        </div>
+      </div>
       <div class="quiz-q" id="quizText"></div>
       <div class="answers">
         <button class="btn" id="ansDirect" onclick="answer('DIRECT')">DIRECT</button>
@@ -300,6 +309,11 @@ main { padding: 8px; }
 </main>
 
 <script src="holds.js"></script>
+<script>
+  // reflect the saved "Pattern: Shown / Hidden" choice on the buttons
+  (function(){ let on = true; try { on = localStorage.getItem('holds_showPattern') !== '0'; } catch (e) {}
+    document.getElementById('patOn').classList.toggle('on', on); document.getElementById('patOff').classList.toggle('on', !on); })();
+</script>
 <script>
 /* Phones: Quick Reference folds behind its title (tap to open) so the hold window keeps the space */
 (function () {

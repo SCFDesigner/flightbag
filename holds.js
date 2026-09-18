@@ -400,6 +400,10 @@ window.flyEntry = () => {
 const VORS = ['ABI','FTW','ADM','TXO','SPS','GGG','UIM','BUJ','TTT','FUZ'];
 let quiz=null, score={ok:0,total:0};
 try{ score = JSON.parse(localStorage.getItem('holds_score')||'{"ok":0,"total":0}'); }catch(e){}
+// Hide the racetrack while answering, to practise picturing it from just the radial and your position.
+// It is always revealed with the answer.
+let showPattern = true;
+try{ showPattern = localStorage.getItem('holds_showPattern') !== '0'; }catch(e){}
 function nextQuestion(){
   const radial = Math.floor(Math.random()*36)*10;
   const dir = Math.random()<0.7 ? 1 : -1;             // standard more common
@@ -419,12 +423,19 @@ function nextQuestion(){
   document.getElementById('quizFeedback').className='feedback';
   document.getElementById('nextQBtn').style.display='none';
   updateScore();
-  // scene: hold drawn, sectors hidden until answered
+  quiz.answered = false;
+  drawQuizQuestion();
+}
+/* Question scene: radial + your arrival; the hold itself only when "Show pattern" is on. Sectors stay
+   hidden until answered. */
+function drawQuizQuestion(){
   clearScene();
-  cx2.save();
-  cx2.translate(FIX.x, FIX.y); cx2.rotate(rad(quiz.course)); cx2.translate(-FIX.x, -FIX.y);
-  drawPath(racetrack(quiz.dir), 'rgba(240,238,230,0.4)', 2, [7,6]);
-  cx2.restore();
+  if(showPattern){
+    cx2.save();
+    cx2.translate(FIX.x, FIX.y); cx2.rotate(rad(quiz.course)); cx2.translate(-FIX.x, -FIX.y);
+    drawPath(racetrack(quiz.dir), 'rgba(240,238,230,0.4)', 2, [7,6]);
+    cx2.restore();
+  }
   drawInbound(quiz.course, 'R-'+fmt3(quiz.radial));
   drawFix(quiz.vor);
   const hd=quiz.heading;
@@ -432,8 +443,16 @@ function nextQuestion(){
   labelAt(FIX.x - Math.sin(rad(hd))*150, FIX.y + Math.cos(rad(hd))*150 + 24, 'hdg '+fmt3(hd)+'°', C.ok, 11);
 }
 window.nextQuestion = nextQuestion;
+window.setShowPattern = on => {
+  showPattern = !!on;
+  try{ localStorage.setItem('holds_showPattern', on ? '1' : '0'); }catch(e){}
+  document.getElementById('patOn').classList.toggle('on', showPattern);
+  document.getElementById('patOff').classList.toggle('on', !showPattern);
+  if(quiz && !quiz.answered){ stopAnim(); drawQuizQuestion(); }
+};
 window.answer = pick => {
-  if(!quiz) return;
+  if(!quiz || quiz.answered) return;
+  quiz.answered = true;
   const right = pick === quiz.answer;
   score.total++; if(right) score.ok++;
   try{ localStorage.setItem('holds_score', JSON.stringify(score)); }catch(e){}
