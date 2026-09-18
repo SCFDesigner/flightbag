@@ -47,9 +47,9 @@ body.fb {
 
 /* ── glass (readouts): one glare from the page lamp, placed like the panels' lamp (flightbag-theme.js) ── */
 .fb-glass {
-  background-image: var(--fb-glare, none);
-  background-size: var(--fb-lamp-size, 100vw 100vh);
-  background-position: var(--fb-lamp-pos, 0 0);
+  background-image: var(--fb-sheen, none), var(--fb-glare, none);
+  background-size: 100% 100%, var(--fb-lamp-size, 100vw 100vh);
+  background-position: 0 0, var(--fb-lamp-pos, 0 0);
   background-repeat: no-repeat;
 }
 

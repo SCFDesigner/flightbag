@@ -60,9 +60,9 @@ body.fb {
   --glass: #141312;
   /* page-wide glare (theme .fb-glass: --fb-glare placed per tile) over the dark pane */
   background-color: var(--glass);
-  background-image: var(--fb-glare, none), linear-gradient(transparent, transparent);
-  background-size: var(--fb-lamp-size, 100vw 100vh), 100% 100%;
-  background-position: var(--fb-lamp-pos, 0 0), 0 0;
+  background-image: var(--fb-sheen, none), var(--fb-glare, none), linear-gradient(transparent, transparent);
+  background-size: 100% 100%, var(--fb-lamp-size, 100vw 100vh), 100% 100%;
+  background-position: 0 0, var(--fb-lamp-pos, 0 0), 0 0;
   background-repeat: no-repeat;
   border: 1px solid rgba(255,255,255,.05);
   border-radius: var(--fb-radius-sm);
@@ -80,7 +80,7 @@ body.fb {
 }
 .e6b-out.lit, .xw-big.lit {
   border-color: color-mix(in srgb, var(--fb-accent) 20%, rgba(255,255,255,.05));
-  background-image: var(--fb-glare, none), radial-gradient(100% 140% at 50% 110%, color-mix(in srgb, var(--fb-accent) 7%, transparent), transparent 65%);
+  background-image: var(--fb-sheen, none), var(--fb-glare, none), radial-gradient(100% 140% at 50% 110%, color-mix(in srgb, var(--fb-accent) 7%, transparent), transparent 65%);
 }
 .e6b-out.lit > span:last-child, .xw-big.lit b {
   color: #f2a07f;
