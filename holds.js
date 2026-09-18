@@ -36,7 +36,7 @@ function buildPath(start, hdg0, segs){
         y -= Math.cos(rad(h)) * sg.s/steps;
         push();
       }
-    } else {
+    } else if(Math.abs(sg.a) > 0.01){
       const r = sg.r || R, dir = sg.a >= 0 ? 1 : -1, total = Math.abs(sg.a);
       const steps = Math.max(4, Math.round(total/6));
       for(let i=1;i<=steps;i++){
@@ -65,32 +65,33 @@ function racetrack(dir){
 }
 function shortestTurn(from, to){ return ((to - from + 540)%360) - 180; }
 
-/* Fly from the current end of a path back to the fix: turn to parallel the
-   inbound course, cut toward the course line at 35°, then ride it in. */
-function closeToFix(segs, dir){
-  // build what we have so far to find the endpoint
-  const built = buildPath(segStart.pos, segStart.hdg, segs);
-  const end = built[built.length-1];
-  const addl = [];
-  let h = end.h;
-  // 1. turn (shortest) to inbound-course heading (0 in hold frame)
-  const d0 = shortestTurn(h, 0);
-  if(Math.abs(d0) > 2) addl.push({a:d0, r:30});
-  // recompute endpoint after that turn
-  const b2 = buildPath(segStart.pos, segStart.hdg, segs.concat(addl));
-  const e2 = b2[b2.length-1];
-  const dx = FIX.x - e2.x;
-  const dy = e2.y - FIX.y;   // must be positive (fix ahead/above)
-  if(Math.abs(dx) > 6 && dy > 30){
-    const icpt = 35 * Math.sign(dx);
-    const run = Math.min(Math.abs(dx)/Math.sin(rad(35)), Math.max(20, dy-30));
-    addl.push({a:icpt, r:24}, {s:run}, {a:-icpt, r:24});
-  }
-  const b3 = buildPath(segStart.pos, segStart.hdg, segs.concat(addl));
-  const e3 = b3[b3.length-1];
-  const rem = e3.y - FIX.y;
-  if(rem > 4) addl.push({s:rem});
-  return segs.concat(addl);
+/* End point of a segment list flown from segStart (hold frame). */
+function endOf(segs){ const b = buildPath(segStart.pos, segStart.hdg, segs); return b[b.length-1]; }
+
+/* From a 45° intercept heading (315 when right of the course, 045 when left),
+   fly straight just long enough that one 45° turn rolls out exactly on the
+   inbound course, tangent to it — no S-jog — then ride the course to the fix. */
+function interceptToFix(segs){
+  const e = endOf(segs);
+  const x = e.x - FIX.x, side = Math.sign(x) || 1;
+  let r2 = 30;
+  const lead = r2*(1 - Math.cos(rad(45)));          // lateral distance the 45° turn covers
+  let d = (Math.abs(x) - lead) / Math.sin(rad(45));
+  if(d < 0){ r2 = Math.abs(x)/(1 - Math.cos(rad(45))); d = 0; }
+  const out = segs.concat(d > 1 ? [{s:d}] : [], [{a:side*45, r:r2}]);
+  const rem = endOf(out).y - FIX.y;
+  return rem > 1 ? out.concat({s:rem}) : out;
+}
+/* Straight segment then a pattern-direction turn to the inbound heading (0),
+   radius picked so the turn rolls out tangent on the course line. */
+function turnOntoCourse(segs, dir, turn){
+  const e = endOf(segs), h = e.h;
+  // lateral shift of an arc from heading h to 0: right = r(cos h − 1), left = r(1 − cos h)
+  const k = dir > 0 ? Math.cos(rad(h)) - 1 : 1 - Math.cos(rad(h));
+  const r = (FIX.x - e.x) / k;
+  const out = segs.concat({a:turn, r});
+  const rem = endOf(out).y - FIX.y;
+  return rem > 1 ? out.concat({s:rem}) : out;
 }
 
 /* Entry path built FROM the aircraft's actual arrival direction.
@@ -110,13 +111,15 @@ function entryPathFrom(rel, entry, dir){
     segs = [{s:APPROACH}, {a:turn}, {s:LEG}, {a:dir*180}, {s:LEG}];
   } else if(entry==='TEARDROP'){
     // cross the fix, take up the 30°-offset teardrop heading on the holding
-    // side, one minute out, then a pattern-direction turn back to intercept
+    // side for one minute, then one pattern-direction turn (210°) that rolls
+    // out on the inbound course
     const tdH = dir>0 ? 150 : 210;
-    segs = closeToFix([{s:APPROACH}, {a:shortestTurn(rel, tdH), r:26}, {s:LEG*1.1}, {a:dir*195, r:R}], dir);
+    segs = turnOntoCourse([{s:APPROACH}, {a:shortestTurn(rel, tdH), r:26}, {s:LEG}], dir, dir*210);
   } else {
-    // parallel: outbound on the reciprocal, then reverse toward the holding
-    // side through more than 180° and come back to the course
-    segs = closeToFix([{s:APPROACH}, {a:shortestTurn(rel, 180), r:26}, {s:LEG}, {a:-dir*205, r:34}], dir);
+    // parallel: outbound on the reciprocal (non-holding side) for one minute,
+    // turn toward the holding side through 225° to a 45° intercept, then
+    // intercept the inbound course back to the fix
+    segs = interceptToFix([{s:APPROACH}, {a:shortestTurn(rel, 180), r:26}, {s:LEG}, {a:-dir*225, r:34}]);
   }
   return buildPath(segStart.pos, segStart.hdg, segs);
 }
