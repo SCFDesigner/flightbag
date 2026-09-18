@@ -121,8 +121,47 @@ body.fb {
   .e6b-card:target { border-color: var(--fb-rim); }
 }
 
+/* ── phones: fit a whole calculator on screen — no card title (the tab names it), inputs and
+   results in two columns with labels on top, crosswind diagram sized to the screen height ── */
 @media (max-width: 700px) {
+  .fb-header { margin-bottom: 8px; }
+  .fb-header p { display: none; }
+  .wx-bar .fb-body { padding-top: 7px; padding-bottom: 7px; }
+  .wx-bar .fb-input, .wx-bar .fb-btn { min-height: 32px; }
+  .e6b-tabs .fb-tab { min-height: 32px; }
+  .e6b-card > .fb-head { display: none; }
+  .e6b-card .fb-body { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 8px; padding-top: 12px; }
+  .e6b-card .fb-body > * { grid-column: 1 / -1; }
+  .e6b-card .fb-body > .e6b-in { grid-column: auto; }
+  .e6b-in { grid-template-columns: 1fr; gap: 3px; }
+  .e6b-in label { font-size: 11px; color: var(--fb-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .e6b-in .fb-input { min-height: 34px; }
+  .e6b-fill { grid-column: auto !important; align-self: end; margin: 0; min-height: 34px; padding: 0 8px; font-size: 12px; white-space: nowrap; }
+  .e6b-outs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 2px; }
+  .e6b-out { flex-direction: column; align-items: flex-start; gap: 1px; padding: 5px 9px; }
+  .e6b-out span:first-child { font-size: 10px; letter-spacing: 1px; }
+  .e6b-out span:last-child { font-size: 15px; text-align: left; }
+  .e6b-hint { font-size: 11px; line-height: 1.35; }
+  /* crosswind */
+  .xw-grid { grid-template-columns: 1fr; gap: 8px; }
+  .xw-col { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 8px; }
+  .xw-col > * { grid-column: 1 / -1; }
+  .xw-col > .e6b-in { grid-column: auto; }
+  #xwCaption { display: none; }
+  #xwSvg { width: min(100%, 31dvh); }
+  .xw-rwys { min-height: 30px; gap: 5px; }
+  .xw-chip { min-height: 30px; padding: 0 9px; }
+  .xw-big { margin-top: 0; padding: 7px 10px; }
+  .xw-big b { font-size: 22px; }
+  .xw-note { font-size: 11px; line-height: 1.35; }
+  .xw-col .e6b-outs { grid-template-columns: repeat(3, 1fr); }
+  .xw-col .e6b-out span:first-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
   #e6b-grid { grid-template-columns: 1fr; }
+}
+/* short phones (SE etc.): smaller diagram, note only when it's a warning */
+@media (max-width: 700px) and (max-height: 740px) {
+  #xwSvg { width: min(100%, 25dvh); }
+  .xw-note:not(.warn) { display: none; }
 }
 </style>
 </head>
@@ -170,7 +209,7 @@ body.fb {
           <div class="xw-big" id="xwBig"><span>Crosswind</span><b id="xwOutXw">—</b></div>
           <div class="e6b-outs">
             <div class="e6b-out"><span id="xwHwLbl">Headwind</span><span id="xwOutHw">—</span></div>
-            <div class="e6b-out"><span>Steady Crosswind</span><span id="xwOutSteady">—</span></div>
+            <div class="e6b-out"><span>Steady XW</span><span id="xwOutSteady">—</span></div>
             <div class="e6b-out"><span>Gust Factor</span><span id="xwOutGf">—</span></div>
           </div>
           <div class="xw-note" id="xwNote">Uses the peak gust when there is one, otherwise the wind speed. Max demo: C-152 12 kts · C-172 15 kts.</div>
