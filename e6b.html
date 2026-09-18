@@ -149,7 +149,7 @@ body.fb {
   .xw-col > .e6b-in { grid-column: auto; }
   #xwCaption { display: none; }
   #xwSvg { width: min(100%, 31dvh); }
-  .xw-rwys { min-height: 30px; gap: 5px; }
+  .xw-rwys { min-height: 30px; gap: 5px; justify-content: center; }
   .xw-chip { min-height: 30px; padding: 0 9px; }
   .xw-big { margin-top: 0; padding: 7px 10px; }
   .xw-big b { font-size: 22px; }
@@ -178,6 +178,8 @@ body.fb {
   .e6b-card:not(.xw-card) .e6b-out span:last-child { font-size: clamp(15px, 3.4cqh, 26px); }
   /* crosswind: the diagram takes what it needs; leftover height spreads between the rows below it */
   .xw-card .fb-body, .xw-grid { display: flex; flex-direction: column; flex: 1 1 auto; }
+  .xw-grid { align-items: stretch; }          /* base grid uses align-items:start → the figure shrank to 300px and sat left */
+  .xw-fig { width: 100%; }
   .xw-col { flex: 1 1 auto; align-content: space-between; row-gap: 6px; }
   .xw-col .e6b-out span:first-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
   #e6b-grid { grid-template-columns: 1fr; }
