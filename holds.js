@@ -2,8 +2,14 @@
 (function(){
 const cv = document.getElementById('holdCanvas');
 const cx2 = cv.getContext('2d');
-const W = cv.width, H = cv.height;
-const FIX = {x: W/2, y: H/2 - 14};
+/* Logical 540×540 scene, drawn at device resolution so text stays crisp */
+const W = 540, H = 540;
+const DPR = Math.min(2, window.devicePixelRatio || 1);
+cv.width = W*DPR; cv.height = H*DPR;
+cx2.setTransform(DPR,0,0,DPR,0,0);
+const FIX = {x: W/2, y: H/2};
+const SECT_R = 200;       // entry-sector pie radius (px)
+const RING_R = 214;       // compass ring radius (px)
 const LEG = 108;          // inbound/outbound leg length (px)
 const R   = 40;           // turn radius (px)
 const C = { bg:'#282827', line:'#45433e', text:'#f0eee6', text2:'#b5b3a9', text3:'#918f84',
@@ -122,6 +128,64 @@ function clearScene(){
   cx2.strokeStyle = 'rgba(255,255,255,0.04)'; cx2.lineWidth = 1;
   for(let x=0;x<W;x+=46){cx2.beginPath();cx2.moveTo(x,0);cx2.lineTo(x,H);cx2.stroke();}
   for(let y=0;y<H;y+=46){cx2.beginPath();cx2.moveTo(0,y);cx2.lineTo(W,y);cx2.stroke();}
+  drawCompass();
+}
+/* Compass card around the pie: ticks every 5°, numbers every 30° (aviation
+   style — N 3 6 E 12 15 S 21 24 W 30 33). North is always up. */
+function drawCompass(){
+  cx2.strokeStyle = C.line; cx2.lineWidth = 1;
+  cx2.beginPath(); cx2.arc(FIX.x, FIX.y, RING_R, 0, Math.PI*2); cx2.stroke();
+  for(let d=0; d<360; d+=5){
+    const len = d%30===0 ? 11 : d%10===0 ? 7 : 4;
+    const s = Math.sin(rad(d)), c = Math.cos(rad(d));
+    cx2.strokeStyle = d%30===0 ? C.text2 : C.text3;
+    cx2.lineWidth = d%30===0 ? 1.5 : 1;
+    cx2.beginPath();
+    cx2.moveTo(FIX.x + s*RING_R, FIX.y - c*RING_R);
+    cx2.lineTo(FIX.x + s*(RING_R+len), FIX.y - c*(RING_R+len));
+    cx2.stroke();
+  }
+  const names = {0:'N', 90:'E', 180:'S', 270:'W'};
+  cx2.font = '600 12px '+monoFont();
+  cx2.textAlign = 'center'; cx2.textBaseline = 'middle';
+  for(let d=0; d<360; d+=30){
+    const r = RING_R + 23;
+    cx2.fillStyle = d===0 ? C.accent : names[d] ? C.text : C.text2;
+    cx2.fillText(names[d] || String(d/10), FIX.x + Math.sin(rad(d))*r, FIX.y - Math.cos(rad(d))*r);
+  }
+  cx2.textAlign = 'start'; cx2.textBaseline = 'alphabetic';
+}
+/* The inbound leg's bearing line: from the compass ring along the holding
+   radial (course + 180) into the fix, arrowhead at the fix. `tag` labels it. */
+function drawInbound(course, tag){
+  const b = norm(course + 180), s = Math.sin(rad(b)), c = Math.cos(rad(b));
+  const at = r => ({x: FIX.x + s*r, y: FIX.y - c*r});
+  const p0 = at(RING_R), p1 = at(15);
+  cx2.strokeStyle = C.text; cx2.globalAlpha = 0.85; cx2.lineWidth = 2;
+  cx2.beginPath(); cx2.moveTo(p0.x, p0.y); cx2.lineTo(p1.x, p1.y); cx2.stroke();
+  // arrowhead pointing at the fix (direction of flight on the inbound leg)
+  cx2.save(); cx2.translate(p1.x, p1.y); cx2.rotate(rad(course));
+  cx2.fillStyle = C.text;
+  cx2.beginPath(); cx2.moveTo(0,-2); cx2.lineTo(5,9); cx2.lineTo(-5,9); cx2.closePath(); cx2.fill();
+  cx2.restore(); cx2.globalAlpha = 1;
+  // bright tick where the radial meets the ring
+  const t0 = at(RING_R - 6), t1 = at(RING_R + 13);
+  cx2.strokeStyle = C.text; cx2.lineWidth = 3;
+  cx2.beginPath(); cx2.moveTo(t0.x, t0.y); cx2.lineTo(t1.x, t1.y); cx2.stroke();
+  if(tag) pill(at(166), tag);
+}
+function monoFont(){ return getComputedStyle(document.body).getPropertyValue('--mono') || 'monospace'; }
+/* Small label with a backing plate, so it reads over lines and sectors */
+function pill(p, txt){
+  cx2.font = '600 11px '+monoFont();
+  const w = cx2.measureText(txt).width + 14, h = 20;
+  const x = Math.max(4, Math.min(W - w - 4, p.x - w/2)), y = p.y - h/2;
+  cx2.fillStyle = 'rgba(25,25,24,0.92)';
+  cx2.strokeStyle = 'rgba(240,238,230,0.45)'; cx2.lineWidth = 1;
+  cx2.beginPath(); cx2.roundRect(x, y, w, h, 5); cx2.fill(); cx2.stroke();
+  cx2.fillStyle = C.text; cx2.textAlign = 'left'; cx2.textBaseline = 'middle';
+  cx2.fillText(txt, x + 7, y + h/2 + 0.5);
+  cx2.textAlign = 'start'; cx2.textBaseline = 'alphabetic';
 }
 function drawFix(label){
   cx2.fillStyle = C.text;
@@ -129,7 +193,7 @@ function drawFix(label){
   const s=7;
   cx2.moveTo(FIX.x, FIX.y-s); cx2.lineTo(FIX.x+s, FIX.y+s*0.8); cx2.lineTo(FIX.x-s, FIX.y+s*0.8);
   cx2.closePath(); cx2.fill();
-  cx2.fillStyle = C.text3; cx2.font = '11px '+getComputedStyle(document.body).getPropertyValue('--mono');
+  cx2.fillStyle = C.text3; cx2.font = '11px '+monoFont();
   cx2.textAlign='center';
   cx2.fillText(label || 'FIX', FIX.x, FIX.y + 22);
   cx2.textAlign='start';
@@ -151,17 +215,6 @@ function drawPlane(p, color){
   cx2.closePath(); cx2.fill();
   cx2.restore();
 }
-function drawCourseArrow(){
-  // inbound course arrow pointing at the fix from below
-  const y0 = FIX.y + LEG + 26;
-  cx2.strokeStyle = C.text3; cx2.lineWidth = 1.5; cx2.setLineDash([6,5]);
-  cx2.beginPath(); cx2.moveTo(FIX.x, y0); cx2.lineTo(FIX.x, FIX.y+12); cx2.stroke();
-  cx2.setLineDash([]);
-  cx2.fillStyle = C.text3;
-  cx2.beginPath();
-  cx2.moveTo(FIX.x, FIX.y+12); cx2.lineTo(FIX.x-4, FIX.y+20); cx2.lineTo(FIX.x+4, FIX.y+20);
-  cx2.closePath(); cx2.fill();
-}
 function labelAt(x,y,txt,color,size){
   cx2.fillStyle = color || C.text2;
   cx2.font = (size||11)+'px -apple-system, sans-serif';
@@ -179,7 +232,7 @@ function drawSectors(course, dir, rot){
     cx2.fillStyle = d.fill;
     cx2.beginPath();
     cx2.moveTo(FIX.x, FIX.y);
-    cx2.arc(FIX.x, FIX.y, 205, a0, a1);
+    cx2.arc(FIX.x, FIX.y, SECT_R, a0, a1);
     cx2.closePath(); cx2.fill();
   });
 }
@@ -235,27 +288,27 @@ const STEPS = [
   anim(){ return racetrack(1); }},
  {title:'Standard vs nonstandard',
   html:'<p>A <strong>standard</strong> hold uses <em>right turns</em> — assume right turns unless told otherwise. A <strong>nonstandard</strong> hold uses left turns and will be stated ("left turns").</p><p>Legs are timed: <strong>1 minute inbound</strong> at or below 14,000 MSL, 1½ minutes above.</p>',
-  draw(){ sceneRacetrack(-1, true); labelAt(FIX.x, 30, 'NONSTANDARD — LEFT TURNS', C.warn, 12); },
+  draw(){ sceneRacetrack(-1, true); },
   anim(){ return racetrack(-1); }},
  {title:'Direct entry',
   html:'<p>Arriving from the <em>direct sector</em> (the wide 180° side): cross the fix and simply <strong>turn to the outbound heading</strong> — you fall straight into the pattern.</p><p>This is the entry for roughly half of all arrivals.</p>',
-  draw(){ sceneRacetrack(1, false); drawSectors(0, 1); },
+  draw(){ sceneRacetrack(1, false, true); },
   anim(){ return entryPathFrom(0, 'DIRECT', 1); }},
  {title:'Teardrop entry',
   html:'<p>Arriving within the narrow <em>70° teardrop sector</em>: cross the fix, fly <strong>outbound offset 30°</strong> toward the holding side for one minute, then turn toward the inbound course and intercept it back to the fix.</p>',
-  draw(){ sceneRacetrack(1, false); drawSectors(0, 1); },
+  draw(){ sceneRacetrack(1, false, true); },
   anim(){ return entryPathFrom(150, 'TEARDROP', 1); }},
  {title:'Parallel entry',
   html:'<p>Arriving from the <em>110° parallel sector</em>: cross the fix, <strong>parallel the course outbound</strong> on the non-holding side for one minute, then turn <em>through more than 180°</em> back toward the fix to intercept the inbound course.</p>',
-  draw(){ sceneRacetrack(1, false); drawSectors(0, 1); },
+  draw(){ sceneRacetrack(1, false, true); },
   anim(){ return entryPathFrom(230, 'PARALLEL', 1); }},
  {title:'The 70° rule',
   html:'<p>The sectors come from one line drawn through the fix at <strong>70° to the inbound course</strong>. It splits the "arriving from ahead" half into the <em>teardrop</em> (70°) and <em>parallel</em> (110°) sectors; everything else is <em>direct</em> (180°).</p><p>These are guides, not regulations — pick the entry that keeps you closest to the pattern.</p>',
-  draw(){ sceneRacetrack(1, false); drawSectors(0, 1); drawSectorEdges(); },
+  draw(){ sceneRacetrack(1, false, true); drawSectorEdges(); },
   anim(){ return null; }},
  {title:'Timing & wind',
   html:'<p><strong>Timing:</strong> start the outbound clock wings-level or abeam the fix, whichever comes later. If the inbound leg came out short, extend the outbound leg; long, shorten it — aim for <em>1 minute inbound</em>.</p><p><strong>Wind:</strong> find the crab angle that holds the inbound course, then apply <em>triple that correction</em> on the outbound leg, into the wind.</p>',
-  draw(){ sceneRacetrack(1, true); labelAt(FIX.x + 118, FIX.y + LEG/2 + 8, 'time this leg', C.warn, 11); labelAt(FIX.x, FIX.y + LEG + 44, 'start clock abeam the fix', C.text3, 10); },
+  draw(){ sceneRacetrack(1, true); labelAt(FIX.x + 118, FIX.y + LEG/2 + 8, 'time this leg', C.warn, 11); labelAt(FIX.x + 2*R, FIX.y - R - 12, 'start clock abeam the fix', C.text3, 10); },
   anim(){ return racetrack(1); }}
 ];
 let learnStep = 0;
@@ -264,23 +317,23 @@ function drawSectorEdges(){
   [110, 290].forEach(a=>{
     cx2.strokeStyle = 'rgba(240,238,230,0.35)'; cx2.lineWidth = 1.5; cx2.setLineDash([4,5]);
     cx2.beginPath(); cx2.moveTo(FIX.x, FIX.y);
-    cx2.lineTo(FIX.x + Math.sin(rad(a))*205, FIX.y - Math.cos(rad(a))*205);
+    cx2.lineTo(FIX.x + Math.sin(rad(a))*SECT_R, FIX.y - Math.cos(rad(a))*SECT_R);
     cx2.stroke();
   });
   cx2.setLineDash([]);
   labelAt(FIX.x+150, FIX.y+90, '70°', C.text, 13);
 }
-function sceneRacetrack(dir, withLabels){
+function sceneRacetrack(dir, withLabels, withSectors){
   clearScene();
-  drawCourseArrow();
+  if(withSectors) drawSectors(0, dir);
   drawPath(racetrack(dir), 'rgba(240,238,230,0.35)', 2, [7,6]);
+  drawInbound(0, 'INBOUND 360° · R-180');
   drawFix('FIX');
   if(withLabels){
     const side = dir>0 ? 1 : -1;
     labelAt(FIX.x + side*(2*R+14), FIX.y + LEG/2 + 4, 'outbound', C.text3, 11);
-    labelAt(FIX.x - side*14 - (side>0?0:0), FIX.y + LEG/2 + 4, '', C.text3, 11);
     labelAt(FIX.x - side*36, FIX.y + LEG/2 + 4, 'inbound', C.text2, 11);
-    labelAt(FIX.x, FIX.y - 34, (dir>0?'RIGHT':'LEFT')+' TURNS', C.text2, 11);
+    labelAt(FIX.x, FIX.y - R - 22, dir>0 ? 'STANDARD · RIGHT TURNS' : 'NONSTANDARD · LEFT TURNS', dir>0 ? C.text2 : C.warn, 11);
   }
 }
 function renderLearn(){
@@ -309,9 +362,8 @@ function renderEntries(animPath){
   drawPath(racetrack(exDir), 'rgba(240,238,230,0.4)', 2, [7,6]);
   cx2.restore();
   drawSectors(exCourse, exDir);
+  drawInbound(exCourse, 'INBOUND '+fmt3(exCourse)+'° · R-'+fmt3(exCourse+180));
   drawFix('FIX');
-  // north tick
-  labelAt(FIX.x, 16, 'N', C.text3, 12);
   // arrival arrow along your heading TO the fix
   const hd = exHeading;
   const ax = FIX.x - Math.sin(rad(hd))*185, ay = FIX.y + Math.cos(rad(hd))*185;
@@ -370,8 +422,8 @@ function nextQuestion(){
   cx2.translate(FIX.x, FIX.y); cx2.rotate(rad(quiz.course)); cx2.translate(-FIX.x, -FIX.y);
   drawPath(racetrack(quiz.dir), 'rgba(240,238,230,0.4)', 2, [7,6]);
   cx2.restore();
+  drawInbound(quiz.course, 'R-'+fmt3(quiz.radial));
   drawFix(quiz.vor);
-  labelAt(FIX.x, 16, 'N', C.text3, 12);
   const hd=quiz.heading;
   drawPlane({x:FIX.x - Math.sin(rad(hd))*150, y:FIX.y + Math.cos(rad(hd))*150, h:hd}, C.ok);
   labelAt(FIX.x - Math.sin(rad(hd))*150, FIX.y + Math.cos(rad(hd))*150 + 24, 'hdg '+fmt3(hd)+'°', C.ok, 11);
@@ -402,8 +454,8 @@ window.answer = pick => {
     drawPath(racetrack(quiz.dir), 'rgba(240,238,230,0.4)', 2, [7,6]);
     cx2.restore();
     drawSectors(quiz.course, quiz.dir);
+    drawInbound(quiz.course, 'R-'+fmt3(quiz.radial)+' · INBOUND '+fmt3(quiz.course)+'°');
     drawFix(quiz.vor);
-    labelAt(FIX.x, 16, 'N', C.text3, 12);
   };
   const pts = entryPathFrom(norm(quiz.heading - quiz.course), quiz.answer, quiz.dir).map(p=>{
     const dx=p.x-FIX.x, dy=p.y-FIX.y, a=rad(quiz.course);

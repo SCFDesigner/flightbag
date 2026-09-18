@@ -42,27 +42,15 @@ header h1 svg, .card h2 svg, .card-ico { width: 15px; height: 15px; stroke: var(
   letter-spacing: 2px;
 }
 
-main {
-  display: flex;
-  gap: 8px;
-  padding: 8px;
-  max-width: 1100px;
-  margin: 0 auto;
-  align-items: flex-start;
-}
-.canvas-wrap {
-  flex: 0 0 auto;
-  padding: 10px;
-}
-#holdCanvas { display: block; border-radius: var(--fb-radius-sm); background: var(--fb-cell); max-width: 100%; }
-.side {
-  flex: 1 1 0;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.card { padding: var(--fb-pad); }
+main { padding: 8px; }
+/* One trainer card: quick reference → hold window → mode controls */
+.trainer { max-width: 600px; margin: 0 auto; }
+.trainer > section { padding: var(--fb-pad); }
+.trainer > section + section { border-top: 1px solid var(--fb-line); }
+.ref-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 18px; }
+.ref-grid p { font-size: 12.5px; line-height: 1.5; margin-bottom: 4px; }
+.canvas-wrap { padding: 10px; }
+#holdCanvas { display: block; width: 100%; max-width: 540px; aspect-ratio: 1; margin: 0 auto; border-radius: var(--fb-radius-sm); background: var(--fb-cell); }
 .card h2 {
   font-size: var(--fb-fs-xs);
   font-weight: 500;
@@ -153,11 +141,13 @@ main {
 .feedback .no { color: var(--fb-bad); font-weight: 700; }
 
 @media (max-width: 860px) {
-  main { flex-direction: column; align-items: stretch; }
-  .canvas-wrap { align-self: center; max-width: 100%; }
   header { flex-wrap: wrap; }
   .tabs { margin-left: 0; width: 100%; display: flex; }
   .tab { flex: 1; text-align: center; min-height: 36px; }
+}
+@media (max-width: 560px) {
+  .ref-grid { grid-template-columns: 1fr; }
+  .canvas-wrap { padding: 6px; }
 }
 @media (max-width: 480px) {
   .ctl { flex-wrap: wrap; }
@@ -180,11 +170,21 @@ main {
 </header>
 
 <main>
-  <div class="canvas-wrap fb-panel"><canvas id="holdCanvas" width="460" height="460"></canvas></div>
-  <div class="side">
+  <div class="trainer fb-panel">
+    <section class="card" id="notesCard">
+      <h2><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg>Quick Reference</h2>
+      <div class="ref-grid">
+      <p><strong>Standard hold:</strong> right turns, 1-minute inbound legs at or below 14,000 MSL (1½ min above).</p>
+      <p><strong>Entries (AIM 5-3-8):</strong> sectors set by a line 70° to the inbound course — <em>direct</em> 180°, <em>teardrop</em> 70°, <em>parallel</em> 110°.</p>
+      <p><strong>Timing:</strong> start outbound timing abeam the fix (or wings-level). Adjust the outbound leg to make the inbound leg 1 minute.</p>
+      <p><strong>Wind:</strong> correct on the inbound leg, then triple that drift correction on the outbound leg (opposite side).</p>
+      </div>
+    </section>
+
+    <section class="canvas-wrap"><canvas id="holdCanvas" aria-label="Holding pattern diagram"></canvas></section>
 
     <!-- LEARN -->
-    <div class="card fb-panel" id="learnCard">
+    <section class="card" id="learnCard">
       <div class="card-head">
         <svg class="card-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/></svg>
         <h2 id="learnTitle" style="margin-bottom:0;">What is a hold?</h2>
@@ -196,10 +196,10 @@ main {
         <button class="btn btn-primary" id="learnNext" onclick="learnStepMove(1)">Next →</button>
         <button class="btn" onclick="replayLearn()">Replay animation</button>
       </div>
-    </div>
+    </section>
 
     <!-- ENTRIES -->
-    <div class="card fb-panel" id="entriesCard" style="display:none;">
+    <section class="card" id="entriesCard" style="display:none;">
       <h2><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg>Entry Explorer</h2>
       <div class="ctl">
         <label>Inbound course</label>
@@ -228,10 +228,10 @@ main {
         <i><b style="background:rgba(217,165,69,.55);"></b> Teardrop (70°)</i>
         <i><b style="background:rgba(127,179,217,.55);"></b> Parallel (110°)</i>
       </div>
-    </div>
+    </section>
 
     <!-- PRACTICE -->
-    <div class="card fb-panel" id="practiceCard" style="display:none;">
+    <section class="card" id="practiceCard" style="display:none;">
       <h2><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 0 1 4.9.7c0 1.7-2.4 2.1-2.4 3.8"/><path d="M12 17h.01"/></svg>Entry Quiz</h2>
       <div class="quiz-q" id="quizText"></div>
       <div class="answers">
@@ -244,16 +244,7 @@ main {
         <button class="btn btn-primary" id="nextQBtn" onclick="nextQuestion()" style="display:none;">Next question →</button>
       </div>
       <div class="score" id="scoreLine"></div>
-    </div>
-
-    <div class="card fb-panel" id="notesCard">
-      <h2><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg>Quick Reference</h2>
-      <p><strong>Standard hold:</strong> right turns, 1-minute inbound legs at or below 14,000 MSL (1½ min above).</p>
-      <p><strong>Entries (AIM 5-3-8):</strong> sectors set by a line 70° to the inbound course — <em>direct</em> 180°, <em>teardrop</em> 70°, <em>parallel</em> 110°.</p>
-      <p><strong>Timing:</strong> start outbound timing abeam the fix (or wings-level). Adjust the outbound leg to make the inbound leg 1 minute.</p>
-      <p><strong>Wind:</strong> correct on the inbound leg, then triple that drift correction on the outbound leg (opposite side).</p>
-    </div>
-
+    </section>
   </div>
 </main>
 
