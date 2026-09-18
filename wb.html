@@ -1459,6 +1459,10 @@
         .left-panel::before, .right-column::before, .settings-panel::before, .e6b-column::before { content: ''; display: block; height: env(safe-area-inset-top); flex: none; }
         .float-chip { margin-top: env(safe-area-inset-top); }
 
+        /* Outside a POH/AFM limit (checkWBLimits) — hover shows why */
+        .over-limit { color: var(--fb-bad) !important; font-weight: 600; }
+        .data-table td.over-limit { background: color-mix(in srgb, var(--fb-bad) 14%, transparent) !important; cursor: help; }
+
         /* ── Fields & readouts (same look as the E6B) ──
            Entry fields are wells pressed into the panel; results — clocks, limits, METAR,
            V-speeds — are flat glass lit by the page's one lamp (theme --fb-glare, placed per element by
@@ -1519,6 +1523,11 @@
                     <option value="CUSTOM">Custom Aircraft</option>
                 </select>
             </div>
+            <!-- Model (172L/P/S) or MTOW configuration (P2006T MODs) — only shown for types that have them -->
+            <div class="input-group" id="aircraftVariantGroup" style="display:none;">
+                <label class="input-label" id="aircraftVariantLabel">Model</label>
+                <select class="select-field" id="aircraftVariant" onchange="onVariantChange()"></select>
+            </div>
         </div>
 
         <!-- Custom Aircraft Section -->
@@ -1566,6 +1575,11 @@
             <div class="input-group">
                 <label class="input-label">Instructor Bag</label>
                 <input type="number" class="input-field" id="instructorBag" placeholder="">
+            </div>
+            <!-- Rear-seat passengers (4-seat types; hidden for the C-152) -->
+            <div class="input-group" id="rearSeatsGroup">
+                <label class="input-label">Rear Seats</label>
+                <input type="number" class="input-field" id="rearSeats" placeholder="">
             </div>
             <div class="input-group">
                 <label class="input-label">Baggage 1</label>
@@ -1686,6 +1700,13 @@
             <div class="input-group">
                 <label class="input-label">RW Length</label>
                 <input type="number" class="input-field" id="runwayLength" placeholder="">
+            </div>
+            <div class="input-group">
+                <label class="input-label">RW Surface</label>
+                <select class="select-field" id="runwaySurface" onchange="updateTakeoffPerformance(); updateLandingPerformance();">
+                    <option value="paved">Paved</option>
+                    <option value="grass">Grass (dry)</option>
+                </select>
             </div>
             <div class="input-group">
                 <label class="input-label">Landing GR</label>
@@ -1944,8 +1965,8 @@
                     <div class="tooltip-content">
                         <div class="tooltip-title">Takeoff Ground Roll Calculation</div>
                         <div class="tooltip-formula">Base Distance × Headwind Correction</div>
-                        <div class="tooltip-formula">C-152: -8ft per knot headwind</div>
-                        <div class="tooltip-formula">P2006T: -8ft per knot headwind</div>
+                        <div class="tooltip-formula">Cessna: −10% per 9 kt headwind, +10% per 2 kt tailwind; grass +15% of ground roll</div>
+                        <div class="tooltip-formula">P2006T: −8 ft/kt headwind, +33 ft/kt tailwind; tables are grass, paved −6% of ground roll</div>
                         <div class="tooltip-note">Interpolated from POH data tables based on temperature, pressure altitude, and aircraft weight. Headwind reduces required ground roll distance.</div>
                     </div>
                 </div>
@@ -1955,8 +1976,8 @@
                     <div class="tooltip-content">
                         <div class="tooltip-title">Landing Ground Roll Calculation</div>
                         <div class="tooltip-formula">Base Distance × Headwind Correction</div>
-                        <div class="tooltip-formula">C-152: +8ft per knot headwind</div>
-                        <div class="tooltip-formula">P2006T: +8ft per knot headwind</div>
+                        <div class="tooltip-formula">Cessna: −10% per 9 kt headwind, +10% per 2 kt tailwind; grass +45% of ground roll</div>
+                        <div class="tooltip-formula">P2006T: −16 ft/kt headwind, +36 ft/kt tailwind; tables are grass, paved −2% of ground roll</div>
                         <div class="tooltip-note">Interpolated from POH landing data tables. Headwind increases landing distance due to float effect.</div>
                     </div>
                 </div>
@@ -2845,6 +2866,7 @@
                 maxTakeoffWeight: 1710,
                 maxLandingWeight: 1670,
                 aftLimit: 36.5,
+                baggage1Max: 120,            // area 1 + 2 combined max (POH); the form loads all bags at area 1
                 demoCrosswind: 12,
                 // CG forward limits based on weight (from POH table + STC)
                 cgForwardLimits: [
@@ -2874,20 +2896,19 @@
                 fuelArm: 2.477,          // Fuel arm
                 groundFuelArm: 2.477,    // Ground fuel use arm
                 estFuelBurnArm: 2.477,   // Est fuel burn arm (+25%)
-                macConstant: 4.4,        // MAC constant for %MAC calculations (inches)
+                macConstant: 4.393,      // MAC 1.339 m in ft (arms are ft aft of the datum = wing leading edge = LEMAC)
                 demoCrosswind: 17,       // Demo crosswind limit: 17 kt
-                fuelWeightMultiplier: 6, // 6 gallons per lb per tank
+                fuelWeightMultiplier: 6, // lb per US gal (AFM: 0.72 kg/L); the fuel input is per side
                 fuelBurnRate: 9,         // 9 gal per hour
                 groundFuelUse: -12,      // Always -12
                 maxTakeoffWeight: 2712,
                 maxLandingWeight: 2712,
-                forwardLimit: 16.5,      // Forward CG limit up to 2712 lb, then 19.5% at 2844 lb
-                aftLimit: 31,            // Aft CG limit for all conditions
-                forwardLimitHigh: 19.5,  // Forward limit at maximum weight (2844 lb)
-                forwardLimitWeight: 2712, // Weight at which forward limit changes
+                forwardLimit: 16.5,      // %MAC; with the 1290 kg config it slopes to 19.5% between 2712 and 2844 lb
+                aftLimit: 31,            // %MAC, all weights
                 seats: 4,
                 fuelTanks: 2,
-                fuelCapacity: 92         // Total fuel capacity in gallons
+                fuelUsablePerSide: 25.68, // US gal usable per wing tank (194.4 L total, AFM p.2-20)
+                baggage1Max: 176         // lb (80 kg), AFM p.2-23
             },
             'P2010': {
                 frontSeatArm: 89.8,
@@ -2899,6 +2920,67 @@
                 groundFuelUse: -6
             }
         };
+
+        /* ---------- Models / configurations ----------
+           Some types differ by model (172L/P/S) or approved MTOW configuration (P2006T MODs). The chosen one is
+           merged into aircraftSpecs[type] so every calculation reads the right numbers. It is remembered per
+           type, and per tail number once a tail is entered. */
+        // P2006T AFM Doc 2006/044 Rev 22: basic 1180 kg; MOD2006/015 (Suppl. A19/G10/G19) 1230 kg; MOD2006/416 (G29) 1290 kg
+        const P2006T_CONFIGS = {
+            '1180': { label: '1180 kg basic', title: 'MTOW 1180 kg / 2601 lb — basic AFM', maxTakeoffWeight: 2601, maxLandingWeight: 2601, maxZeroFuelWeight: 2524, fwdSlope: false,
+                      vs: { vr: 64, vxse: 79, vle: 93, vg: 83, vr50: 70, vyse: 80, vlo: 93, vmc: 62, vx: 73, vs0: 53, va: 118, vy: 80, vs1: 66, vno: 135, vfe: '119/93', vne: 167 } },
+            '1230': { label: '1230 kg', title: 'MTOW 1230 kg / 2712 lb — MOD2006/015 (Suppl. A19 / G10 / G19)', maxTakeoffWeight: 2712, maxLandingWeight: 2712, maxZeroFuelWeight: 2635, fwdSlope: false,
+                      vs: { vr: 65, vxse: 83, vle: 122, vg: 84, vr50: 70, vyse: 84, vlo: 122, vmc: 62, vx: 72, vs0: 54, va: 122, vy: 84, vs1: 66, vno: 138, vfe: '122/93', vne: 171 } },
+            '1290': { label: '1290 kg', title: 'MTOW 1290 kg / 2844 lb — MOD2006/416 (Suppl. G29)', maxTakeoffWeight: 2844, maxLandingWeight: 2844, maxZeroFuelWeight: 2767, fwdSlope: true,
+                      vs: { vr: 67, vxse: 83, vle: 122, vg: 84, vr50: 72, vyse: 84, vlo: 122, vmc: 62, vx: 72, vs0: 50, va: 125, vy: 84, vs1: 63, vno: 138, vfe: '124/97', vne: 171 } }
+        };
+        const C172_MODELS = {};                // filled below from the 172L / 172P / 172S POHs
+        const VARIANTS = {
+            'P2006T': { label: 'Config', options: () => P2006T_CONFIGS, def: '1230' },
+            'C-172':  { label: 'Model',  options: () => C172_MODELS,   def: 'S' }
+        };
+        const VARIANT_KEY = 'wb_variant', TAIL_VARIANT_KEY = 'wb_tailVariant';
+        const readJSON = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) || d; } catch (e) { return d; } };
+        function currentVariant(type){
+            const v = VARIANTS[type]; if (!v) return null;
+            const opts = v.options(), tail = (document.getElementById('tailNumber')?.value || '').trim().toUpperCase();
+            const byTail = tail && readJSON(TAIL_VARIANT_KEY, {})[type + '|' + tail];
+            const byType = readJSON(VARIANT_KEY, {})[type];
+            return [byTail, byType, v.def].find(k => k && opts[k]) || Object.keys(opts)[0];
+        }
+        function p2006tConfig(){ return currentVariant('P2006T'); }
+        function c172Model(){ return currentVariant('C-172'); }
+        const BASE_SPECS = {};
+        /* Merge the chosen model's numbers into aircraftSpecs[type] (from a pristine copy of the base entry) */
+        function applyVariant(type){
+            const v = VARIANTS[type]; if (!v || !aircraftSpecs[type]) return;
+            if (!BASE_SPECS[type]) BASE_SPECS[type] = JSON.parse(JSON.stringify(aircraftSpecs[type]));
+            const key = currentVariant(type), o = v.options()[key]; if (!o) return;
+            const merged = Object.assign(JSON.parse(JSON.stringify(BASE_SPECS[type])), o.specs || o);
+            if (type === 'P2006T') merged.vspeeds = null;             // P2006T speeds keep the school form's own order (populateVSpeedsPanel)
+            aircraftSpecs[type] = merged;
+            console.log('[wb] applied', type, key);
+        }
+        /* The Model / Config row under Aircraft Type: shown only for types that have variants */
+        function setupVariantSelect(type){
+            const group = document.getElementById('aircraftVariantGroup'), sel = document.getElementById('aircraftVariant');
+            if (!group || !sel) return;
+            const v = VARIANTS[type];
+            if (!v || !Object.keys(v.options()).length) { group.style.display = 'none'; return; }
+            group.style.display = '';
+            document.getElementById('aircraftVariantLabel').textContent = v.label;
+            const opts = v.options(), cur = currentVariant(type);
+            sel.innerHTML = Object.entries(opts).map(([k, o]) => `<option value="${k}" title="${o.title || ''}"${k === cur ? ' selected' : ''}>${o.label}</option>`).join('');
+            sel.title = opts[cur] ? (opts[cur].title || '') : '';
+        }
+        function onVariantChange(){
+            const type = document.getElementById('aircraftType').value, key = document.getElementById('aircraftVariant').value;
+            const byType = readJSON(VARIANT_KEY, {}); byType[type] = key;
+            try { localStorage.setItem(VARIANT_KEY, JSON.stringify(byType)); } catch (e) {}
+            const tail = (document.getElementById('tailNumber')?.value || '').trim().toUpperCase();
+            if (tail) { const m = readJSON(TAIL_VARIANT_KEY, {}); m[type + '|' + tail] = key; try { localStorage.setItem(TAIL_VARIANT_KEY, JSON.stringify(m)); } catch (e) {} }
+            populateAircraftSpecificValues(type);
+        }
 
         // Update aircraft type display and populate aircraft-specific values
         document.getElementById('aircraftType').addEventListener('change', function() {
@@ -2943,8 +3025,17 @@
             });
         }
 
+        document.addEventListener('change', e => {
+            if (e.target && e.target.id === 'tailNumber') {
+                const type = document.getElementById('aircraftType').value;
+                if (VARIANTS[type]) populateAircraftSpecificValues(type);
+            }
+        });
+
         function populateAircraftSpecificValues(aircraftType) {
             console.log('populateAircraftSpecificValues called with:', aircraftType);
+            setupVariantSelect(aircraftType);
+            applyVariant(aircraftType);
             const specs = aircraftSpecs[aircraftType];
             console.log('Aircraft specs:', specs);
             if (!specs) {
@@ -3029,8 +3120,9 @@
             // Handle baggage 2 row for C-152 (block it out)
             const baggage2Row = document.querySelector('.data-table tbody tr:nth-child(5)'); // Baggage 2 row (back to row 5)
             if (baggage2Row) {
-                const isTwoSeatAircraft = aircraftType === 'C-152' || specs.seats === 2;
-                if (isTwoSeatAircraft) {
+                // No second baggage area: C-152 (bags go in area 1 on the school form), P2006T (one compartment)
+                const noBaggage2 = aircraftType === 'C-152' || specs.seats === 2 || specs.baggage2Arm == null;
+                if (noBaggage2) {
                     baggage2Row.style.backgroundColor = 'var(--fb-bg)';
                     baggage2Row.style.opacity = '0.5';
                     const baggage2Cells = baggage2Row.querySelectorAll('td');
@@ -3044,7 +3136,7 @@
                     const baggage2Cells = baggage2Row.querySelectorAll('td');
                     baggage2Cells[0].textContent = 'Baggage 2';
                     baggage2Cells[1].textContent = '';
-                    baggage2Cells[2].textContent = '';
+                    baggage2Cells[2].textContent = specs.baggage2Arm;
                     baggage2Cells[3].textContent = '';
                     baggage2Cells.forEach(cell => {
                         cell.style.fontStyle = '';
@@ -3162,362 +3254,319 @@
             ]
         };
 
-        // P2006T Landing Performance Data (from POH) - Weight-based tables
-        const P2006T_LANDING_DATA = {
-            // Weight categories (lbs)
-            weights: [2051, 2381, 2844],
-            
-            // 2844 lbs weight category
-            2844: {
-                pressureAltitudes: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000],
-                temperatures: [-25, 0, 25, 50, 15], // ISA last column
-                groundRoll: [
-                    [708, 781, 853, 922, 823],    // Sea level
-                    [735, 810, 882, 958, 846],    // 1000 ft
-                    [761, 840, 915, 994, 872],    // 2000 ft
-                    [790, 869, 951, 1030, 899],   // 3000 ft
-                    [820, 902, 987, 1069, 928],   // 4000 ft
-                    [853, 938, 1023, 1109, 954],  // 5000 ft
-                    [886, 974, 1063, 1151, 984],  // 6000 ft
-                    [918, 1010, 1105, 1197, 1017], // 7000 ft
-                    [954, 1050, 1148, 1243, 1046], // 8000 ft
-                    [991, 1092, 1191, 1292, 1079], // 9000 ft
-                    [1030, 1135, 1240, 1342, 1115] // 10000 ft
-                ],
-                obstacle50ft: [
-                    [1086, 1178, 1266, 1355, 1230], // Sea level
-                    [1118, 1214, 1305, 1397, 1260], // 1000 ft
-                    [1155, 1250, 1345, 1440, 1292], // 2000 ft
-                    [1191, 1289, 1387, 1486, 1325], // 3000 ft
-                    [1227, 1328, 1430, 1532, 1358], // 4000 ft
-                    [1266, 1371, 1476, 1581, 1394], // 5000 ft
-                    [1305, 1417, 1525, 1633, 1430], // 6000 ft
-                    [1348, 1463, 1574, 1686, 1466], // 7000 ft
-                    [1394, 1509, 1627, 1742, 1506], // 8000 ft
-                    [1440, 1561, 1683, 1801, 1545], // 9000 ft
-                    [1486, 1614, 1738, 1863, 1588]  // 10000 ft
-                ]
+        // P2006T performance, generated from the AFM (Doc. 2006/044 Rev. 22) tables: take-off & landing
+        // distances in ft (grass, table conditions), pa = pressure altitude ft, columns = -25/0/25/50 °C;
+        // one-engine ROC (fpm) at VYSE by weight (lb). Keyed by MTOW configuration (kg): 1180 basic,
+        // 1230 = MOD2006/015 (A19/G10/G19), 1290 = MOD2006/416 (G29). 1080/930 kg take-off tables use the
+        // A19 print (the basic AFM repeats the 4000 ft row at 3000 ft over 50 ft).
+        const P2006T_PERF = {
+            '1180': {
+                to: {
+                    2601: { pa: [0,1000,2000,3000,4000,5000,6000,7000,8000,9000,10000],
+                        gr: [[682,846,1027,1227],[754,932,1135,1355],[833,1033,1253,1499],[922,1141,1387,1656],[1020,1263,1535,1837],[1132,1401,1702,2034],[1256,1555,1886,2257],[1394,1725,2096,2506],[1548,1919,2329,2785],[1722,2132,2591,3100],[1919,2375,2883,3451]],
+                        ob: [[872,1086,1325,1591],[964,1200,1466,1761],[1069,1332,1624,1952],[1315,1637,2001,2404],[1315,1637,2001,2404],[1460,1820,2221,2670],[1624,2024,2470,2972],[1807,2250,2752,3306],[2014,2509,3064,3683],[2247,2798,3418,4110],[2506,3123,3815,4589]] },
+                    2381: { pa: [0,1000,2000,3000,4000,5000,6000,7000,8000,9000,10000],
+                        gr: [[486,617,768,938],[541,689,856,1047],[604,768,955,1168],[676,860,1070,1306],[755,961,1194,1463],[846,1076,1339,1637],[948,1207,1499,1834],[1063,1352,1683,2060],[1194,1519,1893,2313],[1345,1709,2126,2602],[1513,1923,2395,2930]],
+                        ob: [[633,807,1004,1227],[709,899,1119,1371],[791,1004,1250,1529],[883,1122,1398,1709],[988,1257,1565,1913],[1109,1408,1752,2142],[1240,1578,1965,2402],[1394,1772,2205,2697],[1565,1988,2477,3028],[1759,2238,2786,3406],[1982,2517,3133,3832]] },
+                    2050: { pa: [0,1000,2000,3000,4000,5000,6000,7000,8000,9000,10000],
+                        gr: [[328,417,518,637],[367,466,581,709],[410,522,646,794],[459,581,725,886],[512,650,810,991],[574,728,909,1109],[643,817,1017,1243],[722,919,1142,1398],[810,1030,1283,1568],[912,1158,1444,1765],[1027,1303,1624,1985]],
+                        ob: [[430,548,679,833],[479,610,758,929],[535,682,846,1037],[600,761,948,1158],[669,853,1060,1296],[751,955,1188,1453],[843,1070,1332,1627],[945,1201,1493,1828],[1060,1348,1680,2054],[1194,1516,1887,2310],[1342,1706,2126,2599]] },
+                },
+                ldg: {
+                    2601: { pa: [0,1000,2000,3000,4000,5000,6000,7000,8000,9000,10000],
+                        gr: [[600,663,722,781],[623,686,748,810],[646,712,777,840],[669,738,804,872],[695,764,836,905],[722,794,866,941],[748,823,902,977],[777,856,935,1014],[807,889,971,1053],[840,925,1010,1096],[872,961,1050,1138]],
+                        ob: [[945,1023,1099,1174],[974,1053,1132,1210],[1004,1086,1168,1250],[1066,1155,1243,1328],[1066,1155,1243,1328],[1099,1191,1282,1371],[1135,1230,1322,1414],[1171,1269,1364,1460],[1207,1309,1410,1509],[1246,1351,1456,1558],[1289,1397,1506,1610]] },
+                    2381: { pa: [0,1000,2000,3000,4000,5000,6000,7000,8000,9000,10000],
+                        gr: [[574,630,689,745],[594,653,715,774],[617,679,741,804],[640,705,768,833],[663,731,797,863],[689,758,827,895],[715,787,859,932],[741,817,892,968],[771,850,928,1004],[800,882,964,1043],[833,918,1000,1086]],
+                        ob: [[889,961,1033,1105],[915,991,1066,1141],[945,1020,1099,1174],[1004,1086,1168,1250],[1004,1086,1168,1250],[1033,1122,1207,1292],[1066,1158,1246,1332],[1102,1194,1286,1378],[1138,1233,1328,1424],[1174,1273,1371,1469],[1214,1315,1417,1519]] },
+                    2050: { pa: [0,1000,2000,3000,4000,5000,6000,7000,8000,9000,10000],
+                        gr: [[492,544,594,643],[512,564,613,666],[531,584,636,692],[551,607,663,718],[571,630,686,745],[594,653,712,771],[617,679,741,800],[640,705,768,833],[666,731,797,866],[689,761,830,899],[718,790,863,935]],
+                        ob: [[764,827,889,951],[787,853,918,981],[813,879,945,1014],[863,935,1007,1076],[863,935,1007,1076],[892,964,1040,1112],[918,997,1073,1148],[948,1027,1109,1184],[981,1063,1145,1223],[1010,1096,1181,1266],[1046,1135,1220,1309]] },
+                },
+                oei: {
+                    2601: { pa: [0,1000,2000,3000,4000,5000,6000,7000], vyse: [80,80,80,79,79,79,79,78],
+                        roc: [[362,261,171,89],[324,224,134,53],[285,186,97,17],[247,148,60,-19],[209,111,24,-55],[171,74,-13,-91],[132,36,-49,-127],[94,-1,-86,-163]] },
+                    2381: { pa: [0,1000,2000,3000,4000,5000,6000,7000], vyse: [80,80,79,79,79,79,78,78],
+                        roc: [[436,330,235,149],[396,290,196,111],[355,251,157,73],[315,211,118,35],[275,172,80,-3],[234,132,41,-41],[194,93,3,-78],[154,54,-35,-116]] },
+                    2050: { pa: [0,1000,2000,3000,4000,5000,6000,7000], vyse: [79,79,79,78,78,78,78,77],
+                        roc: [[574,455,349,253],[529,411,305,211],[483,367,262,168],[438,322,219,126],[393,278,176,83],[348,235,133,41],[304,191,90,-1],[259,147,47,-43]] },
+                }
             },
-            
-            // 2381 lbs weight category
-            2381: {
-                pressureAltitudes: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000],
-                temperatures: [-25, 0, 25, 50, 15], // ISA last column
-                groundRoll: [
-                    [574, 630, 689, 745, 666],    // Sea level
-                    [594, 653, 715, 774, 686],    // 1000 ft
-                    [617, 679, 741, 804, 705],    // 2000 ft
-                    [640, 705, 768, 833, 728],    // 3000 ft
-                    [663, 731, 797, 863, 748],    // 4000 ft
-                    [689, 758, 827, 895, 771],    // 5000 ft
-                    [715, 787, 859, 932, 797],    // 6000 ft
-                    [741, 817, 892, 968, 820],    // 7000 ft
-                    [771, 850, 928, 1004, 846],   // 8000 ft
-                    [800, 882, 964, 1043, 872],   // 9000 ft
-                    [833, 918, 1000, 1086, 902]   // 10000 ft
-                ],
-                obstacle50ft: [
-                    [889, 961, 1033, 1105, 1004],  // Sea level
-                    [915, 991, 1066, 1141, 1030],  // 1000 ft
-                    [945, 1020, 1099, 1174, 1056], // 2000 ft
-                    [1004, 1086, 1168, 1250, 1109], // 3000 ft
-                    [1004, 1086, 1168, 1250, 1109], // 4000 ft (duplicate in data)
-                    [1033, 1122, 1207, 1292, 1138], // 5000 ft
-                    [1066, 1158, 1246, 1332, 1168], // 6000 ft
-                    [1102, 1194, 1286, 1378, 1197], // 7000 ft
-                    [1138, 1233, 1328, 1424, 1230], // 8000 ft
-                    [1174, 1273, 1371, 1469, 1263], // 9000 ft
-                    [1214, 1315, 1417, 1519, 1296]  // 10000 ft
-                ]
+            '1230': {
+                to: {
+                    2712: { pa: [0,1000,2000,3000,4000,5000,6000,7000,8000,9000,10000],
+                        gr: [[679,863,1076,1316],[758,965,1201,1467],[846,1076,1342,1640],[948,1204,1499,1834],[1060,1348,1677,2051],[1188,1509,1877,2297],[1329,1690,2106,2576],[1493,1896,2362,2887],[1677,2133,2654,3245],[1887,2395,2982,3648],[2123,2697,3356,4108]],
+                        ob: [[889,1132,1408,1723],[994,1263,1572,1923],[1109,1411,1755,2146],[1240,1575,1962,2398],[1388,1762,2195,2684],[1552,1975,2457,3005],[1742,2215,2756,3370],[1952,2484,3091,3780],[2195,2789,3475,4249],[2467,3137,3904,4777],[2779,3530,4397,5374]] },
+                    2381: { pa: [0,1000,2000,3000,4000,5000,6000,7000,8000,9000,10000],
+                        gr: [[486,617,768,938],[541,689,856,1047],[604,768,955,1168],[676,860,1070,1306],[755,961,1194,1463],[846,1076,1339,1637],[948,1207,1499,1834],[1063,1352,1683,2060],[1194,1519,1893,2313],[1345,1709,2126,2602],[1513,1923,2395,2930]],
+                        ob: [[633,807,1004,1227],[709,899,1119,1371],[791,1004,1250,1529],[883,1122,1398,1709],[988,1257,1565,1913],[1109,1408,1752,2142],[1240,1578,1965,2402],[1394,1772,2205,2697],[1565,1988,2477,3028],[1759,2238,2786,3406],[1982,2517,3133,3832]] },
+                    2050: { pa: [0,1000,2000,3000,4000,5000,6000,7000,8000,9000,10000],
+                        gr: [[328,417,518,637],[367,466,581,709],[410,522,646,794],[459,581,725,886],[512,650,810,991],[574,728,909,1109],[643,817,1017,1243],[722,919,1142,1398],[810,1030,1283,1568],[912,1158,1444,1765],[1027,1303,1624,1985]],
+                        ob: [[430,548,679,833],[479,610,758,929],[535,682,846,1037],[600,761,948,1158],[669,853,1060,1296],[751,955,1188,1453],[843,1070,1332,1627],[945,1201,1493,1828],[1060,1348,1680,2054],[1194,1516,1887,2310],[1342,1706,2126,2599]] },
+                },
+                ldg: {
+                    2712: { pa: [0,1000,2000,3000,4000,5000,6000,7000,8000,9000,10000],
+                        gr: [[653,719,784,850],[676,745,814,883],[702,774,843,915],[728,801,876,948],[755,833,909,984],[784,863,942,1020],[814,896,978,1060],[846,932,1017,1102],[879,968,1056,1145],[912,1004,1096,1188],[948,1043,1142,1237]],
+                        ob: [[1011,1096,1178,1260],[1043,1129,1214,1299],[1076,1165,1253,1339],[1142,1237,1332,1424],[1142,1237,1332,1424],[1178,1276,1375,1470],[1217,1319,1417,1519],[1253,1362,1463,1568],[1296,1404,1513,1621],[1339,1450,1562,1673],[1381,1499,1614,1729]] },
+                    2381: { pa: [0,1000,2000,3000,4000,5000,6000,7000,8000,9000,10000],
+                        gr: [[574,630,689,745],[594,653,715,774],[617,679,741,804],[640,705,768,833],[663,731,797,863],[689,758,827,895],[715,787,859,932],[741,817,892,968],[771,850,928,1004],[800,882,964,1043],[833,918,1000,1086]],
+                        ob: [[889,961,1033,1105],[915,991,1066,1141],[945,1020,1099,1174],[1004,1086,1168,1250],[1004,1086,1168,1250],[1033,1122,1207,1292],[1066,1158,1246,1332],[1102,1194,1286,1378],[1138,1233,1328,1424],[1174,1273,1371,1469],[1214,1315,1417,1519]] },
+                    2050: { pa: [0,1000,2000,3000,4000,5000,6000,7000,8000,9000,10000],
+                        gr: [[492,544,594,643],[512,564,613,666],[531,584,636,692],[551,607,663,718],[571,630,686,745],[594,653,712,771],[617,679,741,800],[640,705,768,833],[666,731,797,866],[689,761,830,899],[718,790,863,935]],
+                        ob: [[764,827,889,951],[787,853,918,981],[813,879,945,1014],[863,935,1007,1076],[863,935,1007,1076],[892,964,1040,1112],[918,997,1073,1148],[948,1027,1109,1184],[981,1063,1145,1223],[1010,1096,1181,1266],[1046,1135,1220,1309]] },
+                },
+                oei: {
+                    2712: { pa: [0,1000,2000,3000,4000,5000,6000,7000], vyse: [84,83,82,81,80,79,79,78],
+                        roc: [[330,230,142,62],[292,193,106,26],[254,157,69,-9],[216,120,33,-44],[179,83,-3,-80],[141,46,-38,-115],[104,10,-74,-150],[67,-27,-110,-185]] },
+                    2381: { pa: [0,1000,2000,3000,4000,5000,6000,7000], vyse: [80,80,79,79,79,79,78,78],
+                        roc: [[436,330,235,149],[396,290,196,111],[355,251,157,73],[315,211,118,35],[275,172,80,-3],[234,132,41,-41],[194,93,3,-78],[154,54,-35,-116]] },
+                    2050: { pa: [0,1000,2000,3000,4000,5000,6000,7000], vyse: [79,79,79,78,78,78,78,77],
+                        roc: [[574,455,349,253],[529,411,305,211],[483,367,262,168],[438,322,219,126],[393,278,176,83],[348,235,133,41],[304,191,90,-1],[259,147,47,-43]] },
+                }
             },
-            
-            // 2051 lbs weight category
-            2051: {
-                pressureAltitudes: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000],
-                temperatures: [-25, 0, 25, 50, 15], // ISA last column
-                groundRoll: [
-                    [492, 544, 594, 643, 574],    // Sea level
-                    [512, 564, 613, 666, 590],    // 1000 ft
-                    [531, 584, 636, 692, 607],    // 2000 ft
-                    [551, 607, 663, 718, 626],    // 3000 ft
-                    [571, 630, 686, 745, 646],    // 4000 ft
-                    [594, 653, 712, 771, 666],    // 5000 ft
-                    [617, 679, 741, 800, 686],    // 6000 ft
-                    [640, 705, 768, 833, 705],    // 7000 ft
-                    [666, 731, 797, 866, 728],    // 8000 ft
-                    [689, 761, 830, 899, 751],    // 9000 ft
-                    [718, 790, 863, 935, 777]     // 10000 ft
-                ],
-                obstacle50ft: [
-                    [764, 827, 889, 951, 866],    // Sea level
-                    [787, 853, 918, 981, 886],    // 1000 ft
-                    [813, 879, 945, 1014, 909],   // 2000 ft
-                    [863, 935, 1007, 1076, 954],  // 3000 ft
-                    [863, 935, 1007, 1076, 954],  // 4000 ft (duplicate in data)
-                    [892, 964, 1040, 1112, 981],  // 5000 ft
-                    [918, 997, 1073, 1148, 1007], // 6000 ft
-                    [948, 1027, 1109, 1184, 1033], // 7000 ft
-                    [981, 1063, 1145, 1223, 1059], // 8000 ft
-                    [1010, 1096, 1181, 1266, 1086], // 9000 ft
-                    [1046, 1135, 1220, 1309, 1115]  // 10000 ft
-                ]
-            }
+            '1290': {
+                to: {
+                    2844: { pa: [0,1000,2000,3000,4000,5000,6000,7000,8000,9000,10000],
+                        gr: [[705,899,1118,1368],[787,1004,1246,1525],[879,1118,1394,1706],[984,1253,1558,1906],[1102,1401,1742,2132],[1233,1568,1952,2388],[1384,1758,2188,2676],[1581,2011,2503,3064],[1814,2306,2870,3510],[2076,2640,3287,4021],[2381,3027,3769,4612]],
+                        ob: [[971,1237,1538,1883],[1086,1378,1715,2099],[1210,1542,1919,2345],[1355,1722,2145,2621],[1515,1925,2398,2932],[1696,2158,2686,3287],[1902,2417,3011,3683],[2178,2768,3447,4215],[2496,3172,3946,4828],[2860,3634,4523,5533],[3277,4169,5189,6344]] },
+                    2381: { pa: [0,1000,2000,3000,4000,5000,6000,7000,8000,9000,10000],
+                        gr: [[486,617,768,938],[541,689,856,1047],[604,768,955,1168],[676,860,1070,1306],[755,961,1194,1463],[846,1076,1339,1637],[948,1207,1499,1834],[1063,1352,1683,2060],[1194,1519,1893,2313],[1345,1709,2126,2602],[1513,1923,2395,2930]],
+                        ob: [[633,807,1004,1227],[709,899,1119,1371],[791,1004,1250,1529],[883,1122,1398,1709],[988,1257,1565,1913],[1109,1408,1752,2142],[1240,1578,1965,2402],[1394,1772,2205,2697],[1565,1988,2477,3028],[1759,2238,2786,3406],[1982,2517,3133,3832]] },
+                    2050: { pa: [0,1000,2000,3000,4000,5000,6000,7000,8000,9000,10000],
+                        gr: [[328,417,518,637],[367,466,581,709],[410,522,646,794],[459,581,725,886],[512,650,810,991],[574,728,909,1109],[643,817,1017,1243],[722,919,1142,1398],[810,1030,1283,1568],[912,1158,1444,1765],[1027,1303,1624,1985]],
+                        ob: [[430,548,679,833],[479,610,758,929],[535,682,846,1037],[600,761,948,1158],[669,853,1060,1296],[751,955,1188,1453],[843,1070,1332,1627],[945,1201,1493,1828],[1060,1348,1680,2054],[1194,1516,1887,2310],[1342,1706,2126,2599]] },
+                },
+                ldg: {
+                    2844: { pa: [0,1000,2000,3000,4000,5000,6000,7000,8000,9000,10000],
+                        gr: [[708,781,853,922],[735,810,882,958],[761,840,915,994],[790,869,951,1030],[820,902,987,1069],[853,938,1023,1109],[886,974,1063,1151],[918,1010,1105,1197],[954,1050,1148,1243],[991,1092,1191,1292],[1030,1135,1240,1342]],
+                        ob: [[1086,1178,1266,1355],[1118,1214,1305,1397],[1155,1250,1345,1440],[1191,1289,1387,1486],[1227,1328,1430,1532],[1266,1371,1476,1581],[1305,1417,1525,1633],[1348,1463,1574,1686],[1394,1509,1627,1742],[1440,1561,1683,1801],[1486,1614,1738,1863]] },
+                    2381: { pa: [0,1000,2000,3000,4000,5000,6000,7000,8000,9000,10000],
+                        gr: [[574,630,689,745],[594,653,715,774],[617,679,741,804],[640,705,768,833],[663,731,797,863],[689,758,827,895],[715,787,859,932],[741,817,892,968],[771,850,928,1004],[800,882,964,1043],[833,918,1000,1086]],
+                        ob: [[889,961,1033,1105],[915,991,1066,1141],[945,1020,1099,1174],[1004,1086,1168,1250],[1004,1086,1168,1250],[1033,1122,1207,1292],[1066,1158,1246,1332],[1102,1194,1286,1378],[1138,1233,1328,1424],[1174,1273,1371,1469],[1214,1315,1417,1519]] },
+                    2050: { pa: [0,1000,2000,3000,4000,5000,6000,7000,8000,9000,10000],
+                        gr: [[492,544,594,643],[512,564,613,666],[531,584,636,692],[551,607,663,718],[571,630,686,745],[594,653,712,771],[617,679,741,800],[640,705,768,833],[666,731,797,866],[689,761,830,899],[718,790,863,935]],
+                        ob: [[764,827,889,951],[787,853,918,981],[813,879,945,1014],[863,935,1007,1076],[863,935,1007,1076],[892,964,1040,1112],[918,997,1073,1148],[948,1027,1109,1184],[981,1063,1145,1223],[1010,1096,1181,1266],[1046,1135,1220,1309]] },
+                },
+                oei: {
+                    2844: { pa: [0,1000,2000,3000,4000,5000,6000,7000], vyse: [84,83,82,81,80,79,79,78],
+                        roc: [[293,197,112,35],[257,162,77,1],[220,126,42,-34],[184,91,7,-68],[148,55,-27,-102],[112,20,-62,-136],[75,-15,-97,-170],[39,-51,-131,-204]] },
+                    2381: { pa: [0,1000,2000,3000,4000,5000,6000,7000], vyse: [80,80,79,79,79,79,78,78],
+                        roc: [[436,330,235,149],[396,290,196,111],[355,251,157,73],[315,211,118,35],[275,172,80,-3],[234,132,41,-41],[194,93,3,-78],[154,54,-35,-116]] },
+                    2050: { pa: [0,1000,2000,3000,4000,5000,6000,7000], vyse: [79,79,79,78,78,78,78,77],
+                        roc: [[574,455,349,253],[529,411,305,211],[483,367,262,168],[438,322,219,126],[393,278,176,83],[348,235,133,41],[304,191,90,-1],[259,147,47,-43]] },
+                }
+            },
         };
 
-// P2006T Single Engine Performance Data (from POH)
-const P2006T_SE_PERFORMANCE = {
-    // 1180 kg (2601 lb)
-    '2601': {
-        altitudes: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000],
-        vyse: [80, 80, 80, 79, 79, 79, 79, 78],
-        roc_m25: [362, 324, 285, 247, 209, 171, 132, 94],
-        roc_0: [261, 224, 186, 148, 111, 74, 36, -1],
-        roc_25: [171, 134, 97, 60, 24, -13, -49, -86],
-        roc_50: [89, 53, 17, -19, -55, -91, -127, -163],
-        roc_isa: [206, 176, 146, 116, 85, 55, 25, -5]
-    },
-    // 1080 kg (2381 lb)
-    '2381': {
-        altitudes: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000],
-        vyse: [80, 80, 79, 79, 79, 79, 78, 78],
-        roc_m25: [436, 396, 355, 315, 275, 234, 194, 154],
-        roc_0: [330, 290, 251, 211, 172, 132, 93, 54],
-        roc_25: [235, 196, 157, 118, 80, 41, 3, -35],
-        roc_50: [149, 111, 73, 35, -3, -41, -78, -116],
-        roc_isa: [271, 240, 208, 176, 145, 113, 81, 50]
-    },
-    // 930 kg (2050 lb)
-    '2050': {
-        altitudes: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000],
-        vyse: [79, 79, 79, 78, 78, 78, 78, 77],
-        roc_m25: [574, 529, 483, 438, 393, 348, 304, 259],
-        roc_0: [455, 411, 367, 322, 278, 235, 191, 147],
-        roc_25: [349, 305, 262, 219, 176, 133, 90, 47],
-        roc_50: [253, 211, 168, 126, 83, 41, -1, -43],
-        roc_isa: [390, 355, 319, 284, 248, 213, 178, 142]
-    }
-};
-
-        // P2006T Takeoff Performance Data (from POH) - Weight-based tables
-        const P2006T_TAKEOFF_DATA = {
-            // Weight categories (lbs)
-            weights: [2051, 2381, 2844],
-            
-            // 2844 lbs weight category
-            2844: {
-                pressureAltitudes: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000],
-                temperatures: [-25, 0, 25, 50, 15], // ISA last column
-                groundRoll: [
-                    [705, 899, 1118, 1368, 1027],    // Sea level
-                    [787, 1004, 1246, 1525, 1125],   // 1000 ft
-                    [879, 1118, 1394, 1706, 1237],   // 2000 ft
-                    [984, 1253, 1558, 1906, 1358],   // 3000 ft
-                    [1102, 1401, 1742, 2132, 1492],  // 4000 ft
-                    [1233, 1568, 1952, 2388, 1643],  // 5000 ft
-                    [1384, 1758, 2188, 2676, 1807],  // 6000 ft
-                    [1581, 2011, 2503, 3064, 2034],  // 7000 ft
-                    [1814, 2306, 2870, 3510, 2286],  // 8000 ft
-                    [2076, 2640, 3287, 4021, 2572],  // 9000 ft
-                    [2381, 3027, 3769, 4612, 2896]   // 10000 ft
-                ],
-                obstacle50ft: [
-                    [971, 1237, 1538, 1883, 1368],   // Sea level
-                    [1086, 1378, 1715, 2099, 1499],  // 1000 ft
-                    [1210, 1542, 1919, 2345, 1647],  // 2000 ft
-                    [1355, 1722, 2145, 2621, 1807],  // 3000 ft
-                    [1515, 1925, 2398, 2932, 1988],  // 4000 ft
-                    [1696, 2158, 2686, 3287, 2188],  // 5000 ft
-                    [1902, 2417, 3011, 3683, 2408],  // 6000 ft
-                    [2178, 2768, 3447, 4215, 2709],  // 7000 ft
-                    [2496, 3172, 3946, 4828, 3047],  // 8000 ft
-                    [2860, 3634, 4523, 5533, 3428],  // 9000 ft
-                    [3277, 4169, 5189, 6344, 3861]   // 10000 ft
-                ]
+        const C172S_PERF = { temps: [0, 10, 20, 30, 40],
+            to: {
+                2550: { pa: [0,1000,2000,3000,4000,5000,6000,7000,8000],
+                    gr: [[860,925,995,1070,1150],[940,1010,1090,1170,1260],[1025,1110,1195,1285,1380],[1125,1215,1310,1410,1515],[1235,1335,1440,1550,1660],[1355,1465,1585,1705,1825],[1495,1615,1745,1875,2010],[1645,1785,1920,2065,2215],[1820,1970,2120,2280,2450]],
+                    ob: [[1465,1575,1690,1810,1945],[1600,1720,1850,1990,2135],[1755,1890,2035,2190,2355],[1925,2080,2240,2420,2605],[2120,2295,2480,2685,2880],[2345,2545,2755,2975,3205],[2605,2830,3075,3320,3585],[2910,3170,3440,3730,4045],[3265,3575,3880,4225,4615]] },
+                2400: { pa: [0,1000,2000,3000,4000,5000,6000,7000,8000],
+                    gr: [[745,800,860,925,995],[810,875,940,1010,1085],[885,955,1030,1110,1190],[970,1050,1130,1215,1305],[1065,1150,1240,1335,1430],[1170,1265,1360,1465,1570],[1285,1390,1500,1610,1725],[1415,1530,1650,1770,1900],[1560,1690,1815,1950,2095]],
+                    ob: [[1275,1370,1470,1570,1685],[1390,1495,1605,1720,1845],[1520,1635,1760,1890,2030],[1665,1795,1930,2080,2230],[1830,1975,2130,2295,2455],[2015,2180,2355,2530,2715],[2230,2410,2610,2805,3015],[2470,2685,2900,3125,3370],[2755,3000,3240,3500,3790]] },
+                2200: { pa: [0,1000,2000,3000,4000,5000,6000,7000,8000],
+                    gr: [[610,655,705,760,815],[665,720,770,830,890],[725,785,845,905,975],[795,860,925,995,1065],[870,940,1010,1090,1165],[955,1030,1110,1195,1275],[1050,1130,1220,1310,1400],[1150,1245,1340,1435,1540],[1270,1370,1475,1580,1695]],
+                    ob: [[1055,1130,1205,1290,1380],[1145,1230,1315,1410,1505],[1250,1340,1435,1540,1650],[1365,1465,1570,1685,1805],[1490,1605,1725,1855,1975],[1635,1765,1900,2035,2175],[1800,1940,2090,2240,2395],[1985,2145,2305,2475,2650],[2195,2375,2555,2745,2950]] },
             },
-            
-            // 2381 lbs weight category
-            2381: {
-                pressureAltitudes: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000],
-                temperatures: [-25, 0, 25, 50, 15], // ISA last column
-                groundRoll: [
-                    [485, 617, 768, 938, 705],    // Sea level
-                    [541, 689, 856, 1046, 771],   // 1000 ft
-                    [604, 768, 954, 1168, 846],   // 2000 ft
-                    [676, 859, 1069, 1305, 932],  // 3000 ft
-                    [754, 961, 1194, 1463, 1023], // 4000 ft
-                    [846, 1076, 1338, 1637, 1125], // 5000 ft
-                    [948, 1207, 1499, 1834, 1240], // 6000 ft
-                    [1063, 1351, 1683, 2060, 1368], // 7000 ft
-                    [1194, 1519, 1893, 2312, 1509], // 8000 ft
-                    [1345, 1709, 2125, 2601, 1666], // 9000 ft
-                    [1512, 1922, 2394, 2929, 1840]  // 10000 ft
-                ],
-                obstacle50ft: [
-                    [633, 807, 1004, 1227, 922],    // Sea level
-                    [708, 899, 1118, 1371, 1010],   // 1000 ft
-                    [790, 1004, 1250, 1528, 1109],  // 2000 ft
-                    [987, 1256, 1565, 1912, 1342],  // 3000 ft
-                    [987, 1256, 1565, 1912, 1342],  // 4000 ft (duplicate in data)
-                    [1109, 1407, 1752, 2142, 1473], // 5000 ft
-                    [1240, 1578, 1965, 2401, 1624], // 6000 ft
-                    [1394, 1771, 2204, 2696, 1788], // 7000 ft
-                    [1565, 1988, 2476, 3027, 1975], // 8000 ft
-                    [1758, 2237, 2785, 3405, 2178], // 9000 ft
-                    [1981, 2516, 3132, 3831, 2408]  // 10000 ft
-                ]
+            ldg: {
+                2550: { pa: [0,1000,2000,3000,4000,5000,6000,7000,8000],
+                    gr: [[545,565,585,605,625],[565,585,605,625,650],[585,610,630,650,670],[610,630,655,675,695],[630,655,675,700,725],[655,680,705,725,750],[680,705,730,755,780],[705,730,760,785,810],[735,760,790,815,840]],
+                    ob: [[1290,1320,1350,1380,1415],[1320,1350,1385,1420,1450],[1355,1385,1420,1455,1490],[1385,1425,1460,1495,1530],[1425,1460,1495,1535,1570],[1460,1500,1535,1575,1615],[1500,1540,1580,1620,1660],[1545,1585,1625,1665,1705],[1585,1630,1670,1715,1755]] },
             },
-            
-            // 2051 lbs weight category
-            2051: {
-                pressureAltitudes: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000],
-                temperatures: [-25, 0, 25, 50, 15], // ISA last column
-                groundRoll: [
-                    [328, 417, 518, 636, 479],    // Sea level
-                    [367, 466, 581, 708, 525],    // 1000 ft
-                    [410, 522, 646, 794, 574],    // 2000 ft
-                    [459, 581, 725, 886, 630],    // 3000 ft
-                    [512, 649, 810, 991, 695],    // 4000 ft
-                    [574, 728, 909, 1109, 764],   // 5000 ft
-                    [643, 817, 1017, 1243, 840],  // 6000 ft
-                    [722, 918, 1141, 1397, 925],  // 7000 ft
-                    [810, 1030, 1282, 1568, 1023], // 8000 ft
-                    [912, 1158, 1443, 1765, 1128], // 9000 ft
-                    [1027, 1302, 1624, 1984, 1246] // 10000 ft
-                ],
-                obstacle50ft: [
-                    [430, 548, 679, 833, 623],    // Sea level
-                    [479, 610, 758, 928, 686],    // 1000 ft
-                    [535, 682, 846, 1036, 751],   // 2000 ft
-                    [669, 853, 1059, 1296, 909],  // 3000 ft
-                    [669, 853, 1059, 1296, 909],  // 4000 ft (duplicate in data)
-                    [751, 954, 1187, 1453, 1000], // 5000 ft
-                    [843, 1069, 1332, 1627, 1099], // 6000 ft
-                    [945, 1200, 1492, 1827, 1214], // 7000 ft
-                    [1059, 1348, 1679, 2053, 1338], // 8000 ft
-                    [1194, 1515, 1886, 2309, 1476], // 9000 ft
-                    [1342, 1706, 2125, 2598, 1633]  // 10000 ft
-                ]
-            }
+        };
+        const C172P_PERF = { temps: [0, 10, 20, 30, 40],
+            to: {
+                2400: { pa: [0,1000,2000,3000,4000,5000,6000,7000,8000],
+                    gr: [[795,860,925,995,1065],[875,940,1015,1090,1170],[960,1035,1115,1200,1290],[1055,1140,1230,1325,1425],[1165,1260,1355,1465,1575],[1285,1390,1500,1620,1745],[1425,1540,1665,1800,1940],[1580,1710,1850,2000,null],[1755,1905,2060,null,null]],
+                    ob: [[1460,1570,1685,1810,1945],[1605,1725,1860,2000,2155],[1770,1910,2060,2220,2395],[1960,2120,2295,2480,2685],[2185,2365,2570,2790,3030],[2445,2660,2895,3160,3455],[2755,3015,3300,3620,3990],[3140,3450,3805,4220,null],[3615,4015,4480,null,null]] },
+                2200: { pa: [0,1000,2000,3000,4000,5000,6000,7000,8000],
+                    gr: [[650,700,750,805,865],[710,765,825,885,950],[780,840,905,975,1045],[855,925,995,1070,1150],[945,1020,1100,1180,1270],[1040,1125,1210,1305,1405],[1150,1240,1340,1445,1555],[1270,1375,1485,1605,1730],[1410,1525,1650,1785,1925]],
+                    ob: [[1195,1280,1375,1470,1575],[1310,1405,1510,1615,1735],[1440,1545,1660,1785,1915],[1585,1705,1835,1975,2130],[1750,1890,2040,2200,2375],[1945,2105,2275,2465,2665],[2170,2355,2555,2775,3020],[2440,2655,2890,3155,3450],[2760,3015,3305,3630,4005]] },
+                2000: { pa: [0,1000,2000,3000,4000,5000,6000,7000,8000],
+                    gr: [[525,565,605,650,695],[570,615,665,710,765],[625,675,725,780,840],[690,740,800,860,920],[755,815,880,945,1015],[830,900,970,1040,1120],[920,990,1070,1150,1235],[1015,1095,1180,1275,1370],[1125,1215,1310,1410,1520]],
+                    ob: [[970,1035,1110,1185,1265],[1060,1135,1215,1295,1385],[1160,1240,1330,1425,1525],[1270,1365,1465,1570,1685],[1400,1500,1615,1735,1865],[1545,1660,1790,1925,2070],[1710,1845,1990,2145,2315],[1900,2055,2225,2405,2605],[2125,2305,2500,2715,2950]] },
+            },
+            ldg: {
+                2400: { pa: [0,1000,2000,3000,4000,5000,6000,7000,8000],
+                    gr: [[510,530,550,570,585],[530,550,570,590,610],[550,570,590,610,630],[570,590,615,635,655],[595,615,635,660,680],[615,640,660,685,705],[640,660,685,710,730],[665,690,710,735,760],[690,715,740,765,790]],
+                    ob: [[1235,1265,1295,1325,1350],[1265,1295,1325,1360,1390],[1295,1330,1360,1390,1425],[1330,1360,1395,1430,1460],[1365,1400,1430,1470,1500],[1400,1435,1470,1510,1540],[1435,1470,1510,1550,1580],[1475,1515,1550,1590,1630],[1515,1555,1595,1635,1675]] },
+            },
         };
 
-        function bilinearInterpolation(x, y, x1, x2, y1, y2, q11, q12, q21, q22) {
-            // Bilinear interpolation formula
-            const term1 = q11 * (x2 - x) * (y2 - y);
-            const term2 = q21 * (x - x1) * (y2 - y);
-            const term3 = q12 * (x2 - x) * (y - y1);
-            const term4 = q22 * (x - x1) * (y - y1);
-            
-            return (term1 + term2 + term3 + term4) / ((x2 - x1) * (y2 - y1));
+        /* ---------- Performance engine (all aircraft) ----------
+           Tables: { pa: [ft...], gr: [[ft per temp column]...], ob: [[...]] } keyed by weight (lb); temps = the
+           table's temperature columns (°C). Lookup is bilinear in pressure altitude × temperature, then linear
+           between the two bracketing weight tables. Below the lightest table the lightest is used (longer =
+           conservative); outside the tables' altitude/temperature/weight range the edge value is used and the
+           result is flagged — the POH gives no data there. */
+        function interpAxis(xs, x){
+            const n = xs.length - 1;
+            if (x <= xs[0]) return { i: 0, t: 0, out: x < xs[0] };
+            if (x >= xs[n]) return { i: n - 1, t: 1, out: x > xs[n] };
+            let i = 0; while (x > xs[i + 1]) i++;
+            return { i, t: (x - xs[i]) / (xs[i + 1] - xs[i]), out: false };
         }
-
-        function calculatePerformance(temperature, pressureAltitude, dataTable) {
-            const data = dataTable;
-            
-            // Find bounding indices for pressure altitude
-            let altIndex1 = 0;
-            for (let i = 0; i < data.pressureAltitudes.length - 1; i++) {
-                if (pressureAltitude >= data.pressureAltitudes[i] && pressureAltitude <= data.pressureAltitudes[i + 1]) {
-                    altIndex1 = i;
-                    break;
-                }
+        function tableValue(tbl, temps, pa, oat, key){
+            const a = interpAxis(tbl.pa, pa), b = interpAxis(temps, oat), v = tbl[key];
+            const r0 = v[a.i], r1 = v[a.i + 1];
+            // '---' in the POH (null here) = the airplane can't do it / no data → no answer
+            if ([r0[b.i], r0[b.i + 1], r1[b.i], r1[b.i + 1]].some(x => x == null)) return { value: NaN, paOut: a.out, tempOut: b.out };
+            const top = r0[b.i] + (r0[b.i + 1] - r0[b.i]) * b.t, bot = r1[b.i] + (r1[b.i + 1] - r1[b.i]) * b.t;
+            return { value: top + (bot - top) * a.t, paOut: a.out, tempOut: b.out };
+        }
+        function perfLookup(tables, temps, weight, pa, oat){
+            const ws = Object.keys(tables).map(Number).sort((x, y) => x - y);
+            const notes = [];
+            let wLo = ws[0], wHi = ws[0], tw = 0;
+            if (weight > ws[ws.length - 1]) { wLo = wHi = ws[ws.length - 1]; notes.push(`weight ${Math.round(weight)} lb is above the heaviest table (${wHi} lb)`); }
+            else if (weight > ws[0]) {
+                let i = 0; while (weight > ws[i + 1]) i++;
+                wLo = ws[i]; wHi = ws[i + 1]; tw = (weight - wLo) / (wHi - wLo);
             }
-            const altIndex2 = Math.min(altIndex1 + 1, data.pressureAltitudes.length - 1);
-            
-            // Find bounding indices for temperature
-            let tempIndex1 = 0;
-            for (let i = 0; i < data.temperatures.length - 1; i++) {
-                if (temperature >= data.temperatures[i] && temperature <= data.temperatures[i + 1]) {
-                    tempIndex1 = i;
-                    break;
-                }
-            }
-            const tempIndex2 = Math.min(tempIndex1 + 1, data.temperatures.length - 1);
-            
-            // Get corner values for ground roll
-            const grQ11 = data.groundRoll[altIndex1][tempIndex1];
-            const grQ12 = data.groundRoll[altIndex1][tempIndex2];
-            const grQ21 = data.groundRoll[altIndex2][tempIndex1];
-            const grQ22 = data.groundRoll[altIndex2][tempIndex2];
-            
-            // Get corner values for 50ft obstacle
-            const obQ11 = data.obstacle50ft[altIndex1][tempIndex1];
-            const obQ12 = data.obstacle50ft[altIndex1][tempIndex2];
-            const obQ21 = data.obstacle50ft[altIndex2][tempIndex1];
-            const obQ22 = data.obstacle50ft[altIndex2][tempIndex2];
-            
-            // Perform bilinear interpolation
-            const groundRoll = bilinearInterpolation(
-                temperature, pressureAltitude,
-                data.temperatures[tempIndex1], data.temperatures[tempIndex2],
-                data.pressureAltitudes[altIndex1], data.pressureAltitudes[altIndex2],
-                grQ11, grQ12, grQ21, grQ22
-            );
-            
-            const obstacle50ft = bilinearInterpolation(
-                temperature, pressureAltitude,
-                data.temperatures[tempIndex1], data.temperatures[tempIndex2],
-                data.pressureAltitudes[altIndex1], data.pressureAltitudes[altIndex2],
-                obQ11, obQ12, obQ21, obQ22
-            );
-            
-            return {
-                groundRoll: Math.round(groundRoll),
-                obstacle50ft: Math.round(obstacle50ft)
-            };
+            const out = {};
+            let paOut = false, tempOut = false;
+            ['gr', 'ob'].forEach(k => {
+                const lo = tableValue(tables[wLo], temps, pa, oat, k), hi = tableValue(tables[wHi], temps, pa, oat, k);
+                out[k] = lo.value + (hi.value - lo.value) * tw;
+                paOut = paOut || lo.paOut; tempOut = tempOut || lo.tempOut;
+            });
+            const t0 = tables[wLo];
+            if (paOut) notes.push(`pressure altitude ${Math.round(pa)} ft is outside the table (${t0.pa[0]}–${t0.pa[t0.pa.length - 1]} ft)`);
+            if (tempOut) notes.push(`temperature ${oat}°C is outside the table (${temps[0]} to ${temps[temps.length - 1]}°C)`);
+            if (isNaN(out.gr) || isNaN(out.ob)) notes.push('the POH shows no value (---) for these conditions');
+            out.basis = wLo === wHi ? `${wLo} lb table` : `interpolated ${wLo}–${wHi} lb tables`;
+            out.notes = notes;
+            return out;
         }
-
-        function calculateTakeoffPerformance(temperature, pressureAltitude) {
-            return calculatePerformance(temperature, pressureAltitude, C152_TAKEOFF_DATA);
-        }
-
-        function calculateLandingPerformance(temperature, pressureAltitude) {
-            return calculatePerformance(temperature, pressureAltitude, C152_LANDING_DATA);
-        }
-
-        function calculateP2006TLandingPerformance(temperature, pressureAltitude, weight) {
-            // Find the appropriate weight category
-            const weights = P2006T_LANDING_DATA.weights;
-            let selectedWeight;
-            
-            if (weight <= weights[0]) {
-                selectedWeight = weights[0]; // 2051 lbs
-            } else if (weight <= weights[1]) {
-                selectedWeight = weights[1]; // 2381 lbs
+        /* Wind & surface corrections, per the POH/AFM notes. headwind > 0 = headwind, < 0 = tailwind (kt). */
+        const CESSNA_CORRECTIONS = {
+            // "Decrease distances 10% for each 9 knots headwind. For operation with tail winds up to 10 knots,
+            // increase distances by 10% for each 2 knots." Grass: "+15% (take-off) / +45% (landing) of the ground
+            // roll figure" — added to both distances. Tables are for paved runways.
+            tablesSurface: 'paved',
+            wind(d, hw){ const f = hw >= 0 ? 1 - 0.10 * hw / 9 : 1 + 0.10 * (-hw) / 2; return { gr: d.gr * f, ob: d.ob * f, text: hw >= 0 ? `−10% per 9 kt headwind (×${f.toFixed(3)})` : `+10% per 2 kt tailwind (×${f.toFixed(3)})`, tailwindOver: hw < -10 ? 10 : 0 }; },
+            surface(d, surface, phase, grBase){ if (surface !== 'grass') return { ...d, text: '' }; const k = phase === 'to' ? 0.15 : 0.45, add = grBase * k; return { gr: d.gr + add, ob: d.ob + add, text: `grass: +${k * 100}% of ground roll` }; }
+        };
+        const P2006T_CORRECTIONS = {
+            // AFM Section 5: take-off −2.5 m (−8 ft)/kt headwind, +10 m (+33 ft)/kt tailwind; landing −5 m (−16 ft)/kt
+            // headwind, +11 m (+36 ft)/kt tailwind. Tables are for GRASS; paved runway −6% (take-off) / −2%
+            // (landing) of ground roll — taken off the ground roll only (the AFM doesn't carry it into 50 ft).
+            tablesSurface: 'grass',
+            wind(d, hw, phase){ const k = phase === 'to' ? (hw >= 0 ? 8 : 33) : (hw >= 0 ? 16 : 36), dd = hw >= 0 ? -k * hw : k * -hw; return { gr: Math.max(d.gr + dd, d.gr * 0.5), ob: Math.max(d.ob + dd, d.ob * 0.5), text: hw >= 0 ? `−${k} ft per kt headwind` : `+${k} ft per kt tailwind` }; },
+            surface(d, surface, phase, grBase){ if (surface === 'grass') return { ...d, text: '' }; const k = phase === 'to' ? 0.06 : 0.02; return { gr: d.gr - grBase * k, ob: d.ob, text: `paved: −${k * 100}% of ground roll` }; }
+        };
+        /* Cessna 172 models. Arms in inches aft of the firewall datum; moments on the form are lb·in.
+           172S: NAV III POH (Lycoming IO-360-L2A, 180 hp). 172P: 1982 Information Manual (O-320-D2J, 160 hp) —
+           Cessna marks it "not kept current", so check against the airplane's own POH. 172L: 1971 Owner's
+           Manual (O-320-E2D, 150 hp) — speeds in MPH; its CG limits are the TCDS 3A12 values (the manual only
+           has a graph). Baggage areas: 1 = sta 82–108 (arm 95), 2 = sta 108–142 (arm 123). */
+        const C172_ARMS = { frontSeatArm: 37, rearSeatArm: 73, baggage1Arm: 95, baggage2Arm: 123, fuelArm: 48, fuelWeightMultiplier: 6 };
+        const c172Speeds = (o, unit) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, unit ? `${v} ${unit}` : v]));
+        Object.assign(C172_MODELS, {
+            S: { label: '172S', title: '172S — 180 hp, 2550 lb (NAV III POH)', specs: { ...C172_ARMS,
+                    maxTakeoffWeight: 2550, maxLandingWeight: 2550, maxRampWeight: 2558,
+                    cgForwardLimits: [{ weight: 1500, cgLimit: 35.0 }, { weight: 1950, cgLimit: 35.0 }, { weight: 2550, cgLimit: 41.0 }], aftLimit: 47.3,
+                    cgEnvelope: [[1500, 35.0], [1950, 35.0], [2550, 41.0], [2550, 47.3], [1500, 47.3]],
+                    baggage1Max: 120, baggage2Max: 50, baggageCombinedMax: 120, fuelUsable: 53,
+                    fuelBurnRate: 9, groundFuelUse: -8, demoCrosswind: 15,          // POH sample: 8 lb start/taxi/run-up
+                    vspeeds: c172Speeds({ vr: 55, vr50: 56, vx: 62, vy: 74, vg: 68, vs0: 40, vs1: 48, va: 105, vfe: '110/85', vne: 163,
+                                          vappShort: 61, vappNormal: '60-70', vappFlapless: '65-75', cruise: '75-85' }) },
+                 perf: C172S_PERF },
+            P: { label: '172P', title: '172P — 160 hp, 2400 lb (1982 Information Manual)', specs: { ...C172_ARMS,
+                    maxTakeoffWeight: 2400, maxLandingWeight: 2400, maxRampWeight: 2407,
+                    cgForwardLimits: [{ weight: 1500, cgLimit: 35.0 }, { weight: 1950, cgLimit: 35.0 }, { weight: 2400, cgLimit: 39.5 }], aftLimit: 47.3,
+                    cgEnvelope: [[1500, 35.0], [1950, 35.0], [2400, 39.5], [2400, 47.3], [1500, 47.3]],
+                    baggage1Max: 120, baggage2Max: 50, baggageCombinedMax: 120, fuelUsable: 62,   // largest tank option (integral); standard is 40
+                    fuelBurnRate: 8, groundFuelUse: -7, demoCrosswind: 15,          // POH sample: 7 lb start/taxi/run-up
+                    vspeeds: c172Speeds({ vr: 55, vr50: 56, vx: 60, vy: 76, vg: 65, vs0: 33, vs1: 44, va: 99, vfe: '110/85', vne: 158,
+                                          vappShort: 61, vappNormal: '60-70', vappFlapless: '65-75', cruise: '75-85' }) },
+                 perf: C172P_PERF },
+            L: { label: '172L (mph)', title: '172L — 150 hp, 2300 lb (1971 Owner\'s Manual, speeds in MPH)', specs: { ...C172_ARMS, baggage2Arm: null,   // one baggage area
+                    maxTakeoffWeight: 2300, maxLandingWeight: 2300,
+                    cgForwardLimits: [{ weight: 1500, cgLimit: 35.0 }, { weight: 1950, cgLimit: 35.0 }, { weight: 2300, cgLimit: 38.5 }], aftLimit: 47.3,
+                    cgEnvelope: [[1500, 35.0], [1950, 35.0], [2300, 38.5], [2300, 47.3], [1500, 47.3]],
+                    baggage1Max: 120, fuelUsable: 48,                                 // long-range tanks; standard is 38
+                    fuelBurnRate: 7.5, groundFuelUse: -6, demoCrosswind: 13,         // 15 MPH "can be handled with safety" (not a limit)
+                    oilNotInEmptyWeight: true,                                       // manual adds 8 qt = 15 lb at −0.2 (moment/1000)
+                    vspeeds: c172Speeds({ vr: 60, vr50: 68, vx: 68, vy: 82, vg: 80, vs0: 52, vs1: 59, va: 122, vfe: 100, vne: 174,
+                                          vappShort: 69, vappNormal: '65-75', vappFlapless: '70-80', cruise: '80-90' }, 'mph') },
+                 perf: { custom: c172LPerformance } }
+        });
+        /* 172L (1971) tables: take-off by weight (2300/2000/1700) × altitude (SL/2500/5000/7500 at standard temp) ×
+           headwind (0/10/20 kt, built in); +10% per 25 °F above standard. Landing: 2300 lb only, −10% per 5 kt
+           headwind, no temperature note. Grass: + 7% (take-off) / +20% (landing) of the total-over-50-ft figure,
+           added to both distances. No tailwind data at all. */
+        const C172L_TO = { 2300: { gr: [[865, 1040, 1255, 1565], [615, 750, 920, 1160], [405, 505, 630, 810]], ob: [[1525, 1910, 2480, 3855], [1170, 1485, 1955, 3110], [850, 1100, 1480, 2425]] },
+                           2000: { gr: [[630, 755, 905, 1120], [435, 530, 645, 810], [275, 340, 425, 595]], ob: [[1095, 1325, 1625, 2155], [820, 1005, 1250, 1685], [580, 720, 910, 1255]] },
+                           1700: { gr: [[435, 520, 625, 765], [290, 355, 430, 535], [175, 215, 270, 345]], ob: [[780, 920, 1095, 1370], [570, 680, 820, 1040], [385, 470, 575, 745]] } };
+        const C172L_LDG = { gr: [520, 560, 605, 650], ob: [1250, 1310, 1385, 1455] };
+        const C172L_PA = [0, 2500, 5000, 7500];
+        function c172LPerformance(phase, weight, pa, oat, hw, surface){
+            const notes = [], a = interpAxis(C172L_PA, pa);
+            if (a.out) notes.push(`pressure altitude ${Math.round(pa)} ft is outside the table (SL–7500 ft)`);
+            const alongPA = row => row[a.i] + (row[a.i + 1] - row[a.i]) * a.t;
+            let gr, ob, text = [];
+            if (phase === 'to') {
+                const ws = [1700, 2000, 2300], wa = interpAxis(ws, weight);
+                if (weight > 2300) notes.push(`weight ${Math.round(weight)} lb is above the table (2300 lb)`);
+                const head = Math.max(0, hw), h = interpAxis([0, 10, 20], head);
+                if (head > 20) notes.push('headwind over 20 kt — table stops at 20 kt');
+                if (hw < 0) notes.push('tailwind — the 1971 manual has no tailwind data');
+                const at = (w, key) => { const t = C172L_TO[w][key]; const r0 = alongPA(t[h.i]), r1 = alongPA(t[h.i + 1]); return r0 + (r1 - r0) * h.t; };
+                const val = key => { const lo = at(ws[wa.i], key), hi = at(ws[wa.i + 1], key); return lo + (hi - lo) * wa.t; };
+                gr = val('gr'); ob = val('ob');
+                const stdF = 59 - 3.566 * pa / 1000, oatF = oat * 9 / 5 + 32, over = Math.max(0, oatF - stdF);
+                const f = 1 + 0.10 * over / 25;
+                gr *= f; ob *= f;
+                text.push(`headwind ${head.toFixed(0)} kt from the table`, over > 0 ? `+10% per 25°F above standard (×${f.toFixed(3)})` : 'at/below standard temperature');
+                if (surface === 'grass') { const add = 0.07 * ob; gr += add; ob += add; text.push('grass: +7% of the 50 ft distance'); }
             } else {
-                selectedWeight = weights[2]; // 2844 lbs
+                if (weight > 2300) notes.push(`weight ${Math.round(weight)} lb is above the table (2300 lb)`);
+                gr = alongPA(C172L_LDG.gr); ob = alongPA(C172L_LDG.ob);
+                const baseOb = ob, f = hw >= 0 ? Math.max(0, 1 - 0.10 * hw / 5) : 1;
+                gr *= f; ob *= f;
+                text.push(hw >= 0 ? `−10% per 5 kt headwind (×${f.toFixed(3)})` : 'no tailwind correction in the manual');
+                if (hw < 0) notes.push('tailwind — the 1971 manual has no tailwind data');
+                if (surface === 'grass') { const add = 0.20 * baseOb; gr += add; ob += add; text.push('grass: +20% of the 50 ft distance'); }
             }
-            
-            // Get the data table for the selected weight
-            const dataTable = P2006T_LANDING_DATA[selectedWeight];
-            
-            const performance = calculatePerformance(temperature, pressureAltitude, dataTable);
-            // Add the selected weight to the result
-            performance.selectedWeight = selectedWeight;
-            
-            return performance;
+            return { gr, ob, baseGr: gr, baseOb: ob, basis: phase === 'to' ? 'Fig 6-3 take-off table (1971)' : 'Fig 6-5 landing table, 2300 lb (1971)', notes, correction: text.join('; ') };
         }
 
-        function calculateP2006TTakeoffPerformance(temperature, pressureAltitude, weight) {
-            // Find the appropriate weight category
-            const weights = P2006T_TAKEOFF_DATA.weights;
-            let selectedWeight;
-            
-            if (weight <= weights[0]) {
-                selectedWeight = weights[0]; // 2051 lbs
-            } else if (weight <= weights[1]) {
-                selectedWeight = weights[1]; // 2381 lbs
-            } else {
-                selectedWeight = weights[2]; // 2844 lbs
+        /* Which tables / corrections apply to the selected aircraft (and its model / MTOW configuration) */
+        function perfModel(aircraftType){
+            if (aircraftType === 'C-152') return { temps: C152_TAKEOFF_DATA.temperatures, to: { 1670: c152Table(C152_TAKEOFF_DATA) }, ldg: { 1670: c152Table(C152_LANDING_DATA) }, corr: CESSNA_CORRECTIONS };
+            if (aircraftType === 'P2006T') { const p = P2006T_PERF[p2006tConfig()]; return { temps: [-25, 0, 25, 50], to: p.to, ldg: p.ldg, corr: P2006T_CORRECTIONS }; }
+            if (aircraftType === 'C-172') {
+                const v = C172_MODELS[c172Model()];
+                if (v && v.perf && v.perf.custom) return { custom: v.perf.custom };
+                if (v && v.perf) return { temps: v.perf.temps, to: v.perf.to, ldg: v.perf.ldg, corr: CESSNA_CORRECTIONS };
             }
-            
-            // Get the data table for the selected weight
-            const dataTable = P2006T_TAKEOFF_DATA[selectedWeight];
-            
-            const performance = calculatePerformance(temperature, pressureAltitude, dataTable);
-            // Add the selected weight to the result
-            performance.selectedWeight = selectedWeight;
-            
-            return performance;
+            return null;
+        }
+        const c152Table = d => ({ pa: d.pressureAltitudes, gr: d.groundRoll, ob: d.obstacle50ft });
+        /* Full pipeline: table → wind → surface; returns rounded distances plus the working for the tooltip */
+        function computeRunwayPerformance(aircraftType, phase, weight){
+            const model = perfModel(aircraftType);
+            if (!model) return null;
+            const oat = parseFloat(document.getElementById('temperature').value);
+            const pa = parseFloat(document.getElementById('pressureAltitude').value);
+            const temperature = isNaN(oat) ? 15 : oat, pressureAltitude = isNaN(pa) ? 0 : pa;
+            const hw = parseFloat(document.getElementById('headwind').value) || 0;
+            const surface = (document.getElementById('runwaySurface') || {}).value || 'paved';
+            if (model.custom) {
+                const c = model.custom(phase, weight, pressureAltitude, temperature, hw, surface);
+                return { gr: Math.round(c.gr), ob: Math.round(c.ob), baseGr: Math.round(c.baseGr), baseOb: Math.round(c.baseOb), basis: c.basis,
+                         notes: c.notes, correction: c.correction, headwind: hw, surface, temperature, pressureAltitude, weight };
+            }
+            const base = perfLookup(phase === 'to' ? model.to : model.ldg, model.temps, weight, pressureAltitude, temperature);
+            const w = model.corr.wind(base, hw, phase);
+            const s = model.corr.surface(w, surface, phase, base.gr);
+            const notes = base.notes.slice();
+            if (w.tailwindOver) notes.push('tailwind over 10 kt — beyond the POH correction');
+            return { gr: Math.round(s.gr), ob: Math.round(s.ob), baseGr: Math.round(base.gr), baseOb: Math.round(base.ob), basis: base.basis,
+                     notes, correction: [w.text, s.text].filter(Boolean).join('; '), headwind: hw, surface, temperature, pressureAltitude, weight };
         }
 
         function populateVSpeedsPanel(aircraftType) {
@@ -3580,12 +3629,15 @@ const P2006T_SE_PERFORMANCE = {
                 });
             } else if (aircraftType === 'P2006T') {
                 // P2006T specific V-speeds
+                // Same slots as the school form; values from the AFM for the selected MTOW configuration.
+                // Vr 50' = the AFM's 50 ft speed; the Vapp / Vcc entries are the school's technique speeds.
+                const v = (P2006T_CONFIGS[p2006tConfig()] || P2006T_CONFIGS['1230']).vs;
                 const p2006tVSpeeds = [
-                    'Vr - 65', 'Vxse - 70', 'Vle - 122', 'Vg - 84',
-                    'Vr 50\' - 65', 'Vyse - 84', 'Vlo - 122', 'Vmc - 62',
-                    'Vx - 72', 'Vs0 - 53', 'Va Max - 118', 'Vapp Short - 70',
-                    'Vy - 84', 'Vs1 - 66', 'Vno - 135', 'Vapp Normal - 75',
-                    'Vcc - 95', 'Vfe - 122/93', 'Vne - 171', 'Vapp Flapless - 75'
+                    `Vr - ${v.vr}`, `Vxse - ${v.vxse}`, `Vle - ${v.vle}`, `Vg - ${v.vg}`,
+                    `Vr 50' - ${v.vr50}`, `Vyse - ${v.vyse}`, `Vlo - ${v.vlo}`, `Vmc - ${v.vmc}`,
+                    `Vx - ${v.vx}`, `Vs0 - ${v.vs0}`, `Va Max - ${v.va}`, 'Vapp Short - 70',
+                    `Vy - ${v.vy}`, `Vs1 - ${v.vs1}`, `Vno - ${v.vno}`, 'Vapp Normal - 75',
+                    'Vcc - 95', `Vfe - ${v.vfe}`, `Vne - ${v.vne}`, 'Vapp Flapless - 75'
                 ];
                 
                 vSpeedItems.forEach((item, index) => {
@@ -3648,9 +3700,10 @@ const P2006T_SE_PERFORMANCE = {
             
             const specs = aircraftSpecs[aircraftType];
             
-            // P2006T has fixed forward limit for all conditions
+            // P2006T: 16.5 %MAC; the 1290 kg configuration slopes it to 19.5 % between 1230 kg (2712 lb) and 1290 kg (2844 lb)
             if (aircraftType === 'P2006T') {
-                return specs.forwardLimit; // Always 16.5
+                if (specs.fwdSlope && weight > 2711.7) return 16.5 + Math.min(1, (weight - 2711.7) / (2843.9 - 2711.7)) * 3.0;
+                return specs.forwardLimit;
             }
             
             // For other aircraft, use the existing cgForwardLimits logic
@@ -3685,313 +3738,88 @@ const P2006T_SE_PERFORMANCE = {
             return null;
         }
         
+        /* Take-off / landing fields: table lookup at the T/O (or est. landing) weight, then wind and surface */
+        function rowWeight(row){ return parseFloat(document.querySelector(`.data-table tbody tr:nth-child(${row}) td:nth-child(2)`)?.textContent) || 0; }
+        function showPerf(phase, r){
+            const grField = phase === 'to' ? 'takeoffGR' : 'landingGR', obField = phase === 'to' ? 'takeoffDist50' : 'landingDist50';
+            const grInput = phase === 'to' ? 'takeoffGR' : 'landingGR', obInput = phase === 'to' ? 'fiftyFtObst' : 'landingDist50';
+            const grEl = document.querySelector(`[data-field="${grField}"]`), obEl = document.querySelector(`[data-field="${obField}"]`);
+            if (!r) {
+                grEl.textContent = ''; obEl.textContent = '';
+                document.getElementById(grInput).value = ''; document.getElementById(obInput).value = '';
+                return;
+            }
+            const warn = r.notes.length ? ' ⚠' : '';
+            const fmt = v => isNaN(v) ? '—' : `${v} ft`;
+            grEl.textContent = `${fmt(r.gr)}${warn}`; obEl.textContent = `${fmt(r.ob)}${warn}`;
+            [grEl, obEl].forEach(el => { el.classList.toggle('over-limit', !!warn); el.title = r.notes.join('\n'); });
+            document.getElementById(grInput).value = isNaN(r.gr) ? '' : r.gr;
+            document.getElementById(obInput).value = isNaN(r.ob) ? '' : r.ob;
+            calculationDetails[phase === 'to' ? 'takeoff' : 'landing'] = {
+                baseDistance: `${r.baseGr} (50 ft: ${r.baseOb})`, headwind: r.headwind, correction: r.correction || 'none',
+                temperature: r.temperature, pressureAltitude: r.pressureAltitude, weight: Math.round(r.weight),
+                interpolationNote: `${r.basis}; ${r.surface} runway.${r.notes.length ? ' ⚠ ' + r.notes.join('; ') + '.' : ''}`
+            };
+        }
         function updateTakeoffPerformance() {
-            const aircraftType = document.getElementById('aircraftType').value;
-            if (aircraftType !== 'C-152' && aircraftType !== 'P2006T') {
-                // Clear performance data for unsupported aircraft
-                document.querySelector('[data-field="takeoffGR"]').textContent = '';
-                document.querySelector('[data-field="takeoffDist50"]').textContent = '';
-                // Clear left panel fields
-                document.getElementById('takeoffGR').value = '';
-                document.getElementById('fiftyFtObst').value = '';
-                return;
-            }
-
-            // Get temperature and pressure altitude from weather inputs
-            const temperature = parseFloat(document.getElementById('temperature').value) || 15; // Default to 15°C
-            const pressureAltitude = parseFloat(document.getElementById('pressureAltitude').value) || 0; // Default to sea level
-
-            // Calculate base takeoff performance based on aircraft type
-            let performance;
-            let currentWeight = 0;
-            if (aircraftType === 'C-152') {
-                performance = calculateTakeoffPerformance(temperature, pressureAltitude);
-                currentWeight = 1670; // Typical C-152 weight
-            } else if (aircraftType === 'P2006T') {
-                // Get current aircraft weight for P2006T weight-based performance
-                const takeoffWeightElement = document.querySelector('.data-table tbody tr:nth-child(10) td:nth-child(2)');
-                currentWeight = parseFloat(takeoffWeightElement?.textContent) || 2844;
-                // P2006T data is in Celsius, no conversion needed
-                performance = calculateP2006TTakeoffPerformance(temperature, pressureAltitude, currentWeight);
-            }
-            
-            // Apply headwind correction based on aircraft type
-            const headwind = parseFloat(document.getElementById('headwind').value) || 0;
-            let correctedGroundRoll, correctedObstacle50ft;
-            let correctionFormula = '';
-            
-            if (aircraftType === 'C-152') {
-                // C-152: decrease distances 10% for each 9 knots headwind
-                const headwindCorrection = 1 - (headwind / 9) * 0.1;
-                const correctionFactor = Math.max(headwindCorrection, 0.5); // Safety minimum
-                correctedGroundRoll = Math.round(performance.groundRoll * correctionFactor);
-                correctedObstacle50ft = Math.round(performance.obstacle50ft * correctionFactor);
-                correctionFormula = `Base × ${correctionFactor.toFixed(3)} (${headwind} kts headwind)`;
-            } else if (aircraftType === 'P2006T') {
-                // P2006T: decrease distances 8ft per knot of headwind
-                correctedGroundRoll = Math.max(performance.groundRoll - (headwind * 8), performance.groundRoll * 0.5);
-                correctedObstacle50ft = Math.max(performance.obstacle50ft - (headwind * 8), performance.obstacle50ft * 0.5);
-                correctedGroundRoll = Math.round(correctedGroundRoll);
-                correctedObstacle50ft = Math.round(correctedObstacle50ft);
-                correctionFormula = `Base - (${headwind} × 8) ft`;
-            }
-            
-            // Store calculation details for tooltips
-            calculationDetails.takeoff = {
-                baseDistance: performance.groundRoll,
-                headwind: headwind,
-                correction: correctionFormula,
-                temperature: temperature,
-                pressureAltitude: pressureAltitude,
-                weight: currentWeight,
-                interpolationNote: performance.selectedWeight ? `Weight category: ${performance.selectedWeight} lbs` : 'Standard interpolation'
-            };
-            
-            // Update display fields
-            if (aircraftType === 'P2006T' && performance.selectedWeight) {
-                document.querySelector('[data-field="takeoffGR"]').textContent = `${correctedGroundRoll} ft (${performance.selectedWeight} lbs)`;
-                document.querySelector('[data-field="takeoffDist50"]').textContent = `${correctedObstacle50ft} ft (${performance.selectedWeight} lbs)`;
-            } else {
-                document.querySelector('[data-field="takeoffGR"]').textContent = `${correctedGroundRoll} ft`;
-                document.querySelector('[data-field="takeoffDist50"]').textContent = `${correctedObstacle50ft} ft`;
-            }
-            
-            // Update left panel input fields
-            document.getElementById('takeoffGR').value = correctedGroundRoll;
-            document.getElementById('fiftyFtObst').value = correctedObstacle50ft;
-            
-            // Update P2006T specific performance
+            const type = document.getElementById('aircraftType').value;
+            const w = rowWeight(10) || (aircraftSpecs[type] || {}).maxTakeoffWeight || 0;
+            showPerf('to', computeRunwayPerformance(type, 'to', w));
             updatePerformanceCalculations();
-            
-            // Update tooltips with actual values
             updateTooltipContent();
         }
-
         function updateLandingPerformance() {
-            const aircraftType = document.getElementById('aircraftType').value;
-            if (aircraftType !== 'C-152' && aircraftType !== 'P2006T') {
-                // Clear performance data for unsupported aircraft
-                document.querySelector('[data-field="landingGR"]').textContent = '';
-                document.querySelector('[data-field="landingDist50"]').textContent = '';
-                // Clear left panel fields
-                document.getElementById('landingGR').value = '';
-                document.getElementById('landingDist50').value = '';
-                return;
-            }
-
-            // Get temperature and pressure altitude from weather inputs
-            const temperature = parseFloat(document.getElementById('temperature').value) || 15; // Default to 15°C (59°F)
-            const pressureAltitude = parseFloat(document.getElementById('pressureAltitude').value) || 0; // Default to sea level
-
-            // Calculate base landing performance based on aircraft type
-            let performance;
-            let currentWeight = 0;
-            if (aircraftType === 'C-152') {
-                performance = calculateLandingPerformance(temperature, pressureAltitude);
-                currentWeight = 1670; // Typical C-152 weight
-            } else if (aircraftType === 'P2006T') {
-                // Get estimated landing weight for P2006T weight-based landing performance
-                const landingWeightElement = document.querySelector('.data-table tbody tr:nth-child(12) td:nth-child(2)');
-                currentWeight = parseFloat(landingWeightElement?.textContent) || 2844;
-                // P2006T data is now in Celsius, no conversion needed
-                performance = calculateP2006TLandingPerformance(temperature, pressureAltitude, currentWeight);
-            }
-            
-            // Apply headwind correction based on aircraft type
-            const headwind = parseFloat(document.getElementById('headwind').value) || 0;
-            let correctedGroundRoll, correctedObstacle50ft;
-            let correctionFormula = '';
-            
-            if (aircraftType === 'C-152') {
-                // C-152: increase distances 10% for each 9 knots headwind
-                const headwindCorrection = 1 + (headwind / 9) * 0.1;
-                correctedGroundRoll = Math.round(performance.groundRoll * headwindCorrection);
-                correctedObstacle50ft = Math.round(performance.obstacle50ft * headwindCorrection);
-                correctionFormula = `Base × ${headwindCorrection.toFixed(3)} (${headwind} kts headwind)`;
-            } else if (aircraftType === 'P2006T') {
-                // P2006T: increase distances 8ft per knot of headwind
-                correctedGroundRoll = performance.groundRoll + (headwind * 8);
-                correctedObstacle50ft = performance.obstacle50ft + (headwind * 8);
-                correctedGroundRoll = Math.round(correctedGroundRoll);
-                correctedObstacle50ft = Math.round(correctedObstacle50ft);
-                correctionFormula = `Base + (${headwind} × 8) ft`;
-            }
-            
-            // Store calculation details for tooltips
-            calculationDetails.landing = {
-                baseDistance: performance.groundRoll,
-                headwind: headwind,
-                correction: correctionFormula,
-                temperature: temperature,
-                pressureAltitude: pressureAltitude,
-                weight: currentWeight,
-                interpolationNote: performance.selectedWeight ? `Weight category: ${performance.selectedWeight} lbs` : 'Standard interpolation'
-            };
-            
-            // Update display fields
-            if (aircraftType === 'P2006T' && performance.selectedWeight) {
-                document.querySelector('[data-field="landingGR"]').textContent = `${correctedGroundRoll} ft (${performance.selectedWeight} lbs)`;
-                document.querySelector('[data-field="landingDist50"]').textContent = `${correctedObstacle50ft} ft (${performance.selectedWeight} lbs)`;
-            } else {
-                document.querySelector('[data-field="landingGR"]').textContent = `${correctedGroundRoll} ft`;
-                document.querySelector('[data-field="landingDist50"]').textContent = `${correctedObstacle50ft} ft`;
-            }
-            
-            // Update left panel input fields
-            document.getElementById('landingGR').value = correctedGroundRoll;
-            document.getElementById('landingDist50').value = correctedObstacle50ft;
-            
-            // Update P2006T specific performance
+            const type = document.getElementById('aircraftType').value;
+            const w = rowWeight(12) || (aircraftSpecs[type] || {}).maxLandingWeight || 0;
+            showPerf('ldg', computeRunwayPerformance(type, 'ldg', w));
             updatePerformanceCalculations();
-            
-            // Update tooltips with actual values
             updateTooltipContent();
         }
 
+        /* P2006T: accelerate-stop estimate and one-engine climb / ceiling from the AFM OEI tables */
         function updateP2006TPerformance() {
-            const aircraftType = document.getElementById('aircraftType').value;
-            if (aircraftType !== 'P2006T') return;
-            
-            // Show/hide P2006T specific performance section
+            if (document.getElementById('aircraftType').value !== 'P2006T') return;
             const p2006tSection = document.getElementById('p2006t-performance');
-            if (p2006tSection) {
-                p2006tSection.style.display = 'block';
-            }
-            
-            // Get current performance data
+            if (p2006tSection) p2006tSection.style.display = 'block';
             const takeoffGR = parseFloat(document.getElementById('takeoffGR').value) || 0;
             const landingGR = parseFloat(document.getElementById('landingGR').value) || 0;
-            
-            // Calculate Accelerate/Stop Distance (T/O ground roll + landing ground roll)
+            // The AFM has no accelerate-stop data (its OEI take-off procedure is "before rotation: abort").
+            // Estimate: take-off ground roll + landing ground roll.
             const accelerateStopDist = takeoffGR + landingGR;
             document.querySelector('[data-field="accelerateStopDist"]').textContent = `${accelerateStopDist} ft`;
-            
-            // Get current weight for SE performance calculations
-            const currentWeightElement = document.querySelector('.data-table tbody tr:nth-child(10) td:nth-child(2)');
-            const currentWeight = parseFloat(currentWeightElement?.textContent) || 2381;
-            
-            // Get temperature and pressure altitude for SE performance
-            const temperature = parseFloat(document.getElementById('temperature').value) || 15;
+            const currentWeight = rowWeight(10) || aircraftSpecs.P2006T.maxTakeoffWeight;
+            const oat = parseFloat(document.getElementById('temperature').value);
+            const temperature = isNaN(oat) ? 15 : oat;
             const pressureAltitude = parseFloat(document.getElementById('pressureAltitude').value) || 0;
-            
-            // Calculate SE Service Ceiling and Climb Rate
-            const sePerformance = calculateP2006TSEPerformance(currentWeight, temperature, pressureAltitude);
-            
-            // Determine temperature column for tooltip
-            let tempColumn = 'ISA';
-            if (temperature <= -25) tempColumn = '-25°C';
-            else if (temperature <= 0) tempColumn = '0°C';
-            else if (temperature <= 25) tempColumn = '25°C';
-            else if (temperature <= 50) tempColumn = '50°C';
-            
-            // Determine weight category for tooltip
-            const weightCategories = [2050, 2381, 2601];
-            let closestWeight = weightCategories[0];
-            let minDiff = Math.abs(currentWeight - closestWeight);
-            for (const catWeight of weightCategories) {
-                const diff = Math.abs(currentWeight - catWeight);
-                if (diff < minDiff) {
-                    minDiff = diff;
-                    closestWeight = catWeight;
-                }
-            }
-            
-            // Store P2006T calculation details for tooltips
+            const se = calculateP2006TSEPerformance(currentWeight, temperature, pressureAltitude);
             calculationDetails.p2006t = {
-                takeoffGR: takeoffGR,
-                landingGR: landingGR,
-                accelerateStop: accelerateStopDist,
-                weight: currentWeight,
-                weightCategory: closestWeight,
-                temperature: temperature,
-                tempColumn: tempColumn,
-                pressureAltitude: pressureAltitude,
-                serviceCeiling: sePerformance.serviceCeiling,
-                climbRate: sePerformance.climbRate
+                takeoffGR, landingGR, accelerateStop: accelerateStopDist, weight: Math.round(currentWeight),
+                weightCategory: se.basis, temperature, tempColumn: 'interpolated', pressureAltitude,
+                serviceCeiling: se.serviceCeiling, climbRate: se.climbRate
             };
-            
-            if (sePerformance.serviceCeiling) {
-                document.querySelector('[data-field="seServiceCeiling"]').textContent = `${sePerformance.serviceCeiling} ft`;
-            } else {
-                document.querySelector('[data-field="seServiceCeiling"]').textContent = 'N/A';
-            }
-            
-            if (sePerformance.climbRate) {
-                document.querySelector('[data-field="seClimbRate"]').textContent = `${sePerformance.climbRate} fpm`;
-            } else {
-                document.querySelector('[data-field="seClimbRate"]').textContent = 'N/A';
-            }
-            
-            // Update tooltips with actual values
+            document.querySelector('[data-field="seServiceCeiling"]').textContent = se.serviceCeiling != null ? `${se.serviceCeiling} ft` : 'N/A';
+            document.querySelector('[data-field="seClimbRate"]').textContent = se.climbRate != null ? `${se.climbRate} fpm` : 'N/A';
             updateTooltipContent();
         }
-
+        /* OEI rate of climb at VYSE: interpolated in altitude, temperature and weight. The temperature at each
+           table altitude follows the standard lapse (1.98 °C / 1000 ft) from today's OAT at pressure altitude.
+           Service ceiling = where it falls to 50 fpm. */
         function calculateP2006TSEPerformance(weight, temperature, pressureAltitude) {
-            // Find the closest weight category
-            const weightCategories = [2050, 2381, 2601];
-            let closestWeight = weightCategories[0];
-            let minDiff = Math.abs(weight - closestWeight);
-            
-            for (const catWeight of weightCategories) {
-                const diff = Math.abs(weight - catWeight);
-                if (diff < minDiff) {
-                    minDiff = diff;
-                    closestWeight = catWeight;
-                }
+            const tables = P2006T_PERF[p2006tConfig()].oei, temps = [-25, 0, 25, 50];
+            const roc = alt => perfLookup(Object.fromEntries(Object.entries(tables).map(([w, t]) => [w, { pa: t.pa, gr: t.roc, ob: t.roc }])),
+                                          temps, weight, alt, temperature - 1.98 * (alt - pressureAltitude) / 1000);
+            const at = roc(pressureAltitude);
+            const top = Math.max(...Object.values(tables)[0].pa);
+            let serviceCeiling = null, extrapolated = false;
+            for (let alt = 0; alt <= top; alt += 100) {
+                if (roc(alt).gr <= 50) { serviceCeiling = alt; break; }
             }
-            
-            const performanceData = P2006T_SE_PERFORMANCE[closestWeight.toString()];
-            if (!performanceData) return { serviceCeiling: null, climbRate: null };
-            
-            // Find the closest temperature column
-            let tempColumn = 'roc_isa'; // Default to ISA
-            if (temperature <= -25) tempColumn = 'roc_m25';
-            else if (temperature <= 0) tempColumn = 'roc_0';
-            else if (temperature <= 25) tempColumn = 'roc_25';
-            else if (temperature <= 50) tempColumn = 'roc_50';
-            
-            // Calculate service ceiling (altitude where ROC = 50 fpm)
-            let serviceCeiling = null;
-            const rocData = performanceData[tempColumn];
-            
-            for (let i = 0; i < performanceData.altitudes.length - 1; i++) {
-                if (rocData[i] > 50 && rocData[i + 1] <= 50) {
-                    // Interpolate between these two points
-                    const alt1 = performanceData.altitudes[i];
-                    const alt2 = performanceData.altitudes[i + 1];
-                    const roc1 = rocData[i];
-                    const roc2 = rocData[i + 1];
-                    
-                    const ratio = (roc1 - 50) / (roc1 - roc2);
-                    serviceCeiling = Math.round(alt1 + ratio * (alt2 - alt1));
-                    break;
-                }
+            if (serviceCeiling == null) {                                  // still climbing at the table's top row:
+                const r1 = roc(top).gr, r0 = roc(top - 1000).gr, slope = (r0 - r1) / 1000;   // extend the last trend
+                serviceCeiling = slope > 0 ? Math.min(14000, Math.round((top + (r1 - 50) / slope) / 100) * 100) : 14000;
+                extrapolated = true;
             }
-            
-            // Calculate climb rate at current pressure altitude
-            let climbRate = null;
-            for (let i = 0; i < performanceData.altitudes.length; i++) {
-                if (performanceData.altitudes[i] >= pressureAltitude) {
-                    if (i === 0) {
-                        climbRate = rocData[i];
-                    } else {
-                        // Interpolate between two altitude points
-                        const alt1 = performanceData.altitudes[i - 1];
-                        const alt2 = performanceData.altitudes[i];
-                        const roc1 = rocData[i - 1];
-                        const roc2 = rocData[i];
-                        
-                        const ratio = (pressureAltitude - alt1) / (alt2 - alt1);
-                        climbRate = Math.round(roc1 + ratio * (roc2 - roc1));
-                    }
-                    break;
-                }
-            }
-            
-            return {
-                serviceCeiling: serviceCeiling,
-                climbRate: climbRate
-            };
+            return { climbRate: Math.round(at.gr), serviceCeiling, basis: at.basis + (extrapolated ? ' (ceiling extrapolated above the table)' : '') };
         }
 
         // Store calculation details for tooltips
@@ -4184,12 +4012,12 @@ const P2006T_SE_PERFORMANCE = {
             // Clear canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            if (aircraftType !== 'C-152' && aircraftType !== 'P2006T' && !aircraftType.startsWith('CUSTOM_')) {
+            if (aircraftType !== 'C-152' && aircraftType !== 'C-172' && aircraftType !== 'P2006T' && !aircraftType.startsWith('CUSTOM_')) {
                 // Show message for other aircraft types
                 ctx.fillStyle = '#b5b3a9';
                 ctx.font = '16px Arial';
                 ctx.textAlign = 'center';
-                ctx.fillText('CG Chart available for C-152, P2006T, and Custom Aircraft only', canvas.width/2, canvas.height/2);
+                ctx.fillText('Select an aircraft to see its CG envelope', canvas.width/2, canvas.height/2);
                 return;
             }
             
@@ -4205,6 +4033,11 @@ const P2006T_SE_PERFORMANCE = {
                 // C-152: CG range 30-37 inches, Weight range 1000-1800 lbs
                 cgMin = 30; cgMax = 37;
                 weightMin = 1000; weightMax = 1800;
+                cgUnit = 'inches';
+            } else if (aircraftType === 'C-172') {
+                // C-172: normal-category envelope of the selected model (inches aft of datum)
+                cgMin = 33; cgMax = 49;
+                weightMin = 1400; weightMax = 2600;
                 cgUnit = 'inches';
             } else if (aircraftType === 'P2006T') {
                 // P2006T: MAC range 14-32%, Weight range 1653-2844 lbs
@@ -4253,7 +4086,12 @@ const P2006T_SE_PERFORMANCE = {
             // Set grid increments based on aircraft type
             let majorCGIncrement, minorCGIncrement, majorWeightIncrement, minorWeightIncrement;
             
-            if (aircraftType === 'C-152') {
+            if (aircraftType === 'C-172') {
+                majorCGIncrement = 2;     // Every 2 inches
+                minorCGIncrement = 0.5;
+                majorWeightIncrement = 200;
+                minorWeightIncrement = 50;
+            } else if (aircraftType === 'C-152') {
                 majorCGIncrement = 1;     // Every 1 inch
                 minorCGIncrement = 0.2;   // Every 0.2 inches
                 majorWeightIncrement = 200; // Every 200 lbs
@@ -4357,6 +4195,14 @@ const P2006T_SE_PERFORMANCE = {
                 ctx.stroke();
                 ctx.setLineDash([]); // Reset to solid line
                 
+            } else if (aircraftType === 'C-172') {
+                // Selected model's normal-category envelope (POH Section 2 CG limits)
+                const env = (aircraftSpecs['C-172'] || {}).cgEnvelope || [];
+                env.forEach(([w, cg], i) => i ? ctx.lineTo(cgToX(cg), weightToY(w)) : ctx.moveTo(cgToX(cg), weightToY(w)));
+                ctx.closePath();
+                ctx.stroke();
+                ctx.fillStyle = 'rgba(143, 167, 191, 0.10)';
+                ctx.fill();
             } else if (aircraftType === 'P2006T') {
                 // P2006T CG envelope based on the chart image
                 // Forward limit: 16.5% MAC up to 2712 lb, then straight line to 19.5% MAC at 2844 lb
@@ -4494,9 +4340,9 @@ const P2006T_SE_PERFORMANCE = {
         
         function plotCurrentPositions(ctx, cgToX, weightToY, rect, margin) {
             const aircraftType = document.getElementById('aircraftType').value;
-            if (aircraftType !== 'C-152' && aircraftType !== 'P2006T') return;
+            if (aircraftType !== 'C-152' && aircraftType !== 'C-172' && aircraftType !== 'P2006T') return;
             
-            // Get current weights and CG values (ARM for C-152, MAC% for P2006T)
+            // Get current weights and CG values (ARM for C-152/172, MAC% for P2006T)
             const zeroFuelWeight = parseFloat(document.querySelector('.data-table tbody tr:nth-child(6) td:nth-child(2)').textContent) || 0;
             const takeoffWeight = parseFloat(document.querySelector('.data-table tbody tr:nth-child(10) td:nth-child(2)').textContent) || 0;
             const landingWeight = parseFloat(document.querySelector('.data-table tbody tr:nth-child(12) td:nth-child(2)').textContent) || 0;
@@ -4529,7 +4375,7 @@ const P2006T_SE_PERFORMANCE = {
                     // For C-152, draw the forward-limit reference (marker + drop line + label)
                     // at the forward CG limit for this weight. The solid dot below stays at the
                     // ACTUAL CG so you can see the loaded point sits inside the envelope.
-                    if (aircraftType === 'C-152') {
+                    if (aircraftType === 'C-152' || aircraftType === 'C-172') {
                         const fwdLimit = calculateCGForwardLimit(weight, aircraftType);
                         if (fwdLimit) {
                             const limitX = cgToX(fwdLimit);
@@ -4569,7 +4415,7 @@ const P2006T_SE_PERFORMANCE = {
                     ctx.lineWidth = 2;
                     ctx.stroke();
 
-                    if (aircraftType !== 'C-152') {
+                    if (aircraftType !== 'C-152' && aircraftType !== 'C-172') {
                         // For other aircraft, keep label near the point
                         ctx.fillStyle = color;
                         ctx.font = '10px Arial';
@@ -4693,6 +4539,9 @@ const P2006T_SE_PERFORMANCE = {
             const instructorBag = parseFloat(document.getElementById('instructorBag').value) || 0;
             const baggage1Input = parseFloat(document.getElementById('baggage1').value) || 0;
             const baggage2Input = parseFloat(document.getElementById('baggage2').value) || 0;
+            const rearPax = parseFloat(document.getElementById('rearSeats')?.value) || 0;
+            const rearSeatsGroup = document.getElementById('rearSeatsGroup');
+            if (rearSeatsGroup) rearSeatsGroup.style.display = aircraftType === 'C-152' ? 'none' : '';
             
             if (aircraftType === 'P2006T') {
                 // P2006T: My Bag + Instructor Bag go to rear seats, baggage inputs go to baggage compartments
@@ -4700,10 +4549,11 @@ const P2006T_SE_PERFORMANCE = {
                 const baggage1WeightCell = document.querySelector('.data-table tbody tr:nth-child(4) td:nth-child(2)'); // Baggage 1
                 const baggage2WeightCell = document.querySelector('.data-table tbody tr:nth-child(5) td:nth-child(2)'); // Baggage 2
                 
-                const rearSeatWeight = myBag + instructorBag;
+                const rearSeatWeight = myBag + instructorBag + rearPax;     // school form: bags ride on the rear seats
                 if (rearSeatWeightCell) rearSeatWeightCell.textContent = rearSeatWeight || '';
-                if (baggage1WeightCell) baggage1WeightCell.textContent = baggage1Input || '';
-                if (baggage2WeightCell) baggage2WeightCell.textContent = baggage2Input || '';
+                // One baggage compartment (arm 1.215 m): both baggage inputs load it; the Baggage 2 row is N/A
+                if (baggage1WeightCell) baggage1WeightCell.textContent = (baggage1Input + baggage2Input) || '';
+                void baggage2WeightCell;
                 
                 console.log('P2006T baggage - Rear seats:', rearSeatWeight, 'Baggage 1:', baggage1Input, 'Baggage 2:', baggage2Input);
             } else if (aircraftType === 'C-152') {
@@ -4716,11 +4566,14 @@ const P2006T_SE_PERFORMANCE = {
             } else {
                 // Other aircraft: Default behavior - My Bag + Instructor Bag go to baggage 1
                 const baggage1WeightCell = document.querySelector('.data-table tbody tr:nth-child(4) td:nth-child(2)'); // Baggage 1
-                const baggage1Weight = myBag + instructorBag + baggage1Input;
+                const oneArea = (aircraftSpecs[aircraftType] || {}).baggage2Arm == null;   // e.g. 172L: one baggage area
+                const baggage1Weight = myBag + instructorBag + baggage1Input + (oneArea ? baggage2Input : 0);
                 if (baggage1WeightCell) baggage1WeightCell.textContent = baggage1Weight || '';
                 
                 const baggage2WeightCell = document.querySelector('.data-table tbody tr:nth-child(5) td:nth-child(2)'); // Baggage 2
-                if (baggage2WeightCell) baggage2WeightCell.textContent = baggage2Input || '';
+                if (baggage2WeightCell && !oneArea) baggage2WeightCell.textContent = baggage2Input || '';
+                const rearSeatWeightCell = document.querySelector('.data-table tbody tr:nth-child(3) td:nth-child(2)'); // Rear seats
+                if (rearSeatWeightCell && rearSeatWeightCell.textContent !== 'N/A') rearSeatWeightCell.textContent = rearPax || '';
             }
             
             if (!aircraftType || !aircraftSpecs[aircraftType]) return;
@@ -4738,7 +4591,7 @@ const P2006T_SE_PERFORMANCE = {
                 fuelWeight = fuel * specs.fuelWeightMultiplier; // Single tank: fuel input x 6 lbs/gal
             }
             const fuelWeightCell = document.querySelector('.data-table tbody tr:nth-child(7) td:nth-child(2)'); // Fuel weight (row 7)
-            if (fuelWeightCell) fuelWeightCell.textContent = fuelWeight || '';
+            if (fuelWeightCell) fuelWeightCell.textContent = fuelWeight ? +fuelWeight.toFixed(1) : '';
             
             // Calculate estimated fuel burn - P2006T fuel burn rate is total for both tanks
             // Adding 25% safety margin: calculate base burn then add 25%
@@ -4761,11 +4614,12 @@ const P2006T_SE_PERFORMANCE = {
             const frontSeatWeightFromTable = parseFloat(document.querySelector('.data-table tbody tr:nth-child(2) td:nth-child(2)').textContent) || 0;
             const rearSeatWeight = parseFloat(document.querySelector('.data-table tbody tr:nth-child(3) td:nth-child(2)').textContent) || 0;
             const baggage1WeightFromTable = parseFloat(document.querySelector('.data-table tbody tr:nth-child(4) td:nth-child(2)').textContent) || 0;
+            const baggage2WeightFromTable = parseFloat(document.querySelector('.data-table tbody tr:nth-child(5) td:nth-child(2)').textContent) || 0;   // 'N/A' → 0
             
-            const zeroFuelWeight = basicEmptyWeight + frontSeatWeightFromTable + rearSeatWeight + baggage1WeightFromTable;
+            const zeroFuelWeight = basicEmptyWeight + frontSeatWeightFromTable + rearSeatWeight + baggage1WeightFromTable + baggage2WeightFromTable;
             const zeroFuelWeightCell = document.querySelector('.data-table tbody tr:nth-child(6) td:nth-child(2)'); // Zero Fuel Weight (row 6)
             if (zeroFuelWeightCell && zeroFuelWeight > 0) {
-                zeroFuelWeightCell.textContent = zeroFuelWeight;
+                zeroFuelWeightCell.textContent = +zeroFuelWeight.toFixed(1);
             }
             
             // Calculate moments for individual rows first
@@ -4779,6 +4633,7 @@ const P2006T_SE_PERFORMANCE = {
                 const frontSeatMoment = parseFloat(document.querySelector('.data-table tbody tr:nth-child(2) td:nth-child(4)').textContent) || 0;
                 const rearSeatMoment = parseFloat(document.querySelector('.data-table tbody tr:nth-child(3) td:nth-child(4)').textContent) || 0;
                 const baggage1Moment = parseFloat(document.querySelector('.data-table tbody tr:nth-child(4) td:nth-child(4)').textContent) || 0;
+                const baggage2Moment = parseFloat(document.querySelector('.data-table tbody tr:nth-child(5) td:nth-child(4)').textContent) || 0;
                 
                 // Debug logging
                 console.log('Basic Empty Moment:', basicEmptyMoment);
@@ -4796,7 +4651,7 @@ const P2006T_SE_PERFORMANCE = {
                     zeroFuelMomentCalculated = basicEmptyMoment + frontSeatMoment + baggage1Moment; // C-152: no rear seats
                     console.log('C-152 ZFW moment calculation:', basicEmptyMoment, '+', frontSeatMoment, '+', baggage1Moment, '=', zeroFuelMomentCalculated);
                 } else {
-                    zeroFuelMomentCalculated = basicEmptyMoment + frontSeatMoment + rearSeatMoment + baggage1Moment; // Include rear seats
+                    zeroFuelMomentCalculated = basicEmptyMoment + frontSeatMoment + rearSeatMoment + baggage1Moment + baggage2Moment; // rear seats + both baggage areas
                     console.log('P2006T ZFW moment calculation:', basicEmptyMoment, '+', frontSeatMoment, '+', rearSeatMoment, '+', baggage1Moment, '=', zeroFuelMomentCalculated);
                 }
                 console.log('Final Zero Fuel Moment Calculated:', zeroFuelMomentCalculated);
@@ -4826,7 +4681,7 @@ const P2006T_SE_PERFORMANCE = {
                 const rampWeight = zeroFuelWeight + fuelWeight;
                 const rampWeightCell = document.querySelector('.data-table tbody tr:nth-child(8) td:nth-child(2)'); // Ramp Weight (row 8)
                 if (rampWeightCell && rampWeight > 0) {
-                    rampWeightCell.textContent = rampWeight;
+                    rampWeightCell.textContent = +rampWeight.toFixed(1);
                 }
                 
                 // Calculate Ramp Weight moment (Zero Fuel Weight moment + Fuel moment)
@@ -4853,7 +4708,7 @@ const P2006T_SE_PERFORMANCE = {
                 const takeoffWeight = rampWeight + grndFuelUse;
                 const takeoffWeightCell = document.querySelector('.data-table tbody tr:nth-child(10) td:nth-child(2)'); // T/O Weight (row 10)
                 if (takeoffWeightCell && takeoffWeight > 0) {
-                    takeoffWeightCell.textContent = takeoffWeight;
+                    takeoffWeightCell.textContent = +takeoffWeight.toFixed(1);
                 }
                 
                 // Calculate T/O Weight moment (Ramp Weight moment + Grnd Fuel Use moment)
@@ -4915,6 +4770,10 @@ const P2006T_SE_PERFORMANCE = {
                 
                 // Update CG limits display
                 updateCGLimitsDisplay();
+                checkWBLimits();
+                // Distances depend on the T/O and landing weights just computed
+                updateTakeoffPerformance();
+                updateLandingPerformance();
             }, 10);
             
             // Calculate moments for all rows
@@ -4924,6 +4783,43 @@ const P2006T_SE_PERFORMANCE = {
         }
         
         
+        /* Mark anything outside the POH/AFM limits in red, with the reason on hover: T/O / landing / zero-fuel
+           weight, CG at zero fuel / T/O / landing (in or %MAC), baggage areas, usable fuel. */
+        function checkWBLimits() {
+            const type = document.getElementById('aircraftType').value, specs = aircraftSpecs[type];
+            const cell = (row, col) => document.querySelector(`.data-table tbody tr:nth-child(${row}) td:nth-child(${col})`);
+            document.querySelectorAll('.data-table td.over-limit, .right-panel .info-value.over-limit').forEach(el => { el.classList.remove('over-limit'); el.removeAttribute('title'); });
+            if (!specs) return;
+            const flag = (el, why) => { if (!el) return; el.classList.add('over-limit'); el.title = el.title ? el.title + '\n' + why : why; };
+            const limitItem = label => [...document.querySelectorAll('.right-panel .info-item')].find(i => i.querySelector('.info-label')?.textContent === label)?.querySelector('.info-value');
+            const num = el => parseFloat(el?.textContent) || 0;
+            const isMac = type === 'P2006T';
+            const cgOf = row => isMac ? extractMACPercentage(cell(row, 3)?.textContent || '') : num(cell(row, 3));
+            const unit = isMac ? '% MAC' : ' in';
+            [[6, 'Zero fuel', 'Zero Fuel CG fwd/aft', specs.maxZeroFuelWeight, 'max zero fuel weight'],
+             [10, 'Take-off', 'T/O CG fwd/aft', specs.maxTakeoffWeight || specs.maxWeight, 'max take-off weight'],
+             [12, 'Landing', 'LDG CG fwd/aft', specs.maxLandingWeight, 'max landing weight']].forEach(([row, name, cgLabel, maxW, maxName]) => {
+                const w = num(cell(row, 2)); if (!w) return;
+                if (maxW && w > maxW + 0.5) {
+                    flag(cell(row, 2), `${name} weight ${Math.round(w)} lb is over the ${maxName} (${maxW} lb)`);
+                    if (row === 10) flag(limitItem('Max T/O Weight'), `T/O weight ${Math.round(w)} lb`);
+                    if (row === 12) flag(limitItem('Max LDG Weight'), `Landing weight ${Math.round(w)} lb`);
+                }
+                const cg = cgOf(row); if (!cg) return;
+                const fwd = calculateCGForwardLimit(w, type), aft = specs.aftLimit;
+                const why = fwd != null && cg < fwd - 0.005 ? `${name} CG ${cg.toFixed(2)}${unit} is forward of the limit (${fwd.toFixed(2)}${unit})`
+                          : aft != null && cg > aft + 0.005 ? `${name} CG ${cg.toFixed(2)}${unit} is aft of the limit (${aft}${unit})` : '';
+                if (why) { flag(cell(row, 3), why); flag(limitItem(cgLabel), why); }
+            });
+            const b1 = num(cell(4, 2)), b2 = num(cell(5, 2));
+            if (specs.baggage1Max && b1 > specs.baggage1Max) flag(cell(4, 2), `Baggage ${b1} lb is over the ${specs.baggage1Max} lb limit`);
+            if (specs.baggage2Max && b2 > specs.baggage2Max) flag(cell(5, 2), `Baggage area 2 ${b2} lb is over the ${specs.baggage2Max} lb limit`);
+            if (specs.baggageCombinedMax && b1 + b2 > specs.baggageCombinedMax) { const why = `Baggage areas together ${b1 + b2} lb are over the ${specs.baggageCombinedMax} lb limit`; flag(cell(4, 2), why); flag(cell(5, 2), why); }
+            const fuelGal = parseFloat(document.getElementById('fuel').value) || 0;
+            const usable = specs.fuelUsablePerSide || specs.fuelUsable;
+            if (usable && fuelGal > usable + 0.05) flag(cell(7, 2), `${fuelGal} gal is more than the ${usable} gal usable${specs.fuelUsablePerSide ? ' per side' : ''}`);
+        }
+
         function calculateMoments() {
             console.log('calculateMoments() called');
             const rows = document.querySelectorAll('.data-table tbody tr');
@@ -5123,12 +5019,16 @@ const P2006T_SE_PERFORMANCE = {
                     && weatherWindGust > sustainedSpeed;
                 const effectiveSpeed = gustApplies ? weatherWindGust : sustainedSpeed;
 
-                headwind = Math.abs(effectiveSpeed * Math.cos(adjustedAngleDiff * Math.PI / 180));
+                // Signed: + headwind, − tailwind. A headwind is credited at the steady speed only (the POH gives
+                // no gust credit); a tailwind and the crosswind use the gust when gusting — the limiting case.
+                const along = Math.cos(adjustedAngleDiff * Math.PI / 180);
+                headwind = along >= 0 ? sustainedSpeed * along : effectiveSpeed * along;
                 crosswind = Math.abs(effectiveSpeed * Math.sin(adjustedAngleDiff * Math.PI / 180));
                 
                 const headwindElement = document.querySelector('[data-field="headwind"]');
                 if (headwindElement) {
-                    headwindElement.textContent = headwind.toFixed(1) + ' kts';
+                    headwindElement.textContent = headwind >= 0 ? headwind.toFixed(1) + ' kts' : `${(-headwind).toFixed(1)} kts TAILWIND`;
+                    headwindElement.classList.toggle('over-limit', headwind < 0);
                 }
                 
                 const crosswindElement = document.querySelector('[data-field="crosswind"]');

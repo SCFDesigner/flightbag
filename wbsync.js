@@ -13,7 +13,7 @@
   // Flight input fields to snapshot (left-panel data entry only — not settings/builder)
   const FLIGHT_FIELD_IDS = [
     'airportCode','tailNumber','aircraftType','weight','arm','moment',
-    'myWeight','myBag','instructorWeight','instructorBag','baggage1','baggage2',
+    'myWeight','myBag','instructorWeight','instructorBag','rearSeats','baggage1','baggage2',
     'fuel','time','hr50','hr100','ad1','ad2','annual','regist',
     'weatherObs','windDirection','windSpeed','visibility','weather','temperature',
     'dewpoint','altimeter','headwind','crosswind','fieldElevation',
@@ -220,8 +220,11 @@
     pendingResume = null;
   };
 
+  // Local test copies (the dev preview on localhost) never write the synced draft — test numbers would
+  // otherwise replace the real unsaved flight on the user's other devices.
+  const IS_LOCAL = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
   function scheduleAutoSave() {
-    if (applyingSnapshot || !currentRef) return;
+    if (applyingSnapshot || !currentRef || IS_LOCAL) return;
     clearTimeout(autoSaveTimer);
     autoSaveTimer = setTimeout(() => {
       const fields = collectFields();
