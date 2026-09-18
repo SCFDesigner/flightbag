@@ -149,3 +149,97 @@ input[type="number"].fb-input { font-family: var(--fb-mono); }
 .fb-home svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2.5; }
 
 @media (prefers-reduced-motion: reduce) { .fb-panel, .fb-btn, .fb-row, .fb-tab { transition: none; } }
+
+/* ── Liquid-glass buttons ──
+   Dark-theme take on the "liquid glass" button: a faint glass body (white gradient over the panel, slight
+   backdrop blur), a rim that catches light from the top-left and bottom-right (conic gradient masked to a
+   ring), a sheen that sweeps across on hover, and a slight press. Applies to every themed button (.fb-btn
+   and the pages' .btn); primary buttons are accent-tinted glass. Pages keep their own sizes and layout —
+   the selector (body.fb …) outranks page-level .btn rules only for these visual properties. */
+@property --fb-glass-rim { syntax: "<angle>"; inherits: false; initial-value: -75deg; }
+@property --fb-glass-sheen { syntax: "<angle>"; inherits: false; initial-value: -45deg; }
+body.fb :is(.btn, .fb-btn) {
+  --glass-tint: rgba(255, 255, 255, .035);
+  --glass-rim: rgba(255, 255, 255, .42);
+  position: relative;
+  isolation: isolate;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background:
+    linear-gradient(-75deg, rgba(255,255,255,.025), rgba(255,255,255,.10), rgba(255,255,255,.025)),
+    var(--glass-tint);
+  box-shadow:
+    inset 0 .125em .125em rgba(0,0,0,.35),           /* top inner shade */
+    inset 0 -.125em .125em rgba(255,255,255,.10),     /* bottom inner glow */
+    inset 0 0 .1em .25em rgba(255,255,255,.03),
+    0 .25em .3em -.12em rgba(0,0,0,.55);              /* lifted off the panel */
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  color: var(--fb-bright);
+  text-shadow: 0 .15em .1em rgba(0,0,0,.35);
+  transition: transform 400ms cubic-bezier(.25, 1, .5, 1), box-shadow 400ms cubic-bezier(.25, 1, .5, 1),
+              background 400ms cubic-bezier(.25, 1, .5, 1), color 200ms ease;
+}
+/* rim: light catches two opposite edges */
+body.fb :is(.btn, .fb-btn)::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background:
+    conic-gradient(from var(--fb-glass-rim) at 50% 50%, var(--glass-rim), rgba(255,255,255,0) 5% 40%, var(--glass-rim) 50%, rgba(255,255,255,0) 60% 95%, var(--glass-rim)),
+    linear-gradient(rgba(255,255,255,.10), rgba(255,255,255,.10));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  pointer-events: none;
+  transition: --fb-glass-rim 500ms ease;
+}
+/* sheen: a soft band that slides across on hover */
+body.fb :is(.btn, .fb-btn)::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  background: linear-gradient(var(--fb-glass-sheen), rgba(255,255,255,0) 0%, rgba(255,255,255,.16) 40% 50%, rgba(255,255,255,0) 55%);
+  background-size: 200% 200%;
+  background-position: 0% 50%;
+  background-repeat: no-repeat;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  transition: background-position 500ms cubic-bezier(.25, 1, .5, 1), --fb-glass-sheen 500ms cubic-bezier(.25, 1, .5, 1);
+}
+body.fb :is(.btn, .fb-btn):hover:not(:disabled) {
+  transform: scale(.975);
+  border-color: transparent;
+  color: var(--fb-bright);
+  box-shadow:
+    inset 0 .125em .125em rgba(0,0,0,.35),
+    inset 0 -.125em .125em rgba(255,255,255,.14),
+    inset 0 0 .05em .1em rgba(255,255,255,.08),
+    0 .15em .1em -.1em rgba(0,0,0,.6);
+}
+body.fb :is(.btn, .fb-btn):hover:not(:disabled)::after { --fb-glass-rim: -125deg; }
+body.fb :is(.btn, .fb-btn):hover:not(:disabled)::before { background-position: 25% 50%; }
+body.fb :is(.btn, .fb-btn):active:not(:disabled)::after { --fb-glass-rim: -75deg; }
+body.fb :is(.btn, .fb-btn):active:not(:disabled)::before { background-position: 50% 15%; --fb-glass-sheen: -15deg; }
+body.fb :is(.btn, .fb-btn):focus-visible { outline: 2px solid color-mix(in srgb, var(--fb-accent) 70%, transparent); outline-offset: 2px; }
+/* primary: accent-tinted glass */
+body.fb :is(.btn-primary, .fb-btn.primary) {
+  --glass-tint: color-mix(in srgb, var(--fb-accent) 62%, transparent);
+  --glass-rim: rgba(255, 225, 210, .55);
+  color: #fff;
+  font-weight: 600;
+}
+body.fb :is(.btn-primary, .fb-btn.primary):hover:not(:disabled) { color: #fff; filter: none; }
+/* danger: red-tinted glass */
+body.fb .btn-danger { --glass-tint: color-mix(in srgb, var(--fb-bad) 18%, transparent); color: #f0b8b0; }
+body.fb .btn-danger:hover:not(:disabled) { color: #fff; }
+/* touch screens: no hover state, keep the rim still */
+@media (hover: none) and (pointer: coarse) {
+  body.fb :is(.btn, .fb-btn)::after, body.fb :is(.btn, .fb-btn):hover::after, body.fb :is(.btn, .fb-btn):active::after { --fb-glass-rim: -75deg; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.fb :is(.btn, .fb-btn), body.fb :is(.btn, .fb-btn)::before, body.fb :is(.btn, .fb-btn)::after { transition: none; }
+}
