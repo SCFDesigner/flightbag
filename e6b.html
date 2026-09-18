@@ -155,16 +155,27 @@ body.fb {
   .xw-big b { font-size: 22px; }
   .xw-note { font-size: 11px; line-height: 1.35; }
   .xw-col .e6b-outs { grid-template-columns: repeat(3, 1fr); }
-  /* roomier on taller phones: spacing and field height grow with the screen height */
-  .xw-card.is-active { min-height: 100%; display: flex; flex-direction: column; }
-  .xw-card.is-active > .fb-body { flex: 1 1 auto; }
-  .e6b-card:not(.xw-card) .fb-body { row-gap: clamp(8px, 1.9dvh, 18px); column-gap: 10px; align-content: start; }
+  /* scale to fit: the active card fills the window, and field / result sizes are set from the
+     window's height (cqh = 1% of #e6b-grid's height), so taller phones get bigger controls;
+     any height still left over is spread evenly between the rows */
+  #e6b-grid { container-type: size; }
+  .e6b-card.is-active { min-height: 100%; display: flex; flex-direction: column; }
+  .e6b-card.is-active > .fb-body { flex: 1 1 auto; }
+  .e6b-card:not(.xw-card) .fb-body { row-gap: clamp(6px, 1.8cqh, 16px); column-gap: 10px; align-content: space-evenly; }
+  .e6b-card:not(.xw-card) .e6b-hint { font-size: clamp(11px, 2.1cqh, 14px); }
+  .e6b-card:not(.xw-card) .e6b-in { gap: clamp(3px, .8cqh, 6px); }
+  .e6b-card:not(.xw-card) .e6b-in label { font-size: clamp(11px, 2.1cqh, 14px); }
   .e6b-card:not(.xw-card) .e6b-in .fb-input,
-  .e6b-card:not(.xw-card) .e6b-fill,
-  .e6b-card:not(.xw-card) .e6b-convrow .fb-input { min-height: clamp(36px, 5.4dvh, 46px); }
-  .e6b-card:not(.xw-card) .e6b-in { gap: 5px; }
-  .e6b-card:not(.xw-card) .e6b-outs { gap: clamp(4px, 1dvh, 8px); margin-top: clamp(2px, 1dvh, 10px); }
-  .e6b-card:not(.xw-card) .e6b-out { padding: clamp(5px, 1dvh, 9px) 10px; }
+  .e6b-card:not(.xw-card) .e6b-convrow .fb-input { min-height: clamp(36px, 7.2cqh, 60px); font-size: clamp(14px, 2.8cqh, 21px); }
+  .e6b-card:not(.xw-card) .e6b-fill { min-height: clamp(36px, 7.2cqh, 60px); font-size: clamp(12px, 2.2cqh, 15px); }
+  .e6b-card:not(.xw-card) .e6b-convlbl { font-size: clamp(11px, 2cqh, 14px); }
+  /* result tiles become grid items of their own, two across, starting on a fresh row */
+  .e6b-card:not(.xw-card) .e6b-outs { display: contents; }
+  .e6b-card:not(.xw-card) .e6b-out { justify-content: center; min-height: clamp(44px, 10cqh, 84px); padding: 6px 12px; }
+  .e6b-card:not(.xw-card) .e6b-out:first-child { grid-column-start: 1; }
+  .e6b-card:not(.xw-card) .e6b-out:only-child { grid-column: 1 / -1; }
+  .e6b-card:not(.xw-card) .e6b-out span:first-child { font-size: clamp(10px, 1.8cqh, 12px); }
+  .e6b-card:not(.xw-card) .e6b-out span:last-child { font-size: clamp(15px, 3.4cqh, 26px); }
   /* crosswind: the diagram takes what it needs; leftover height spreads between the rows below it */
   .xw-card .fb-body, .xw-grid { display: flex; flex-direction: column; flex: 1 1 auto; }
   .xw-col { flex: 1 1 auto; align-content: space-between; row-gap: 6px; }
