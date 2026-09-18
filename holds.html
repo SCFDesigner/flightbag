@@ -124,6 +124,7 @@ main { padding: 8px; }
   color: var(--fb-accent);
   letter-spacing: 1px;
 }
+.entry-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 10px; }
 .legend i { font-style: normal; font-size: 11px; color: var(--fb-text); display: inline-flex; align-items: center; gap: 6px; }
 .legend b { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
@@ -148,6 +149,51 @@ main { padding: 8px; }
 @media (max-width: 560px) {
   .ref-grid { grid-template-columns: 1fr; }
   .canvas-wrap { padding: 6px; }
+}
+/* ── phones: the whole trainer fits the screen — header, card and controls fixed; the hold window takes
+   whatever height is left (sized by container units), Quick Reference folds away behind its title ── */
+@media (max-width: 700px), (orientation: landscape) and (max-height: 500px) {
+  html, body.fb { height: 100%; overflow: hidden; }
+  body.fb { height: 100dvh; display: flex; flex-direction: column; }
+  header { flex: none; padding: max(8px, env(safe-area-inset-top)) 12px 8px; row-gap: 6px; }
+  main { flex: 1 1 auto; min-height: 0; padding: 0 8px max(8px, env(safe-area-inset-bottom)); }
+  .trainer { height: 100%; max-width: none; display: flex; flex-direction: column; }
+  .trainer > section { flex: none; padding: 10px 12px; }
+  #notesCard h2 { margin: 0; cursor: pointer; user-select: none; }
+  #notesCard h2::after { content: ''; margin-left: auto; width: 7px; height: 7px; border-right: 1.5px solid var(--fb-dim); border-bottom: 1.5px solid var(--fb-dim); transform: rotate(45deg) translateY(-2px); transition: transform var(--fb-ease); }
+  #notesCard.open h2::after { transform: rotate(225deg); }
+  #notesCard .ref-grid { display: none; margin-top: 8px; grid-template-columns: 1fr; }
+  #notesCard.open .ref-grid { display: grid; }
+  .canvas-wrap { flex: 1 1 auto !important; min-height: 120px; container-type: size; display: flex; align-items: center; justify-content: center; padding: 6px !important; }
+  #holdCanvas { width: min(100cqw, 100cqh); max-width: none; height: auto; margin: 0; }
+  /* controls keep their natural height; very long lesson text scrolls inside its own section */
+  #learnCard, #entriesCard, #practiceCard { max-height: 46dvh; overflow-y: auto; }
+  .card p { font-size: 13px; line-height: 1.45; margin-bottom: 6px; }
+  .ctl { margin-bottom: 6px; }
+  .btnrow { margin-top: 4px; }
+  .legend { margin-top: 6px; }
+  /* Entries: label + value on one line with the slider under it, Turns inline, entry beside its button */
+  #entriesCard .ctl:not(.ctl-turns) { display: grid; grid-template-columns: 1fr auto; row-gap: 0; }
+  #entriesCard .ctl:not(.ctl-turns) label { grid-column: 1; grid-row: 1; font-size: 12px; color: var(--fb-dim); min-width: 0; }
+  #entriesCard .ctl:not(.ctl-turns) .val { grid-column: 2; grid-row: 1; }
+  #entriesCard .ctl:not(.ctl-turns) input[type=range] { grid-column: 1 / -1; grid-row: 2; min-height: 26px; }
+  #entriesCard .ctl-turns { flex-wrap: nowrap; }
+  #entriesCard .ctl-turns label { flex: none; min-width: 0; font-size: 12px; color: var(--fb-dim); }
+  #entriesCard .ctl-turns .seg { flex: 1; }
+  #entriesCard .ctl-turns .seg button { flex: 1; padding: 0 6px; }
+  #entriesCard .entry-row p { margin-bottom: 0; }
+  #entriesCard .entry-name { font-size: 20px; }
+  #entriesCard .entry-row .btnrow { margin-top: 0; }
+  #entriesCard > h2, #practiceCard > h2 { display: none; }   /* the tab already names it */
+}
+/* phone on its side: hold window left, controls right */
+@media (orientation: landscape) and (max-height: 500px) {
+  header { flex-wrap: nowrap; }
+  .tabs { width: auto; margin-left: auto; }
+  .trainer { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  #notesCard { grid-column: 2; grid-row: 1; }
+  .canvas-wrap { grid-column: 1; grid-row: 1 / span 2; border-top: 0 !important; }
+  #learnCard, #entriesCard, #practiceCard { grid-column: 2; grid-row: 2; max-height: none; border-top: 1px solid var(--fb-line); }
 }
 @media (max-width: 480px) {
   .ctl { flex-wrap: wrap; }
@@ -211,17 +257,21 @@ main { padding: 8px; }
         <input type="range" id="ctlHeading" min="0" max="359" value="45" step="5">
         <span class="val" id="valHeading">045°</span>
       </div>
-      <div class="ctl">
+      <div class="ctl ctl-turns">
         <label>Turns</label>
         <div class="seg">
           <button id="segR" class="on" onclick="setTurns('R')">Standard (Right)</button>
           <button id="segL" onclick="setTurns('L')">Nonstandard (Left)</button>
         </div>
       </div>
-      <p style="font-size:12px;">Entry for this arrival:</p>
-      <div class="entry-name" id="entryName">DIRECT</div>
-      <div class="btnrow">
-        <button class="btn btn-primary" onclick="flyEntry()">Fly this entry</button>
+      <div class="entry-row">
+        <div>
+          <p style="font-size:12px;">Entry for this arrival:</p>
+          <div class="entry-name" id="entryName">DIRECT</div>
+        </div>
+        <div class="btnrow">
+          <button class="btn btn-primary" onclick="flyEntry()">Fly this entry</button>
+        </div>
       </div>
       <div class="legend">
         <i><b style="background:rgba(217,119,87,.55);"></b> Direct (180°)</i>
@@ -249,6 +299,16 @@ main { padding: 8px; }
 </main>
 
 <script src="holds.js"></script>
+<script>
+/* Phones: Quick Reference folds behind its title (tap to open) so the hold window keeps the space */
+(function () {
+  const card = document.getElementById('notesCard');
+  card.querySelector('h2').addEventListener('click', () => {
+    card.classList.toggle('open');
+    if (window.FlightBagTheme) window.FlightBagTheme.place();
+  });
+})();
+</script>
 <script>
 /* Flight Bag theme: re-place panel lighting after cards show/hide (visual only). */
 (function(){
