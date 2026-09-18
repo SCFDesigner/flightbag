@@ -172,6 +172,25 @@ body.fb {
     </div>
   </section>
 
+  <!-- PIVOTAL ALTITUDE -->
+  <section class="e6b-card fb-panel" id="pivotal">
+    <div class="fb-head"><h2 class="fb-title"><svg viewBox="0 0 24 24"><path d="M12 21v-7M9 21h6M12 14l-2-4h4z"/><path d="M4 7a10 5 0 0 1 16 0"/></svg>Pivotal Altitude</h2></div>
+    <div class="fb-body">
+      <div class="e6b-hint">PA (ft AGL) = GS² ÷ 11.3. Enter GS, or TAS + wind for the upwind/downwind range.</div>
+      <div class="e6b-in"><label for="paGs">Groundspeed (kts)</label><input type="number" inputmode="decimal" class="fb-input" id="paGs" placeholder="90"></div>
+      <div class="e6b-in"><label for="paTas">TAS (kts)</label><input type="number" inputmode="decimal" class="fb-input" id="paTas" placeholder="90"></div>
+      <div class="e6b-in"><label for="paWind">Wind Speed (kts)</label><input type="number" inputmode="decimal" class="fb-input" id="paWind" placeholder="10"></div>
+      <div class="e6b-in"><label for="paElev">Ground Elev (ft)</label><input type="number" inputmode="decimal" class="fb-input" id="paElev" placeholder="642"></div>
+      <div class="e6b-outs">
+        <div class="e6b-out"><span>Pivotal Alt AGL</span><span id="paOutAgl">—</span></div>
+        <div class="e6b-out"><span>Pivotal Alt MSL</span><span id="paOutMsl">—</span></div>
+        <div class="e6b-out"><span>Upwind (GS · PA)</span><span id="paOutUp">—</span></div>
+        <div class="e6b-out"><span>Downwind (GS · PA)</span><span id="paOutDn">—</span></div>
+      </div>
+      <div class="e6b-hint">Highest on the downwind side, lowest upwind. Uses ground elevation for MSL.</div>
+    </div>
+  </section>
+
   <!-- TIME · SPEED · DISTANCE -->
   <section class="e6b-card fb-panel" id="tsd">
     <div class="fb-head"><h2 class="fb-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg>Time · Speed · Distance</h2></div>
@@ -698,6 +717,25 @@ body.fb {
   xwCalc();
   loadRunways();
   load('metar').then(ok => { if (ok) xwFill(); });
+})();
+</script>
+<script>
+/* Pivotal altitude (eights on pylons): PA ft AGL = GS(kts)² / 11.3 */
+(function () {
+  const $ = id => document.getElementById(id);
+  const num = id => { const v = parseFloat($(id).value); return isFinite(v) ? v : null; };
+  const pa = gs => gs * gs / 11.3;
+  const ft = v => Math.round(v / 10) * 10 + ' ft';
+  function calc() {
+    const gs = num('paGs'), tas = num('paTas'), w = num('paWind') ?? 0, elev = num('paElev') ?? 0;
+    const base = gs ?? tas;   // no GS typed: use TAS (no-wind PA)
+    $('paOutAgl').textContent = base ? ft(pa(base)) : '—';
+    $('paOutMsl').textContent = base ? ft(pa(base) + elev) : '—';
+    const show = (id, g) => $(id).textContent = tas && g > 0 ? `${Math.round(g)} kt · ${ft(pa(g) + elev)}` : '—';
+    show('paOutUp', tas - w);
+    show('paOutDn', tas + w);
+  }
+  ['paGs', 'paTas', 'paWind', 'paElev'].forEach(id => $(id).addEventListener('input', calc));
 })();
 </script>
 <script src="e6b.js"></script>
