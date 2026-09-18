@@ -78,7 +78,9 @@ body.fb {
 .xw-note { font-size: var(--fb-fs-xs); line-height: 1.5; color: var(--fb-dim); }
 .xw-note.warn { color: var(--fb-bad); }
 .xw-fig { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-#xwSvg { width: 100%; max-width: 340px; aspect-ratio: 1; display: block; }
+#xwSvg { width: 100%; max-width: 340px; aspect-ratio: 1; display: block; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; border-radius: 50%; }
+#xwSvg.drag { cursor: grabbing; }
+#xwSvg:focus-visible { outline: 2px solid var(--fb-accent); outline-offset: 4px; }
 #xwSvg text { font-family: var(--fb-mono); }
 @media (max-width: 760px) { .xw-grid { grid-template-columns: 1fr; } .xw-fig { order: -1; } }
 
@@ -142,8 +144,8 @@ body.fb {
           <div class="xw-note" id="xwNote">Uses the peak gust when there is one, otherwise the wind speed. Max demo: C-152 12 kts · C-172 15 kts.</div>
         </div>
         <div class="xw-fig">
-          <svg id="xwSvg" viewBox="0 0 300 300" role="img" aria-label="Runway and wind diagram"></svg>
-          <div class="xw-note" id="xwCaption">Runway-up view: you're on final to the bottom end.</div>
+          <svg id="xwSvg" viewBox="0 0 300 300" role="slider" tabindex="0" aria-label="Runway heading — drag to rotate, arrow keys step 10°" aria-valuemin="10" aria-valuemax="360"></svg>
+          <div class="xw-note" id="xwCaption">Drag the compass to turn the runway 10° at a time (arrow keys / scroll work too). You're on final to the bottom end.</div>
         </div>
       </div>
     </div>
@@ -629,6 +631,50 @@ body.fb {
     return String(r).padStart(2, '0') + ({ L: 'R', R: 'L', C: 'C' }[s] || '');
   }
   window.e6bFillXwind = xwFill;
+
+  /* Turn the runway by dragging the compass (mouse or finger), scrolling, or arrow keys — 10° steps.
+     Runway-up view: dragging the ring clockwise brings lower headings to the top. */
+  const svgEl = $('xwSvg');
+  const snap10 = h => { const v = Math.round(norm360(h) / 10) * 10 % 360; return v === 0 ? 360 : v; };
+  function norm360(h) { return ((h % 360) + 360) % 360; }
+  function setHeading(h) {
+    h = snap10(h);
+    if (num('xwRwy') === h) return;
+    rwyManual = true;
+    // keep the chip highlighted when a runway end has this heading (current pick, then preferred, then any)
+    const match = id => rwyHdg(id) === h;
+    const pref = (PREFERRED_ENDS[icao()] || []).filter(id => rwyEnds.includes(id));
+    rwyPicked = (rwyPicked && match(rwyPicked) && rwyPicked) || pref.find(match) || rwyEnds.find(match) || null;
+    $('xwRwy').value = h;
+    svgEl.setAttribute('aria-valuenow', h);
+    xwCalc();
+  }
+  const ptrAngle = e => {
+    const r = svgEl.getBoundingClientRect();
+    return Math.atan2(e.clientX - (r.left + r.width / 2), -(e.clientY - (r.top + r.height / 2))) * 180 / Math.PI;
+  };
+  let drag = null;
+  svgEl.addEventListener('pointerdown', e => {
+    drag = { a0: ptrAngle(e), h0: num('xwRwy') ?? 360, id: e.pointerId };
+    try { svgEl.setPointerCapture(e.pointerId); } catch (_) {}
+    svgEl.classList.add('drag');
+    e.preventDefault();
+  });
+  svgEl.addEventListener('pointermove', e => {
+    if (!drag || e.pointerId !== drag.id) return;
+    let d = ptrAngle(e) - drag.a0;
+    d = ((d + 540) % 360) - 180;          // unwrap across ±180
+    drag.a0 += d; drag.acc = (drag.acc || 0) + d;
+    setHeading(drag.h0 - drag.acc);
+  });
+  const endDrag = e => { if (drag && e.pointerId === drag.id) { drag = null; svgEl.classList.remove('drag'); } };
+  svgEl.addEventListener('pointerup', endDrag);
+  svgEl.addEventListener('pointercancel', endDrag);
+  svgEl.addEventListener('wheel', e => { e.preventDefault(); setHeading((num('xwRwy') ?? 360) + (e.deltaY > 0 ? 10 : -10)); }, { passive: false });
+  svgEl.addEventListener('keydown', e => {
+    const step = { ArrowRight: 10, ArrowUp: 10, ArrowLeft: -10, ArrowDown: -10 }[e.key];
+    if (step) { e.preventDefault(); setHeading((num('xwRwy') ?? 360) + step); }
+  });
 
   ['xwRwy', 'xwDir', 'xwSpd', 'xwGst', 'xwMax'].forEach(id => $(id).addEventListener('input', () => {
     if (id === 'xwRwy') rwyManual = true;
