@@ -52,13 +52,47 @@ body.fb {
 .e6b-in .fb-input { min-height: 36px; text-align: right; }
 .e6b-fill { align-self: flex-start; min-height: 36px; margin: 4px 0 2px; }
 .e6b-fill svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.e6b-outs { margin-top: 6px; display: flex; flex-direction: column; gap: 2px; }
+.e6b-outs { margin-top: 6px; display: flex; flex-direction: column; gap: 4px; }
+/* Results are instrument readouts — the opposite of the recessed input wells: a raised bezel, a dark
+   glass face with a reflection across the top half, and digits that light up (accent glow) once there
+   is a result and sit dark while it's "—". .lit is toggled by the readout script at the bottom. */
+.e6b-out, .xw-big {
+  --glass: #151312;
+  position: relative;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.014) 46%, rgba(255,255,255,0) 50%),
+    radial-gradient(130% 160% at 50% 0%, #1c1917 0%, var(--glass) 70%);
+  border: 1px solid #2c2a27;
+  border-radius: var(--fb-radius-sm);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.07),        /* bezel top edge catches the light */
+    inset 0 -1px 0 rgba(0,0,0,.55),
+    0 1px 0 rgba(0,0,0,.6), 0 2px 5px rgba(0,0,0,.35);   /* sits proud of the panel */
+  transition: border-color .25s ease, background .25s ease;
+}
 .e6b-out {
   display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
-  background: var(--fb-cell); border-radius: var(--fb-radius-sm); padding: 7px 10px;
+  padding: 7px 10px;
 }
-.e6b-out span:first-child { font-size: var(--fb-fs-xs); letter-spacing: 1.5px; text-transform: uppercase; color: var(--fb-dim); }
-.e6b-out span:last-child { font-family: var(--fb-mono); font-size: var(--fb-fs-md); color: var(--fb-accent); text-align: right; }
+.e6b-out > span:first-child { font-size: var(--fb-fs-xs); letter-spacing: 1.5px; text-transform: uppercase; color: var(--fb-dim); }
+.e6b-out > span:last-child, .xw-big b {
+  font-family: var(--fb-mono); font-size: var(--fb-fs-md); text-align: right; white-space: nowrap;
+  color: #4f4c47;                                   /* unlit segment */
+  transition: color .25s ease, text-shadow .25s ease;
+}
+.e6b-out.lit, .xw-big.lit {
+  border-color: color-mix(in srgb, var(--fb-accent) 26%, #2c2a27);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.014) 46%, rgba(255,255,255,0) 50%),
+    radial-gradient(90% 120% at 50% 100%, color-mix(in srgb, var(--fb-accent) 9%, transparent), transparent 70%),
+    radial-gradient(130% 160% at 50% 0%, #1c1917 0%, var(--glass) 70%);
+}
+.e6b-out.lit span:last-child, .xw-big.lit b {
+  color: #f2a07f;
+  text-shadow: 0 0 6px rgba(217,119,87,.55), 0 0 18px rgba(217,119,87,.22);
+}
+/* number big, unit / words small */
+.ro-u { font-size: .6em; margin-left: .3em; opacity: .75; letter-spacing: .5px; }
 
 /* crosswind */
 .xw-card { grid-column: 1 / -1; }
@@ -74,15 +108,16 @@ body.fb {
 .xw-chip:hover { border-color: var(--fb-accent); color: var(--fb-bright); }
 .xw-chip.on { border-color: var(--fb-accent); color: var(--fb-accent); background: color-mix(in srgb, var(--fb-accent) 12%, var(--fb-cell)); }
 .xw-chip .hw { font-size: 10px; color: var(--fb-dim); margin-left: 6px; }
-.xw-big { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; background: var(--fb-cell); border-radius: var(--fb-radius-sm); padding: 10px 12px; margin-top: 6px; }
+.xw-big { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 10px 12px; margin-top: 6px; }
 .xw-big span:first-child { font-size: var(--fb-fs-xs); letter-spacing: 1.5px; text-transform: uppercase; color: var(--fb-dim); }
-.xw-big b { font-family: var(--fb-mono); font-size: 26px; font-weight: 600; color: var(--fb-accent); }
-.xw-big b small { font-size: var(--fb-fs-sm); font-weight: 400; color: var(--fb-text); margin-left: 6px; }
-.xw-big.over b { color: var(--fb-bad); }
+.xw-big b { font-size: 26px; font-weight: 600; }
+.xw-big b small { font-size: var(--fb-fs-sm); font-weight: 400; margin-left: 6px; opacity: .75; }
+.xw-big.over { border-color: color-mix(in srgb, var(--fb-bad) 45%, #2c2a27); }
+.xw-big.over b { color: #ef7a6c; text-shadow: 0 0 6px rgba(192,88,76,.6), 0 0 18px rgba(192,88,76,.28); }
 .xw-note { font-size: var(--fb-fs-xs); line-height: 1.5; color: var(--fb-dim); }
 .xw-note.warn { color: var(--fb-bad); }
 .xw-fig { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-#xwSvg { width: 100%; max-width: 340px; aspect-ratio: 1; display: block; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; border-radius: 50%; }
+#xwSvg { width: 100%; max-width: 340px; aspect-ratio: 1; display: block; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
 #xwSvg.drag { cursor: grabbing; }
 #xwSvg:focus-visible { outline: 2px solid var(--fb-accent); outline-offset: 4px; }
 #xwSvg text { font-family: var(--fb-mono); }
@@ -144,8 +179,8 @@ body.fb {
   .e6b-fill { grid-column: auto !important; align-self: end; margin: 0; min-height: 34px; padding: 0 8px; font-size: 12px; white-space: nowrap; }
   .e6b-outs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 2px; }
   .e6b-out { flex-direction: column; align-items: flex-start; gap: 1px; padding: 5px 9px; }
-  .e6b-out span:first-child { font-size: 10px; letter-spacing: 1px; }
-  .e6b-out span:last-child { font-size: 15px; text-align: left; }
+  .e6b-out > span:first-child { font-size: 10px; letter-spacing: 1px; }
+  .e6b-out > span:last-child { font-size: 15px; text-align: left; }
   .e6b-hint { font-size: 11px; line-height: 1.35; }
   /* crosswind */
   .xw-grid { grid-template-columns: 1fr; gap: 8px; }
@@ -179,14 +214,14 @@ body.fb {
   .e6b-card:not(.xw-card) .e6b-out { justify-content: center; min-height: clamp(44px, 10cqh, 84px); padding: 6px 12px; }
   .e6b-card:not(.xw-card) .e6b-out:first-child { grid-column-start: 1; }
   .e6b-card:not(.xw-card) .e6b-out:only-child { grid-column: 1 / -1; }
-  .e6b-card:not(.xw-card) .e6b-out span:first-child { font-size: clamp(10px, 1.8cqh, 12px); }
-  .e6b-card:not(.xw-card) .e6b-out span:last-child { font-size: clamp(15px, 3.4cqh, 26px); }
+  .e6b-card:not(.xw-card) .e6b-out > span:first-child { font-size: clamp(10px, 1.8cqh, 12px); }
+  .e6b-card:not(.xw-card) .e6b-out > span:last-child { font-size: clamp(15px, 3.4cqh, 26px); }
   /* crosswind: the diagram takes what it needs; leftover height spreads between the rows below it */
   .xw-card .fb-body, .xw-grid { display: flex; flex-direction: column; flex: 1 1 auto; }
   .xw-grid { align-items: stretch; }          /* base grid uses align-items:start → the figure shrank to 300px and sat left */
   .xw-fig { width: 100%; }
   .xw-col { flex: 1 1 auto; align-content: space-between; row-gap: 6px; }
-  .xw-col .e6b-out span:first-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+  .xw-col .e6b-out > span:first-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
   #e6b-grid { grid-template-columns: 1fr; }
 }
 /* short phones (SE etc.): smaller diagram, note only when it's a warning */
@@ -950,6 +985,29 @@ html.embed body.fb { padding: 0 0 max(6px, env(safe-area-inset-bottom)); backgro
   // Tap the one-line METAR to read all of it
   const bar = document.querySelector('.wx-bar');
   document.getElementById('metarDisplay').addEventListener('click', () => bar.classList.toggle('open'));
+})();
+</script>
+<script>
+/* Readouts: light up a result tile when it holds a value, and split "87 kts" into a big number and a
+   small unit. The calculators write plain text; this reformats it (and ignores its own rewrite). */
+(function () {
+  const EMPTY = /^\s*(—|-|)\s*$/;
+  function fmt(span) {
+    const raw = span.textContent;
+    if (span.dataset.raw === raw) return;
+    span.dataset.raw = raw;
+    const tile = span.closest('.e6b-out, .xw-big');
+    if (tile) tile.classList.toggle('lit', !EMPTY.test(raw));
+    if (span.tagName === 'B') return;                       // crosswind headline formats itself
+    const m = raw.match(/^(-?[\d.,]+°?)\s*([^\d]*)$/);  // number + words (no second number)
+    if (m && m[2]) span.innerHTML = `${m[1]}<span class="ro-u">${m[2].replace(/</g, '&lt;')}</span>`;
+  }
+  const spans = [...document.querySelectorAll('.e6b-out > span:last-child, .xw-big > b')];
+  const mo = new MutationObserver(recs => recs.forEach(r => {
+    const sp = r.target.nodeType === 1 ? r.target.closest('.e6b-out > span:last-child, .xw-big > b') : r.target.parentElement?.closest('.e6b-out > span:last-child, .xw-big > b');
+    if (sp) fmt(sp);
+  }));
+  spans.forEach(sp => { fmt(sp); mo.observe(sp, { childList: true, characterData: true, subtree: true }); });
 })();
 </script>
 <script src="e6b.js"></script>
