@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>VOR Trainer</title>
+<link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="theme/flightbag-theme.css">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  /* vor.js writes inline font-family:var(--mono) — keep this alias */
+  --mono: var(--fb-mono);
+}
+body { min-height: 100vh; }
+header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  /* home-screen app: clear the iPhone status bar / notch */
+  padding: max(10px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 10px max(16px, env(safe-area-inset-left));
+  border-bottom: 1px solid var(--fb-line);
+}
+header h1 {
+  font-size: var(--fb-fs-xs);
+  font-weight: 500;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--fb-bright);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+header h1 svg, .card h2 svg, .card-ico { width: 15px; height: 15px; stroke: var(--fb-accent); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.fb-home { min-height: 36px; }
+.tabs { margin-left: auto; }
+.tab {
+  min-height: 32px;
+  padding: 0 14px;
+  font-weight: 600;
+  letter-spacing: 2px;
+}
+
+main { padding: 8px; }
+/* One trainer card: quick reference → instrument window → mode controls */
+.trainer { max-width: 600px; margin: 0 auto; }
+.trainer > section { padding: var(--fb-pad); }
+.trainer > section + section { border-top: 1px solid var(--fb-line); }
+.ref-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 18px; }
+.ref-grid p { font-size: 12.5px; line-height: 1.5; margin-bottom: 4px; }
+.canvas-wrap { padding: 10px; }
+#navCanvas { display: block; width: 100%; max-width: 540px; aspect-ratio: 1; margin: 0 auto; border-radius: var(--fb-radius-sm); background: var(--fb-cell); }
+.card h2 {
+  font-size: var(--fb-fs-xs);
+  font-weight: 500;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--fb-bright);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.card-head { display: flex; align-items: center; gap: 9px; margin-bottom: 10px; }
+.card p { font-size: 13.5px; line-height: 1.55; color: var(--fb-text); margin-bottom: 8px; }
+.card p strong { color: var(--fb-bright); }
+.card p em { color: var(--fb-accent); font-style: normal; font-weight: 600; }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  background: color-mix(in srgb, var(--fb-cell) 82%, transparent);
+  color: var(--fb-text);
+  border: 1px solid var(--fb-border);
+  padding: 6px 14px;
+  border-radius: var(--fb-radius-sm);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  transition: border-color var(--fb-ease), color var(--fb-ease), background var(--fb-ease);
+}
+.btn:hover { border-color: var(--fb-accent); color: var(--fb-bright); }
+.btn-primary { background: var(--fb-accent); border-color: var(--fb-accent); color: var(--fb-on-accent); font-weight: 600; }
+.btn-primary:hover { color: var(--fb-on-accent); filter: brightness(1.08); }
+.btn:disabled { opacity: .35; cursor: default; }
+.btn:disabled:hover { border-color: var(--fb-border); color: var(--fb-text); }
+.btnrow { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+.stepdots { display: flex; gap: 5px; align-items: center; margin-left: auto; }
+.stepdots span { width: 7px; height: 7px; border-radius: 50%; background: var(--fb-cell); border: 1px solid var(--fb-border); }
+.stepdots span.on { background: var(--fb-accent); border-color: var(--fb-accent); }
+
+.ctl { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.ctl label { font-size: var(--fb-fs-sm); color: var(--fb-text); min-width: 118px; }
+.ctl input[type=range] { flex: 1; accent-color: var(--fb-accent); min-height: 36px; }
+.ctl .val {
+  font-family: var(--fb-mono);
+  font-size: 13px;
+  color: var(--fb-bright);
+  min-width: 46px;
+  text-align: right;
+}
+.seg { display: flex; gap: 2px; padding: 2px; background: var(--fb-cell); border: 1px solid var(--fb-line); border-radius: var(--fb-radius-sm); }
+.seg button {
+  background: none;
+  color: var(--fb-dim);
+  border: none;
+  border-radius: 4px;
+  min-height: 32px;
+  padding: 0 12px;
+  font: inherit;
+  font-size: var(--fb-fs-sm);
+  cursor: pointer;
+  transition: background var(--fb-ease), color var(--fb-ease);
+}
+.seg button:hover { color: var(--fb-bright); }
+.seg button.on { background: var(--fb-panel); color: var(--fb-accent); box-shadow: 0 1px 0 rgba(217, 119, 87, .6); }
+.entry-name {
+  font-family: var(--fb-mono);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--fb-accent);
+  letter-spacing: 1px;
+}
+.entry-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 10px; }
+.legend i { font-style: normal; font-size: 11px; color: var(--fb-text); display: inline-flex; align-items: center; gap: 6px; }
+.legend b { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+
+.answers { display: flex; gap: 8px; margin-top: 10px; }
+.answers .btn { flex: 1; text-align: center; font-weight: 600; font-family: var(--fb-mono); letter-spacing: .5px; }
+.answers .btn.good { border-color: var(--fb-ok); background: color-mix(in srgb, var(--fb-ok) 15%, transparent); color: var(--fb-bright); }
+.answers .btn.badpick { border-color: var(--fb-bad); background: color-mix(in srgb, var(--fb-bad) 14%, transparent); color: var(--fb-bright); }
+.ctl.quiz-opt { margin-bottom: 10px; flex-wrap: nowrap; }
+.ctl.quiz-opt label { min-width: 0; flex: none; font-size: var(--fb-fs-sm); color: var(--fb-dim); }
+.quiz-q { font-size: 14.5px; line-height: 1.6; color: var(--fb-bright); }
+.quiz-q .mono { font-family: var(--fb-mono); color: var(--fb-warn); }
+.score { font-family: var(--fb-mono); font-size: var(--fb-fs-sm); color: var(--fb-dim); margin-top: 10px; }
+.feedback { font-size: 13px; margin-top: 10px; line-height: 1.5; color: var(--fb-text); display: none; }
+.feedback.show { display: block; }
+.feedback .yes { color: var(--fb-ok); font-weight: 700; }
+.feedback .no { color: var(--fb-bad); font-weight: 700; }
+
+@media (max-width: 860px) {
+  header { flex-wrap: wrap; }
+  .tabs { margin-left: 0; width: 100%; display: flex; }
+  .tab { flex: 1; text-align: center; min-height: 36px; }
+}
+@media (max-width: 560px) {
+  .ref-grid { grid-template-columns: 1fr; }
+  .canvas-wrap { padding: 6px; }
+}
+/* ── phones: the whole trainer fits the screen — header, card and controls fixed; the hold window takes
+   whatever height is left (sized by container units), Quick Reference folds away behind its title ── */
+@media (max-width: 700px), (orientation: landscape) and (max-height: 500px) {
+  html, body.fb { height: 100%; overflow: hidden; }
+  body.fb { height: 100dvh; display: flex; flex-direction: column; }
+  header { flex: none; padding: max(8px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) 8px max(12px, env(safe-area-inset-left)); row-gap: 6px; }
+  main { flex: 1 1 auto; min-height: 0; padding: 0 8px max(8px, env(safe-area-inset-bottom)); }
+  .trainer { height: 100%; max-width: none; display: flex; flex-direction: column; }
+  .trainer > section { flex: none; padding: 10px 12px; }
+  #notesCard h2 { margin: 0; cursor: pointer; user-select: none; }
+  #notesCard h2::after { content: ''; margin-left: auto; width: 7px; height: 7px; border-right: 1.5px solid var(--fb-dim); border-bottom: 1.5px solid var(--fb-dim); transform: rotate(45deg) translateY(-2px); transition: transform var(--fb-ease); }
+  #notesCard.open h2::after { transform: rotate(225deg); }
+  #notesCard .ref-grid { display: none; margin-top: 8px; grid-template-columns: 1fr; }
+  #notesCard.open .ref-grid { display: grid; }
+  .canvas-wrap { flex: 1 1 auto !important; min-height: 120px; container-type: size; display: flex; align-items: center; justify-content: center; padding: 6px !important; }
+  #navCanvas { width: min(100cqw, 100cqh); max-width: none; height: auto; margin: 0; }
+  /* controls keep their natural height; very long lesson text scrolls inside its own section */
+  #learnCard, #practiceCard, #flyCard { max-height: 46dvh; overflow-y: auto; }
+  .card p { font-size: 13px; line-height: 1.45; margin-bottom: 6px; }
+  .ctl { margin-bottom: 6px; }
+  .btnrow { margin-top: 4px; }
+  .legend { margin-top: 6px; }
+}
+/* phone on its side: hold window left, controls right */
+@media (orientation: landscape) and (max-height: 500px) {
+  header { flex-wrap: nowrap; }
+  .tabs { width: auto; margin-left: auto; }
+  .trainer { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  #notesCard { grid-column: 2; grid-row: 1; }
+  .canvas-wrap { grid-column: 1; grid-row: 1 / span 2; border-top: 0 !important; }
+  #learnCard, #practiceCard, #flyCard { grid-column: 2; grid-row: 2; max-height: none; border-top: 1px solid var(--fb-line); }
+  #flyCard { grid-row: 1 / span 2; border-top: 0; }   /* Quick Reference is hidden in Fly */
+}
+@media (max-width: 480px) {
+  .ctl { flex-wrap: wrap; }
+  .ctl label { min-width: 0; flex: 1 1 100%; }
+  .seg { flex: 1; }
+  .seg button { flex: 1; }
+}
+.answers { flex-wrap: wrap; }
+.answers .btn { min-width: 30%; }
+/* FLY */
+.fly-clr { font-size: 13.5px; line-height: 1.5; }
+.fly-clr .fly-pos { color: var(--fb-dim); font-size: 12.5px; }
+.fly-step { display: flex; gap: 10px; align-items: baseline; margin-top: 8px; font-size: 13px; line-height: 1.45; color: var(--fb-text); }
+.fly-step > b { font-family: var(--fb-mono); color: var(--fb-accent); flex: none; min-width: 26px; }
+.fly-step span b { color: var(--fb-bright); font-family: var(--fb-mono); font-weight: 600; }
+.fly-status { min-height: 16px; margin: 2px 0 6px 36px; font-family: var(--fb-mono); font-size: 12px; color: var(--fb-ok); }
+.fly-status.warn { color: var(--fb-bad); }
+.fly-row { display: grid; grid-template-columns: auto auto minmax(0, 1fr); gap: 14px; align-items: center; }
+.knob { display: grid; grid-template-columns: auto auto; grid-template-rows: auto auto; gap: 4px 8px; align-items: center; outline: none; }
+.knob:focus-visible .knob-cap { box-shadow: 0 0 0 2px var(--fb-accent); }
+.knob-cap {
+  grid-row: 1 / span 2; width: 62px; height: 62px; border-radius: 50%; position: relative; cursor: grab; touch-action: none;
+  background: radial-gradient(circle at 50% 35%, #3a3936, #1d1d1c 70%);
+  border: 1px solid #0b0b0a;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 2px 6px rgba(0,0,0,.6), 0 0 0 4px rgba(255,255,255,.03);
+}
+.knob-cap:active { cursor: grabbing; }
+.knob-cap i { position: absolute; inset: 0; transition: transform .05s linear; }
+.knob-cap i::before { content: ''; position: absolute; left: 50%; top: 6px; width: 3px; height: 14px; margin-left: -1.5px; border-radius: 2px; background: var(--fb-accent); box-shadow: 0 0 6px rgba(217,119,87,.6); }
+.knob-crs .knob-cap i::before { background: var(--fb-ok); box-shadow: 0 0 6px rgba(111,175,106,.6); }
+.knob-read span { display: block; font-size: 10px; letter-spacing: 1.5px; color: var(--fb-dim); }
+.knob-read b { font-family: var(--fb-mono); font-size: 17px; font-weight: 600; color: var(--fb-accent); }
+.knob-crs .knob-read b { color: var(--fb-ok); }
+.knob-btns { display: flex; gap: 4px; }
+.knob-btns button { width: 28px; height: 26px; border-radius: 5px; border: 1px solid var(--fb-border); background: var(--fb-cell); color: var(--fb-text); font: inherit; font-size: 15px; line-height: 1; cursor: pointer; }
+.knob-btns button:hover { border-color: var(--fb-accent); color: var(--fb-bright); }
+.fly-ctl { display: flex; flex-direction: column; gap: 6px; align-items: stretch; min-width: 0; }
+.fly-ctl .btnrow { margin: 0; flex-wrap: nowrap; }
+.fly-ctl .btnrow .btn { flex: 1; min-height: 32px; padding: 4px 8px; }
+.fly-ctl .seg button { flex: 1; min-height: 26px; padding: 0 6px; }
+@media (max-width: 520px) {
+  .fly-row { grid-template-columns: auto auto; }
+  .fly-ctl { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; }
+  .fly-ctl .btnrow { flex: 1 1 100%; }
+  .fly-ctl .seg { flex: 1; }
+}
+@media (max-width: 700px), (orientation: landscape) and (max-height: 500px) {
+  .tab { letter-spacing: 1px; padding: 0 6px; }
+  .fly-clr { font-size: 12.5px; }
+  .fly-step { margin-top: 4px; font-size: 12px; }
+  .fly-status { margin-bottom: 4px; }
+  .knob-cap { width: 54px; height: 54px; }
+  #flyCard > h2 { display: none; }
+}
+</style>
+</head>
+<body class="fb">
+
+<header>
+  <a class="fb-home" href="index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Flight Bag</a>
+  <h1><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M3 12h18"/><path d="M8.5 6h7l3.5 6-3.5 6h-7L5 12z"/></svg>VOR Trainer</h1>
+  <div class="tabs fb-tabs" role="tablist">
+    <button class="tab fb-tab active" data-mode="learn" onclick="setMode('learn')">LEARN</button>
+    <button class="tab fb-tab" data-mode="practice" onclick="setMode('practice')">QUIZ</button>
+    <button class="tab fb-tab" data-mode="fly" onclick="setMode('fly')">FLY</button>
+  </div>
+</header>
+
+<main>
+  <div class="trainer fb-panel">
+    <section class="card" id="notesCard">
+      <h2><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg>Quick Reference</h2>
+      <div class="ref-grid">
+      <p><strong>Radials</strong> go <em>from</em> the station. Inbound on the 240 radial = OBS <em>060 TO</em>; outbound = <em>240 FROM</em>.</p>
+      <p><strong>Where am I?</strong> Twist the OBS until the needle centres with a <em>FROM</em> flag — that's your radial.</p>
+      <p><strong>Intercept:</strong> set the course, turn <em>30–45°</em> toward the needle, and start the turn onto course as it comes off full scale.</p>
+      <p><strong>Wind — bracket:</strong> drifting off? Turn 20° toward the needle; once centred, take half out (10°). Keep halving until it stays — that's your wind correction.</p>
+      </div>
+    </section>
+
+    <section class="canvas-wrap"><canvas id="navCanvas" aria-label="VOR navigation display"></canvas></section>
+
+    <!-- LEARN -->
+    <section class="card" id="learnCard">
+      <div class="card-head">
+        <svg class="card-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/></svg>
+        <h2 id="learnTitle" style="margin-bottom:0;">Radials</h2>
+        <div class="stepdots" id="learnDots"></div>
+      </div>
+      <div id="learnBody"></div>
+      <div class="btnrow">
+        <button class="btn" id="learnPrev" onclick="learnStepMove(-1)">← Back</button>
+        <button class="btn btn-primary" id="learnNext" onclick="learnStepMove(1)">Next →</button>
+        <button class="btn" onclick="replayLearn()">Replay animation</button>
+      </div>
+    </section>
+
+    <!-- PRACTICE -->
+    <section class="card" id="practiceCard" style="display:none;">
+      <h2><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 0 1 4.9.7c0 1.7-2.4 2.1-2.4 3.8"/><path d="M12 17h.01"/></svg>VOR Quiz</h2>
+      <div class="quiz-q" id="quizText"></div>
+      <div class="answers" id="answers"></div>
+      <div class="feedback" id="quizFeedback"></div>
+      <div class="btnrow">
+        <button class="btn btn-primary" id="nextQBtn" onclick="nextQuestion()" style="display:none;">Next question →</button>
+      </div>
+      <div class="score" id="scoreLine"></div>
+    </section>
+
+    <!-- FLY -->
+    <section class="card" id="flyCard" style="display:none;">
+      <div class="quiz-q fly-clr" id="flyClr"></div>
+      <div class="fly-step"><b id="flyStepN">1/5</b><span id="flyStep"></span></div>
+      <div class="fly-status" id="flyStatus"></div>
+      <div class="fly-row">
+        <div class="knob" id="knobHdg" tabindex="0" role="slider" aria-label="Heading bug (drag, scroll or arrow keys)">
+          <div class="knob-cap"><i></i></div>
+          <div class="knob-read"><span>HDG</span><b id="knobHdgV">000</b></div>
+          <div class="knob-btns"><button type="button" data-d="-5" aria-label="Heading bug left 5">−</button><button type="button" data-d="5" aria-label="Heading bug right 5">+</button></div>
+        </div>
+        <div class="knob knob-crs" id="knobCrs" tabindex="0" role="slider" aria-label="Course / OBS (drag, scroll or arrow keys)">
+          <div class="knob-cap"><i></i></div>
+          <div class="knob-read"><span>CRS</span><b id="knobCrsV">000</b></div>
+          <div class="knob-btns"><button type="button" data-d="-5" aria-label="Course minus 5">−</button><button type="button" data-d="5" aria-label="Course plus 5">+</button></div>
+        </div>
+        <div class="fly-ctl">
+          <div class="btnrow">
+            <button class="btn btn-primary" id="flyPlay" onclick="flyPlay()">Play</button>
+            <button class="btn" onclick="flyNew()">New</button>
+          </div>
+          <div class="seg" id="flyView"><button class="on" data-v="hsi" onclick="flyView('hsi')">HSI</button><button data-v="map" onclick="flyView('map')">Map</button></div>
+          <div class="seg" id="flySpeed"><button data-v="5" onclick="flySpeed(5)">5×</button><button class="on" data-v="10" onclick="flySpeed(10)">10×</button><button data-v="20" onclick="flySpeed(20)">20×</button></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script src="vor.js"></script>
+<script>
+/* Phones: Quick Reference folds behind its title (tap to open) so the instrument keeps the space */
+(function () {
+  const card = document.getElementById('notesCard');
+  card.querySelector('h2').addEventListener('click', () => {
+    card.classList.toggle('open');
+    if (window.FlightBagTheme) window.FlightBagTheme.place();
+  });
+})();
+/* Flight Bag theme: re-place panel lighting after cards show/hide (visual only). */
+(function(){
+  const place = () => { if (window.FlightBagTheme) window.FlightBagTheme.place(); };
+  ['setMode','answer','nextQuestion','flyView'].forEach(n => {
+    const f = window[n];
+    if (typeof f === 'function') window[n] = function(){ const r = f.apply(this, arguments); place(); return r; };
+  });
+})();
+</script>
+<script src="theme/flightbag-theme.js"></script>
+</body>
+</html>
