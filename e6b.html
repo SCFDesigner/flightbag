@@ -123,7 +123,7 @@ body.fb {
 
 /* ── phones: fit a whole calculator on screen — no card title (the tab names it), inputs and
    results in two columns with labels on top, crosswind diagram sized to the screen height ── */
-@media (max-width: 700px) {
+@media (max-width: 700px), (orientation: landscape) and (max-height: 500px) {
   .fb-header { margin-bottom: 8px; }
   .fb-header p { display: none; }
   .wx-bar .fb-body { padding-top: 7px; padding-bottom: 7px; }
@@ -185,9 +185,48 @@ body.fb {
   #e6b-grid { grid-template-columns: 1fr; }
 }
 /* short phones (SE etc.): smaller diagram, note only when it's a warning */
-@media (max-width: 700px) and (max-height: 740px) {
+@media (max-width: 700px) and (max-height: 740px), (orientation: landscape) and (max-height: 500px) {
   #xwSvg { width: min(100%, 25dvh); }
   .xw-note:not(.warn) { display: none; }
+}
+/* ── phone on its side: header, weather and a vertical tab list down the left; the calculator
+   fills the rest of the screen on the right ── */
+@media (orientation: landscape) and (max-height: 500px) {
+  body.fb {
+    display: grid; grid-template-columns: minmax(168px, 200px) minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr); column-gap: 10px; row-gap: 8px;
+    padding: max(8px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  }
+  .fb-header { grid-column: 1; grid-row: 1; margin: 0; flex-wrap: nowrap; gap: 8px; }
+  .fb-header h1 { font-size: 16px; letter-spacing: 3px; }
+  .wx-bar { grid-column: 1; grid-row: 2; margin: 0; }
+  .wx-bar .fb-body { flex-wrap: wrap; gap: 6px; }
+  .wx-bar .fb-input { flex: 1 1 60px; width: auto; min-width: 60px; }
+  .wx-bar .fb-btn { flex: 1 1 auto; }
+  .wx-metar { flex: 1 1 100%; font-size: 11px; }
+  .e6b-tabs {
+    grid-column: 1; grid-row: 3; margin: 0; min-height: 0;
+    flex-direction: column; overflow-x: hidden; overflow-y: auto; align-self: stretch;
+  }
+  .e6b-tabs .fb-tab { text-align: left; min-height: 34px; padding: 0 12px; }
+  #e6b-grid { grid-column: 2; grid-row: 1 / -1; min-height: 0; height: 100%; }
+  /* wide and short: three fields / results across */
+  .e6b-card:not(.xw-card) .fb-body { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  /* crosswind: diagram on the left, sized to the height; inputs and results beside it */
+  .xw-grid { flex-direction: row; align-items: center; gap: 14px; }
+  .xw-fig { width: auto; flex: 0 0 auto; }
+  #xwSvg { width: min(42cqw, 92cqh); }
+  .xw-col { flex: 1 1 0; min-width: 0; align-self: stretch; }
+  .xw-rwys { justify-content: flex-start; }
+  .e6b-card:not(.xw-card) .e6b-convrow .fb-input { min-height: 32px; }
+}
+/* small phones on their side (SE): slimmer menu, smaller diagram so the fields keep their width */
+@media (orientation: landscape) and (max-height: 500px) and (max-width: 740px) {
+  body.fb { grid-template-columns: 148px minmax(0, 1fr); }
+  #xwSvg { width: min(34cqw, 92cqh); }
+  .xw-grid { gap: 10px; }
+  .xw-big b { font-size: 20px; }
+  .xw-big b small { display: block; margin: 0; text-align: right; }
 }
 </style>
 </head>
@@ -860,7 +899,10 @@ body.fb {
     cards.forEach(c => c.classList.toggle('is-active', c.id === id));
     tabs.forEach(t => { const on = t.dataset.card === id; t.classList.toggle('active', on); t.setAttribute('aria-selected', on); });
     const t = tabs.find(t => t.dataset.card === id);
-    if (t) nav.scrollTo({ left: t.offsetLeft - (nav.clientWidth - t.offsetWidth) / 2, behavior: user ? 'smooth' : 'auto' });
+    if (t) {   // centre the tab in the strip — sideways on portrait, up/down in the landscape side list
+      const nr = nav.getBoundingClientRect(), tr = t.getBoundingClientRect();
+      nav.scrollBy({ left: (tr.left + tr.width / 2) - (nr.left + nr.width / 2), top: (tr.top + tr.height / 2) - (nr.top + nr.height / 2), behavior: user ? 'smooth' : 'auto' });
+    }
     grid.scrollTop = 0;
     try { localStorage.setItem(KEY, id); } catch (e) {}
     if (user && location.hash) history.replaceState(null, '', location.pathname + location.search);
