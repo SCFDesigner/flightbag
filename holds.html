@@ -293,6 +293,13 @@ main { padding: 8px; }
           <button id="patOff" onclick="setShowPattern(false)">Hidden</button>
         </div>
       </div>
+      <div class="ctl ctl-turns quiz-opt">
+        <label>View</label>
+        <div class="seg">
+          <button id="viewHdg" class="on" onclick="setHeadingUp(true)">Heading up</button>
+          <button id="viewNorth" onclick="setHeadingUp(false)">North up</button>
+        </div>
+      </div>
       <div class="quiz-q" id="quizText"></div>
       <div class="answers">
         <button class="btn" id="ansDirect" onclick="answer('DIRECT')">DIRECT</button>
@@ -313,6 +320,8 @@ main { padding: 8px; }
   // reflect the saved "Pattern: Shown / Hidden" choice on the buttons
   (function(){ let on = true; try { on = localStorage.getItem('holds_showPattern') !== '0'; } catch (e) {}
     document.getElementById('patOn').classList.toggle('on', on); document.getElementById('patOff').classList.toggle('on', !on); })();
+  (function(){ let on = true; try { on = localStorage.getItem('holds_headingUp') !== '0'; } catch (e) {}
+    document.getElementById('viewHdg').classList.toggle('on', on); document.getElementById('viewNorth').classList.toggle('on', !on); })();
 </script>
 <script>
 /* Phones: Quick Reference folds behind its title (tap to open) so the hold window keeps the space */

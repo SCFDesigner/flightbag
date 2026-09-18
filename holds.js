@@ -125,16 +125,27 @@ function entryPathFrom(rel, entry, dir){
 }
 
 /* ---------- Drawing ---------- */
+/* View rotation: 0 = north up. The quiz can fly heading-up (like an HSI): the whole scene turns so your
+   heading points up. clearScene() sets the rotation for the scene; text is always drawn upright. */
+let VIEW = 0;
+function upPt(x, y){        // scene point → unrotated canvas point
+  if(!VIEW) return {x, y};
+  const a = -rad(VIEW), dx = x - FIX.x, dy = y - FIX.y;
+  return {x: FIX.x + dx*Math.cos(a) - dy*Math.sin(a), y: FIX.y + dx*Math.sin(a) + dy*Math.cos(a)};
+}
+function upright(fn){ cx2.save(); cx2.setTransform(DPR,0,0,DPR,0,0); fn(); cx2.restore(); }
 function clearScene(){
+  cx2.setTransform(DPR,0,0,DPR,0,0);
   cx2.clearRect(0,0,W,H);
   cx2.fillStyle = C.bg; cx2.fillRect(0,0,W,H);
   cx2.strokeStyle = 'rgba(255,255,255,0.04)'; cx2.lineWidth = 1;
   for(let x=0;x<W;x+=46){cx2.beginPath();cx2.moveTo(x,0);cx2.lineTo(x,H);cx2.stroke();}
   for(let y=0;y<H;y+=46){cx2.beginPath();cx2.moveTo(0,y);cx2.lineTo(W,y);cx2.stroke();}
+  if(VIEW){ cx2.translate(FIX.x, FIX.y); cx2.rotate(-rad(VIEW)); cx2.translate(-FIX.x, -FIX.y); }
   drawCompass();
 }
 /* Compass card around the pie: ticks every 5°, numbers every 30° (aviation
-   style — N 3 6 E 12 15 S 21 24 W 30 33). North is always up. */
+   style — N 3 6 E 12 15 S 21 24 W 30 33). Turns with the view; labels stay upright. */
 function drawCompass(){
   cx2.strokeStyle = C.line; cx2.lineWidth = 1;
   cx2.beginPath(); cx2.arc(FIX.x, FIX.y, RING_R, 0, Math.PI*2); cx2.stroke();
@@ -149,14 +160,15 @@ function drawCompass(){
     cx2.stroke();
   }
   const names = {0:'N', 90:'E', 180:'S', 270:'W'};
-  cx2.font = '600 12px '+monoFont();
-  cx2.textAlign = 'center'; cx2.textBaseline = 'middle';
-  for(let d=0; d<360; d+=30){
-    const r = RING_R + 23;
-    cx2.fillStyle = d===0 ? C.accent : names[d] ? C.text : C.text2;
-    cx2.fillText(names[d] || String(d/10), FIX.x + Math.sin(rad(d))*r, FIX.y - Math.cos(rad(d))*r);
-  }
-  cx2.textAlign = 'start'; cx2.textBaseline = 'alphabetic';
+  upright(() => {
+    cx2.font = '600 12px '+monoFont();
+    cx2.textAlign = 'center'; cx2.textBaseline = 'middle';
+    for(let d=0; d<360; d+=30){
+      const r = RING_R + 23, q = upPt(FIX.x + Math.sin(rad(d))*r, FIX.y - Math.cos(rad(d))*r);
+      cx2.fillStyle = d===0 ? C.accent : names[d] ? C.text : C.text2;
+      cx2.fillText(names[d] || String(d/10), q.x, q.y);
+    }
+  });
 }
 /* The inbound leg's bearing line: from the compass ring along the holding
    radial (course + 180) into the fix, arrowhead at the fix. `tag` labels it. */
@@ -179,7 +191,8 @@ function drawInbound(course, tag){
 }
 function monoFont(){ return getComputedStyle(document.body).getPropertyValue('--mono') || 'monospace'; }
 /* Small label with a backing plate, so it reads over lines and sectors */
-function pill(p, txt){
+function pill(p, txt){ upright(() => pillFlat(upPt(p.x, p.y), txt)); }
+function pillFlat(p, txt){
   cx2.font = '600 11px '+monoFont();
   const w = cx2.measureText(txt).width + 14, h = 20;
   const x = Math.max(4, Math.min(W - w - 4, p.x - w/2)), y = p.y - h/2;
@@ -196,10 +209,11 @@ function drawFix(label){
   const s=7;
   cx2.moveTo(FIX.x, FIX.y-s); cx2.lineTo(FIX.x+s, FIX.y+s*0.8); cx2.lineTo(FIX.x-s, FIX.y+s*0.8);
   cx2.closePath(); cx2.fill();
-  cx2.fillStyle = C.text3; cx2.font = '11px '+monoFont();
-  cx2.textAlign='center';
-  cx2.fillText(label || 'FIX', FIX.x, FIX.y + 22);
-  cx2.textAlign='start';
+  upright(() => {
+    cx2.fillStyle = C.text3; cx2.font = '11px '+monoFont();
+    cx2.textAlign='center';
+    cx2.fillText(label || 'FIX', FIX.x, FIX.y + 22);
+  });
 }
 function drawPath(pts, color, width, dash){
   if(!pts.length) return;
@@ -219,9 +233,12 @@ function drawPlane(p, color){
   cx2.restore();
 }
 function labelAt(x,y,txt,color,size){
-  cx2.fillStyle = color || C.text2;
-  cx2.font = (size||11)+'px -apple-system, sans-serif';
-  cx2.textAlign='center'; cx2.fillText(txt, x, y); cx2.textAlign='start';
+  const q = upPt(x, y);
+  upright(() => {
+    cx2.fillStyle = color || C.text2;
+    cx2.font = (size||11)+'px -apple-system, sans-serif';
+    cx2.textAlign='center'; cx2.fillText(txt, q.x, q.y);
+  });
 }
 /* Sector fan around the fix. Sector angles are absolute canvas headings
    ("from" direction of arrival tracks). */
@@ -404,6 +421,9 @@ try{ score = JSON.parse(localStorage.getItem('holds_score')||'{"ok":0,"total":0}
 // It is always revealed with the answer.
 let showPattern = true;
 try{ showPattern = localStorage.getItem('holds_showPattern') !== '0'; }catch(e){}
+// Heading-up (default): the scene turns so your heading points up, like the HSI; off = north up.
+let headingUp = true;
+try{ headingUp = localStorage.getItem('holds_headingUp') !== '0'; }catch(e){}
 function nextQuestion(){
   const radial = Math.floor(Math.random()*36)*10;
   const dir = Math.random()<0.7 ? 1 : -1;             // standard more common
@@ -429,6 +449,7 @@ function nextQuestion(){
 /* Question scene: radial + your arrival; the hold itself only when "Show pattern" is on. Sectors stay
    hidden until answered. */
 function drawQuizQuestion(){
+  VIEW = headingUp ? quiz.heading : 0;
   clearScene();
   if(showPattern){
     cx2.save();
@@ -449,6 +470,16 @@ window.setShowPattern = on => {
   document.getElementById('patOn').classList.toggle('on', showPattern);
   document.getElementById('patOff').classList.toggle('on', !showPattern);
   if(quiz && !quiz.answered){ stopAnim(); drawQuizQuestion(); }
+};
+window.setHeadingUp = on => {
+  headingUp = !!on;
+  try{ localStorage.setItem('holds_headingUp', on ? '1' : '0'); }catch(e){}
+  document.getElementById('viewHdg').classList.toggle('on', headingUp);
+  document.getElementById('viewNorth').classList.toggle('on', !headingUp);
+  if(!quiz) return;
+  VIEW = headingUp ? quiz.heading : 0;
+  if(!quiz.answered){ stopAnim(); drawQuizQuestion(); }
+  else if(staticDraw){ stopAnim(); staticDraw(); drawPath(animPts, C.accent, 2.5); drawPlane(animPts[animPts.length-1]); }
 };
 window.answer = pick => {
   if(!quiz || quiz.answered) return;
@@ -494,6 +525,7 @@ function updateScore(){
 
 /* ---------- Mode switching ---------- */
 window.setMode = mode => {
+  VIEW = 0;                                   // learn / entries are always north-up
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.mode===mode));
   document.getElementById('learnCard').style.display    = mode==='learn'   ? '' : 'none';
   document.getElementById('entriesCard').style.display  = mode==='entries' ? '' : 'none';
