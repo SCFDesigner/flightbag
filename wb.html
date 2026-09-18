@@ -1597,6 +1597,11 @@
                 <label class="input-label">Time</label>
                 <input type="text" inputmode="decimal" class="input-field" id="time" placeholder="">
             </div>
+            <!-- 172 only: planned fuel burn (GPH). Blank = the model's POH cruise value (placeholder). -->
+            <div class="input-group" id="fuelBurnGroup" style="display:none;">
+                <label class="input-label">Fuel Burn (GPH)</label>
+                <input type="text" inputmode="decimal" class="input-field" id="fuelBurn" placeholder="">
+            </div>
         </div>
 
         <!-- Section 3: Maintenance -->
@@ -4578,7 +4583,7 @@
             
             if (!aircraftType || !aircraftSpecs[aircraftType]) return;
             
-            const specs = aircraftSpecs[aircraftType];
+            let specs = aircraftSpecs[aircraftType];
             const fuel = parseFloat(document.getElementById('fuel').value) || 0;
             const time = parseFloat(document.getElementById('time').value) || 0;
             
@@ -4595,6 +4600,14 @@
             
             // Calculate estimated fuel burn - P2006T fuel burn rate is total for both tanks
             // Adding 25% safety margin: calculate base burn then add 25%
+            // 172: the Fuel Burn field overrides the model's POH value (shown as its placeholder)
+            const fuelBurnGroup = document.getElementById('fuelBurnGroup'), fuelBurnInput = document.getElementById('fuelBurn');
+            if (fuelBurnGroup) fuelBurnGroup.style.display = aircraftType === 'C-172' ? '' : 'none';
+            if (aircraftType === 'C-172' && fuelBurnInput) {
+                fuelBurnInput.placeholder = specs.fuelBurnRate;
+                const typed = parseFloat(fuelBurnInput.value);
+                if (typed > 0) specs = Object.assign({}, specs, { fuelBurnRate: typed });
+            }
             console.log('Fuel burn calculation - Aircraft type:', aircraftType, 'Time:', time, 'Fuel burn rate:', specs.fuelBurnRate);
             let baseFuelBurn;
             if (aircraftType === 'P2006T') {
@@ -4801,7 +4814,13 @@
              [12, 'Landing', 'LDG CG fwd/aft', specs.maxLandingWeight, 'max landing weight']].forEach(([row, name, cgLabel, maxW, maxName]) => {
                 const w = num(cell(row, 2)); if (!w) return;
                 if (maxW && w > maxW + 0.5) {
-                    flag(cell(row, 2), `${name} weight ${Math.round(w)} lb is over the ${maxName} (${maxW} lb)`);
+                    // P2006T: the MTOW is set by the airframe's modifications, not by the load — say which config would allow it
+                    let cfgNote = '';
+                    if (type === 'P2006T' && row !== 6) {
+                        const fit = Object.entries(P2006T_CONFIGS).find(([, c]) => c.maxTakeoffWeight >= w);
+                        cfgNote = fit ? ` for this configuration — only a ${fit[0]} kg airplane (${fit[1].title.split('— ')[1]}) may weigh this; set Config if this tail has it` : '';
+                    }
+                    flag(cell(row, 2), `${name} weight ${Math.round(w)} lb is over the ${maxName} (${maxW} lb)${cfgNote}`);
                     if (row === 10) flag(limitItem('Max T/O Weight'), `T/O weight ${Math.round(w)} lb`);
                     if (row === 12) flag(limitItem('Max LDG Weight'), `Landing weight ${Math.round(w)} lb`);
                 }

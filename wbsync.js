@@ -14,7 +14,7 @@
   const FLIGHT_FIELD_IDS = [
     'airportCode','tailNumber','aircraftType','weight','arm','moment',
     'myWeight','myBag','instructorWeight','instructorBag','rearSeats','baggage1','baggage2',
-    'fuel','time','hr50','hr100','ad1','ad2','annual','regist',
+    'fuel','time','fuelBurn','hr50','hr100','ad1','ad2','annual','regist',
     'weatherObs','windDirection','windSpeed','visibility','weather','temperature',
     'dewpoint','altimeter','headwind','crosswind','fieldElevation',
     'pressureAltitude','densityAltitude','runwayHeading','runwayLength',
