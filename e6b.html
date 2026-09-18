@@ -10,6 +10,10 @@
 <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="stylesheet" href="theme/flightbag-theme.css">
+<script>
+  // ?embed=1 — shown inside the W&B page's E6B column: no page header, no W&B link (already there)
+  if (new URLSearchParams(location.search).has('embed')) document.documentElement.classList.add('embed');
+</script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body.fb {
@@ -228,6 +232,13 @@ body.fb {
   .xw-big b { font-size: 20px; }
   .xw-big b small { display: block; margin: 0; text-align: right; }
 }
+/* embedded in wb.html */
+html.embed .fb-header, html.embed .e6b-link { display: none !important; }
+html.embed body.fb { padding: 0 0 max(6px, env(safe-area-inset-bottom)); background: transparent; }
+/* W&B link card (desktop grid) */
+.e6b-link .fb-body { gap: 10px; }
+.e6b-link .fb-btn { align-self: flex-start; min-height: 36px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+.e6b-link .fb-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 </style>
 </head>
 <body class="fb">
@@ -284,6 +295,15 @@ body.fb {
           <div class="xw-note" id="xwCaption">Drag the compass to turn the runway 10° at a time (click it first to use the scroll wheel or arrow keys). You're on final to the bottom end.</div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- W&B — our full calculator lives on its own page (a tab that jumps there on phones) -->
+  <section class="e6b-card fb-panel e6b-link" id="wb" data-href="wb.html">
+    <div class="fb-head"><h2 class="fb-title"><svg viewBox="0 0 24 24"><path d="M12 3v18M5 21h14M6 7h12M6 7l-3 7a3 3 0 0 0 6 0zM18 7l-3 7a3 3 0 0 0 6 0z"/></svg>Weight &amp; Balance</h2></div>
+    <div class="fb-body">
+      <div class="e6b-hint">The full W&amp;B calculator — loading, CG envelope, fuel and FSP import. It has this E6B built in too.</div>
+      <a class="fb-btn" href="wb.html">Open W&amp;B<svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></a>
     </div>
   </section>
 
@@ -462,9 +482,11 @@ body.fb {
   const $ = id => document.getElementById(id);
   const input = $('airportCode'), display = $('metarDisplay');
 
+  const EMBED = document.documentElement.classList.contains('embed');
+  const given = (new URLSearchParams(location.search).get('airport') || '').toUpperCase();
   let saved = null;
   try { saved = localStorage.getItem(AIRPORT_KEY); } catch (e) {}
-  input.value = (saved || DEFAULT_AIRPORT).toUpperCase();
+  input.value = (/^[A-Z0-9]{3,4}$/.test(given) ? given : (saved || DEFAULT_AIRPORT)).toUpperCase();
 
   const cache = {};          // ICAO -> { wx: Promise, elev: Promise }
   let elevDb = null;         // Promise of { ICAO: elevation_ft }
@@ -581,7 +603,7 @@ body.fb {
   async function load(kind) {
     const code = icao();
     if (!/^[A-Z0-9]{3,4}$/.test(code)) { status('Enter a 3–4 letter airport identifier.', 'warn'); return false; }
-    try { localStorage.setItem(AIRPORT_KEY, code); } catch (e) {}
+    if (!EMBED) try { localStorage.setItem(AIRPORT_KEY, code); } catch (e) {}   // embedded: follow the W&B page, don't change the saved default
     const needElev = kind === 'alt' || kind === 'cloud';
     status(`Fetching ${code}…`, 'muted');
     const c = get(code, needElev);
@@ -851,6 +873,16 @@ body.fb {
   input.addEventListener('keydown', e => { if (e.key === 'Enter') load('metar'); });
   input.addEventListener('change', () => { input.value = icao(); });
 
+  // W&B page changed its airport → follow it
+  window.addEventListener('message', e => {
+    if (e.origin !== location.origin || !e.data || e.data.type !== 'e6b-airport') return;
+    const code = String(e.data.code || '').toUpperCase();
+    if (!/^[A-Z0-9]{3,4}$/.test(code) || code === icao()) return;
+    input.value = code; rwyManual = false;
+    loadRunways();
+    load('metar').then(ok => { if (ok) xwFill(); });
+  });
+
   // Crosswind is the pre-flight check: fetch the saved airport's weather and runways on open
   xwCalc();
   loadRunways();
@@ -882,20 +914,22 @@ body.fb {
    (the .is-active class only matters inside the media query). Choice kept in localStorage; #hash wins. */
 (function () {
   const KEY = 'e6bTab';
-  const NAMES = { crosswind: 'Crosswind', pivotal: 'Pivotal Alt', wind: 'Wind', tsd: 'Time/Dist', fuel: 'Fuel', descent: 'Descent',
+  const NAMES = { wb: 'W&B ↗', crosswind: 'Crosswind', pivotal: 'Pivotal Alt', wind: 'Wind', tsd: 'Time/Dist', fuel: 'Fuel', descent: 'Descent',
                   altitude: 'Density Alt', cloud: 'Cloud Base', climb: 'Climb', glide: 'Glide', conversions: 'Convert' };
-  const cards = [...document.querySelectorAll('#e6b-grid > .e6b-card')];
+  const embed = document.documentElement.classList.contains('embed');
+  const cards = [...document.querySelectorAll('#e6b-grid > .e6b-card')].filter(c => !(embed && c.dataset.href));
   const nav = document.getElementById('e6bTabs'), grid = document.getElementById('e6b-grid');
   const tabs = cards.map(c => {
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'fb-tab'; b.role = 'tab'; b.dataset.card = c.id;
     b.textContent = NAMES[c.id] || c.querySelector('.fb-title')?.textContent.trim() || c.id;
-    b.addEventListener('click', () => show(c.id, true));
+    // link cards (W&B) open their page instead of showing a card
+    b.addEventListener('click', () => c.dataset.href ? (location.href = c.dataset.href) : show(c.id, true));
     nav.appendChild(b);
     return b;
   });
   function show(id, user) {
-    if (!cards.some(c => c.id === id)) id = cards[0].id;
+    if (!cards.some(c => c.id === id && !c.dataset.href)) id = cards[0].id;
     cards.forEach(c => c.classList.toggle('is-active', c.id === id));
     tabs.forEach(t => { const on = t.dataset.card === id; t.classList.toggle('active', on); t.setAttribute('aria-selected', on); });
     const t = tabs.find(t => t.dataset.card === id);

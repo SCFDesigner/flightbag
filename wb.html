@@ -160,6 +160,9 @@
             display: none;
         }
         .desktop-layout.e6b-open .e6b-column { display: block; }
+        .e6b-frame { display: block; width: 100%; height: calc(100% - 44px); border: 0; background: transparent; }
+        .e6b-full { margin-left: auto; font-size: var(--fb-fs-xs); letter-spacing: 1px; text-transform: none; color: var(--fb-dim); text-decoration: none; }
+        .e6b-full:hover { color: var(--fb-accent); }
         .e6b-section-title {
             font-size: var(--fb-fs-xs);
             font-weight: 500;
@@ -990,6 +993,8 @@
                 max-width: 100%;
             }
 
+            /* embedded E6B stops above the floating bottom menu (70px + gap) */
+            .desktop-layout.mobile-show-e6b .e6b-frame { height: calc(100% - 44px - 92px - env(safe-area-inset-bottom)); }
             .desktop-layout.mobile-show-e6b .e6b-column {
                 display: block !important;
                 position: absolute;
@@ -2038,117 +2043,12 @@
     <!-- Column Resizer between Right Column and Settings Panel -->
     <div class="column-resizer" data-resize="right-settings"></div>
 
-    <!-- E6B Flight Computer (Column) -->
+    <!-- E6B Flight Computer (Column) — the standalone e6b.html in embed mode (crosswind, pivotal alt,
+         wind, TSD, fuel… with its own tabs). Loaded the first time the column is shown; the W&B airport
+         is handed to it so its weather matches this page. -->
     <div class="e6b-column">
-        <div class="panel-title"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><rect x="8" y="6" width="8" height="4" rx="1"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/></svg>E6B Flight Computer</div>
-
-        <!-- Wind -->
-        <div class="input-section fb-panel">
-            <div class="e6b-section-title">Wind &amp; Groundspeed</div>
-            <div class="input-group"><label class="input-label">Course (°T)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bCourse" data-panel="wind" placeholder="360"></div>
-            <div class="input-group"><label class="input-label">TAS (kts)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bTas" data-panel="wind" placeholder="95"></div>
-            <div class="input-group"><label class="input-label">Wind Dir (°)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bWindDir" data-panel="wind" placeholder="270"></div>
-            <div class="input-group"><label class="input-label">Wind Speed (kts)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bWindSpd" data-panel="wind" placeholder="10"></div>
-            <div class="input-group"><label class="input-label">Variation (°W+ / E−)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bVar" data-panel="wind" placeholder="3"></div>
-            <button class="btn" type="button" onclick="e6bFillWind()" style="margin-bottom: 10px;">Use Current Weather</button>
-            <div class="e6b-out"><span>WCA</span><span id="e6bOutWca">—</span></div>
-            <div class="e6b-out"><span>True Heading</span><span id="e6bOutHdg">—</span></div>
-            <div class="e6b-out"><span>Magnetic Heading</span><span id="e6bOutMh">—</span></div>
-            <div class="e6b-out"><span>Groundspeed</span><span id="e6bOutGs">—</span></div>
-            <div class="e6b-out"><span>Headwind</span><span id="e6bOutHw">—</span></div>
-            <div class="e6b-out"><span>Crosswind</span><span id="e6bOutXw">—</span></div>
-        </div>
-
-        <!-- Time / Speed / Distance -->
-        <div class="input-section fb-panel">
-            <div class="e6b-section-title">Time · Speed · Distance</div>
-            <div class="e6b-hint">Enter any two — the third computes.</div>
-            <div class="input-group"><label class="input-label">GS (kts)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bTsdGs" data-panel="tsd" placeholder=""></div>
-            <div class="input-group"><label class="input-label">Distance (NM)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bTsdDist" data-panel="tsd" placeholder=""></div>
-            <div class="input-group"><label class="input-label">Time (min)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bTsdTime" data-panel="tsd" placeholder=""></div>
-            <div class="e6b-out"><span id="e6bTsdLabel">Result</span><span id="e6bTsdOut">—</span></div>
-        </div>
-
-        <!-- Fuel -->
-        <div class="input-section fb-panel">
-            <div class="e6b-section-title">Fuel</div>
-            <div class="e6b-hint">Enter any two — the third computes.</div>
-            <div class="input-group"><label class="input-label">Burn (GPH)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bFuelRate" data-panel="fuel" placeholder=""></div>
-            <div class="input-group"><label class="input-label">Time (min)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bFuelTime" data-panel="fuel" placeholder=""></div>
-            <div class="input-group"><label class="input-label">Fuel (gal)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bFuelAmt" data-panel="fuel" placeholder=""></div>
-            <div class="e6b-out"><span id="e6bFuelLabel">Result</span><span id="e6bFuelOut">—</span></div>
-            <div class="e6b-out"><span>Weight</span><span id="e6bFuelLbs">—</span></div>
-        </div>
-
-        <!-- Descent -->
-        <div class="input-section fb-panel">
-            <div class="e6b-section-title">Descent Planning</div>
-            <div class="input-group"><label class="input-label">Alt to Lose (ft)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bDesAlt" data-panel="descent" placeholder="3000"></div>
-            <div class="input-group"><label class="input-label">Distance (NM)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bDesDist" data-panel="descent" placeholder="10"></div>
-            <div class="input-group"><label class="input-label">GS (kts)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bDesGs" data-panel="descent" placeholder="90"></div>
-            <div class="e6b-out"><span>Gradient</span><span id="e6bOutGrad">—</span></div>
-            <div class="e6b-out"><span>Descent Rate</span><span id="e6bOutFpm">—</span></div>
-            <div class="e6b-out"><span>Time</span><span id="e6bOutDesTime">—</span></div>
-        </div>
-
-        <!-- Altitude / TAS -->
-        <div class="input-section fb-panel">
-            <div class="e6b-section-title">Altitude &amp; TAS</div>
-            <div class="input-group"><label class="input-label">Altimeter (inHg)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bAltim" data-panel="alt" placeholder="29.92" step="0.01"></div>
-            <div class="input-group"><label class="input-label">Elevation (ft)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bElev" data-panel="alt" placeholder=""></div>
-            <div class="input-group"><label class="input-label">OAT (°C)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bOat" data-panel="alt" placeholder="15"></div>
-            <div class="input-group"><label class="input-label">CAS (kts)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bCas" data-panel="alt" placeholder=""></div>
-            <button class="btn" type="button" onclick="e6bFillAlt()" style="margin-bottom: 10px;">Use Current Weather</button>
-            <div class="e6b-out"><span>Pressure Alt</span><span id="e6bOutPa">—</span></div>
-            <div class="e6b-out"><span>Density Alt</span><span id="e6bOutDa">—</span></div>
-            <div class="e6b-out"><span>ISA Deviation</span><span id="e6bOutIsaDev">—</span></div>
-            <div class="e6b-out"><span>TAS (approx)</span><span id="e6bOutTas">—</span></div>
-        </div>
-
-        <!-- Cloud Base / Freezing Level -->
-        <div class="input-section fb-panel">
-            <div class="e6b-section-title">Cloud Base &amp; Freezing Level</div>
-            <div class="input-group"><label class="input-label">Temp (°C)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bCbTemp" data-panel="cloud" placeholder="19"></div>
-            <div class="input-group"><label class="input-label">Dew Point (°C)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bCbDew" data-panel="cloud" placeholder="5"></div>
-            <div class="input-group"><label class="input-label">Elevation (ft)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bCbElev" data-panel="cloud" placeholder="642"></div>
-            <button class="btn" type="button" onclick="e6bFillCloud()" style="margin-bottom: 10px;">Use Current Weather</button>
-            <div class="e6b-out"><span>Cloud Base AGL</span><span id="e6bOutCbAgl">—</span></div>
-            <div class="e6b-out"><span>Cloud Base MSL</span><span id="e6bOutCbMsl">—</span></div>
-            <div class="e6b-out"><span>Freezing Level</span><span id="e6bOutFrz">—</span></div>
-            <div class="e6b-hint" style="margin-top: 8px; margin-bottom: 0;">Estimates: base ≈ spread ÷ 2.5 °C × 1000 ft; freezing ≈ 2 °C / 1000 ft lapse. Verify with reported ceilings.</div>
-        </div>
-
-        <!-- Climb Gradient -->
-        <div class="input-section fb-panel">
-            <div class="e6b-section-title">Climb Gradient</div>
-            <div class="e6b-hint">Enter GS plus either one — the rest compute.</div>
-            <div class="input-group"><label class="input-label">GS (kts)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bClbGs" data-panel="climb" placeholder="70"></div>
-            <div class="input-group"><label class="input-label">Required (ft/NM)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bClbGrad" data-panel="climb" placeholder="200"></div>
-            <div class="input-group"><label class="input-label">Climb Rate (fpm)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bClbFpm" data-panel="climb" placeholder=""></div>
-            <div class="e6b-out"><span id="e6bClbLabel">Result</span><span id="e6bClbOut">—</span></div>
-        </div>
-
-        <!-- Glide -->
-        <div class="input-section fb-panel">
-            <div class="e6b-section-title">Glide Distance</div>
-            <div class="input-group"><label class="input-label">Height AGL (ft)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bGldAlt" data-panel="glide" placeholder="3000"></div>
-            <div class="input-group"><label class="input-label">Glide (NM/1000ft)</label><input type="number" inputmode="decimal" class="input-field e6b-field" id="e6bGldRatio" data-panel="glide" placeholder="" step="0.1"></div>
-            <div class="e6b-out"><span>Glide Range</span><span id="e6bOutGld">—</span></div>
-            <div class="e6b-hint" style="margin-top: 8px; margin-bottom: 0;">Use your POH best-glide figure (no wind). Headwind shortens it.</div>
-        </div>
-
-        <!-- Conversions -->
-        <div class="input-section fb-panel">
-            <div class="e6b-section-title">Conversions</div>
-            <div class="e6b-convrow"><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvKts" data-group="speed" data-unit="kts"><span class="e6b-convlbl">kts</span><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvMph" data-group="speed" data-unit="mph"><span class="e6b-convlbl">mph</span></div>
-            <div class="e6b-convrow"><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvNm" data-group="dist" data-unit="nm"><span class="e6b-convlbl">NM</span><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvSm" data-group="dist" data-unit="sm"><span class="e6b-convlbl">SM</span><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvKm" data-group="dist" data-unit="km"><span class="e6b-convlbl">km</span></div>
-            <div class="e6b-convrow"><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvGal" data-group="fuelw" data-unit="gal"><span class="e6b-convlbl">gal</span><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvLbs" data-group="fuelw" data-unit="lbs"><span class="e6b-convlbl">lbs</span></div>
-            <div class="e6b-convrow"><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvC" data-group="temp" data-unit="c"><span class="e6b-convlbl">°C</span><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvF" data-group="temp" data-unit="f"><span class="e6b-convlbl">°F</span></div>
-            <div class="e6b-convrow"><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvFt" data-group="len" data-unit="ft"><span class="e6b-convlbl">ft</span><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvM" data-group="len" data-unit="m"><span class="e6b-convlbl">m</span></div>
-            <div class="e6b-convrow"><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvHg" data-group="press" data-unit="hg" step="0.01"><span class="e6b-convlbl">inHg</span><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvMb" data-group="press" data-unit="mb"><span class="e6b-convlbl">mb</span></div>
-            <div class="e6b-convrow"><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvL" data-group="vol" data-unit="l"><span class="e6b-convlbl">L</span><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvGal2" data-group="vol" data-unit="gal"><span class="e6b-convlbl">gal</span></div>
-            <div class="e6b-convrow"><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvKg" data-group="mass" data-unit="kg"><span class="e6b-convlbl">kg</span><input type="number" inputmode="decimal" class="input-field e6b-conv" id="cvLb" data-group="mass" data-unit="lb"><span class="e6b-convlbl">lbs</span></div>
-        </div>
+        <div class="panel-title"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><rect x="8" y="6" width="8" height="4" rx="1"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/></svg>E6B Flight Computer<a class="e6b-full" href="e6b.html" target="_blank" rel="noopener" title="Open the E6B on its own page">Full page</a></div>
+        <iframe id="e6bFrame" class="e6b-frame" title="E6B flight computer" data-src="e6b.html?embed=1"></iframe>
     </div>
 
     <!-- Settings Panel (Column D) -->
@@ -7642,6 +7542,25 @@ function updateFormFieldsFromWeather(weatherData) {
 <!-- Cross-device flight sync (Recent Flights) -->
 <script src="wbsync.js"></script>
 <script src="e6b.js"></script>
+<script>
+/* Embedded E6B: load it the first time its column becomes visible (desktop toggle or the mobile
+   E6B view), starting on this page's airport; later airport changes are passed in. */
+(function () {
+  const frame = document.getElementById('e6bFrame'), apt = document.getElementById('airportCode');
+  if (!frame) return;
+  const code = () => (apt && apt.value || '').trim().toUpperCase();
+  const load = () => {
+    if (frame.src) return;
+    frame.src = frame.dataset.src + (/^[A-Z0-9]{3,4}$/.test(code()) ? '&airport=' + code() : '');
+    console.log('[wb] E6B loaded');
+  };
+  new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) load(); }).observe(frame);
+  if (apt) apt.addEventListener('change', () => {
+    if (frame.src && frame.contentWindow && /^[A-Z0-9]{3,4}$/.test(code()))
+      frame.contentWindow.postMessage({ type: 'e6b-airport', code: code() }, location.origin);
+  });
+})();
+</script>
 <script src="theme/flightbag-theme.js"></script>
 </body>
 </html>
