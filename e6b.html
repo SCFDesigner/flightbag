@@ -56,6 +56,32 @@ body.fb {
 .e6b-out span:first-child { font-size: var(--fb-fs-xs); letter-spacing: 1.5px; text-transform: uppercase; color: var(--fb-dim); }
 .e6b-out span:last-child { font-family: var(--fb-mono); font-size: var(--fb-fs-md); color: var(--fb-accent); text-align: right; }
 
+/* crosswind */
+.xw-card { grid-column: 1 / -1; }
+.xw-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 340px); gap: 18px; align-items: start; }
+.xw-col { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.xw-rwys { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; min-height: 32px; }
+.xw-chip {
+  font: inherit; font-family: var(--fb-mono); font-size: var(--fb-fs-sm); letter-spacing: .5px;
+  min-height: 32px; padding: 0 12px; border-radius: var(--fb-radius-sm); cursor: pointer;
+  background: var(--fb-cell); color: var(--fb-text); border: 1px solid var(--fb-border);
+  transition: border-color var(--fb-ease), color var(--fb-ease);
+}
+.xw-chip:hover { border-color: var(--fb-accent); color: var(--fb-bright); }
+.xw-chip.on { border-color: var(--fb-accent); color: var(--fb-accent); background: color-mix(in srgb, var(--fb-accent) 12%, var(--fb-cell)); }
+.xw-chip .hw { font-size: 10px; color: var(--fb-dim); margin-left: 6px; }
+.xw-big { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; background: var(--fb-cell); border-radius: var(--fb-radius-sm); padding: 10px 12px; margin-top: 6px; }
+.xw-big span:first-child { font-size: var(--fb-fs-xs); letter-spacing: 1.5px; text-transform: uppercase; color: var(--fb-dim); }
+.xw-big b { font-family: var(--fb-mono); font-size: 26px; font-weight: 600; color: var(--fb-accent); }
+.xw-big b small { font-size: var(--fb-fs-sm); font-weight: 400; color: var(--fb-text); margin-left: 6px; }
+.xw-big.over b { color: var(--fb-bad); }
+.xw-note { font-size: var(--fb-fs-xs); line-height: 1.5; color: var(--fb-dim); }
+.xw-note.warn { color: var(--fb-bad); }
+.xw-fig { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+#xwSvg { width: 100%; max-width: 340px; aspect-ratio: 1; display: block; }
+#xwSvg text { font-family: var(--fb-mono); }
+@media (max-width: 760px) { .xw-grid { grid-template-columns: 1fr; } .xw-fig { order: -1; } }
+
 /* conversions */
 .e6b-convrow { display: flex; align-items: center; gap: 6px; }
 .e6b-convrow .fb-input { flex: 1 1 0; min-width: 0; min-height: 36px; text-align: right; }
@@ -87,12 +113,41 @@ body.fb {
     <div class="wx-metar muted" id="metarDisplay">Loads when you tap “Use Current Weather”.</div>
   </div>
   <!-- Filled from the METAR / airport database; the E6B fill buttons (e6b.js) read these ids, same as on wb.html -->
-  <input type="hidden" id="windDirection"><input type="hidden" id="windSpeed">
+  <input type="hidden" id="windDirection"><input type="hidden" id="windSpeed"><input type="hidden" id="windGust">
   <input type="hidden" id="temperature"><input type="hidden" id="dewpoint">
   <input type="hidden" id="altimeter"><input type="hidden" id="fieldElevation">
 </section>
 
 <main id="e6b-grid">
+
+  <!-- CROSSWIND -->
+  <section class="e6b-card fb-panel xw-card" id="crosswind">
+    <div class="fb-head"><h2 class="fb-title"><svg viewBox="0 0 24 24"><path d="M4 21V4M4 5h11l-2 3 2 3H4"/><path d="M15 16h6M18 13l3 3-3 3"/></svg>Crosswind</h2></div>
+    <div class="fb-body">
+      <div class="xw-grid">
+        <div class="xw-col">
+          <div class="xw-rwys" id="xwRwys"><span class="e6b-hint">Runways load with the weather.</span></div>
+          <div class="e6b-in"><label for="xwRwy">RWY HDG (°)</label><input type="number" inputmode="decimal" class="fb-input" id="xwRwy" placeholder="360" min="1" max="360"></div>
+          <div class="e6b-in"><label for="xwDir">Wind Direction (°)</label><input type="number" inputmode="decimal" class="fb-input" id="xwDir" placeholder="310" min="0" max="360"></div>
+          <div class="e6b-in"><label for="xwSpd">Wind Speed (kts)</label><input type="number" inputmode="decimal" class="fb-input" id="xwSpd" placeholder="12" min="0"></div>
+          <div class="e6b-in"><label for="xwGst">Peak Gust (kts)</label><input type="number" inputmode="decimal" class="fb-input" id="xwGst" placeholder="none" min="0"></div>
+          <div class="e6b-in"><label for="xwMax">Max Demo XW (kts)</label><input type="number" inputmode="decimal" class="fb-input" id="xwMax" placeholder="12" min="0"></div>
+          <button class="fb-btn e6b-fill" type="button" data-fill="xwind"><svg viewBox="0 0 24 24"><path d="M7 18a5 5 0 1 1 1-9.9A6 6 0 0 1 19 10a4 4 0 0 1-1 8z"/></svg>Use Current Weather</button>
+          <div class="xw-big" id="xwBig"><span>Crosswind</span><b id="xwOutXw">—</b></div>
+          <div class="e6b-outs">
+            <div class="e6b-out"><span id="xwHwLbl">Headwind</span><span id="xwOutHw">—</span></div>
+            <div class="e6b-out"><span>Steady Crosswind</span><span id="xwOutSteady">—</span></div>
+            <div class="e6b-out"><span>Gust Factor</span><span id="xwOutGf">—</span></div>
+          </div>
+          <div class="xw-note" id="xwNote">Uses the peak gust when there is one, otherwise the wind speed. Max demo: C-152 12 kts · C-172 15 kts.</div>
+        </div>
+        <div class="xw-fig">
+          <svg id="xwSvg" viewBox="0 0 300 300" role="img" aria-label="Runway and wind diagram"></svg>
+          <div class="xw-note" id="xwCaption">Runway-up view: you're on final to the bottom end.</div>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- WIND -->
   <section class="e6b-card fb-panel" id="wind">
@@ -272,21 +327,24 @@ body.fb {
     const raw = d.rawOb || '';
     const alt = raw.match(/\sA(\d{4})\s/);
     const [t, dp] = parseTempDew(raw);
-    return { raw: d.rawOb || 'N/A', windDir: d.wdir || null, windSpd: d.wspd || null,
+    const vrb = d.wdir === 'VRB';
+    return { raw: d.rawOb || 'N/A', windDir: vrb ? null : (d.wdir ?? null), windSpd: d.wspd ?? null, windGust: d.wgst || null, vrb,
              temp: t, dew: dp, altim: alt ? parseInt(alt[1]) / 100 : null };
   }
 
   // wb.html parseRawMETAR (fields the E6B uses)
   function fromRaw(raw) {
-    const w = raw.match(/(\d{3})(\d{2,3})(G(\d{2,3}))?KT|(\d{5})KT/);
-    let wd = 0, ws = 0;
+    // dddff(Gff)KT, or VRBff(Gff)KT (variable — no direction)
+    const w = raw.match(/\b(\d{3}|VRB)(\d{2,3})(?:G(\d{2,3}))?KT\b/);
+    let wd = 0, ws = 0, wg = null, vrb = false;
     if (w) {
-      if (w[1] && w[2]) { wd = parseInt(w[1]); ws = parseInt(w[2]); }
-      else if (w[5]) { wd = parseInt(w[5].substring(0, 3)); ws = parseInt(w[5].substring(3)); }
+      vrb = w[1] === 'VRB';
+      wd = vrb ? null : parseInt(w[1]); ws = parseInt(w[2]);
+      if (w[3]) wg = parseInt(w[3]);
     }
     const alt = raw.match(/A(\d{4})/);
     const [t, dp] = parseTempDew(raw);
-    return { raw, windDir: wd, windSpd: ws, temp: t, dew: dp, altim: alt ? parseFloat((parseInt(alt[1]) / 100).toFixed(2)) : 30.00 };
+    return { raw, windDir: wd, windSpd: ws, windGust: wg, vrb, temp: t, dew: dp, altim: alt ? parseFloat((parseInt(alt[1]) / 100).toFixed(2)) : 30.00 };
   }
 
   // Each source gets 8 s so a dead proxy doesn't stall the button for minutes
@@ -351,10 +409,11 @@ body.fb {
 
   // Write into the hidden fields the E6B fill functions read (wb.html updateFormFieldsFromWeather rules)
   function setHidden(wx, elev) {
-    ['windDirection', 'windSpeed', 'temperature', 'dewpoint', 'altimeter', 'fieldElevation'].forEach(id => $(id).value = '');
+    ['windDirection', 'windSpeed', 'windGust', 'temperature', 'dewpoint', 'altimeter', 'fieldElevation'].forEach(id => $(id).value = '');
     if (wx) {
       if (wx.windDir !== undefined && wx.windDir !== null) $('windDirection').value = wx.windDir;
       if (wx.windSpd !== undefined && wx.windSpd !== null) $('windSpeed').value = wx.windSpd;
+      if (wx.windGust) $('windGust').value = wx.windGust;
       if (wx.temp !== null) $('temperature').value = wx.temp;
       if (wx.dew !== null) $('dewpoint').value = wx.dew;
       if (wx.altim !== null) $('altimeter').value = wx.altim.toFixed(2);
@@ -374,10 +433,211 @@ body.fb {
     if (!wx) { status(`No METAR for ${code} — weather sources unavailable. Enter values by hand.`, 'warn'); setHidden(null, elev); return !!elev; }
     status(wx.raw + (elev != null ? `  ·  elev ${elev} ft` : ''));
     setHidden(wx, elev);
+    lastWx = wx;
     return true;
   }
 
-  const fill = { wind: () => window.e6bFillWind(), alt: () => window.e6bFillAlt(), cloud: () => window.e6bFillCloud() };
+  let lastWx = null;
+
+  /* ---------- Crosswind ---------- */
+  // Runway ends per airport from OurAirports (le/he idents). Runway heading = designator × 10 (magnetic).
+  let rwyDb = null;
+  function loadRwyDb() {
+    if (!rwyDb) rwyDb = window.fetch('https://davidmegginson.github.io/ourairports-data/runways.csv')
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
+      .then(csv => {
+        const lines = csv.split('\n'), h = lines[0].split(',').map(x => x.replace(/"/g, ''));
+        const iA = h.indexOf('airport_ident'), iL = h.indexOf('le_ident'), iH = h.indexOf('he_ident'), iC = h.indexOf('closed');
+        const db = {};
+        for (let i = 1; i < lines.length; i++) {
+          const row = lines[i].split(',').map(x => x.replace(/"/g, '').trim());
+          if (row[iC] === '1') continue;
+          const ends = [row[iL], row[iH]].filter(id => /^\d{1,2}[LRC]?$/.test(id || ''));
+          if (ends.length) (db[row[iA]] = db[row[iA]] || []).push(...ends);
+        }
+        console.log(`[e6b] runways for ${Object.keys(db).length} airports`);
+        return db;
+      })
+      .catch(e => { console.error('[e6b] runway db failed', e); rwyDb = null; return {}; });
+    return rwyDb;
+  }
+  // Ends used day to day, preferred when auto-picking the runway (both parallels are listed as chips)
+  const PREFERRED_ENDS = { KDTO: ['18L', '36R'] };
+  const XW_MAX_KEY = 'e6bXwMax';
+  const rwyHdg = id => { const n = parseInt(id); return (n === 0 ? 36 : n) * 10; };
+  let rwyEnds = [], rwyPicked = null, rwyManual = false;
+
+  const num = id => { const v = parseFloat($(id).value); return isFinite(v) ? v : null; };
+  const comp = (dir, spd, hdg) => { const a = rad(dir - hdg); return { hw: spd * Math.cos(a), xw: spd * Math.sin(a) }; };
+  const rad = d => d * Math.PI / 180;
+  const fmtK = v => `${Math.round(Math.abs(v))} kt`;
+
+  function renderChips() {
+    const box = $('xwRwys');
+    if (!rwyEnds.length) { box.innerHTML = '<span class="e6b-hint">No runway list for this airport — type the heading.</span>'; return; }
+    const dir = num('xwDir'), spd = num('xwGst') ?? num('xwSpd');
+    box.innerHTML = '';
+    rwyEnds.forEach(id => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'xw-chip' + (id === rwyPicked ? ' on' : '');
+      b.textContent = id;
+      if (dir != null && spd != null) {
+        const { hw } = comp(dir, spd, rwyHdg(id));
+        const t = document.createElement('span'); t.className = 'hw';
+        t.textContent = (hw >= 0 ? 'H' : 'T') + Math.round(Math.abs(hw));
+        b.appendChild(t);
+      }
+      b.addEventListener('click', () => { rwyManual = true; pickRwy(id); });
+      box.appendChild(b);
+    });
+  }
+  function pickRwy(id) {
+    rwyPicked = id;
+    $('xwRwy').value = rwyHdg(id);
+    xwCalc();
+  }
+  // Most headwind wins; among the airport's preferred ends when it has them
+  function autoPick() {
+    if (rwyManual || !rwyEnds.length) return;
+    const dir = num('xwDir'), spd = num('xwGst') ?? num('xwSpd');
+    const pref = (PREFERRED_ENDS[icao()] || []).filter(id => rwyEnds.includes(id));
+    const pool = pref.length ? pref : rwyEnds;
+    let best = pool[0];
+    if (dir != null && spd) best = pool.reduce((a, b) => comp(dir, spd, rwyHdg(b)).hw > comp(dir, spd, rwyHdg(a)).hw ? b : a);
+    pickRwy(best);
+  }
+  async function loadRunways() {
+    const code = icao();
+    const db = await loadRwyDb();
+    if (code !== icao()) return;
+    const ends = (db[code] || []).slice().sort((a, b) => rwyHdg(a) - rwyHdg(b) || a.localeCompare(b));
+    rwyEnds = [...new Set(ends)];
+    if (!rwyEnds.includes(rwyPicked)) { rwyPicked = null; rwyManual = false; }
+    autoPick(); renderChips();
+  }
+
+  function xwFill() {
+    const wx = lastWx;
+    if (!wx) return;
+    $('xwDir').value = wx.windDir ?? '';
+    $('xwSpd').value = wx.windSpd ?? '';
+    $('xwGst').value = wx.windGust || '';   // no gust in the METAR → stays empty, wind speed is used
+    autoPick(); xwCalc();
+    if (wx.vrb) note('Wind is variable (VRB) — no direction to compute from. Use the worst case: the full speed as crosswind.', true);
+  }
+
+  function note(text, warn) { const n = $('xwNote'); n.textContent = text; n.className = 'xw-note' + (warn ? ' warn' : ''); }
+
+  function xwCalc() {
+    const hdg = num('xwRwy'), dir = num('xwDir'), spd = num('xwSpd'), gst = num('xwGst');
+    const max = num('xwMax') ?? 12;
+    try { localStorage.setItem(XW_MAX_KEY, $('xwMax').value); } catch (e) {}
+    // Typed heading that matches no chip clears the chip highlight
+    if (rwyPicked && hdg !== rwyHdg(rwyPicked)) rwyPicked = null;
+    const use = gst != null && gst > 0 ? gst : spd;
+    const set = (id, t) => $(id).textContent = t;
+    $('xwBig').classList.remove('over');
+    if (hdg == null || dir == null || use == null) {
+      set('xwOutXw', '—'); set('xwOutHw', '—'); set('xwOutSteady', '—'); set('xwOutGf', '—');
+      renderChips(); drawXw(hdg, dir, spd, gst); return;
+    }
+    const c = comp(dir, use, hdg), side = c.xw >= 0 ? 'from right' : 'from left';
+    $('xwOutXw').innerHTML = Math.abs(c.xw) < 0.5 ? '0 kt' : `${fmtK(c.xw)}<small>${side}</small>`;
+    set('xwHwLbl', c.hw >= 0 ? 'Headwind' : 'Tailwind');
+    set('xwOutHw', fmtK(c.hw));
+    const steady = spd != null ? comp(dir, spd, hdg).xw : null;
+    set('xwOutSteady', gst && steady != null ? fmtK(steady) : '—');
+    set('xwOutGf', gst && spd != null ? `${Math.max(0, gst - spd)} kt` : '—');
+    const over = Math.abs(c.xw) > max;
+    $('xwBig').classList.toggle('over', over);
+    const basis = gst ? `peak gust ${gst} kt` : `wind ${use} kt`;
+    note(over ? `Crosswind ${fmtK(c.xw)} exceeds your ${max} kt max demonstrated — consider another runway or airport.`
+              : `Computed from the ${basis}${c.hw < 0 ? ' · tailwind on this runway — check the other end' : ''}.`, over || c.hw < 0);
+    renderChips(); drawXw(hdg, dir, spd, gst);
+  }
+
+  /* Runway-up diagram: the runway you picked runs bottom → top (you're on final to the bottom
+     threshold), compass ring rotated to match, windsock pointing downwind and filled by speed. */
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  function el(tag, attrs, parent, text) {
+    const e = document.createElementNS(SVGNS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (text != null) e.textContent = text;
+    parent.appendChild(e); return e;
+  }
+  function drawXw(hdg, dir, spd, gst) {
+    const svg = $('xwSvg'); svg.innerHTML = '';
+    const C = 150, RR = 132, H = hdg ?? 360;
+    const css = n => getComputedStyle(document.body).getPropertyValue(n).trim();
+    const col = { text: css('--fb-text'), dim: css('--fb-dim'), bright: css('--fb-bright'), accent: css('--fb-accent'), line: css('--fb-border'), cell: css('--fb-cell'), bad: css('--fb-bad') };
+    const at = (deg, r) => [C + Math.sin(rad(deg)) * r, C - Math.cos(rad(deg)) * r];
+    // compass ring, rotated so the runway heading is straight up
+    el('circle', { cx: C, cy: C, r: RR, fill: 'none', stroke: col.line }, svg);
+    for (let d = 0; d < 360; d += 10) {
+      const rel = d - H, big = d % 30 === 0;
+      const [x1, y1] = at(rel, RR), [x2, y2] = at(rel, RR - (big ? 9 : 5));
+      el('line', { x1, y1, x2, y2, stroke: big ? col.text : col.dim, 'stroke-width': big ? 1.5 : 1 }, svg);
+      if (big) {
+        const [tx, ty] = at(rel, RR - 20), names = { 0: 'N', 90: 'E', 180: 'S', 270: 'W' };
+        el('text', { x: tx, y: ty, fill: d === 0 ? col.accent : col.dim, 'font-size': 10, 'text-anchor': 'middle', 'dominant-baseline': 'central' }, svg, names[d] || d / 10);
+      }
+    }
+    // runway (vertical), threshold bars, centreline, both end numbers
+    const RW = 34, top = 62, bot = 238;
+    const g = el('g', {}, svg);
+    el('rect', { x: C - RW / 2, y: top, width: RW, height: bot - top, rx: 2, fill: '#3b3a37', stroke: '#55534d' }, g);
+    for (let i = 0; i < 4; i++) {
+      const x = C - RW / 2 + 4 + i * 7.5;
+      el('rect', { x, y: bot - 14, width: 3.5, height: 10, fill: col.bright, opacity: .8 }, g);
+      el('rect', { x, y: top + 4, width: 3.5, height: 10, fill: col.bright, opacity: .8 }, g);
+    }
+    el('line', { x1: C, y1: top + 44, x2: C, y2: bot - 44, stroke: col.bright, 'stroke-width': 1.5, 'stroke-dasharray': '8 7', opacity: .7 }, g);
+    const endId = rwyPicked || (hdg != null ? String(Math.round(H / 10) || 36).padStart(2, '0') : '—');
+    const recip = rwyPicked ? recipOf(rwyPicked) : (hdg != null ? String(Math.round(((H + 180) % 360) / 10) || 36).padStart(2, '0') : '');
+    el('text', { x: C, y: bot - 28, fill: col.bright, 'font-size': 13, 'font-weight': 700, 'text-anchor': 'middle', 'dominant-baseline': 'central' }, g, endId);
+    el('text', { x: C, y: top + 28, fill: col.bright, 'font-size': 13, 'font-weight': 700, 'text-anchor': 'middle', 'dominant-baseline': 'central', transform: `rotate(180 ${C} ${top + 28})` }, g, recip);
+    // you: final approach chevron below the landing end
+    el('path', { d: `M${C} ${bot + 8} l7 12 l-7 -4 l-7 4 z`, fill: col.accent }, svg);
+    if (dir == null || spd == null) return;
+    const rel = dir - H;                 // wind FROM, relative to the runway
+    // wind arrow from the ring toward the runway
+    const [ax, ay] = at(rel, RR - 30), [bx, by] = at(rel, RR - 62);
+    el('line', { x1: ax, y1: ay, x2: bx, y2: by, stroke: col.accent, 'stroke-width': 3, 'stroke-linecap': 'round' }, svg);
+    const hd = el('path', { d: 'M0 0 l-6 -10 l12 0 z', fill: col.accent }, svg);
+    hd.setAttribute('transform', `translate(${bx} ${by}) rotate(${rel})`);
+    el('text', { x: 6, y: 14, fill: col.dim, 'font-size': 9, 'letter-spacing': 1 }, svg, 'WIND');
+    el('text', { x: 6, y: 30, fill: col.accent, 'font-size': 13, 'font-weight': 600 }, svg,
+       `${String(Math.round(dir)).padStart(3, '0')}@${Math.round(spd)}${gst ? 'G' + Math.round(gst) : ''}`);
+    // windsock beside the landing end, streaming downwind; bands fill at ~3 kt each (full at 15 kt)
+    const sx = C + RW / 2 + 36, sy = bot - 30;
+    el('circle', { cx: sx, cy: sy, r: 3, fill: col.bright }, svg);
+    const sock = el('g', { transform: `translate(${sx} ${sy}) rotate(${rel + 180})` }, svg);
+    const L = 44, band = L / 5;
+    const shown = spd <= 0 ? 0.6 : Math.min(5, Math.max(1, spd / 3));
+    if (gst) { // gust reach as a ghost outline
+      const gl = Math.min(5, gst / 3) * band;
+      el('path', { d: `M-7 0 L7 0 L${7 - 3 * gl / L} ${-gl} L${-7 + 3 * gl / L} ${-gl} Z`, fill: 'none', stroke: col.accent, 'stroke-dasharray': '3 3', opacity: .8 }, sock);
+    }
+    for (let i = 0; i < Math.ceil(shown); i++) {
+      const y0 = -i * band, y1 = -Math.min(shown, i + 1) * band;
+      const w0 = 7 - 3 * (-y0) / L, w1 = 7 - 3 * (-y1) / L;
+      el('path', { d: `M${-w0} ${y0} L${w0} ${y0} L${w1} ${y1} L${-w1} ${y1} Z`, fill: i % 2 ? '#f0eee6' : '#e8702a' }, sock);
+    }
+  }
+  function recipOf(id) {
+    const n = parseInt(id), r = ((n + 18 - 1) % 36) + 1, s = id.replace(/^\d+/, '');
+    return String(r).padStart(2, '0') + ({ L: 'R', R: 'L', C: 'C' }[s] || '');
+  }
+  window.e6bFillXwind = xwFill;
+
+  ['xwRwy', 'xwDir', 'xwSpd', 'xwGst', 'xwMax'].forEach(id => $(id).addEventListener('input', () => {
+    if (id === 'xwRwy') rwyManual = true;
+    xwCalc();
+  }));
+  try { const m = localStorage.getItem(XW_MAX_KEY); $('xwMax').value = m || 12; } catch (e) { $('xwMax').value = 12; }
+  input.addEventListener('change', () => { rwyManual = false; loadRunways(); });
+
+  const fill = { wind: () => window.e6bFillWind(), alt: () => window.e6bFillAlt(), cloud: () => window.e6bFillCloud(), xwind: () => xwFill() };
   document.querySelectorAll('.e6b-fill').forEach(btn => btn.addEventListener('click', async () => {
     const kind = btn.dataset.fill;
     btn.disabled = true;
@@ -387,6 +647,11 @@ body.fb {
   $('wxLoad').addEventListener('click', () => load('metar'));
   input.addEventListener('keydown', e => { if (e.key === 'Enter') load('metar'); });
   input.addEventListener('change', () => { input.value = icao(); });
+
+  // Crosswind is the pre-flight check: fetch the saved airport's weather and runways on open
+  xwCalc();
+  loadRunways();
+  load('metar').then(ok => { if (ok) xwFill(); });
 })();
 </script>
 <script src="e6b.js"></script>

@@ -30,7 +30,7 @@ Never estimate, approximate, or invent values. If a number is in this tool, it h
 | File | Purpose |
 |------|---------|
 | `index.html` | Home — "Flight Bag" launcher (reference implementation of the theme: tool panels with .fb-row links, UTC clock) |
-| `e6b.html` | Standalone E6B flight computer (ported from wb.html's E6B column; anchors #wind, #altitude) |
+| `e6b.html` | Standalone E6B flight computer (ported from wb.html's E6B column; anchors #crosswind, #wind, #altitude). Crosswind card (inline script) auto-loads the saved airport (default KDTO) METAR + OurAirports runways.csv on open; uses the METAR peak gust when present, else wind speed; runway chips = designator × 10, auto-pick most headwind among `PREFERRED_ENDS` (KDTO 18L/36R); max demo XW in localStorage `e6bXwMax` |
 | `theme/` | Shared Flight Bag theme (CSS tokens/components + grain/light runtime) |
 | `wb.html` | Weight & Balance calculator (C-152 / C-172 / P2006T / custom). Layout order matches the flight school's paper form — do not reorder. |
 | `wb.html#fsp=…` | Hand-off from the FSP Dispatch Prep Firefox extension (`~/Desktop/mystuff/extension`): base64url JSON in the hash prefills aircraft type, tail, empty weight/arm/moment and instructor weight/bag (`applyFspImport()`), plus `FSP_IMPORT_DEFAULTS` (2.5 hr, 24.5 gal for C-152). Station arms/CG limits stay POH values. |
