@@ -19,7 +19,8 @@ header {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 10px 16px;
+  /* home-screen app: clear the iPhone status bar / notch */
+  padding: max(10px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 10px max(16px, env(safe-area-inset-left));
   border-bottom: 1px solid var(--fb-line);
 }
 header h1 {
@@ -155,7 +156,7 @@ main { padding: 8px; }
 @media (max-width: 700px), (orientation: landscape) and (max-height: 500px) {
   html, body.fb { height: 100%; overflow: hidden; }
   body.fb { height: 100dvh; display: flex; flex-direction: column; }
-  header { flex: none; padding: max(8px, env(safe-area-inset-top)) 12px 8px; row-gap: 6px; }
+  header { flex: none; padding: max(8px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) 8px max(12px, env(safe-area-inset-left)); row-gap: 6px; }
   main { flex: 1 1 auto; min-height: 0; padding: 0 8px max(8px, env(safe-area-inset-bottom)); }
   .trainer { height: 100%; max-width: none; display: flex; flex-direction: column; }
   .trainer > section { flex: none; padding: 10px 12px; }

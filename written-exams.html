@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Sheppard Air Study — FOI + FIA</title>
 <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -389,6 +389,10 @@ h1,h2,.stem,.chead .ttl,.hcard h2,.sname,.nextbox .nt,.tdone .big,.rcdone .big{c
 .home .fbnav{position:absolute;top:18px;left:24px;margin:0}
 .mtop .fb-home{min-height:36px;padding:0 4px}
 .figlbx{border-radius:8px}
+
+/* Home-screen app: pages draw under the iPhone status bar — keep the top clear of the clock (0 elsewhere) */
+body::before { content: ''; display: block; height: env(safe-area-inset-top); flex: none; }
+@media print { body::before { display: none; } }
 </style></head>
 <body class="fb">
 <div class="home" id="home"><div class="homeinner">

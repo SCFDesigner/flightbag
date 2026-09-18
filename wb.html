@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>Weight & Balance Calculator</title>
     <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -1454,6 +1454,10 @@
             .settings-heading { margin-top: 6px; }
             .wx-links { width: 100%; }
         }
+
+        /* Home-screen app: keep each column's top (and the floating chips) clear of the iPhone status bar */
+        .left-panel::before, .right-column::before, .settings-panel::before, .e6b-column::before { content: ''; display: block; height: env(safe-area-inset-top); flex: none; }
+        .float-chip { margin-top: env(safe-area-inset-top); }
 
         /* ── Fields & readouts (same look as the E6B) ──
            Entry fields are wells pressed into the panel; results — clocks, limits, METAR,

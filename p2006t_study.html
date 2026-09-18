@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>P2006T Multi-Engine Study</title>
     <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -431,7 +431,11 @@
         .fc-result-val{font-size:20px;font-weight:600;font-family:var(--fb-mono);color:var(--fb-bright)}
         .fc-result-val .unit{font-size:12px;color:var(--fb-dim)}
         .fc-result-sub{color:var(--fb-dim);font-size:10px;margin-top:2px;font-family:var(--fb-mono)}
-    </style>
+    
+/* Home-screen app: pages draw under the iPhone status bar — keep the top clear of the clock (0 elsewhere) */
+body::before { content: ''; display: block; height: env(safe-area-inset-top); flex: none; }
+@media print { body::before { display: none; } }
+</style>
 </head>
 <body class="fb">
     <!-- Top Bar -->
