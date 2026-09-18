@@ -1,11 +1,12 @@
 // Flight Bag theme runtime (pairs with flightbag-theme.css). Generates the panel grain tile and
 // positions one page-wide soft light: every .fb-panel shows the same viewport-sized gradient shifted
 // by its own on-screen position, so the light is continuous across panels (CSS fixed backgrounds
-// render per element). Values are the My Stuff dashboard's tuned look (config.look, 2026-09-17).
+// render per element). Started from the My Stuff dashboard's look (config.look, 2026-09-17); retuned 2026-09-18.
 (() => {
-  const DEFAULTS = { grain: 0.1, grainScale: 1, edge: 0.25, lampAmt: 0.08, lampX: 0.53, lampY: 0.23, lampRadius: 0.68, lampMid: 0.5, lampShadow: 0.5,
+  // Tuned with ?tune on 2026-09-18 (light moved up-left, softer glass).
+  const DEFAULTS = { grain: 0.1, grainScale: 1, edge: 0.2, lampAmt: 0.07, lampX: 0.39, lampY: 0.03, lampRadius: 0.68, lampMid: 0.5, lampShadow: 0.5,
     // glass (readouts): glare strength (× lampAmt) and size (× screen height); edge sheen strength (× glare) and reach (× glare size)
-    glareAmt: 2.2, glareSize: 0.75, sheenAmt: 0.9, sheenReach: 1.35, sheenStart: 0.35 };
+    glareAmt: 1.1, glareSize: 0.78, sheenAmt: 0.35, sheenReach: 2.5, sheenStart: 0.22 };
   // Local overrides from the ?tune panel (this browser only; Copy hands them over to bake in as DEFAULTS)
   const TUNE_KEY = 'fbLookTune';
   let saved = {};
