@@ -140,6 +140,7 @@ body.fb {
   .e6b-in { grid-template-columns: 1fr; gap: 3px; }
   .e6b-in label { font-size: 11px; color: var(--fb-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .e6b-in .fb-input { min-height: 34px; }
+  .fb-input { font-size: 16px; }             /* under 16px iOS zooms the page when a field is tapped */
   .e6b-fill { grid-column: auto !important; align-self: end; margin: 0; min-height: 34px; padding: 0 8px; font-size: 12px; white-space: nowrap; }
   .e6b-outs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 2px; }
   .e6b-out { flex-direction: column; align-items: flex-start; gap: 1px; padding: 5px 9px; }
@@ -170,7 +171,7 @@ body.fb {
   .e6b-card:not(.xw-card) .e6b-in { gap: clamp(3px, .8cqh, 6px); }
   .e6b-card:not(.xw-card) .e6b-in label { font-size: clamp(11px, 2.1cqh, 14px); }
   .e6b-card:not(.xw-card) .e6b-in .fb-input,
-  .e6b-card:not(.xw-card) .e6b-convrow .fb-input { min-height: clamp(36px, 7.2cqh, 60px); font-size: clamp(14px, 2.8cqh, 21px); }
+  .e6b-card:not(.xw-card) .e6b-convrow .fb-input { min-height: clamp(36px, 7.2cqh, 60px); font-size: clamp(16px, 2.8cqh, 21px); }
   .e6b-card:not(.xw-card) .e6b-fill { min-height: clamp(36px, 7.2cqh, 60px); font-size: clamp(12px, 2.2cqh, 15px); }
   .e6b-card:not(.xw-card) .e6b-convlbl { font-size: clamp(11px, 2cqh, 14px); }
   /* result tiles become grid items of their own, two across, starting on a fresh row */

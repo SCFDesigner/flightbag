@@ -14,6 +14,9 @@
   --fb-dim: #85837a;
   --fb-bright: #f0eee6;
   --fb-accent: #d97757;
+  --fb-well: #111110;             /* recessed field floor */
+  --fb-well-top: #0b0b0a;         /* darker under the top wall */
+  --fb-well-rim: #0a0a09;
   --fb-on-accent: #ffffff;
   --fb-ok: #7fa36b;               /* VFR / good */
   --fb-info: #6b8fb8;             /* MVFR / info */
@@ -89,11 +92,28 @@ body.fb {
 .fb-tab:hover { color: var(--fb-bright); }
 .fb-tab[aria-selected="true"], .fb-tab.active { background: var(--fb-panel); color: var(--fb-accent); box-shadow: 0 1px 0 rgba(217, 119, 87, .6); }
 
+/* Fields are wells pressed into the panel (same idea as the dashboard's playhead lane): darker than
+   the panel, shadow falling in from the top wall, a faint catch-light on the lower lip. */
 .fb-input, .fb-select, .fb-textarea {
-  width: 100%; background: var(--fb-cell); color: var(--fb-bright); border: 1px solid var(--fb-border);
+  width: 100%; color: var(--fb-bright);
+  background: linear-gradient(180deg, var(--fb-well-top) 0%, var(--fb-well) 45%, var(--fb-well) 100%);
+  border: 1px solid var(--fb-well-rim);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, .7),          /* shadow cast by the top wall */
+    inset 0 1px 1px rgba(0, 0, 0, .8),
+    inset 0 -1px 0 rgba(255, 255, 255, .03),    /* floor catches a little light at the bottom */
+    0 1px 0 rgba(255, 255, 255, .055);          /* lit lip below the cut */
   border-radius: var(--fb-radius-sm); font: inherit; font-size: var(--fb-fs-sm); padding: 7px 9px;
+  transition: box-shadow var(--fb-ease), border-color var(--fb-ease);
 }
-.fb-input:focus, .fb-select:focus, .fb-textarea:focus { outline: none; border-color: var(--fb-accent); }
+.fb-input::placeholder, .fb-textarea::placeholder { color: var(--fb-dim); opacity: .55; }
+.fb-input:focus, .fb-select:focus, .fb-textarea:focus {
+  outline: none; border-color: color-mix(in srgb, var(--fb-accent) 55%, var(--fb-well-rim));
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, .7), inset 0 1px 1px rgba(0, 0, 0, .8),
+    inset 0 0 10px color-mix(in srgb, var(--fb-accent) 22%, transparent),   /* glow down in the well */
+    0 1px 0 rgba(255, 255, 255, .055);
+}
 input[type="number"].fb-input { font-family: var(--fb-mono); }
 
 /* list row: icon · title/sub · chevron (dashboard "resources" rows) */
