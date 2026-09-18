@@ -89,10 +89,40 @@ body.fb {
 .e6b-convrow .fb-input { flex: 1 1 0; min-width: 0; min-height: 36px; text-align: right; }
 .e6b-convlbl { font-family: var(--fb-mono); font-size: var(--fb-fs-xs); color: var(--fb-dim); min-width: 30px; }
 
-@media (max-width: 700px) {
-  #e6b-grid { grid-template-columns: 1fr; max-width: 520px; }
-  .fb-header, .wx-bar { max-width: 520px; }
+/* ── tabs: phones & tablets show one calculator at a time in a fixed window ── */
+.e6b-tabs { display: none; }
+@media (max-width: 1024px) {
+  html, body.fb { height: 100%; overflow: hidden; }
+  body.fb {
+    height: 100dvh;
+    padding: max(12px, env(safe-area-inset-top)) 12px max(10px, env(safe-area-inset-bottom));
+    align-items: stretch;
+  }
+  .fb-header, .wx-bar, #e6b-grid { max-width: none; }
+  .fb-header { margin-bottom: 10px; }
   .fb-header h1 { font-size: 18px; letter-spacing: 4px; }
+  .wx-bar { margin-bottom: 8px; }
+  .wx-bar .fb-head { display: none; }
+  .wx-bar .fb-body { flex-wrap: nowrap; padding-top: 10px; padding-bottom: 10px; }
+  .wx-metar { flex: 1 1 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+  .wx-bar.open .wx-metar { white-space: normal; }
+  .e6b-tabs {
+    display: flex; flex: none; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+    margin-bottom: 8px; max-width: 100%;
+  }
+  .e6b-tabs::-webkit-scrollbar { display: none; }
+  .e6b-tabs .fb-tab { flex: none; min-height: 36px; padding: 0 14px; font-size: var(--fb-fs-sm); white-space: nowrap; }
+  #e6b-grid {
+    flex: 1 1 auto; min-height: 0; display: block;
+    overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+  }
+  .e6b-card { max-width: 720px; margin: 0 auto; }
+  .e6b-card:not(.is-active) { display: none; }
+  .e6b-card:target { border-color: var(--fb-rim); }
+}
+
+@media (max-width: 700px) {
+  #e6b-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -120,6 +150,8 @@ body.fb {
   <input type="hidden" id="altimeter"><input type="hidden" id="fieldElevation">
 </section>
 
+<nav class="e6b-tabs fb-tabs" id="e6bTabs" role="tablist" aria-label="Calculators"></nav>
+
 <main id="e6b-grid">
 
   <!-- CROSSWIND -->
@@ -145,7 +177,7 @@ body.fb {
         </div>
         <div class="xw-fig">
           <svg id="xwSvg" viewBox="0 0 300 300" role="slider" tabindex="0" aria-label="Runway heading — drag to rotate, arrow keys step 10°" aria-valuemin="10" aria-valuemax="360"></svg>
-          <div class="xw-note" id="xwCaption">Drag the compass to turn the runway 10° at a time (arrow keys / scroll work too). You're on final to the bottom end.</div>
+          <div class="xw-note" id="xwCaption">Drag the compass to turn the runway 10° at a time (click it first to use the scroll wheel or arrow keys). You're on final to the bottom end.</div>
         </div>
       </div>
     </div>
@@ -675,6 +707,7 @@ body.fb {
   let drag = null;
   svgEl.addEventListener('pointerdown', e => {
     drag = { a0: ptrAngle(e), h0: num('xwRwy') ?? 360, id: e.pointerId };
+    svgEl.focus({ preventScroll: true });
     try { svgEl.setPointerCapture(e.pointerId); } catch (_) {}
     svgEl.classList.add('drag');
     e.preventDefault();
@@ -689,7 +722,8 @@ body.fb {
   const endDrag = e => { if (drag && e.pointerId === drag.id) { drag = null; svgEl.classList.remove('drag'); } };
   svgEl.addEventListener('pointerup', endDrag);
   svgEl.addEventListener('pointercancel', endDrag);
-  svgEl.addEventListener('wheel', e => { e.preventDefault(); setHeading((num('xwRwy') ?? 360) + (e.deltaY > 0 ? 10 : -10)); }, { passive: false });
+  // Wheel only once the compass has been clicked/focused, so scrolling the page past it doesn't turn it
+  svgEl.addEventListener('wheel', e => { if (document.activeElement !== svgEl) return; e.preventDefault(); setHeading((num('xwRwy') ?? 360) + (e.deltaY > 0 ? 10 : -10)); }, { passive: false });
   svgEl.addEventListener('keydown', e => {
     const step = { ArrowRight: 10, ArrowUp: 10, ArrowLeft: -10, ArrowDown: -10 }[e.key];
     if (step) { e.preventDefault(); setHeading((num('xwRwy') ?? 360) + step); }
@@ -736,6 +770,44 @@ body.fb {
     show('paOutDn', tas + w);
   }
   ['paGs', 'paTas', 'paWind', 'paElev'].forEach(id => $(id).addEventListener('input', calc));
+})();
+</script>
+<script>
+/* Phones/tablets (≤ 1024px): one calculator at a time, picked from the tab strip; the page itself
+   doesn't scroll — the active card scrolls inside the window if it's taller. Desktop shows every card
+   (the .is-active class only matters inside the media query). Choice kept in localStorage; #hash wins. */
+(function () {
+  const KEY = 'e6bTab';
+  const NAMES = { crosswind: 'Crosswind', pivotal: 'Pivotal Alt', wind: 'Wind', tsd: 'Time/Dist', fuel: 'Fuel', descent: 'Descent',
+                  altitude: 'Density Alt', cloud: 'Cloud Base', climb: 'Climb', glide: 'Glide', conversions: 'Convert' };
+  const cards = [...document.querySelectorAll('#e6b-grid > .e6b-card')];
+  const nav = document.getElementById('e6bTabs'), grid = document.getElementById('e6b-grid');
+  const tabs = cards.map(c => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'fb-tab'; b.role = 'tab'; b.dataset.card = c.id;
+    b.textContent = NAMES[c.id] || c.querySelector('.fb-title')?.textContent.trim() || c.id;
+    b.addEventListener('click', () => show(c.id, true));
+    nav.appendChild(b);
+    return b;
+  });
+  function show(id, user) {
+    if (!cards.some(c => c.id === id)) id = cards[0].id;
+    cards.forEach(c => c.classList.toggle('is-active', c.id === id));
+    tabs.forEach(t => { const on = t.dataset.card === id; t.classList.toggle('active', on); t.setAttribute('aria-selected', on); });
+    const t = tabs.find(t => t.dataset.card === id);
+    if (t) nav.scrollTo({ left: t.offsetLeft - (nav.clientWidth - t.offsetWidth) / 2, behavior: user ? 'smooth' : 'auto' });
+    grid.scrollTop = 0;
+    try { localStorage.setItem(KEY, id); } catch (e) {}
+    if (user && location.hash) history.replaceState(null, '', location.pathname + location.search);
+    if (window.FlightBagTheme) window.FlightBagTheme.place();
+  }
+  let saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  show((location.hash || '').slice(1) || saved || 'crosswind');
+  window.addEventListener('hashchange', () => show(location.hash.slice(1)));
+  // Tap the one-line METAR to read all of it
+  const bar = document.querySelector('.wx-bar');
+  document.getElementById('metarDisplay').addEventListener('click', () => bar.classList.toggle('open'));
 })();
 </script>
 <script src="e6b.js"></script>
