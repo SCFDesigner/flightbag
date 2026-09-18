@@ -414,12 +414,7 @@ function flySteps(s){
     `OBS <b>${fmt3(s.B + 180)}</b>; turn inbound at <b>R-${fmt3(p.lrRadial)}</b>, track ${fmt3(s.B + 180)}° to the VOR`
   ];
 }
-function flyGeom(s){
-  const dme = Math.hypot(s.x, s.y), radial = norm(deg(Math.atan2(s.x, s.y)));
-  const diff = n180(radial - s.crs), from = Math.abs(diff) < 90;
-  const dev = from ? -diff : n180(radial - norm(s.crs + 180));          // + = course is to the right
-  return { dme, radial, from, dev, brg: norm(radial + 180) };
-}
+const flyGeom = NavSim.geom;            // shared VOR geometry (navsim.js)
 function evalStep(s, g){
   const p = s.plan, c1 = s.inbound ? norm(s.A + 180) : s.A;
   const within = (a, b, t) => Math.abs(n180(a - b)) <= t;
@@ -478,73 +473,7 @@ function updateSteps(){
   document.getElementById('flyPlay').disabled = s.done;
 }
 
-/* HSI: card turns with heading; course pointer + CDI bar, TO/FROM, bearing pointer to the VOR, heading bug */
-function drawHSI(s){
-  clearScene();
-  const g = flyGeom(s), R = 196, c = STN;
-  cx2.fillStyle = '#1b1b1a'; cx2.beginPath(); cx2.arc(c.x, c.y, R + 8, 0, Math.PI*2); cx2.fill();
-  cx2.strokeStyle = C.line; cx2.lineWidth = 1.5; cx2.stroke();
-  cx2.save(); cx2.translate(c.x, c.y);
-  // compass card
-  for(let d=0; d<360; d+=5){
-    cx2.save(); cx2.rotate(rad(d - s.hdg));
-    const len = d%30===0 ? 16 : d%10===0 ? 11 : 6;
-    cx2.strokeStyle = d%10===0 ? C.text : C.text3; cx2.lineWidth = d%10===0 ? 2 : 1;
-    cx2.beginPath(); cx2.moveTo(0, -R); cx2.lineTo(0, -R + len); cx2.stroke();
-    if(d%30===0){
-      cx2.fillStyle = C.text; cx2.font = '600 17px '+monoFont(); cx2.textAlign = 'center'; cx2.textBaseline = 'middle';
-      cx2.fillText({0:'N',90:'E',180:'S',270:'W'}[d] || String(d/10), 0, -R + 32);
-    }
-    cx2.restore();
-  }
-  // heading bug
-  cx2.save(); cx2.rotate(rad(s.bug - s.hdg));
-  cx2.fillStyle = C.accent; cx2.beginPath(); cx2.moveTo(-11, -R - 2); cx2.lineTo(11, -R - 2); cx2.lineTo(11, -R + 8); cx2.lineTo(4, -R + 8); cx2.lineTo(0, -R + 3); cx2.lineTo(-4, -R + 8); cx2.lineTo(-11, -R + 8); cx2.closePath(); cx2.fill();
-  cx2.restore();
-  // bearing pointer to the station
-  cx2.save(); cx2.rotate(rad(g.brg - s.hdg));
-  cx2.strokeStyle = C.blue; cx2.fillStyle = C.blue; cx2.lineWidth = 2;
-  cx2.beginPath(); cx2.moveTo(0, R - 44); cx2.lineTo(0, -R + 52); cx2.stroke();
-  cx2.beginPath(); cx2.moveTo(0, -R + 44); cx2.lineTo(7, -R + 58); cx2.lineTo(-7, -R + 58); cx2.closePath(); cx2.fill();
-  cx2.restore();
-  // course pointer + CDI
-  cx2.save(); cx2.rotate(rad(s.crs - s.hdg));
-  const dotPx = 22, dev = Math.max(-10, Math.min(10, g.dev)), barX = dev / 2.5 * dotPx;   // 2.5° per dot, 4 dots = full scale
-  cx2.fillStyle = 'rgba(240,238,230,0.55)';
-  for(let i=-4;i<=4;i++){ if(!i) continue; cx2.beginPath(); cx2.arc(i*dotPx, 0, 3.2, 0, Math.PI*2); cx2.fill(); }
-  cx2.strokeStyle = C.ok; cx2.fillStyle = C.ok; cx2.lineWidth = 4; cx2.lineCap = 'round';
-  cx2.beginPath(); cx2.moveTo(0, -R + 50); cx2.lineTo(0, -92); cx2.stroke();                    // head shaft
-  cx2.beginPath(); cx2.moveTo(0, -R + 40); cx2.lineTo(10, -R + 60); cx2.lineTo(-10, -R + 60); cx2.closePath(); cx2.fill();
-  cx2.beginPath(); cx2.moveTo(0, 92); cx2.lineTo(0, R - 44); cx2.stroke();                       // tail
-  cx2.beginPath(); cx2.moveTo(barX, -82); cx2.lineTo(barX, 82); cx2.stroke();                   // CDI bar
-  cx2.lineCap = 'butt';
-  // TO / FROM flag
-  cx2.fillStyle = C.text;
-  cx2.beginPath();
-  if(g.from){ cx2.moveTo(34, 50); cx2.lineTo(46, 50); cx2.lineTo(40, 62); }
-  else { cx2.moveTo(34, -50); cx2.lineTo(46, -50); cx2.lineTo(40, -62); }
-  cx2.closePath(); cx2.fill();
-  cx2.restore();
-  // fixed airplane + lubber line
-  cx2.fillStyle = C.accent;
-  cx2.beginPath(); cx2.moveTo(0, -R - 12); cx2.lineTo(7, -R - 24); cx2.lineTo(-7, -R - 24); cx2.closePath(); cx2.fill();
-  cx2.strokeStyle = C.text; cx2.lineWidth = 3; cx2.lineCap = 'round';
-  cx2.beginPath(); cx2.moveTo(0, -18); cx2.lineTo(0, 16); cx2.moveTo(-18, -2); cx2.lineTo(18, -2); cx2.moveTo(-7, 13); cx2.lineTo(7, 13); cx2.stroke();
-  cx2.lineCap = 'butt';
-  cx2.restore();
-  // readouts in the corners
-  const ro = (x, y, lab, val, align, color) => {
-    cx2.textAlign = align; cx2.font = '10px -apple-system, sans-serif'; cx2.fillStyle = C.text3; cx2.fillText(lab, x, y);
-    cx2.font = '600 18px '+monoFont(); cx2.fillStyle = color || C.text; cx2.fillText(val, x, y + 20);
-  };
-  ro(12, 22, 'CRS', fmt3(s.crs) + '°', 'left', C.ok);
-  ro(12, 70, 'DME', g.dme.toFixed(1), 'left');                        // top-right corner holds the mini view
-  ro(12, H - 34, 'HDG', fmt3(s.hdg) + '°', 'left', C.accent);
-  ro(W - 12, H - 34, 'GS', s.gs + ' kt', 'right');
-  cx2.textAlign = 'center'; cx2.font = '600 12px '+monoFont(); cx2.fillStyle = C.text2;
-  cx2.fillText(g.from ? 'FROM' : 'TO', c.x, H - 12);                  // flag in words too
-  cx2.textAlign = 'start';
-}
+function drawHSI(s){ NavSim.hsi(cx2, s); }     // shared HSI (navsim.js)
 /* Map: north-up, fitted to the arc and the airplane */
 function drawMap(s, mini){
   const g = flyGeom(s), p = s.plan;
@@ -565,59 +494,19 @@ function drawMap(s, mini){
   if(mini) cx2.restore();
 }
 /* Fly draws the chosen view full size and the other one as a mini view in the top-right corner
-   (tap it to swap). The mini view is rendered offscreen at full size, then scaled into the inset. */
-const INSET = { x: W - 176, y: 8, w: 168, h: 168 };
-const offCv = document.createElement('canvas');
-offCv.width = W*DPR; offCv.height = H*DPR;
-const offCx = offCv.getContext('2d');
+   (tap it to swap). The mini view is rendered offscreen at full size (navsim.js frames it). */
+const offCv = NavSim.offscreen(), offCx = offCv.getContext('2d');
 function drawFly(){
   if(!fly.s) return;
   const main = fly.view === 'map' ? drawMap : drawHSI, mini = fly.view === 'map' ? drawHSI : drawMap;
   const onCx = cx2;
   cx2 = offCx; mini(fly.s, true); cx2 = onCx;
   main(fly.s);
-  const {x, y, w, h} = INSET;
-  cx2.save();
-  cx2.shadowColor = 'rgba(0,0,0,.55)'; cx2.shadowBlur = 14; cx2.shadowOffsetY = 3;
-  cx2.fillStyle = C.bg; cx2.beginPath(); cx2.roundRect(x, y, w, h, 10); cx2.fill();
-  cx2.shadowColor = 'transparent';
-  cx2.beginPath(); cx2.roundRect(x, y, w, h, 10); cx2.clip();
-  cx2.drawImage(offCv, x, y, w, h);
-  cx2.restore();
-  cx2.strokeStyle = 'rgba(240,238,230,0.28)'; cx2.lineWidth = 1;
-  cx2.beginPath(); cx2.roundRect(x + .5, y + .5, w - 1, h - 1, 10); cx2.stroke();
-  cx2.font = '600 9px ' + monoFont(); cx2.fillStyle = C.text3; cx2.textAlign = 'right';
-  cx2.fillText((fly.view === 'map' ? 'HSI' : 'MAP') + ' ⇄', x + w - 8, y + h - 8); cx2.textAlign = 'start';
+  NavSim.drawInset(cx2, offCv, fly.view === 'map' ? 'HSI' : 'MAP');
 }
-// tap the mini view to swap
-cv.addEventListener('click', e => {
-  if(!fly.on) return;
-  const r = cv.getBoundingClientRect(), px = (e.clientX - r.left) * W / r.width, py = (e.clientY - r.top) * H / r.height;
-  if(px >= INSET.x && px <= INSET.x + INSET.w && py >= INSET.y && py <= INSET.y + INSET.h) window.flyView(fly.view === 'map' ? 'hsi' : 'map');
-});
+cv.addEventListener('click', e => { if(fly.on && NavSim.insetHit(cv, e)) window.flyView(fly.view === 'map' ? 'hsi' : 'map'); });
 
-/* Knobs: drag round (1° per degree), wheel, arrow keys, or the − / + buttons (5°) */
-function knob(el, get, set){
-  const cap = el.querySelector('.knob-cap');
-  let drag = null;
-  const ang = e => { const r = cap.getBoundingClientRect(); return deg(Math.atan2(e.clientX - (r.left + r.width/2), -(e.clientY - (r.top + r.height/2)))); };
-  cap.addEventListener('pointerdown', e => { drag = { a: ang(e), id: e.pointerId }; try { cap.setPointerCapture(e.pointerId); } catch (_) {} e.preventDefault(); });
-  cap.addEventListener('pointermove', e => {
-    if(!drag || e.pointerId !== drag.id) return;
-    const a = ang(e), d = n180(a - drag.a); drag.a = a;
-    drag.acc = (drag.acc || 0) + d;
-    const whole = Math.trunc(drag.acc);
-    if(whole){ drag.acc -= whole; set(norm(get() + whole)); }
-  });
-  const end = () => { drag = null; };
-  cap.addEventListener('pointerup', end); cap.addEventListener('pointercancel', end);
-  cap.addEventListener('wheel', e => { e.preventDefault(); set(norm(get() + (e.deltaY > 0 ? 1 : -1) * (e.shiftKey ? 10 : 1))); }, { passive: false });
-  el.addEventListener('keydown', e => {
-    const k = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1 }[e.key];
-    if(k){ e.preventDefault(); set(norm(get() + k * (e.shiftKey ? 10 : 1))); }
-  });
-  el.querySelectorAll('.knob-btns button').forEach(b => b.addEventListener('click', () => set(norm(get() + +b.dataset.d))));
-}
+const knob = NavSim.knob;               // shared knob behaviour (navsim.js)
 function syncKnobs(){
   const s = fly.s; if(!s) return;
   document.getElementById('knobHdgV').textContent = fmt3(s.bug);

@@ -1,6 +1,5 @@
 /* ===== VOR Trainer — radials, TO/FROM, intercepting and tracking, on an HSI =====
-   Same instrument as the DME Arc Trainer's Fly mode (drawHSI / knobs / mini view are kept in step with
-   dme.js). Position is in NM from the VOR (x east, y north); the heading bug steers at standard rate and
+   The HSI, knobs, VOR geometry and mini-view frame are shared with the DME Arc Trainer (navsim.js). Position is in NM from the VOR (x east, y north); the heading bug steers at standard rate and
    the OBS drives the course pointer / CDI (±10° full scale, 2.5° per dot). No wind in the sim — wind
    correction (bracketing) is taught in Learn and the Quick Reference. */
 (function(){
@@ -30,12 +29,7 @@ const ptOn = (bearing, distPx) => ({x: STN.x + Math.sin(rad(bearing))*distPx, y:
 /* ---------- VOR geometry ----------
    Course c on the OBS: FROM when your radial is within 90° of c, else TO.
    dev > 0 = the course is to your right (the CDI deflects right). */
-function vorGeom(s){
-  const dme = Math.hypot(s.x, s.y), radial = norm(deg(Math.atan2(s.x, s.y)));
-  const diff = n180(radial - s.crs), from = Math.abs(diff) < 90;
-  const dev = from ? -diff : n180(radial - norm(s.crs + 180));
-  return { dme, radial, from, dev, brg: norm(radial + 180) };
-}
+const vorGeom = NavSim.geom;            // shared VOR geometry (navsim.js)
 /* Heading that intercepts course c at `angle`°, from a position on `radial` (inbound = course c is TO) */
 function interceptHdg(c, radial, inbound, angle){
   const R = inbound ? norm(c + 180) : c;                     // the radial the course lies on
@@ -116,71 +110,8 @@ function pill(p, txt, color){
 /* Airplane position (NM) → map pixels */
 const P = t => ({x: STN.x + t.x*SCALE, y: STN.y - t.y*SCALE});
 
-/* ---------- HSI (same instrument as the DME trainer's Fly mode) ---------- */
-function drawHSI(s, opts){
-  opts = opts || {};
-  clearScene();
-  const g = vorGeom(s), R = 196, c = STN;
-  cx2.fillStyle = '#1b1b1a'; cx2.beginPath(); cx2.arc(c.x, c.y, R + 8, 0, Math.PI*2); cx2.fill();
-  cx2.strokeStyle = C.line; cx2.lineWidth = 1.5; cx2.stroke();
-  cx2.save(); cx2.translate(c.x, c.y);
-  for(let d=0; d<360; d+=5){
-    cx2.save(); cx2.rotate(rad(d - s.hdg));
-    const len = d%30===0 ? 16 : d%10===0 ? 11 : 6;
-    cx2.strokeStyle = d%10===0 ? C.text : C.text3; cx2.lineWidth = d%10===0 ? 2 : 1;
-    cx2.beginPath(); cx2.moveTo(0, -R); cx2.lineTo(0, -R + len); cx2.stroke();
-    if(d%30===0){
-      cx2.fillStyle = C.text; cx2.font = '600 17px '+monoFont(); cx2.textAlign = 'center'; cx2.textBaseline = 'middle';
-      cx2.fillText({0:'N',90:'E',180:'S',270:'W'}[d] || String(d/10), 0, -R + 32);
-    }
-    cx2.restore();
-  }
-  if(opts.bug !== false){
-    cx2.save(); cx2.rotate(rad(s.bug - s.hdg));
-    cx2.fillStyle = C.accent; cx2.beginPath(); cx2.moveTo(-11, -R - 2); cx2.lineTo(11, -R - 2); cx2.lineTo(11, -R + 8); cx2.lineTo(4, -R + 8); cx2.lineTo(0, -R + 3); cx2.lineTo(-4, -R + 8); cx2.lineTo(-11, -R + 8); cx2.closePath(); cx2.fill();
-    cx2.restore();
-  }
-  if(opts.bearing !== false){
-    cx2.save(); cx2.rotate(rad(g.brg - s.hdg));
-    cx2.strokeStyle = C.blue; cx2.fillStyle = C.blue; cx2.lineWidth = 2;
-    cx2.beginPath(); cx2.moveTo(0, R - 44); cx2.lineTo(0, -R + 52); cx2.stroke();
-    cx2.beginPath(); cx2.moveTo(0, -R + 44); cx2.lineTo(7, -R + 58); cx2.lineTo(-7, -R + 58); cx2.closePath(); cx2.fill();
-    cx2.restore();
-  }
-  cx2.save(); cx2.rotate(rad(s.crs - s.hdg));
-  const dotPx = 22, dev = Math.max(-10, Math.min(10, g.dev)), barX = dev / 2.5 * dotPx;
-  cx2.fillStyle = 'rgba(240,238,230,0.55)';
-  for(let i=-4;i<=4;i++){ if(!i) continue; cx2.beginPath(); cx2.arc(i*dotPx, 0, 3.2, 0, Math.PI*2); cx2.fill(); }
-  cx2.strokeStyle = C.ok; cx2.fillStyle = C.ok; cx2.lineWidth = 4; cx2.lineCap = 'round';
-  cx2.beginPath(); cx2.moveTo(0, -R + 50); cx2.lineTo(0, -92); cx2.stroke();
-  cx2.beginPath(); cx2.moveTo(0, -R + 40); cx2.lineTo(10, -R + 60); cx2.lineTo(-10, -R + 60); cx2.closePath(); cx2.fill();
-  cx2.beginPath(); cx2.moveTo(0, 92); cx2.lineTo(0, R - 44); cx2.stroke();
-  cx2.beginPath(); cx2.moveTo(barX, -82); cx2.lineTo(barX, 82); cx2.stroke();
-  cx2.lineCap = 'butt';
-  cx2.fillStyle = C.text;
-  cx2.beginPath();
-  if(g.from){ cx2.moveTo(34, 50); cx2.lineTo(46, 50); cx2.lineTo(40, 62); }
-  else { cx2.moveTo(34, -50); cx2.lineTo(46, -50); cx2.lineTo(40, -62); }
-  cx2.closePath(); cx2.fill();
-  cx2.restore();
-  cx2.fillStyle = C.accent;
-  cx2.beginPath(); cx2.moveTo(0, -R - 12); cx2.lineTo(7, -R - 24); cx2.lineTo(-7, -R - 24); cx2.closePath(); cx2.fill();
-  cx2.strokeStyle = C.text; cx2.lineWidth = 3; cx2.lineCap = 'round';
-  cx2.beginPath(); cx2.moveTo(0, -18); cx2.lineTo(0, 16); cx2.moveTo(-18, -2); cx2.lineTo(18, -2); cx2.moveTo(-7, 13); cx2.lineTo(7, 13); cx2.stroke();
-  cx2.lineCap = 'butt';
-  cx2.restore();
-  const ro = (x, y, lab, val, align, color) => {
-    cx2.textAlign = align; cx2.font = '10px -apple-system, sans-serif'; cx2.fillStyle = C.text3; cx2.fillText(lab, x, y);
-    cx2.font = '600 18px '+monoFont(); cx2.fillStyle = color || C.text; cx2.fillText(val, x, y + 20);
-  };
-  ro(12, 22, 'CRS', fmt3(s.crs) + '°', 'left', C.ok);
-  if(opts.dme !== false) ro(12, 70, 'DME', g.dme.toFixed(1), 'left');
-  ro(12, H - 34, 'HDG', fmt3(s.hdg) + '°', 'left', C.accent);
-  if(s.gs) ro(W - 12, H - 34, 'GS', s.gs + ' kt', 'right');
-  cx2.textAlign = 'center'; cx2.font = '600 12px '+monoFont(); cx2.fillStyle = C.text2;
-  cx2.fillText(g.from ? 'FROM' : 'TO', c.x, H - 12);
-  cx2.textAlign = 'start';
-}
+/* ---------- HSI (shared with the DME trainer, navsim.js) ---------- */
+function drawHSI(s, opts){ NavSim.hsi(cx2, s, opts); }
 /* Map: north-up around the VOR, fitted to the airplane; `course` draws the target radial line */
 function drawMap(s, mini){
   const g = vorGeom(s);
@@ -559,11 +490,8 @@ function updateSteps(){
   document.getElementById('flyPlay').textContent = fly.running ? 'Pause' : (s.done ? 'Done' : 'Play');
   document.getElementById('flyPlay').disabled = s.done;
 }
-/* Main view + the other one as a mini view in the top-right corner (tap to swap) */
-const INSET = { x: W - 176, y: 8, w: 168, h: 168 };
-const offCv = document.createElement('canvas');
-offCv.width = W*DPR; offCv.height = H*DPR;
-const offCx = offCv.getContext('2d');
+/* Main view + the other one as a mini view in the top-right corner (tap to swap; navsim.js frames it) */
+const offCv = NavSim.offscreen(), offCx = offCv.getContext('2d');
 function drawFly(){
   const s = fly.s; if(!s) return;
   const mapState = { ...s, target: s.kind === 'direct' ? (s.passed || s.step >= 3 ? s.R : undefined) : s.R };
@@ -572,46 +500,10 @@ function drawFly(){
   const onCx = cx2;
   cx2 = offCx; mini(); cx2 = onCx;
   main();
-  const {x, y, w, h} = INSET;
-  cx2.save();
-  cx2.shadowColor = 'rgba(0,0,0,.55)'; cx2.shadowBlur = 14; cx2.shadowOffsetY = 3;
-  cx2.fillStyle = C.bg; cx2.beginPath(); cx2.roundRect(x, y, w, h, 10); cx2.fill();
-  cx2.shadowColor = 'transparent';
-  cx2.beginPath(); cx2.roundRect(x, y, w, h, 10); cx2.clip();
-  cx2.drawImage(offCv, x, y, w, h);
-  cx2.restore();
-  cx2.strokeStyle = 'rgba(240,238,230,0.28)'; cx2.lineWidth = 1;
-  cx2.beginPath(); cx2.roundRect(x + .5, y + .5, w - 1, h - 1, 10); cx2.stroke();
-  cx2.font = '600 9px ' + monoFont(); cx2.fillStyle = C.text3; cx2.textAlign = 'right';
-  cx2.fillText((fly.view === 'map' ? 'HSI' : 'MAP') + ' ⇄', x + w - 8, y + h - 8); cx2.textAlign = 'start';
+  NavSim.drawInset(cx2, offCv, fly.view === 'map' ? 'HSI' : 'MAP');
 }
-cv.addEventListener('click', e => {
-  if(!fly.on) return;
-  const r = cv.getBoundingClientRect(), px = (e.clientX - r.left) * W / r.width, py = (e.clientY - r.top) * H / r.height;
-  if(px >= INSET.x && px <= INSET.x + INSET.w && py >= INSET.y && py <= INSET.y + INSET.h) window.flyView(fly.view === 'map' ? 'hsi' : 'map');
-});
-/* Knobs: drag round (1° per degree), wheel, arrow keys, or the − / + buttons (5°) */
-function knob(el, get, set){
-  const cap = el.querySelector('.knob-cap');
-  let drag = null;
-  const ang = e => { const r = cap.getBoundingClientRect(); return deg(Math.atan2(e.clientX - (r.left + r.width/2), -(e.clientY - (r.top + r.height/2)))); };
-  cap.addEventListener('pointerdown', e => { drag = { a: ang(e), id: e.pointerId }; try { cap.setPointerCapture(e.pointerId); } catch (_) {} e.preventDefault(); });
-  cap.addEventListener('pointermove', e => {
-    if(!drag || e.pointerId !== drag.id) return;
-    const a = ang(e), d = n180(a - drag.a); drag.a = a;
-    drag.acc = (drag.acc || 0) + d;
-    const whole = Math.trunc(drag.acc);
-    if(whole){ drag.acc -= whole; set(norm(get() + whole)); }
-  });
-  const end = () => { drag = null; };
-  cap.addEventListener('pointerup', end); cap.addEventListener('pointercancel', end);
-  cap.addEventListener('wheel', e => { e.preventDefault(); set(norm(get() + (e.deltaY > 0 ? 1 : -1) * (e.shiftKey ? 10 : 1))); }, { passive: false });
-  el.addEventListener('keydown', e => {
-    const k = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1 }[e.key];
-    if(k){ e.preventDefault(); set(norm(get() + k * (e.shiftKey ? 10 : 1))); }
-  });
-  el.querySelectorAll('.knob-btns button').forEach(b => b.addEventListener('click', () => set(norm(get() + +b.dataset.d))));
-}
+cv.addEventListener('click', e => { if(fly.on && NavSim.insetHit(cv, e)) window.flyView(fly.view === 'map' ? 'hsi' : 'map'); });
+const knob = NavSim.knob;               // shared knob behaviour (navsim.js)
 function syncKnobs(){
   const s = fly.s; if(!s) return;
   document.getElementById('knobHdgV').textContent = fmt3(s.bug);
