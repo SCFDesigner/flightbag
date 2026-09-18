@@ -155,19 +155,20 @@ input[type="number"].fb-input { font-family: var(--fb-mono); }
    backdrop blur), a rim that catches light from the top-left and bottom-right (conic gradient masked to a
    ring), a sheen that sweeps across on hover, and a slight press. Applies to every themed button (.fb-btn
    and the pages' .btn); primary buttons are accent-tinted glass. Pages keep their own sizes and layout —
-   the selector (body.fb …) outranks page-level .btn rules only for these visual properties. */
+   the selector (body.fb …) outranks page-level .btn rules only for these visual properties.
+   Also glass: the W&B floating chips and bottom menu, the knob ± buttons, and the SELECTED tab / segment /
+   runway chip — their strips are recessed wells (below), so the selection sits on them like a glass pill. */
 @property --fb-glass-rim { syntax: "<angle>"; inherits: false; initial-value: -75deg; }
 @property --fb-glass-sheen { syntax: "<angle>"; inherits: false; initial-value: -45deg; }
-body.fb :is(.btn, .fb-btn) {
-  --glass-tint: rgba(255, 255, 255, .035);
-  --glass-rim: rgba(255, 255, 255, .42);
-  position: relative;
+/* low-specificity defaults (variants, selected states and page colours override these) */
+body.fb :where(.btn, .fb-btn, .float-chip, .mobile-nav-btn, .knob-btns button, .fb-tab.active, .fb-tab[aria-selected="true"], .seg button.on, .xw-chip.on) { position: relative; color: var(--fb-bright); }
+body.fb :is(.btn, .fb-btn, .float-chip, .mobile-nav-btn, .knob-btns button, .fb-tab.active, .fb-tab[aria-selected="true"], .seg button.on, .xw-chip.on) {
   isolation: isolate;
   border: 1px solid transparent;
-  border-radius: 999px;
+  border-radius: var(--glass-radius, 999px);
   background:
     linear-gradient(-75deg, rgba(255,255,255,.025), rgba(255,255,255,.10), rgba(255,255,255,.025)),
-    var(--glass-tint);
+    var(--glass-tint, rgba(255, 255, 255, .035));
   box-shadow:
     inset 0 .125em .125em rgba(0,0,0,.35),           /* top inner shade */
     inset 0 -.125em .125em rgba(255,255,255,.10),     /* bottom inner glow */
@@ -175,20 +176,19 @@ body.fb :is(.btn, .fb-btn) {
     0 .25em .3em -.12em rgba(0,0,0,.55);              /* lifted off the panel */
   -webkit-backdrop-filter: blur(3px);
   backdrop-filter: blur(3px);
-  color: var(--fb-bright);
   text-shadow: 0 .15em .1em rgba(0,0,0,.35);
   transition: transform 400ms cubic-bezier(.25, 1, .5, 1), box-shadow 400ms cubic-bezier(.25, 1, .5, 1),
               background 400ms cubic-bezier(.25, 1, .5, 1), color 200ms ease;
 }
 /* rim: light catches two opposite edges */
-body.fb :is(.btn, .fb-btn)::after {
+body.fb :is(.btn, .fb-btn, .float-chip, .mobile-nav-btn, .knob-btns button, .fb-tab.active, .fb-tab[aria-selected="true"], .seg button.on, .xw-chip.on)::after {
   content: "";
   position: absolute;
   inset: -1px;
   border-radius: inherit;
   padding: 1px;
   background:
-    conic-gradient(from var(--fb-glass-rim) at 50% 50%, var(--glass-rim), rgba(255,255,255,0) 5% 40%, var(--glass-rim) 50%, rgba(255,255,255,0) 60% 95%, var(--glass-rim)),
+    conic-gradient(from var(--fb-glass-rim) at 50% 50%, var(--glass-rim, rgba(255,255,255,.42)), rgba(255,255,255,0) 5% 40%, var(--glass-rim, rgba(255,255,255,.42)) 50%, rgba(255,255,255,0) 60% 95%, var(--glass-rim, rgba(255,255,255,.42))),
     linear-gradient(rgba(255,255,255,.10), rgba(255,255,255,.10));
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
@@ -197,7 +197,7 @@ body.fb :is(.btn, .fb-btn)::after {
   transition: --fb-glass-rim 500ms ease;
 }
 /* sheen: a soft band that slides across on hover */
-body.fb :is(.btn, .fb-btn)::before {
+body.fb :is(.btn, .fb-btn, .float-chip, .mobile-nav-btn, .knob-btns button, .fb-tab.active, .fb-tab[aria-selected="true"], .seg button.on, .xw-chip.on)::before {
   content: "";
   position: absolute;
   inset: 1px;
@@ -210,21 +210,20 @@ body.fb :is(.btn, .fb-btn)::before {
   pointer-events: none;
   transition: background-position 500ms cubic-bezier(.25, 1, .5, 1), --fb-glass-sheen 500ms cubic-bezier(.25, 1, .5, 1);
 }
-body.fb :is(.btn, .fb-btn):hover:not(:disabled) {
+body.fb :is(.btn, .fb-btn, .float-chip, .mobile-nav-btn, .knob-btns button, .fb-tab.active, .fb-tab[aria-selected="true"], .seg button.on, .xw-chip.on):hover:not(:disabled) {
   transform: scale(.975);
   border-color: transparent;
-  color: var(--fb-bright);
   box-shadow:
     inset 0 .125em .125em rgba(0,0,0,.35),
     inset 0 -.125em .125em rgba(255,255,255,.14),
     inset 0 0 .05em .1em rgba(255,255,255,.08),
     0 .15em .1em -.1em rgba(0,0,0,.6);
 }
-body.fb :is(.btn, .fb-btn):hover:not(:disabled)::after { --fb-glass-rim: -125deg; }
-body.fb :is(.btn, .fb-btn):hover:not(:disabled)::before { background-position: 25% 50%; }
-body.fb :is(.btn, .fb-btn):active:not(:disabled)::after { --fb-glass-rim: -75deg; }
-body.fb :is(.btn, .fb-btn):active:not(:disabled)::before { background-position: 50% 15%; --fb-glass-sheen: -15deg; }
-body.fb :is(.btn, .fb-btn):focus-visible { outline: 2px solid color-mix(in srgb, var(--fb-accent) 70%, transparent); outline-offset: 2px; }
+body.fb :is(.btn, .fb-btn, .float-chip, .mobile-nav-btn, .knob-btns button, .fb-tab.active, .fb-tab[aria-selected="true"], .seg button.on, .xw-chip.on):hover:not(:disabled)::after { --fb-glass-rim: -125deg; }
+body.fb :is(.btn, .fb-btn, .float-chip, .mobile-nav-btn, .knob-btns button, .fb-tab.active, .fb-tab[aria-selected="true"], .seg button.on, .xw-chip.on):hover:not(:disabled)::before { background-position: 25% 50%; }
+body.fb :is(.btn, .fb-btn, .float-chip, .mobile-nav-btn, .knob-btns button, .fb-tab.active, .fb-tab[aria-selected="true"], .seg button.on, .xw-chip.on):active:not(:disabled)::after { --fb-glass-rim: -75deg; }
+body.fb :is(.btn, .fb-btn, .float-chip, .mobile-nav-btn, .knob-btns button, .fb-tab.active, .fb-tab[aria-selected="true"], .seg button.on, .xw-chip.on):active:not(:disabled)::before { background-position: 50% 15%; --fb-glass-sheen: -15deg; }
+body.fb :is(.btn, .fb-btn, .float-chip, .mobile-nav-btn, .knob-btns button, .fb-tab.active, .fb-tab[aria-selected="true"], .seg button.on, .xw-chip.on):focus-visible { outline: 2px solid color-mix(in srgb, var(--fb-accent) 70%, transparent); outline-offset: 2px; }
 /* primary: accent-tinted glass */
 body.fb :is(.btn-primary, .fb-btn.primary) {
   --glass-tint: color-mix(in srgb, var(--fb-accent) 62%, transparent);
@@ -238,8 +237,25 @@ body.fb .btn-danger { --glass-tint: color-mix(in srgb, var(--fb-bad) 18%, transp
 body.fb .btn-danger:hover:not(:disabled) { color: #fff; }
 /* touch screens: no hover state, keep the rim still */
 @media (hover: none) and (pointer: coarse) {
-  body.fb :is(.btn, .fb-btn)::after, body.fb :is(.btn, .fb-btn):hover::after, body.fb :is(.btn, .fb-btn):active::after { --fb-glass-rim: -75deg; }
+  body.fb :is(.btn, .fb-btn, .float-chip, .mobile-nav-btn, .knob-btns button, .fb-tab.active, .fb-tab[aria-selected="true"], .seg button.on, .xw-chip.on)::after, body.fb :is(.btn, .fb-btn, .float-chip, .mobile-nav-btn, .knob-btns button, .fb-tab.active, .fb-tab[aria-selected="true"], .seg button.on, .xw-chip.on):hover::after, body.fb :is(.btn, .fb-btn, .float-chip, .mobile-nav-btn, .knob-btns button, .fb-tab.active, .fb-tab[aria-selected="true"], .seg button.on, .xw-chip.on):active::after { --fb-glass-rim: -75deg; }
 }
 @media (prefers-reduced-motion: reduce) {
-  body.fb :is(.btn, .fb-btn), body.fb :is(.btn, .fb-btn)::before, body.fb :is(.btn, .fb-btn)::after { transition: none; }
+  body.fb :is(.btn, .fb-btn, .float-chip, .mobile-nav-btn, .knob-btns button, .fb-tab.active, .fb-tab[aria-selected="true"], .seg button.on, .xw-chip.on), body.fb :is(.btn, .fb-btn, .float-chip, .mobile-nav-btn, .knob-btns button, .fb-tab.active, .fb-tab[aria-selected="true"], .seg button.on, .xw-chip.on)::before, body.fb :is(.btn, .fb-btn, .float-chip, .mobile-nav-btn, .knob-btns button, .fb-tab.active, .fb-tab[aria-selected="true"], .seg button.on, .xw-chip.on)::after { transition: none; }
 }
+
+/* shapes and colours for the non-pill members */
+body.fb .float-chip { position: fixed; }                       /* keep the chips' own placement (the default above is low-specificity) */
+body.fb .mobile-nav-btn { --glass-radius: 12px; }
+body.fb .knob-btns button { --glass-radius: 7px; }
+body.fb :is(.fb-tab.active, .fb-tab[aria-selected="true"], .seg button.on, .xw-chip.on) { color: var(--fb-accent); --glass-tint: rgba(255,255,255,.06); }
+body.fb :is(.fb-tab.active, .fb-tab[aria-selected="true"], .seg button.on, .xw-chip.on):hover { color: var(--fb-accent); }
+body.fb .mobile-nav-btn.active { color: var(--fb-accent); --glass-tint: color-mix(in srgb, var(--fb-accent) 16%, transparent); }
+/* strips that hold a selection: recessed wells, same as the input fields */
+body.fb :is(.fb-tabs, .seg) {
+  background: linear-gradient(180deg, var(--fb-well-top) 0%, var(--fb-well) 45%, var(--fb-well) 100%);
+  border: 1px solid var(--fb-well-rim);
+  border-radius: 999px;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,.7), inset 0 1px 1px rgba(0,0,0,.8), inset 0 -1px 0 rgba(255,255,255,.03), 0 1px 0 rgba(255,255,255,.055);
+  padding: 3px;
+}
+body.fb :is(.fb-tabs .fb-tab, .seg button) { border-radius: 999px; }
