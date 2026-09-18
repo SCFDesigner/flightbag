@@ -47,3 +47,6 @@ Never estimate, approximate, or invent values. If a number is in this tool, it h
 | `maneuvers-data.js` | Verbatim transcription of the SEL Maneuvers Guide Rev 2 — speeds, power tables, procedures, ACS standards. The single source of truth for `maneuvers.html`; every entry cites its guide page. |
 | `holds.html` + `holds.js` | Hold Trainer — IFR holding tutorial (anatomy/entries/timing), interactive AIM 70°-rule entry explorer, and entry quiz with animated answers. |
 | `navlog.html` | C-152 cross-country planner — POH Fig 5-1/5-6/5-7 data baked in, vertical profile view, wind triangle, fillable Jeppesen VFR nav log. Descent figures are user-set, not POH. |
+
+## Look tuning
+- Add `?tune` to any Flight Bag page URL → sliders for the page light and glass readouts (theme/flightbag-theme.js `TUNE`). Saved per browser in localStorage `fbLookTune` (diff vs `DEFAULTS`); "Copy values" gives JSON to bake into `DEFAULTS`. Glass = `.fb-glass` or `window.FB_GLASS` selector: `--fb-glare` (radial at the lamp) + `--fb-sheen` (per-element edge facing the lamp, fading with distance).
