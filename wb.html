@@ -1463,6 +1463,20 @@
         .over-limit { color: var(--fb-bad) !important; font-weight: 600; }
         .data-table td.over-limit { background: color-mix(in srgb, var(--fb-bad) 14%, transparent) !important; cursor: help; }
 
+        /* POH / AFM source viewer: the page behind each table-based number */
+        .poh-btn { margin-left: 6px; padding: 1px 6px; font: 600 9px var(--fb-mono); letter-spacing: 1px; color: var(--fb-accent); background: transparent; border: 1px solid color-mix(in srgb, var(--fb-accent) 45%, transparent); border-radius: 4px; cursor: pointer; vertical-align: middle; }
+        .poh-btn:hover { background: color-mix(in srgb, var(--fb-accent) 15%, transparent); }
+        #pohViewer { position: fixed; inset: 0; z-index: 10000; background: rgba(10,10,9,.82); display: none; overflow: auto; padding: max(16px, env(safe-area-inset-top)) 12px 24px; }
+        #pohViewer.open { display: block; }
+        #pohViewer .poh-inner { max-width: 900px; margin: 0 auto; }
+        #pohViewer .poh-top { position: sticky; top: 0; display: flex; align-items: center; gap: 10px; padding: 10px 0; background: rgba(10,10,9,.92); z-index: 1; }
+        #pohViewer .poh-top .btn { width: auto; flex: none; margin: 0; }
+        #pohViewer .poh-top h3 { flex: 1; font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--fb-bright); font-weight: 500; }
+        #pohViewer .poh-work { font: 12px/1.5 var(--fb-mono); color: var(--fb-text); background: var(--fb-panel); border: 1px solid var(--fb-line); border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; white-space: pre-wrap; }
+        #pohViewer figure { margin: 0 0 16px; }
+        #pohViewer figcaption { font-size: 11px; color: var(--fb-dim); margin: 0 0 6px; }
+        #pohViewer img { width: 100%; height: auto; display: block; border-radius: 6px; background: #fff; }
+
         /* ── Fields & readouts (same look as the E6B) ──
            Entry fields are wells pressed into the panel; results — clocks, limits, METAR,
            V-speeds — are flat glass lit by the page's one lamp (theme --fb-glare, placed per element by
@@ -3030,6 +3044,74 @@
             });
         }
 
+
+        /* ---------- POH / AFM source pages ----------
+           A small "POH" button next to each table-based result opens the actual manual page(s) for the selected
+           aircraft / model / configuration, with the calculator's working on top, so anyone can check it. */
+        const POH_PAGES = {
+            'C-172:S': { to: [['c172s-to-2550', '172S POH Fig 5-5 sheet 1 — short-field take-off, 2550 lb (p.5-14)'], ['c172s-to-2400', 'sheet 2 — 2400 lb (p.5-15)'], ['c172s-to-2200', 'sheet 3 — 2200 lb (p.5-16)']],
+                         ldg: [['c172s-ldg', '172S POH Fig 5-11 — short-field landing, 2550 lb (p.5-23)']], cg: [['c172s-cg', '172S POH — CG limits (Section 6)']] },
+            'C-172:P': { to: [['c172p-to-1', '172P Information Manual Fig 5-5 sheet 1 — short-field take-off (p.5-14)'], ['c172p-to-2', 'sheet 2 (p.5-15)']],
+                         ldg: [['c172p-ldg', '172P Fig 5-11 — short-field landing, 2400 lb (p.5-25)']], cg: [['c172p-cg', '172P Fig 6-8 — CG limits (p.6-14)']] },
+            'C-172:L': { to: [['c172l-to', '172L (1971) Fig 6-3 — take-off data, hard surface, flaps up (MPH)']],
+                         ldg: [['c172l-ldg', '172L (1971) Fig 6-5 — landing data, 2300 lb']], cg: [['c172l-cg', '172L (1971) — CG moment envelope (graph; limits per TCDS 3A12)']] }
+        };
+        const P2006T_LIGHT = { to: [['p2006t-to-1080-a19', 'AFM Suppl. A19 p.W5-8 — take-off 1080 kg (corrected 3000 ft row)'], ['p2006t-to-930-a19', 'Suppl. A19 p.W5-9 — take-off 930 kg']],
+                               ldg: [['p2006t-ldg-1080', 'AFM p.5-20 — landing 1080 kg'], ['p2006t-ldg-930', 'AFM p.5-21 — landing 930 kg']] };
+        [['1180', 'AFM p.5-7 — take-off 1180 kg', 'AFM p.5-19 — landing 1180 kg', 'AFM p.5-14 — one-engine ROC at VYSE'],
+         ['1230', 'Suppl. A19 p.W5-7 — take-off 1230 kg', 'Suppl. A19 p.W5-19 — landing 1230 kg', 'Suppl. A19 p.W5-14 — one-engine ROC at VYSE'],
+         ['1290', 'Suppl. G29 p.S5-7 — take-off 1290 kg', 'Suppl. G29 p.S5-19 — landing 1290 kg', 'Suppl. G29 p.S5-14 — one-engine ROC at VYSE']].forEach(([k, to, ldg, oei]) => {
+            POH_PAGES['P2006T:' + k] = { to: [['p2006t-to-' + k, to], ...P2006T_LIGHT.to], ldg: [['p2006t-ldg-' + k, ldg], ...P2006T_LIGHT.ldg],
+                                        oei: [['p2006t-oei-' + k, oei]], cg: [['p2006t-cg', 'AFM p.2-17 — weights and CG limits']] };
+        });
+        function pohKey(){ const t = document.getElementById('aircraftType').value; return t + ':' + (VARIANTS[t] ? currentVariant(t) : ''); }
+        function pohWorking(kind){
+            const d = kind === 'to' ? calculationDetails.takeoff : kind === 'ldg' ? calculationDetails.landing : kind === 'oei' ? calculationDetails.p2006t : null;
+            if (kind === 'cg') {
+                const cell = (r, c) => document.querySelector(`.data-table tbody tr:nth-child(${r}) td:nth-child(${c})`)?.textContent || '—';
+                return `T/O ${cell(10, 2)} lb at ${cell(10, 3)}\nLanding ${cell(12, 2)} lb at ${cell(12, 3)}\nZero fuel ${cell(6, 2)} lb at ${cell(6, 3)}`;
+            }
+            if (!d) return '';
+            if (kind === 'oei') return `Weight ${d.weight} lb · OAT ${d.temperature}°C · PA ${d.pressureAltitude} ft\nClimb ${d.climbRate} fpm · ceiling ${d.serviceCeiling} ft\n${d.weightCategory || ''}`;
+            return `Weight ${d.weight} lb · OAT ${d.temperature}°C · PA ${d.pressureAltitude} ft · wind ${d.headwind >= 0 ? d.headwind + ' kt head' : -d.headwind + ' kt TAIL'}\nTable value: ${d.baseDistance} ft\nCorrections: ${d.correction}\n${d.interpolationNote}`;
+        }
+        function openPoh(kind){
+            const set = POH_PAGES[pohKey()], pages = set && set[kind];
+            if (!pages) return;
+            let v = document.getElementById('pohViewer');
+            if (!v) {
+                v = document.createElement('div'); v.id = 'pohViewer';
+                v.innerHTML = '<div class="poh-inner"><div class="poh-top"><h3></h3><button class="btn" type="button">Close</button></div><div class="poh-work"></div><div class="poh-pages"></div></div>';
+                v.addEventListener('click', e => { if (e.target === v || e.target.closest('.poh-top button')) v.classList.remove('open'); });
+                document.addEventListener('keydown', e => { if (e.key === 'Escape') v.classList.remove('open'); });
+                document.body.appendChild(v);
+            }
+            v.querySelector('h3').textContent = { to: 'Take-off distance', ldg: 'Landing distance', oei: 'One-engine climb', cg: 'Weight & CG limits' }[kind] + ' — source';
+            v.querySelector('.poh-work').textContent = pohWorking(kind) + '\n\nThe calculator interpolates between rows, temperatures and weights on these pages, then applies the notes printed on them.';
+            v.querySelector('.poh-pages').innerHTML = pages.map(([img, cap]) => `<figure><figcaption>${cap}</figcaption><img src="poh/${img}.jpg" alt="${cap}" loading="lazy"></figure>`).join('');
+            v.classList.add('open'); v.scrollTop = 0;
+        }
+        /* Buttons beside the table-based results; hidden when the aircraft has no manual pages loaded (e.g. C-152) */
+        function addPohButtons(){
+            const put = (el, kind) => {
+                if (!el || el.querySelector(`.poh-btn[data-poh="${kind}"]`)) return;
+                const b = document.createElement('button'); b.type = 'button'; b.className = 'poh-btn'; b.dataset.poh = kind; b.textContent = 'POH';
+                b.title = 'Open the manual page this is calculated from';
+                b.addEventListener('click', e => { e.stopPropagation(); openPoh(kind); });
+                el.appendChild(b);
+            };
+            const labelOf = field => document.querySelector(`[data-field="${field}"]`)?.closest('.info-item')?.querySelector('.info-label');
+            put(labelOf('takeoffGR'), 'to'); put(labelOf('landingGR'), 'ldg'); put(labelOf('seClimbRate'), 'oei');
+            const cgItem = [...document.querySelectorAll('.right-panel .info-item')].find(i => i.querySelector('.info-label')?.textContent.startsWith('T/O CG'));
+            put(cgItem && cgItem.querySelector('.info-label'), 'cg');
+            refreshPohButtons();
+        }
+        function refreshPohButtons(){
+            const set = POH_PAGES[pohKey()];
+            document.querySelectorAll('.poh-btn').forEach(b => { b.style.display = set && set[b.dataset.poh] ? '' : 'none'; });
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addPohButtons); else setTimeout(addPohButtons, 0);
+
         document.addEventListener('change', e => {
             if (e.target && e.target.id === 'tailNumber') {
                 const type = document.getElementById('aircraftType').value;
@@ -3041,6 +3123,7 @@
             console.log('populateAircraftSpecificValues called with:', aircraftType);
             setupVariantSelect(aircraftType);
             applyVariant(aircraftType);
+            if (typeof refreshPohButtons === 'function') refreshPohButtons();
             const specs = aircraftSpecs[aircraftType];
             console.log('Aircraft specs:', specs);
             if (!specs) {
