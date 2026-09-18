@@ -4,7 +4,7 @@
    radius) are drawn to the same scale. */
 (function(){
 const cv = document.getElementById('arcCanvas');
-const cx2 = cv.getContext('2d');
+let cx2 = cv.getContext('2d');          // swapped to an offscreen context while drawing the Fly mini view
 const W = 540, H = 540;
 const DPR = Math.min(2, window.devicePixelRatio || 1);
 cv.width = W*DPR; cv.height = H*DPR;
@@ -538,7 +538,7 @@ function drawHSI(s){
     cx2.font = '600 18px '+monoFont(); cx2.fillStyle = color || C.text; cx2.fillText(val, x, y + 20);
   };
   ro(12, 22, 'CRS', fmt3(s.crs) + '°', 'left', C.ok);
-  ro(W - 12, 22, 'DME', g.dme.toFixed(1), 'right');
+  ro(12, 70, 'DME', g.dme.toFixed(1), 'left');                        // top-right corner holds the mini view
   ro(12, H - 34, 'HDG', fmt3(s.hdg) + '°', 'left', C.accent);
   ro(W - 12, H - 34, 'GS', s.gs + ' kt', 'right');
   cx2.textAlign = 'center'; cx2.font = '600 12px '+monoFont(); cx2.fillStyle = C.text2;
@@ -546,7 +546,7 @@ function drawHSI(s){
   cx2.textAlign = 'start';
 }
 /* Map: north-up, fitted to the arc and the airplane */
-function drawMap(s){
+function drawMap(s, mini){
   const g = flyGeom(s), p = s.plan;
   SCALE = 196 / Math.max(s.D + 4, g.dme + 2, 8);
   clearScene(); drawCompass();
@@ -558,10 +558,43 @@ function drawMap(s){
   pill(ptOn(s.B, RING_R - 22), 'R-' + fmt3(s.B));
   drawStation('VOR');
   const P = t => ({x: STN.x + t.x*SCALE, y: STN.y - t.y*SCALE});
-  drawPath(s.trail.map(P).concat([P(s)]), C.accent, 2);
-  const q = P(s); drawPlane({x: q.x, y: q.y, h: s.hdg}, C.ok);
+  drawPath(s.trail.map(P).concat([P(s)]), C.accent, mini ? 6 : 2);
+  const q = P(s);
+  if(mini){ cx2.save(); cx2.translate(q.x, q.y); cx2.scale(2.6, 2.6); cx2.translate(-q.x, -q.y); }   // readable once scaled down
+  drawPlane({x: q.x, y: q.y, h: s.hdg}, C.ok);
+  if(mini) cx2.restore();
 }
-function drawFly(){ if(fly.s) (fly.view === 'map' ? drawMap : drawHSI)(fly.s); }
+/* Fly draws the chosen view full size and the other one as a mini view in the top-right corner
+   (tap it to swap). The mini view is rendered offscreen at full size, then scaled into the inset. */
+const INSET = { x: W - 176, y: 8, w: 168, h: 168 };
+const offCv = document.createElement('canvas');
+offCv.width = W*DPR; offCv.height = H*DPR;
+const offCx = offCv.getContext('2d');
+function drawFly(){
+  if(!fly.s) return;
+  const main = fly.view === 'map' ? drawMap : drawHSI, mini = fly.view === 'map' ? drawHSI : drawMap;
+  const onCx = cx2;
+  cx2 = offCx; mini(fly.s, true); cx2 = onCx;
+  main(fly.s);
+  const {x, y, w, h} = INSET;
+  cx2.save();
+  cx2.shadowColor = 'rgba(0,0,0,.55)'; cx2.shadowBlur = 14; cx2.shadowOffsetY = 3;
+  cx2.fillStyle = C.bg; cx2.beginPath(); cx2.roundRect(x, y, w, h, 10); cx2.fill();
+  cx2.shadowColor = 'transparent';
+  cx2.beginPath(); cx2.roundRect(x, y, w, h, 10); cx2.clip();
+  cx2.drawImage(offCv, x, y, w, h);
+  cx2.restore();
+  cx2.strokeStyle = 'rgba(240,238,230,0.28)'; cx2.lineWidth = 1;
+  cx2.beginPath(); cx2.roundRect(x + .5, y + .5, w - 1, h - 1, 10); cx2.stroke();
+  cx2.font = '600 9px ' + monoFont(); cx2.fillStyle = C.text3; cx2.textAlign = 'right';
+  cx2.fillText((fly.view === 'map' ? 'HSI' : 'MAP') + ' ⇄', x + w - 8, y + h - 8); cx2.textAlign = 'start';
+}
+// tap the mini view to swap
+cv.addEventListener('click', e => {
+  if(!fly.on) return;
+  const r = cv.getBoundingClientRect(), px = (e.clientX - r.left) * W / r.width, py = (e.clientY - r.top) * H / r.height;
+  if(px >= INSET.x && px <= INSET.x + INSET.w && py >= INSET.y && py <= INSET.y + INSET.h) window.flyView(fly.view === 'map' ? 'hsi' : 'map');
+});
 
 /* Knobs: drag round (1° per degree), wheel, arrow keys, or the − / + buttons (5°) */
 function knob(el, get, set){
@@ -618,6 +651,7 @@ function startFly(){
 window.setMode = mode => {
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.mode===mode));
   ['learn','entries','practice','fly'].forEach(m => document.getElementById(m + 'Card').style.display = m === mode ? '' : 'none');
+  document.getElementById('notesCard').style.display = mode === 'fly' ? 'none' : '';   // Fly: the arc window gets the room
   stopAnim();
   fly.on = false;
   if(fly.running){ fly.running = false; }                  // leaving Fly pauses it
