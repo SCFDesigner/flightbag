@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>DME Arc Trainer</title>
+<link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="theme/flightbag-theme.css">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  /* dme.js writes inline font-family:var(--mono) — keep this alias */
+  --mono: var(--fb-mono);
+}
+body { min-height: 100vh; }
+header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  /* home-screen app: clear the iPhone status bar / notch */
+  padding: max(10px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 10px max(16px, env(safe-area-inset-left));
+  border-bottom: 1px solid var(--fb-line);
+}
+header h1 {
+  font-size: var(--fb-fs-xs);
+  font-weight: 500;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--fb-bright);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+header h1 svg, .card h2 svg, .card-ico { width: 15px; height: 15px; stroke: var(--fb-accent); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.fb-home { min-height: 36px; }
+.tabs { margin-left: auto; }
+.tab {
+  min-height: 32px;
+  padding: 0 14px;
+  font-weight: 600;
+  letter-spacing: 2px;
+}
+
+main { padding: 8px; }
+/* One trainer card: quick reference → arc window → mode controls */
+.trainer { max-width: 600px; margin: 0 auto; }
+.trainer > section { padding: var(--fb-pad); }
+.trainer > section + section { border-top: 1px solid var(--fb-line); }
+.ref-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 18px; }
+.ref-grid p { font-size: 12.5px; line-height: 1.5; margin-bottom: 4px; }
+.canvas-wrap { padding: 10px; }
+#arcCanvas { display: block; width: 100%; max-width: 540px; aspect-ratio: 1; margin: 0 auto; border-radius: var(--fb-radius-sm); background: var(--fb-cell); }
+.card h2 {
+  font-size: var(--fb-fs-xs);
+  font-weight: 500;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--fb-bright);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.card-head { display: flex; align-items: center; gap: 9px; margin-bottom: 10px; }
+.card p { font-size: 13.5px; line-height: 1.55; color: var(--fb-text); margin-bottom: 8px; }
+.card p strong { color: var(--fb-bright); }
+.card p em { color: var(--fb-accent); font-style: normal; font-weight: 600; }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  background: color-mix(in srgb, var(--fb-cell) 82%, transparent);
+  color: var(--fb-text);
+  border: 1px solid var(--fb-border);
+  padding: 6px 14px;
+  border-radius: var(--fb-radius-sm);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  transition: border-color var(--fb-ease), color var(--fb-ease), background var(--fb-ease);
+}
+.btn:hover { border-color: var(--fb-accent); color: var(--fb-bright); }
+.btn-primary { background: var(--fb-accent); border-color: var(--fb-accent); color: var(--fb-on-accent); font-weight: 600; }
+.btn-primary:hover { color: var(--fb-on-accent); filter: brightness(1.08); }
+.btn:disabled { opacity: .35; cursor: default; }
+.btn:disabled:hover { border-color: var(--fb-border); color: var(--fb-text); }
+.btnrow { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+.stepdots { display: flex; gap: 5px; align-items: center; margin-left: auto; }
+.stepdots span { width: 7px; height: 7px; border-radius: 50%; background: var(--fb-cell); border: 1px solid var(--fb-border); }
+.stepdots span.on { background: var(--fb-accent); border-color: var(--fb-accent); }
+
+.ctl { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.ctl label { font-size: var(--fb-fs-sm); color: var(--fb-text); min-width: 118px; }
+.ctl input[type=range] { flex: 1; accent-color: var(--fb-accent); min-height: 36px; }
+.ctl .val {
+  font-family: var(--fb-mono);
+  font-size: 13px;
+  color: var(--fb-bright);
+  min-width: 46px;
+  text-align: right;
+}
+.seg { display: flex; gap: 2px; padding: 2px; background: var(--fb-cell); border: 1px solid var(--fb-line); border-radius: var(--fb-radius-sm); }
+.seg button {
+  background: none;
+  color: var(--fb-dim);
+  border: none;
+  border-radius: 4px;
+  min-height: 32px;
+  padding: 0 12px;
+  font: inherit;
+  font-size: var(--fb-fs-sm);
+  cursor: pointer;
+  transition: background var(--fb-ease), color var(--fb-ease);
+}
+.seg button:hover { color: var(--fb-bright); }
+.seg button.on { background: var(--fb-panel); color: var(--fb-accent); box-shadow: 0 1px 0 rgba(217, 119, 87, .6); }
+.entry-name {
+  font-family: var(--fb-mono);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--fb-accent);
+  letter-spacing: 1px;
+}
+.entry-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 10px; }
+.legend i { font-style: normal; font-size: 11px; color: var(--fb-text); display: inline-flex; align-items: center; gap: 6px; }
+.legend b { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+
+.answers { display: flex; gap: 8px; margin-top: 10px; }
+.answers .btn { flex: 1; text-align: center; font-weight: 600; font-family: var(--fb-mono); letter-spacing: .5px; }
+.answers .btn.good { border-color: var(--fb-ok); background: color-mix(in srgb, var(--fb-ok) 15%, transparent); color: var(--fb-bright); }
+.answers .btn.badpick { border-color: var(--fb-bad); background: color-mix(in srgb, var(--fb-bad) 14%, transparent); color: var(--fb-bright); }
+.ctl.quiz-opt { margin-bottom: 10px; flex-wrap: nowrap; }
+.ctl.quiz-opt label { min-width: 0; flex: none; font-size: var(--fb-fs-sm); color: var(--fb-dim); }
+.quiz-q { font-size: 14.5px; line-height: 1.6; color: var(--fb-bright); }
+.quiz-q .mono { font-family: var(--fb-mono); color: var(--fb-warn); }
+.score { font-family: var(--fb-mono); font-size: var(--fb-fs-sm); color: var(--fb-dim); margin-top: 10px; }
+.feedback { font-size: 13px; margin-top: 10px; line-height: 1.5; color: var(--fb-text); display: none; }
+.feedback.show { display: block; }
+.feedback .yes { color: var(--fb-ok); font-weight: 700; }
+.feedback .no { color: var(--fb-bad); font-weight: 700; }
+
+@media (max-width: 860px) {
+  header { flex-wrap: wrap; }
+  .tabs { margin-left: 0; width: 100%; display: flex; }
+  .tab { flex: 1; text-align: center; min-height: 36px; }
+}
+@media (max-width: 560px) {
+  .ref-grid { grid-template-columns: 1fr; }
+  .canvas-wrap { padding: 6px; }
+}
+/* ── phones: the whole trainer fits the screen — header, card and controls fixed; the hold window takes
+   whatever height is left (sized by container units), Quick Reference folds away behind its title ── */
+@media (max-width: 700px), (orientation: landscape) and (max-height: 500px) {
+  html, body.fb { height: 100%; overflow: hidden; }
+  body.fb { height: 100dvh; display: flex; flex-direction: column; }
+  header { flex: none; padding: max(8px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) 8px max(12px, env(safe-area-inset-left)); row-gap: 6px; }
+  main { flex: 1 1 auto; min-height: 0; padding: 0 8px max(8px, env(safe-area-inset-bottom)); }
+  .trainer { height: 100%; max-width: none; display: flex; flex-direction: column; }
+  .trainer > section { flex: none; padding: 10px 12px; }
+  #notesCard h2 { margin: 0; cursor: pointer; user-select: none; }
+  #notesCard h2::after { content: ''; margin-left: auto; width: 7px; height: 7px; border-right: 1.5px solid var(--fb-dim); border-bottom: 1.5px solid var(--fb-dim); transform: rotate(45deg) translateY(-2px); transition: transform var(--fb-ease); }
+  #notesCard.open h2::after { transform: rotate(225deg); }
+  #notesCard .ref-grid { display: none; margin-top: 8px; grid-template-columns: 1fr; }
+  #notesCard.open .ref-grid { display: grid; }
+  .canvas-wrap { flex: 1 1 auto !important; min-height: 120px; container-type: size; display: flex; align-items: center; justify-content: center; padding: 6px !important; }
+  #arcCanvas { width: min(100cqw, 100cqh); max-width: none; height: auto; margin: 0; }
+  /* controls keep their natural height; very long lesson text scrolls inside its own section */
+  #learnCard, #entriesCard, #practiceCard { max-height: 46dvh; overflow-y: auto; }
+  .card p { font-size: 13px; line-height: 1.45; margin-bottom: 6px; }
+  .ctl { margin-bottom: 6px; }
+  .btnrow { margin-top: 4px; }
+  .legend { margin-top: 6px; }
+  /* Entries: label + value on one line with the slider under it, Turns inline, entry beside its button */
+  #entriesCard .ctl:not(.ctl-turns) { display: grid; grid-template-columns: 1fr auto; row-gap: 0; }
+  #entriesCard .ctl:not(.ctl-turns) label { grid-column: 1; grid-row: 1; font-size: 12px; color: var(--fb-dim); min-width: 0; }
+  #entriesCard .ctl:not(.ctl-turns) .val { grid-column: 2; grid-row: 1; }
+  #entriesCard .ctl:not(.ctl-turns) input[type=range] { grid-column: 1 / -1; grid-row: 2; min-height: 26px; }
+  #entriesCard .ctl-turns { flex-wrap: nowrap; }
+  #entriesCard .ctl-turns label { flex: none; min-width: 0; font-size: 12px; color: var(--fb-dim); }
+  #entriesCard .ctl-turns .seg { flex: 1; }
+  #entriesCard .ctl-turns .seg button { flex: 1; padding: 0 6px; }
+  #entriesCard .entry-row p { margin-bottom: 0; }
+  #entriesCard .entry-name { font-size: 20px; }
+  #entriesCard .entry-row .btnrow { margin-top: 0; }
+  #entriesCard > h2, #practiceCard > h2 { display: none; }   /* the tab already names it */
+}
+/* phone on its side: hold window left, controls right */
+@media (orientation: landscape) and (max-height: 500px) {
+  header { flex-wrap: nowrap; }
+  .tabs { width: auto; margin-left: auto; }
+  .trainer { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  #notesCard { grid-column: 2; grid-row: 1; }
+  .canvas-wrap { grid-column: 1; grid-row: 1 / span 2; border-top: 0 !important; }
+  #learnCard, #entriesCard, #practiceCard { grid-column: 2; grid-row: 2; max-height: none; border-top: 1px solid var(--fb-line); }
+}
+@media (max-width: 480px) {
+  .ctl { flex-wrap: wrap; }
+  .ctl label { min-width: 0; flex: 1 1 100%; }
+  .seg { flex: 1; }
+  .seg button { flex: 1; }
+}
+/* explore readouts (flat glass, lit by the page lamp like the E6B) */
+.xo { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 4px 0 8px; }
+.xo div { background-color: #141312; background-image: var(--fb-sheen, none), var(--fb-glare, none); background-size: 100% 100%, var(--fb-lamp-size, 100vw 100vh); background-position: 0 0, var(--fb-lamp-pos, 0 0); background-repeat: no-repeat; border: 1px solid rgba(255,255,255,.05); border-radius: var(--fb-radius-sm); padding: 6px 9px; min-width: 0; }
+.xo span { display: block; font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--fb-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.xo b { display: block; font-family: var(--fb-mono); font-size: 16px; font-weight: 500; color: #f2a07f; text-shadow: 0 0 6px rgba(217,119,87,.5), 0 0 16px rgba(217,119,87,.2); white-space: nowrap; }
+.answers { flex-wrap: wrap; }
+.answers .btn { min-width: 30%; }
+@media (max-width: 700px), (orientation: landscape) and (max-height: 500px) {
+  .xo { gap: 4px; margin: 2px 0 6px; }
+  .xo div { padding: 4px 7px; }
+  .xo b { font-size: 14px; }
+}
+</style>
+</head>
+<body class="fb">
+
+<header>
+  <a class="fb-home" href="index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Flight Bag</a>
+  <h1><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19A10 10 0 0 1 19 5"/><rect x="16" y="16" width="5" height="5" rx="1"/></svg>DME Arc Trainer</h1>
+  <div class="tabs fb-tabs" role="tablist">
+    <button class="tab fb-tab active" data-mode="learn" onclick="setMode('learn')">LEARN</button>
+    <button class="tab fb-tab" data-mode="entries" onclick="setMode('entries')">EXPLORE</button>
+    <button class="tab fb-tab" data-mode="practice" onclick="setMode('practice')">PRACTICE</button>
+  </div>
+</header>
+
+<main>
+  <div class="trainer fb-panel">
+    <section class="card" id="notesCard">
+      <h2><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg>Quick Reference</h2>
+      <div class="ref-grid">
+      <p><strong>On the arc:</strong> heading ≈ radial ± 90° — <em>clockwise</em> +90, <em>counterclockwise</em> −90. Keep the bearing pointer on the wingtip.</p>
+      <p><strong>10-10 rule:</strong> when the pointer falls ~10° behind the wingtip, turn 10° toward the station. Outside the arc, turn in more; inside, turn out.</p>
+      <p><strong>Joining:</strong> lead the 90° turn by about your turn radius — <em>GS ÷ 200</em> NM (½ NM at 100 kts).</p>
+      <p><strong>Leaving:</strong> lead radial ≈ <em>60 × lead ÷ DME</em> degrees before the final course radial (charts often publish an LR).</p>
+      </div>
+    </section>
+
+    <section class="canvas-wrap"><canvas id="arcCanvas" aria-label="DME arc diagram"></canvas></section>
+
+    <!-- LEARN -->
+    <section class="card" id="learnCard">
+      <div class="card-head">
+        <svg class="card-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/></svg>
+        <h2 id="learnTitle" style="margin-bottom:0;">What is a DME arc?</h2>
+        <div class="stepdots" id="learnDots"></div>
+      </div>
+      <div id="learnBody"></div>
+      <div class="btnrow">
+        <button class="btn" id="learnPrev" onclick="learnStepMove(-1)">← Back</button>
+        <button class="btn btn-primary" id="learnNext" onclick="learnStepMove(1)">Next →</button>
+        <button class="btn" onclick="replayLearn()">Replay animation</button>
+      </div>
+    </section>
+
+    <!-- EXPLORE -->
+    <section class="card" id="entriesCard" style="display:none;">
+      <h2><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg>Arc Explorer</h2>
+      <div class="ctl">
+        <label>Outbound on radial</label>
+        <input type="range" id="ctlFrom" min="0" max="355" value="90" step="5">
+        <span class="val" id="valFrom">090°</span>
+      </div>
+      <div class="ctl">
+        <label>Final: inbound on radial</label>
+        <input type="range" id="ctlTo" min="0" max="355" value="180" step="5">
+        <span class="val" id="valTo">180°</span>
+      </div>
+      <div class="ctl">
+        <label>Arc (DME)</label>
+        <input type="range" id="ctlDme" min="6" max="20" value="10" step="1">
+        <span class="val" id="valDme">10 NM</span>
+      </div>
+      <div class="ctl">
+        <label>Groundspeed</label>
+        <input type="range" id="ctlGs" min="80" max="180" value="110" step="10">
+        <span class="val" id="valGs">110 kt</span>
+      </div>
+      <div class="xo">
+        <div><span>Arc</span><b id="oDir">—</b></div>
+        <div><span>Arc heading</span><b id="oHdg">—</b></div>
+        <div><span>Join lead</span><b id="oLead">—</b></div>
+        <div><span>Lead radial</span><b id="oLr">—</b></div>
+        <div><span>Final course</span><b id="oFinal">—</b></div>
+        <div><span>Arc length</span><b id="oLen">—</b></div>
+      </div>
+      <div class="btnrow">
+        <button class="btn btn-primary" onclick="flyArc()">Fly this arc</button>
+      </div>
+    </section>
+
+    <!-- PRACTICE -->
+    <section class="card" id="practiceCard" style="display:none;">
+      <h2><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 0 1 4.9.7c0 1.7-2.4 2.1-2.4 3.8"/><path d="M12 17h.01"/></svg>Arc Quiz</h2>
+      <div class="quiz-q" id="quizText"></div>
+      <div class="answers" id="answers"></div>
+      <div class="feedback" id="quizFeedback"></div>
+      <div class="btnrow">
+        <button class="btn btn-primary" id="nextQBtn" onclick="nextQuestion()" style="display:none;">Next question →</button>
+      </div>
+      <div class="score" id="scoreLine"></div>
+    </section>
+  </div>
+</main>
+
+<script>window.FB_GLASS = '.xo div';   // explore readouts catch the page lamp</script>
+<script src="dme.js"></script>
+<script>
+/* Phones: Quick Reference folds behind its title (tap to open) so the arc window keeps the space */
+(function () {
+  const card = document.getElementById('notesCard');
+  card.querySelector('h2').addEventListener('click', () => {
+    card.classList.toggle('open');
+    if (window.FlightBagTheme) window.FlightBagTheme.place();
+  });
+})();
+/* Flight Bag theme: re-place panel lighting after cards show/hide (visual only). */
+(function(){
+  const place = () => { if (window.FlightBagTheme) window.FlightBagTheme.place(); };
+  ['setMode','answer','nextQuestion'].forEach(n => {
+    const f = window[n];
+    if (typeof f === 'function') window[n] = function(){ const r = f.apply(this, arguments); place(); return r; };
+  });
+})();
+</script>
+<script src="theme/flightbag-theme.js"></script>
+</body>
+</html>
