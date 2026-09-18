@@ -53,21 +53,15 @@ body.fb {
 .e6b-fill { align-self: flex-start; min-height: 36px; margin: 4px 0 2px; }
 .e6b-fill svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .e6b-outs { margin-top: 6px; display: flex; flex-direction: column; gap: 4px; }
-/* Results are instrument readouts — the opposite of the recessed input wells: a raised bezel, a dark
-   glass face with a reflection across the top half, and digits that light up (accent glow) once there
-   is a result and sit dark while it's "—". .lit is toggled by the readout script at the bottom. */
+/* Results are flat glass displays set flush in the panel (the inputs are the recessed wells): a dark
+   pane with a faint diagonal sheen, digits unlit while it's "—" and glowing once there is a result.
+   .lit is toggled by the readout script at the bottom. */
 .e6b-out, .xw-big {
-  --glass: #151312;
-  position: relative;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.014) 46%, rgba(255,255,255,0) 50%),
-    radial-gradient(130% 160% at 50% 0%, #1c1917 0%, var(--glass) 70%);
-  border: 1px solid #2c2a27;
+  --glass: #141312;
+  --sheen: linear-gradient(115deg, rgba(255,255,255,0) 30%, rgba(255,255,255,.045) 44%, rgba(255,255,255,.012) 56%, rgba(255,255,255,0) 64%);
+  background: var(--sheen), var(--glass);
+  border: 1px solid rgba(255,255,255,.05);
   border-radius: var(--fb-radius-sm);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.07),        /* bezel top edge catches the light */
-    inset 0 -1px 0 rgba(0,0,0,.55),
-    0 1px 0 rgba(0,0,0,.6), 0 2px 5px rgba(0,0,0,.35);   /* sits proud of the panel */
   transition: border-color .25s ease, background .25s ease;
 }
 .e6b-out {
@@ -81,13 +75,10 @@ body.fb {
   transition: color .25s ease, text-shadow .25s ease;
 }
 .e6b-out.lit, .xw-big.lit {
-  border-color: color-mix(in srgb, var(--fb-accent) 26%, #2c2a27);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.014) 46%, rgba(255,255,255,0) 50%),
-    radial-gradient(90% 120% at 50% 100%, color-mix(in srgb, var(--fb-accent) 9%, transparent), transparent 70%),
-    radial-gradient(130% 160% at 50% 0%, #1c1917 0%, var(--glass) 70%);
+  border-color: color-mix(in srgb, var(--fb-accent) 20%, rgba(255,255,255,.05));
+  background: var(--sheen), radial-gradient(100% 140% at 50% 110%, color-mix(in srgb, var(--fb-accent) 7%, transparent), transparent 65%), var(--glass);
 }
-.e6b-out.lit span:last-child, .xw-big.lit b {
+.e6b-out.lit > span:last-child, .xw-big.lit b {
   color: #f2a07f;
   text-shadow: 0 0 6px rgba(217,119,87,.55), 0 0 18px rgba(217,119,87,.22);
 }
@@ -112,7 +103,7 @@ body.fb {
 .xw-big span:first-child { font-size: var(--fb-fs-xs); letter-spacing: 1.5px; text-transform: uppercase; color: var(--fb-dim); }
 .xw-big b { font-size: 26px; font-weight: 600; }
 .xw-big b small { font-size: var(--fb-fs-sm); font-weight: 400; margin-left: 6px; opacity: .75; }
-.xw-big.over { border-color: color-mix(in srgb, var(--fb-bad) 45%, #2c2a27); }
+.xw-big.over { border-color: color-mix(in srgb, var(--fb-bad) 40%, rgba(255,255,255,.05)); }
 .xw-big.over b { color: #ef7a6c; text-shadow: 0 0 6px rgba(192,88,76,.6), 0 0 18px rgba(192,88,76,.28); }
 .xw-note { font-size: var(--fb-fs-xs); line-height: 1.5; color: var(--fb-dim); }
 .xw-note.warn { color: var(--fb-bad); }
