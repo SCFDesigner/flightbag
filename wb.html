@@ -3092,6 +3092,11 @@
             v.classList.add('open'); v.scrollTop = 0;
         }
         /* Buttons beside the table-based results; hidden when the aircraft has no manual pages loaded (e.g. C-152) */
+        /* An info label's own text, without the POH button appended to it (labels are matched by text) */
+        function infoLabelText(item){
+            const el = item.querySelector('.info-label');
+            return el ? [...el.childNodes].filter(n => !(n.classList && n.classList.contains('poh-btn'))).map(n => n.textContent).join('').trim() : '';
+        }
         function addPohButtons(){
             const put = (el, kind) => {
                 if (!el || el.querySelector(`.poh-btn[data-poh="${kind}"]`)) return;
@@ -3764,7 +3769,7 @@
             const infoItems = limitsPanel.parentElement.querySelectorAll('.info-item');
             
             infoItems.forEach(item => {
-                const label = item.querySelector('.info-label').textContent;
+                const label = infoLabelText(item);
                 const valueSpan = item.querySelector('.info-value');
                 
                 switch(label) {
@@ -4028,7 +4033,7 @@
             const landingWeight = parseFloat(document.querySelector('.data-table tbody tr:nth-child(12) td:nth-child(2)').textContent) || 0;
             
             infoItems.forEach(item => {
-                const label = item.querySelector('.info-label').textContent;
+                const label = infoLabelText(item);
                 const valueSpan = item.querySelector('.info-value');
                 
                 switch(label) {
