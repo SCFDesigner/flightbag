@@ -188,7 +188,7 @@ body.fb :is(.btn, .fb-btn, .float-chip, .mobile-nav-btn, .knob-btns button, .fb-
   border-radius: inherit;
   padding: 1px;
   background:
-    conic-gradient(from var(--fb-glass-rim) at 50% 50%, var(--glass-rim, rgba(255,255,255,.42)), rgba(255,255,255,0) 5% 40%, var(--glass-rim, rgba(255,255,255,.42)) 50%, rgba(255,255,255,0) 60% 95%, var(--glass-rim, rgba(255,255,255,.42))),
+    conic-gradient(from var(--fb-glass-rim) at 50% 50%, var(--glass-rim, rgba(255,255,255,calc(.42 * var(--fb-btn-rim, 1)))), rgba(255,255,255,0) 5% 40%, var(--glass-rim, rgba(255,255,255,calc(.42 * var(--fb-btn-rim, 1)))) 50%, rgba(255,255,255,0) 60% 95%, var(--glass-rim, rgba(255,255,255,calc(.42 * var(--fb-btn-rim, 1))))),
     linear-gradient(rgba(255,255,255,.10), rgba(255,255,255,.10));
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
