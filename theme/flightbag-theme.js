@@ -6,7 +6,7 @@
   // Tuned with ?tune on 2026-09-18 (light moved up-left, softer glass).
   const DEFAULTS = { grain: 0.1, grainScale: 1, edge: 0.2, lampAmt: 0.07, lampX: 0.39, lampY: 0.03, lampRadius: 0.68, lampMid: 0.5, lampShadow: 0.5,
     // glass (readouts): glare strength (× lampAmt) and size (× screen height); edge sheen strength (× glare) and reach (× glare size)
-    glareAmt: 1.1, glareSize: 0.78, sheenAmt: 0.35, sheenReach: 2.5, sheenStart: 0.22, btnSheen: 1, btnRim: 1 };
+    glareAmt: 1.1, glareSize: 0.78, sheenAmt: 0.35, sheenReach: 2.5, sheenStart: 0.22, btnSheen: 0.1, btnRim: 1 };
   // Local overrides from the ?tune panel (this browser only; Copy hands them over to bake in as DEFAULTS)
   const TUNE_KEY = 'fbLookTune';
   let saved = {};
