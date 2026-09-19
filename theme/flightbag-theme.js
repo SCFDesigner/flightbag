@@ -6,7 +6,7 @@
   // Tuned with ?tune on 2026-09-18 (light moved up-left, softer glass).
   const DEFAULTS = { grain: 0.1, grainScale: 1, edge: 0.2, lampAmt: 0.07, lampX: 0.39, lampY: 0.03, lampRadius: 0.68, lampMid: 0.5, lampShadow: 0.5,
     // glass (readouts): glare strength (× lampAmt) and size (× screen height); edge sheen strength (× glare) and reach (× glare size)
-    glareAmt: 1.1, glareSize: 0.78, sheenAmt: 0.35, sheenReach: 2.5, sheenStart: 0.22 };
+    glareAmt: 1.1, glareSize: 0.78, sheenAmt: 0.35, sheenReach: 2.5, sheenStart: 0.22, btnSheen: 1 };
   // Local overrides from the ?tune panel (this browser only; Copy hands them over to bake in as DEFAULTS)
   const TUNE_KEY = 'fbLookTune';
   let saved = {};
@@ -74,8 +74,10 @@
     });
   }
 
+  // liquid-glass buttons: scales the sheen band (1 = the original .16 white)
+  const btnGlass = () => root.setProperty('--fb-btn-sheen', String(LOOK.btnSheen));
   const edge = () => root.setProperty('--fb-edge', `linear-gradient(180deg, rgba(255,255,255,${(0.06 * LOOK.edge).toFixed(3)}) 0%, rgba(0,0,0,0) 50%, rgba(0,0,0,${(0.2 * LOOK.edge).toFixed(3)}) 100%)`);
-  edge();
+  edge(); btnGlass();
   grainTile();
   lamp();
   // Re-place when the page or any panel changes size (tabs, collapsibles, content loading). Pages that
@@ -101,6 +103,8 @@
     ['Glass readouts', null],
     ['glareAmt', 'Glare strength', 0, 6, 0.05], ['glareSize', 'Glare size', 0.2, 2, 0.01],
     ['sheenAmt', 'Edge sheen', 0, 3, 0.05], ['sheenReach', 'Sheen reach', 0.3, 3, 0.01], ['sheenStart', 'Sheen width', 0, 0.9, 0.01, true],
+    ['Glass buttons', null],
+    ['btnSheen', 'Button sheen', 0, 2, 0.05],
   ];
   function tuner() {
     const box = document.createElement('div');
@@ -130,6 +134,7 @@
         const diff = {}; for (const key in DEFAULTS) if (LOOK[key] !== DEFAULTS[key]) diff[key] = LOOK[key];
         try { localStorage.setItem(TUNE_KEY, JSON.stringify(diff)); } catch (e) {}
         if (k === 'edge') edge();
+        if (k === 'btnSheen') btnGlass();
         lamp(); place();
       });
       row.dataset.key = k;
@@ -143,7 +148,7 @@
       const a = e.target.closest('button')?.dataset.a;
       if (a === 'reset') {
         try { localStorage.removeItem(TUNE_KEY); } catch (err) {}
-        Object.assign(LOOK, DEFAULTS); edge(); lamp(); place();
+        Object.assign(LOOK, DEFAULTS); edge(); btnGlass(); lamp(); place();
         box.querySelectorAll('label').forEach(l => { const d = TUNE.find(t => t[0] === l.dataset.key); const inp = l.querySelector('input'); inp.value = d[5] ? (d[3] - LOOK[d[0]] + d[2]) : LOOK[d[0]]; l.querySelector('output').textContent = (+inp.value).toFixed(d[4] < 0.01 ? 3 : 2); });
       }
       if (a === 'copy') {
