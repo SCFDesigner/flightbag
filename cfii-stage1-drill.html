@@ -1,0 +1,324 @@
+<title>CFII Stage 1 Drill</title>
+<!-- Standalone drill — intentionally NOT linked from the Flight Bag yet.
+     Source: (Y7) CFII Stage 1 (2023) results email, 22 Sep 2026 (Gmail clipped at Q22 of 60).
+     Add questions to BANK below as the rest of the bank comes in (Sheppard Air / full email). -->
+<style>
+:root{
+  --bg:#191918;--panel:#1f201f;--cell:#282827;--border:#3a3935;--hair:rgba(58,57,53,.7);
+  --text:#b5b3a9;--dim:#85837a;--bright:#f0eee6;--accent:#d97757;
+  --ok:#7fa36b;--bad:#c0584c;--warn:#c9a24a;
+  --okbg:color-mix(in srgb,var(--ok) 14%,transparent);--badbg:color-mix(in srgb,var(--bad) 14%,transparent);
+  --font:-apple-system,BlinkMacSystemFont,'Inter','Helvetica Neue',sans-serif;
+  --mono:'JetBrains Mono','SF Mono',Menlo,ui-monospace,monospace;--r:10px;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){color-scheme:light;
+  --bg:#efeee9;--panel:#fbfaf7;--cell:#e9e7e1;--border:#d4d1c8;--hair:rgba(40,36,30,.1);
+  --text:#3a3833;--dim:#6e6c64;--bright:#1c1b19;--accent:#c2603f;--ok:#4d7a39;--bad:#b0453a;--warn:#94701c;}}
+:root[data-theme="light"]{color-scheme:light;
+  --bg:#efeee9;--panel:#fbfaf7;--cell:#e9e7e1;--border:#d4d1c8;--hair:rgba(40,36,30,.1);
+  --text:#3a3833;--dim:#6e6c64;--bright:#1c1b19;--accent:#c2603f;--ok:#4d7a39;--bad:#b0453a;--warn:#94701c;}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 var(--font);-webkit-text-size-adjust:100%}
+.wrap{max-width:760px;margin:0 auto;padding:20px 16px 60px}
+header{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:4px}
+h1{font-size:20px;color:var(--bright);margin:0;letter-spacing:-.01em}
+.sub{color:var(--dim);font-size:13px;margin-bottom:16px}
+.tag{font:11px var(--mono);color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 45%,transparent);border-radius:99px;padding:1px 8px}
+.bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+button{font:inherit;color:var(--text);background:var(--cell);border:1px solid var(--border);border-radius:8px;padding:7px 12px;cursor:pointer}
+button:hover{color:var(--bright)}
+button.on{color:var(--bright);border-color:var(--accent);background:color-mix(in srgb,var(--accent) 16%,var(--cell))}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.stat{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:8px 10px}
+.stat b{display:block;font:600 18px var(--mono);color:var(--bright)}
+.stat span{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.05em}
+.prog{height:4px;background:var(--cell);border-radius:99px;overflow:hidden;margin-bottom:14px}
+.prog i{display:block;height:100%;background:var(--ok);transition:width .3s}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:18px}
+.meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font:12px var(--mono);color:var(--dim);margin-bottom:10px}
+.pill{border:1px solid var(--border);border-radius:99px;padding:0 7px}
+.pill.miss{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 50%,transparent)}
+.pill.fig{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 50%,transparent)}
+.q{font-size:17px;color:var(--bright);margin:0 0 14px;line-height:1.45}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{display:flex;gap:10px;text-align:left;width:100%;padding:11px 12px;background:var(--cell);border-radius:8px;line-height:1.4}
+.opt .k{font:600 13px var(--mono);color:var(--dim);min-width:18px}
+.opt.right{border-color:var(--ok);background:var(--okbg);color:var(--bright)}
+.opt.wrong{border-color:var(--bad);background:var(--badbg)}
+.opt.was{box-shadow:inset 3px 0 0 var(--bad)}
+.opt:disabled{cursor:default}
+.why{margin-top:14px;padding:12px 14px;border-left:3px solid var(--accent);background:var(--cell);border-radius:0 8px 8px 0;font-size:14px}
+.why .ref{display:block;margin-top:6px;font:12px var(--mono);color:var(--dim)}
+.why .hook{display:block;margin-top:6px;color:var(--warn)}
+.verdict{font-weight:600;margin-top:12px}
+.verdict.ok{color:var(--ok)}.verdict.no{color:var(--bad)}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:14px;gap:8px}
+.hint{font-size:12px;color:var(--dim)}
+.done{text-align:center;padding:30px 18px}
+.done h2{color:var(--bright);margin:0 0 6px}
+.list .item{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:8px}
+.list .item p{margin:0 0 6px;color:var(--bright)}
+.list .ans{color:var(--ok)}
+.list .mine{color:var(--bad);font-size:13px}
+.foot{margin-top:24px;font-size:12px;color:var(--dim)}
+@media (max-width:520px){.stats{grid-template-columns:repeat(2,1fr)}.q{font-size:16px}}
+</style>
+<div class="wrap">
+  <header><h1>CFII Stage 1 — Makeup Drill</h1><span class="tag">not in Flight Bag</span></header>
+  <div class="sub">From your 22 Sep results (75%, need 80). <span id="cnt"></span></div>
+
+  <div class="bar" id="modes">
+    <button data-mode="bake" class="on" title="Missed-on-test first; each question must be answered right twice in a row">Bake it in</button>
+    <button data-mode="missed">Test misses only</button>
+    <button data-mode="exam">Practice test</button>
+    <button data-mode="review">Answer sheet</button>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b id="s-baked">0</b><span>Baked</span></div>
+    <div class="stat"><b id="s-left">0</b><span>Left in queue</span></div>
+    <div class="stat"><b id="s-acc">—</b><span>Accuracy</span></div>
+    <div class="stat"><b id="s-streak">0</b><span>Streak</span></div>
+  </div>
+  <div class="prog"><i id="prog" style="width:0"></i></div>
+
+  <div id="stage"></div>
+
+  <div class="foot">
+    Keys: <b>1/2/3</b> or <b>A/B/C</b> to answer · <b>Enter</b>/<b>Space</b> for next.
+    Answers shuffle each time so you learn the answer, not the letter.
+    <button id="reset" style="margin-left:6px;padding:3px 9px;font-size:12px">Reset progress</button>
+  </div>
+</div>
+
+<script>
+/* ── Question bank ───────────────────────────────────────────────
+   q: stem (verbatim from the results email) · a: options in original A/B/C order
+   c: index of correct option · mine: index you picked on the test (22 Sep)
+   fig: figure number(s) from the FAA-CT-8080 testing supplement (not in the email)
+   why / ref / hook: explanation, source, memory hook                        */
+const BANK = [
+{n:1,q:"To enter a constant-airspeed descent from level cruising flight, and maintain cruising airspeed, the pilot should",
+ a:["first adjust the pitch attitude to a descent using the attitude indicator as a reference, then adjust the power to maintain the cruising speed",
+    "first reduce power, then adjust the pitch using the attitude indicator as a reference to establish a specific rate on the VSI",
+    "simultaneously reduce power and adjust the pitch using the attitude indicator as a reference to maintain the cruising airspeed"],c:2,mine:0,
+ why:"Constant-airspeed descent: reduce power and lower the nose at the same time. Pitch-first speeds you up; power-first slows you down. The goal is airspeed, not a VSI number.",
+ ref:"Instrument Flying Handbook, Ch. 7 — Descents",hook:"Constant AIRSPEED → both together, watch the airspeed."},
+{n:2,q:"(Refer to Figure 144) Which illustration indicated a coordinated turn?",a:["3","1","2"],c:0,mine:0,fig:"144",
+ why:"Coordinated turn = inclinometer ball centered. In Fig. 144 that's illustration 3. (1 = skid, 2 = slip.)",
+ ref:"FAA-CT-8080 Fig. 144 · IFH Ch. 5 — Turn coordinator",hook:"3 = centered/coordinated · 1 = skid · 2 = slip"},
+{n:3,q:"What is the correct sequence in which to use the three skills used in instrument flying?",
+ a:["Attitude control, cross-check, and instrument interpretation","Pitch controls, power controls, and trim control.","Cross-check, instrument interpretation, and aircraft control."],c:2,mine:0,
+ why:"The three fundamental skills of attitude instrument flying, in order: cross-check (scan), instrument interpretation, then aircraft control. You must see and understand before you control.",
+ ref:"IFH Ch. 6 — Fundamental Skills",hook:"See it → Understand it → Fix it (C-I-C)."},
+{n:4,q:"For maintaining level flight at a constant thrust, which instrument would be the least appropriate for determining the need for a pitch change?",
+ a:["Altimeter","VSI","Attitude indicator"],c:2,mine:1,
+ why:"The altimeter (primary for pitch in level flight) and the VSI (trend) are what tell you a pitch change is NEEDED. The attitude indicator is the instrument you make the change on — it doesn't show you're drifting off altitude.",
+ ref:"IFH Ch. 6 — Straight-and-level, pitch control",hook:"Altimeter/VSI tell you WHEN; AI is HOW."},
+{n:5,q:"What are the three fundamentals skills involved in attitude instrument flying?",
+ a:["Instrument interpretations, trim application, and aircraft control.","Cross-check, emphasis, and aircraft control.","Cross-check, instrument interpretation, and aircraft control."],c:2,mine:1,
+ why:"Same trio as Q3: cross-check, instrument interpretation, aircraft control. \"Emphasis\" is a common cross-check ERROR, not a skill. Trim is part of aircraft control.",
+ ref:"IFH Ch. 6 — Fundamental Skills",hook:"Emphasis = error, not a skill."},
+{n:6,q:"No pilot may act as pilot-in-command of an aircraft under IFR or in weather conditions less than the minimums prescribed for VFR unless that pilot has, within the preceding 6 calendar months, completed at least",
+ a:["three instrument approaches and logged 3 hours","six instrument flights under actual IFR conditions","six instrument approaches, holding procedures, intercepting and tracking courses using navigational systems, or passed an instrument proficiency check"],c:2,mine:2,
+ why:"IFR currency: within the preceding 6 calendar months — 6 approaches, holding procedures and tasks, and intercepting and tracking courses. Otherwise, an IPC.",
+ ref:"14 CFR 61.57(c)",hook:"6-HIT in 6 months: 6 approaches · Holds · Intercept · Track."},
+{n:7,q:"An aircraft altimeter system test and inspection must be accomplished within",
+ a:["12 calendar months.","18 calendar months.","24 calendar months."],c:2,mine:2,
+ why:"Altimeter, static system, and automatic pressure altitude reporting: tested and inspected within the preceding 24 calendar months for IFR in controlled airspace. The transponder (91.413) is also 24.",
+ ref:"14 CFR 91.411",hook:"AVIATE: A = Altimeter/static 24 mo · T = Transponder 24 mo."},
+{n:8,q:"(Refer to Figure 144) Which illustration indicated a skidding turn?",a:["2","1","3"],c:1,mine:1,fig:"144",
+ why:"Skid = ball slides to the OUTSIDE of the turn (too much rudder / rate of turn too high for the bank). That's illustration 1.",
+ ref:"FAA-CT-8080 Fig. 144 · IFH Ch. 5",hook:"Skid = ball Outside · Slip = ball Inside."},
+{n:9,q:"On the taxi check, the magnetic compass should",
+ a:["Swing opposite to the direction of turn when turning from north","Exhibit the same number of degrees of dip as the latitude","Swing freely and indicate known headings"],c:2,mine:2,
+ why:"Preflight/taxi: the compass should be full of fluid, swing freely, and show known headings (e.g., runway heading). Check the deviation card is present.",
+ ref:"IFH Ch. 5 — Magnetic compass preflight"},
+{n:10,q:"What indications are displayed by the miniature aircraft of a turn coordinator?",
+ a:["Rate and roll and rate of turn.","Direct indication of bank angle and pitch attitude.","Indirect indication of bank angle and pitch attitude."],c:0,mine:0,
+ why:"The turn coordinator's gyro is canted ~30°, so it senses both rate of ROLL and rate of TURN. The turn-and-slip indicator only shows rate of turn. Neither shows pitch.",
+ ref:"IFH Ch. 5 — Turn coordinator",hook:"Coordinator = Roll + Turn. No pitch info — ever."},
+{n:11,q:"Which data must be recorded in the aircraft log or other appropriate log by a pilot making a VOR operational check for IFR operations?",
+ a:["VOR name or identification, date of check, amount of bearing error, and signature","Place of operational check, amount of bearing error, date of check, and signature","Date of check, VOR name or identification, place of operational check, and amount of bearing error"],c:1,mine:1,
+ why:"VOR check log entry (within the preceding 30 days): Date, Place, bearing Error, Signature. VOR name isn't required.",
+ ref:"14 CFR 91.171(d)",hook:"DEPS: Date · Error · Place · Signature."},
+{n:12,q:"While recovering from an unusual flight attitude without the aid of the attitude indicator, approximate level pitch attitude is reached when the",
+ a:["airspeed and altimeter stop their movement and the VSI reverses its trend","airspeed arrives at cruising speed, the altimeter reverses its trend, and the vertical speed stops its movement","altimeter and vertical speed reverse their trend and the airspeed stops its movement"],c:0,mine:0,
+ why:"Pitch passes through level when the airspeed and altimeter STOP moving; the VSI lags, so it's still reversing its trend.",
+ ref:"IFH Ch. 7 — Unusual attitude recovery"},
+{n:13,q:"At an altitude of 6,500 feet MSL, you see the altimeter setting is 30.42'' Hg. What would the pressure altitude approximately be?",
+ a:["7,500 feet.","6,000 feet.","6,500 feet."],c:1,mine:1,
+ why:"PA = indicated + (29.92 − setting) × 1,000 = 6,500 + (29.92 − 30.42) × 1,000 = 6,500 − 500 = 6,000 ft.",
+ ref:"PHAK Ch. 8 — Pressure altitude",hook:"Setting above 29.92 → PA below indicated."},
+{n:14,q:"(Refer to Figures 87 and 88) What is your relationship to the airway while heading west on V222?",
+ a:["South of V222 and approaching FALSE intersection","North of V222 and approaching FALSE intersection","South of V222 and past FALSE intersection"],c:0,mine:2,fig:"87 & 88",
+ why:"Answer: south of V222 and approaching FALSE. You picked \"past\" — re-work the second VOR: if you haven't crossed the cross-radial yet, you're still approaching. Pull up Figs. 87/88 in the testing supplement and re-derive it once.",
+ ref:"FAA-CT-8080 Figs. 87 & 88 · IFH Ch. 9 — VOR orientation"},
+{n:15,q:"What should be the indication on the magnetic compass as you roll into a standard rate turn to the left from a north heading in the Northern Hemisphere?",
+ a:["The compass will indicate a turn to the left, but at a faster rate than is actually occurring.","The compass will initially indicate a turn to the right","The compass will remain on north for a short time, then gradually catch up to the magnetic heading of the aircraft"],c:1,mine:2,
+ why:"Turning FROM north: the compass initially shows a turn in the OPPOSITE direction (right, for a left turn), then lags. \"Remains on north for a short time\" is the wrong description. Turning from south, it leads.",
+ ref:"IFH Ch. 5 — Northerly turning error",hook:"UNOS: Undershoot North, Overshoot South. From north: starts the wrong way."},
+{n:16,q:"While cruising at 160 knots, you wish to establish a climb at 130 knots. When entering the climb it is proper to make the initial pitch change by increasing back elevator pressure until the",
+ a:["Attitude indicator, airspeed, and vertical speed indicate a climb","Vertical speed indication reaches the predetermined rate of climb","Attitude indicator shows the approximate pitch attitude appropriate for the 130-knot climb"],c:2,mine:0,
+ why:"Initial pitch change is made on the attitude indicator to the known attitude for the target climb speed, then adjust power and fine-tune with airspeed. You don't wait for all the instruments to show a climb.",
+ ref:"IFH Ch. 7 — Climbs, entry",hook:"Set the attitude on the AI first. The others confirm it."},
+{n:17,q:"Which altitude is indicated when the altimeter is set to 29.92'' Hg?",
+ a:["Density","Pressure","Standard"],c:1,mine:1,
+ why:"With 29.92 in the Kollsman window, the altimeter reads pressure altitude.",
+ ref:"PHAK Ch. 8"},
+{n:18,q:"The sensations which lead to spatial disorientation during instrument flight conditions",
+ a:["are frequently encountered by beginning instrument pilots, but never by pilots with moderate instrument experience.","occur, in most instances, during the initial period of transition from visual to instrument flight.","must be supressed and complete reliance placed on the indications of the flight instruments."],c:2,mine:2,
+ why:"Any pilot can get disoriented at any experience level. The fix: ignore the sensations and trust the instruments.",
+ ref:"IFH Ch. 3 — Spatial disorientation"},
+{n:19,q:"(Refer to Figure 110) In which general direction from the VORTAC is the aircraft located?",
+ a:["Southwest","Northwest","Northeast"],c:2,mine:1,fig:"110",
+ why:"Answer: Northeast. Method: turn the OBS until the CDI centers with a FROM flag. That radial is your position from the station. Re-work Fig. 110 with this method: if you center it with a TO flag, you're on the reciprocal side.",
+ ref:"FAA-CT-8080 Fig. 110 · IFH Ch. 9",hook:"Center with FROM → you're on that radial."},
+{n:20,q:"When using VOT to make a VOR receiver check, the CDI should be centered and the OBS should indicate that the aircraft is on the",
+ a:["090 radial","180 radial","360 radial"],c:2,mine:1,
+ why:"VOT broadcasts the 360 radial in every direction. CDI centers on 360 FROM or 180 TO. The question asks for the RADIAL (radials are always FROM), so the answer is 360. Tolerance is ±4°.",
+ ref:"AIM 1-1-4 · 14 CFR 91.171",hook:"\"Cessna 180 TO\" → 180 TO = 360 FROM = the 360 radial."},
+{n:21,q:"The primary reason the angle of attack must be increased, to maintain a constant altitude during a coordinated turn, is because the",
+ a:["Thrust is acting in a different direction, causing a reduction in airspeed and loss of lift.","Vertical component of lift has decreased as the result of the bank","Use of ailerons has decreased the drag"],c:1,mine:1,
+ why:"Banking tilts the lift vector, so part of it becomes horizontal (turning) force and the vertical component shrinks. Increase AOA to get vertical lift back to equal weight.",
+ ref:"PHAK Ch. 5 — Forces in turns"},
+];
+
+/* ── State ─────────────────────────────────────────────────────── */
+const KEY='cfii-stage1-drill-v1', BAKE_STREAK=2;
+const store={get(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return{}}},
+             set(v){try{localStorage.setItem(KEY,JSON.stringify(v))}catch(e){}}};
+let S=Object.assign({streaks:{},seen:0,right:0,mode:'bake'},store.get());
+let queue=[],cur=null,order=[],answered=false,runStreak=0,exam=null;
+const $=id=>document.getElementById(id);
+const byN=n=>BANK.find(q=>q.n===n);
+const missedOnTest=q=>q.mine!==q.c;
+const baked=q=>(S.streaks[q.n]||0)>=BAKE_STREAK;
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const save=()=>store.set(S);
+
+$('cnt').textContent=`${BANK.length} questions (Gmail cut the email off at Q22 of 60) · ${BANK.filter(missedOnTest).length} missed on the test.`;
+
+function buildQueue(){
+  let pool=BANK;
+  if(S.mode==='missed') pool=BANK.filter(missedOnTest);
+  if(S.mode==='bake'){
+    pool=BANK.filter(q=>!baked(q));
+    // missed-on-test first, each group shuffled
+    queue=[...shuffle(pool.filter(missedOnTest)),...shuffle(pool.filter(q=>!missedOnTest(q)))].map(q=>q.n);
+    return;
+  }
+  queue=shuffle(pool).map(q=>q.n);
+  if(S.mode==='exam') exam={total:queue.length,right:0,wrong:[]};
+}
+
+function stats(){
+  const b=BANK.filter(baked).length;
+  $('s-baked').textContent=`${b}/${BANK.length}`;
+  $('s-left').textContent=S.mode==='review'?'—':queue.length;
+  $('s-acc').textContent=S.seen?Math.round(100*S.right/S.seen)+'%':'—';
+  $('s-streak').textContent=runStreak;
+  $('prog').style.width=(100*b/BANK.length)+'%';
+}
+
+function next(){
+  answered=false;
+  if(!queue.length) return finish();
+  cur=byN(queue.shift());
+  order=shuffle([0,1,2].slice(0,cur.a.length));
+  render();
+}
+
+function render(){
+  const q=cur, s=S.streaks[q.n]||0;
+  $('stage').innerHTML=`<div class="card">
+    <div class="meta"><span>Q${q.n}</span>
+      ${missedOnTest(q)?'<span class="pill miss">missed on test</span>':''}
+      ${q.fig?`<span class="pill fig">Fig. ${esc(q.fig)} (testing supplement)</span>`:''}
+      ${S.mode==='bake'?`<span class="pill">streak ${s}/${BAKE_STREAK}</span>`:''}</div>
+    <p class="q">${esc(q.q)}</p>
+    <div class="opts">${order.map((oi,i)=>`<button class="opt" data-oi="${oi}"><span class="k">${'ABC'[i]}</span><span>${esc(q.a[oi])}</span></button>`).join('')}</div>
+    <div id="fb"></div>
+  </div>`;
+  document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>pick(+b.dataset.oi));
+  stats();
+}
+
+function pick(oi){
+  if(answered) return; answered=true;
+  const q=cur, ok=oi===q.c;
+  S.seen++; if(ok){S.right++;runStreak++}else runStreak=0;
+  S.streaks[q.n]=ok?(S.streaks[q.n]||0)+1:0;
+  if(S.mode==='bake'&&!ok){ // missed → comes back after 2 other questions
+    queue.splice(Math.min(2,queue.length),0,q.n);
+  } else if(S.mode==='bake'&&!baked(q)){ // right but not baked yet → back further down
+    queue.splice(Math.min(5,queue.length),0,q.n);
+  }
+  if(exam){ if(ok) exam.right++; else exam.wrong.push(q.n); }
+  save();
+  document.querySelectorAll('.opt').forEach(b=>{
+    const k=+b.dataset.oi; b.disabled=true;
+    if(k===q.c) b.classList.add('right');
+    else if(k===oi) b.classList.add('wrong');
+    if(k===q.mine&&q.mine!==q.c) b.classList.add('was');
+  });
+  const showWhy=S.mode!=='exam';
+  $('fb').innerHTML=`<div class="verdict ${ok?'ok':'no'}">${ok?'Correct':'Incorrect'}${!ok&&q.mine===oi?' — same pick as on the test':''}</div>
+    ${showWhy?`<div class="why">${esc(q.why)}${q.hook?`<span class="hook">${esc(q.hook)}</span>`:''}<span class="ref">${esc(q.ref)}</span></div>`:''}
+    <div class="nav"><span class="hint">${q.mine!==q.c?'Red edge = your pick on the test':''}</span><button class="primary" id="nx">Next →</button></div>`;
+  $('nx').onclick=next; $('nx').focus({preventScroll:true});
+  stats();
+}
+
+function finish(){
+  cur=null;
+  if(exam){
+    const pct=Math.round(100*exam.right/exam.total), pass=pct>=80;
+    $('stage').innerHTML=`<div class="card done"><h2 style="color:var(--${pass?'ok':'bad'})">${pct}%</h2>
+      <div>${exam.right}/${exam.total} · ${pass?'Passing (80+)':'Below 80 — go bake the misses'}</div>
+      ${exam.wrong.length?`<p class="hint">Missed: ${exam.wrong.map(n=>'Q'+n).join(', ')}</p>`:''}
+      <button class="primary" id="again">Retake</button></div>`;
+    exam=null;
+  } else {
+    $('stage').innerHTML=`<div class="card done"><h2>${S.mode==='bake'?'All baked in 🔥':'Round done'}</h2>
+      <p class="hint">${S.mode==='bake'?`Every question answered right ${BAKE_STREAK}× in a row. Take a practice test to confirm.`:'Run it again or switch modes.'}</p>
+      <button class="primary" id="again">${S.mode==='bake'?'Practice test':'Again'}</button></div>`;
+  }
+  $('again').onclick=()=>setMode(S.mode==='bake'?'exam':S.mode);
+  stats();
+}
+
+function review(){
+  cur=null;
+  $('stage').innerHTML=`<div class="list">${BANK.map(q=>`<div class="item">
+    <div class="meta"><span>Q${q.n}</span>${missedOnTest(q)?'<span class="pill miss">missed</span>':''}${q.fig?`<span class="pill fig">Fig. ${esc(q.fig)}</span>`:''}</div>
+    <p>${esc(q.q)}</p><div class="ans">✓ ${esc(q.a[q.c])}</div>
+    ${missedOnTest(q)?`<div class="mine">✗ you picked: ${esc(q.a[q.mine])}</div>`:''}
+    ${q.hook?`<div class="hint" style="color:var(--warn)">${esc(q.hook)}</div>`:''}</div>`).join('')}</div>`;
+  stats();
+}
+
+function setMode(m){
+  S.mode=m; save(); runStreak=0; exam=null;
+  document.querySelectorAll('#modes button').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
+  if(m==='review'){queue=[];return review();}
+  buildQueue(); next();
+}
+
+document.querySelectorAll('#modes button').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
+let armed=0; // two-tap confirm (dialogs are blocked in the artifact viewer)
+$('reset').onclick=()=>{const b=$('reset');
+  if(!armed){armed=setTimeout(()=>{armed=0;b.textContent='Reset progress'},3000);b.textContent='Tap again to reset';return;}
+  clearTimeout(armed);armed=0;b.textContent='Reset progress';
+  S={streaks:{},seen:0,right:0,mode:S.mode};save();setMode(S.mode);};
+document.addEventListener('keydown',e=>{
+  if(!cur||e.metaKey||e.ctrlKey) return;
+  const k=e.key.toLowerCase(), i='123'.indexOf(k)>=0?'123'.indexOf(k):'abc'.indexOf(k);
+  if(!answered&&i>=0&&i<order.length){e.preventDefault();pick(order[i]);}
+  else if(answered&&(k==='enter'||k===' ')){e.preventDefault();next();}
+});
+setMode(S.mode);
+</script>
