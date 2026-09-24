@@ -44,7 +44,7 @@ Never estimate, approximate, or invent values. If a number is in this tool, it h
 | `p2006t_study.html` | P2006T multi-engine study |
 | `mnemonics.html` | Mnemonics reference |
 | `general_knowledge.html` | Regs / airspace knowledge |
-| `written-exams.html` | FOI + FIA + FII written exam prep (FII figures load from `images/fii/`; add a course with `~/Downloads/FlightTest5-Toolkit/add_course.py`) |
+| `written-exams.html` | FOI + FIA + FII written exam prep (FII figures load from `images/fii/`; add a course with `~/Downloads/FlightTest5-Toolkit/add_course.py`). Banks + FII figures are AES-encrypted: `node tools/exam-vault.mjs unlock` before editing data, `lock` before committing (pre-commit hook enforces) |
 | `p2006t_chairfly.html` | Chairfly trainer, two aircraft: P2006T (G1000 panel) and Cessna 152 (steam six-pack). C-152 set: 27 ASEL maneuvers from the SEL Guide/Airwork Profiles + USAA 152 trifold checklists. `?aircraft=p2006t|c152`. Requires landscape orientation. |
 | `maneuvers.html` | SEL maneuvers study & test — reference, flashcards, step-ordering test, ACS limits test, speed/power tables. Aircraft selector (C-152 default / C-172) substitutes V-speeds into procedure text; standard selector (Private / Commercial / CFI) filters maneuvers and picks the ACS column. |
 | `maneuvers-data.js` | Verbatim transcription of the SEL Maneuvers Guide Rev 2 — speeds, power tables, procedures, ACS standards. The single source of truth for `maneuvers.html`; every entry cites its guide page. |
