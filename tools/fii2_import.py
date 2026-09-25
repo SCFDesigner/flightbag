@@ -24,8 +24,8 @@ DEFAULT_DOCX = os.path.expanduser('~/Documents/Screen Captures/Screen Captures.d
 
 CATS = ['Weather', 'Weather Services', 'Flight Instruments', 'Navigation',
         'Regulations and Procedures', 'Departure', 'En Route', 'Arrival and Approach']
-# Prepware category sizes → category ("117" is how OCR read Weather's "111")
-TOTALS = {111: 'Weather', 117: 'Weather', 68: 'Weather Services', 130: 'Flight Instruments',
+# Prepware category sizes → category (Weather's list has 117; 111 kept as an alias)
+TOTALS = {117: 'Weather', 111: 'Weather', 68: 'Weather Services', 130: 'Flight Instruments',
           100: 'Navigation', 132: 'Regulations and Procedures', 136: 'Departure',
           66: 'En Route', 126: 'Arrival and Approach'}
 
@@ -327,13 +327,13 @@ def main(paths):
     print(f'{len(questions)} questions, {len(figs)} figures →', os.path.relpath(PAGE, ROOT))
     for c in CATS:
         counts.setdefault(c, 0)
-        tot = next((k for k, v in TOTALS.items() if v == c and k != 117), None)
+        tot = next((k for k, v in TOTALS.items() if v == c and k != 111), None)
         print(f'  {c:28} {counts[c]:4}' + (f' / {tot}' if tot else ''))
     have = {}
     for q in questions:
         if 'n' in q: have.setdefault(q['cat'], set()).add(q['n'])
     for c in CATS:
-        tot = next((k for k, v in TOTALS.items() if v == c and k != 117), None)
+        tot = next((k for k, v in TOTALS.items() if v == c and k != 111), None)
         if tot and counts[c] and counts[c] < tot:
             miss = sorted(set(range(1, tot + 1)) - have.get(c, set()))
             if len(have.get(c, ())) >= 0.9 * counts[c]:   # only meaningful when nearly every item carries its counter
