@@ -229,6 +229,16 @@ def quality(q):
     return (len(q['choices']) == 3) * 4 + any(c['c'] for c in q['choices']) * 3 + bool(q['exp']) * 2 + bool(q.get('fig'))
 
 
+def compress(nums):
+    """[1,2,3,7,9,10] → '1-3, 7, 9-10'"""
+    out, i = [], 0
+    while i < len(nums):
+        j = i
+        while j + 1 < len(nums) and nums[j + 1] == nums[j] + 1: j += 1
+        out.append(str(nums[i]) if i == j else f'{nums[i]}-{nums[j]}'); i = j + 1
+    return ', '.join(out)
+
+
 def main(paths):
     page = open(PAGE, encoding='utf8').read()
     if re.search(r'<script id="vault" type="application/json"[^>]*>\s*[^<\s]', page):
@@ -239,14 +249,21 @@ def main(paths):
     best, figs, report = OrderedDict(), {}, {'uncategorized': [], 'warnings': 0, 'flagged': []}
     order = 0
     for path in paths:
-        for it in items_from(paragraphs(path)):
+        its = items_from(paragraphs(path))
+        # No counter and not in the legacy map → borrow the category of the nearest counted item in the same walk
+        for k, it in enumerate(its):
+            if it['counter'] or it['id'] in legacy: continue
+            near = [j for j in sorted(range(len(its)), key=lambda j: abs(j - k))
+                    if its[j]['session'] == it['session'] and its[j]['counter'] and TOTALS.get(its[j]['counter'][1])]
+            if near: it['near_cat'] = TOTALS[its[near[0]]['counter'][1]]
+        for it in its:
             order += 1
             if any('couldn\'t capture' in text(sg) for sg, _ in it['body']) and len(it['body']) < 6:
                 continue   # placeholder written when an item didn't open
             stem, choices, exp, warn = parse(it)
             n = it['counter'][1] if it['counter'] else None
             cat = TOTALS.get(n) if n else None
-            cat = cat or legacy.get(it['id'])
+            cat = cat or legacy.get(it['id']) or it.get('near_cat')
             if not cat:
                 report['uncategorized'].append(it['id']); cat = 'Uncategorized'
             q = {'id': it['id'], 'cat': cat, 'stem': stem,
@@ -309,6 +326,15 @@ def main(paths):
         counts.setdefault(c, 0)
         tot = next((k for k, v in TOTALS.items() if v == c and k != 117), None)
         print(f'  {c:28} {counts[c]:4}' + (f' / {tot}' if tot else ''))
+    have = {}
+    for q in questions:
+        if 'n' in q: have.setdefault(q['cat'], set()).add(q['n'])
+    for c in CATS:
+        tot = next((k for k, v in TOTALS.items() if v == c and k != 117), None)
+        if tot and counts[c] and counts[c] < tot:
+            miss = sorted(set(range(1, tot + 1)) - have.get(c, set()))
+            if len(have.get(c, ())) >= 0.9 * counts[c]:   # only meaningful when nearly every item carries its counter
+                print(f'  {c}: missing quiz positions {compress(miss)}')
     if report['flagged']: print('  check / re-walk:', ' '.join(report['flagged']))
     print(f'  {report["warnings"]} questions with parse warnings', '· uncategorized: ' + ' '.join(report['uncategorized']) if report['uncategorized'] else '')
 
