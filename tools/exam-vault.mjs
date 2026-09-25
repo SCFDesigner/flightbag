@@ -19,7 +19,7 @@ import { webcrypto as C } from 'node:crypto';
 import { createInterface } from 'node:readline';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const PAGES = ['written-exams.html', 'cfii-stage1-drill.html'];
+const PAGES = ['written-exams.html', 'cfii-stage1-drill.html', 'fii-study-2.html'];
 const ITER = 310000;
 const b64 = u => Buffer.from(u).toString('base64');
 const unb64 = s => new Uint8Array(Buffer.from(s, 'base64'));
