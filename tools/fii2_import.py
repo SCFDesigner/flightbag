@@ -21,6 +21,8 @@ PAGE = os.path.join(ROOT, 'fii-study-2.html')
 IMGDIR = 'images/fii2'
 LEGACY = os.path.join(ROOT, 'tools', 'fii2_legacy_cats.json')
 DEFAULT_DOCX = os.path.expanduser('~/Documents/Screen Captures/Screen Captures.docx')
+EXTRA = os.path.expanduser('~/Documents/Screen Captures/fii2_extra.json')   # stage-test questions (tools/fii2_stage_import.py)
+SUPP = os.path.join(ROOT, 'supplement', 'index.json')                        # FAA test supplement: figure/legend → page
 
 CATS = ['Weather', 'Weather Services', 'Flight Instruments', 'Navigation',
         'Regulations and Procedures', 'Departure', 'En Route', 'Arrival and Approach']
@@ -232,6 +234,76 @@ def quality(q):
     return (len(q['choices']) == 3) * 4 + any(c['c'] for c in q['choices']) * 3 + bool(q['exp']) * 2 + bool(q.get('fig'))
 
 
+# ---------- stage tests + FAA supplement ----------
+
+STOP = set('the a an of to in on at for and or is are be by with from that which what when if as it its this than then into your you'.split())
+
+
+def tokens(text):
+    return {w for w in re.findall(r'[a-z0-9]+', text.lower()) if w not in STOP and (len(w) > 2 or w.isdigit())}
+
+
+def similarity(a, b):
+    return len(a & b) / len(a | b) if a and b else 0.0
+
+
+def right_answer(q):
+    return next((c['t'] for c in q['choices'] if c['c']), '')
+
+
+def merge_extras(questions, report):
+    """Add stage-test questions: category from the most similar Prepware question; same question → borrow its
+    explanation and check the answers agree. Duplicates are kept on purpose (extra repetition)."""
+    if not os.path.exists(EXTRA): return []
+    extras = json.load(open(EXTRA))
+    bank = [(q, tokens(q['stem'] + ' ' + right_answer(q))) for q in questions]
+    norm = lambda x: re.sub(r'[^a-z0-9]+', ' ', x.lower().replace('°', ' degrees ')).strip()
+    # Numbers and quoted labels ('D', "E") identify look-alike variants that share the rest of the wording
+    nums = lambda x: re.findall(r'\d+(?:\.\d+)?', x) + [m.upper() for m in re.findall(r'[\'"“‘]([A-Za-z0-9]{1,3})[\'"”’]', x)]
+    def same_answer(a, b):
+        a, b = norm(a), norm(b)
+        return a == b or (a and b and (a in b or b in a)) or similarity(tokens(a), tokens(b)) >= 0.6
+    added, dups, conflicts = 0, 0, []
+    for e in extras:
+        src = e['seen'][0]                                   # "Stage 1 Pass #2"
+        m = re.match(r'Stage (\d) (\w)\w* #(\d+)', src, re.I)
+        qid = f'S{m.group(1)}{m.group(2).upper()}-{m.group(3)}' if m else 'S-' + str(added)
+        et = tokens(e['stem'] + ' ' + right_answer(e))
+        best_q, score = max(((q, similarity(et, t)) for q, t in bank), key=lambda x: x[1], default=(None, 0))
+        q = {'id': qid, 'cat': best_q['cat'] if best_q else 'Uncategorized', 'stem': e['stem'],
+             'choices': [{'l': c['l'], 't': c['t'], 'c': c['c']} for c in e['choices']],
+             'exp': '', 'b': 100000 + added, 'src': 'stage'}
+        seen = 'Seen on: ' + ', '.join(e['seen'])
+        stem_sim = similarity(tokens(e['stem']), tokens(best_q['stem'])) if best_q else 0
+        # Same question = near-identical wording AND the same numbers (figure look-alikes differ only in a number)
+        if best_q and stem_sim >= 0.8 and nums(e['stem']) == nums(best_q['stem']):
+            dups += 1
+            if right_answer(best_q) and not same_answer(right_answer(best_q), right_answer(e)):
+                conflicts.append(f"{qid} vs #{best_q['id']}: stage says “{right_answer(e)[:50]}”, Prepware says “{right_answer(best_q)[:50]}”")
+                q['exp'] = f"Note: Prepware #{best_q['id']} marks a different answer (“{right_answer(best_q)}”).\n\n{seen}"
+            else:
+                q['exp'] = (best_q['exp'] + '\n\n' if best_q['exp'] else '') + f"(Explanation from the matching Prepware question #{best_q['id']}.) {seen}"
+        else:
+            q['exp'] = seen
+        questions.append(q); added += 1
+    out = [f'stage tests: {added} questions added ({dups} also in the Prepware bank, explanations borrowed)']
+    out += ['ANSWER CONFLICT ' + c for c in conflicts]
+    return out
+
+
+def add_supplement_refs(questions):
+    """'(Refer to Figures 96 and 97)' / 'Legend 15' → q['sup'] = ['F96', 'F97', 'L15'] for pages in the FAA supplement."""
+    if not os.path.exists(SUPP): return
+    idx = json.load(open(SUPP))
+    for q in questions:
+        refs = []
+        for kind, grp in re.findall(r'(Figures?|Legends?)\s+((?:\d+[A-Z]?)(?:\s*(?:,|and|&)\s*\d+[A-Z]?)*)', q['stem']):
+            part, pfx = ('figures', 'F') if kind.lower().startswith('fig') else ('legends', 'L')
+            for n in re.findall(r'\d+[A-Z]?', grp):
+                if n in idx[part] and pfx + n not in refs: refs.append(pfx + n)
+        if refs: q['sup'] = refs
+
+
 def compress(nums):
     """[1,2,3,7,9,10] → '1-3, 7, 9-10'"""
     out, i = [], 0
@@ -295,6 +367,8 @@ def main(paths):
                 best[q['id']] = q
 
     questions = list(best.values())
+    extra_report = merge_extras(questions, report)
+    add_supplement_refs(questions)
     for q in questions:   # figure captured on another question that uses the same figure
         want = q.pop('_wantfig', None)
         if want and 'P' + want in figs: q['fig'] = want
@@ -323,12 +397,13 @@ def main(paths):
         h2 = re.sub(r'(href="fii-study-2.html">[\s\S]*?<span class="fb-row-tag">)\d+ Q', lambda m: f'{m.group(1)}{len(questions)} Q', h, count=1)
         if h2 != h: open(idx, 'w', encoding='utf8').write(h2)
 
-    counts = {c: sum(q['cat'] == c for q in questions) for c in cats}
+    counts = {c: sum(q['cat'] == c and q.get('src') != 'stage' for q in questions) for c in cats}
+    stage_counts = {c: sum(q['cat'] == c and q.get('src') == 'stage' for q in questions) for c in cats}
     print(f'{len(questions)} questions, {len(figs)} figures →', os.path.relpath(PAGE, ROOT))
     for c in CATS:
         counts.setdefault(c, 0)
         tot = next((k for k, v in TOTALS.items() if v == c and k != 111), None)
-        print(f'  {c:28} {counts[c]:4}' + (f' / {tot}' if tot else ''))
+        print(f'  {c:28} {counts[c]:4}' + (f' / {tot}' if tot else '') + (f'  + {stage_counts.get(c, 0)} stage-test' if stage_counts.get(c) else ''))
     have = {}
     for q in questions:
         if 'n' in q: have.setdefault(q['cat'], set()).add(q['n'])
@@ -339,6 +414,7 @@ def main(paths):
             if len(have.get(c, ())) >= 0.9 * counts[c]:   # only meaningful when nearly every item carries its counter
                 print(f'  {c}: missing quiz positions {compress(miss)}')
     if report['flagged']: print('  check / re-walk:', ' '.join(report['flagged']))
+    for line in extra_report: print('  ' + line)
     print(f'  {report["warnings"]} questions with parse warnings', '· uncategorized: ' + ' '.join(report['uncategorized']) if report['uncategorized'] else '')
 
 
