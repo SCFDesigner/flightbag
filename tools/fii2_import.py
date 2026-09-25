@@ -107,6 +107,9 @@ def items_from(paras):
         cm = COUNTER.search(t)
         if cm and not cur['counter'] and (t.startswith(('Question ', '<', '＜', '&lt;')) or len(t) < 24):
             cur['counter'] = (int(cm.group(1)), int(cm.group(2)))
+            # "Question 12 of 132 · Weather" — full-run captures name the category outright
+            tail = t.split('·', 1)[1].strip() if '·' in t else ''
+            if tail in CATS: cur['cat'] = tail
             continue
         for path in imgs:
             cur['images'].append((z, path))
@@ -262,7 +265,7 @@ def main(paths):
                 continue   # placeholder written when an item didn't open
             stem, choices, exp, warn = parse(it)
             n = it['counter'][1] if it['counter'] else None
-            cat = TOTALS.get(n) if n else None
+            cat = it.get('cat') or (TOTALS.get(n) if n else None)
             cat = cat or legacy.get(it['id']) or it.get('near_cat')
             if not cat:
                 report['uncategorized'].append(it['id']); cat = 'Uncategorized'
