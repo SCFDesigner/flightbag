@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#191918">
+<title>Instrument Airwork — Flight Bag</title>
+<link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="theme/flightbag-theme.css">
+<!--
+  Instrument Airwork — compass-turn / timed-turn calculator, turn timer, kneeboard table and the
+  CFII Flight Lesson 6–7 brief (attitude instrument flying).
+  Sources: US Aviation Academy Instrument Procedures (IR Guide) Rev 2, 3/16/2025 (~/Downloads/USAAIN1.pdf) —
+  page numbers cited inline as "USAA p.."; SEL Maneuvers Guide Rev 2 (steep turns, p38–39);
+  FAA-H-8083-16B Instrument Procedures Handbook App. A (icing); 14 CFR as cited.
+  Rules used by the calculator:
+    standard-rate bank = airspeed ÷ 10 + ½ of that (USAA p33)    rollout lead = ½ bank (USAA p31)
+    timed turn seconds = degrees ÷ 3 (USAA p33)                    compass turning error = latitude × (° off E/W) ÷ 90 (USAA p36 chart)
+-->
+<style>
+:root {
+  --ro-glass: #141312;   /* readout pane (same as the E6B readouts) */
+  --ro-unlit: #4f4c47;   /* unlit segment */
+  --ro-lit: #f2a07f;     /* lit segment */
+  --ro-glow: rgba(217, 119, 87, .55);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body.fb {
+  min-height: 100vh;
+  padding: max(28px, env(safe-area-inset-top)) 16px max(32px, env(safe-area-inset-bottom));
+  display: flex; flex-direction: column; align-items: center;
+}
+
+/* ── header ── */
+.fb-header { width: 100%; max-width: 1240px; display: flex; align-items: center; gap: 14px; margin-bottom: 22px; flex-wrap: wrap; }
+.fb-header .fb-home { min-height: 36px; }
+.fb-header h1 { font-size: 22px; font-weight: 300; letter-spacing: 6px; color: var(--fb-bright); text-transform: uppercase; }
+.fb-header p { font-size: var(--fb-fs-xs); letter-spacing: 2.5px; color: var(--fb-dim); text-transform: uppercase; margin-top: 4px; }
+.fb-header .titles { margin-right: auto; }
+#viewTabs .fb-tab { min-height: 30px; padding: 3px 14px; }
+
+main { width: 100%; max-width: 1240px; }
+.view[hidden] { display: none; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 8px; align-items: start; }
+/* calculator: 3 columns with Setup + Timer stacked; 4 across when there's room; 2 on tablets */
+#view-calc { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.stack { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+@media (min-width: 1240px) {
+  #view-calc { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  #view-calc .stack { display: contents; }
+  #setupCard { order: 1; } #turnCard { order: 2; } #roseCard { order: 3; } #timerCard { order: 4; }
+}
+@media (max-width: 1000px) { #view-calc { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.card { min-width: 0; }
+.card .fb-body { display: flex; flex-direction: column; gap: 6px; }
+.hint { font-size: var(--fb-fs-xs); color: var(--fb-dim); line-height: 1.5; }
+.hint b { color: var(--fb-text); font-weight: 500; }
+
+/* inputs */
+.in { display: grid; grid-template-columns: minmax(0, 1fr) 118px; align-items: center; gap: 10px; }
+.in label { font-size: var(--fb-fs-sm); color: var(--fb-text); }
+.in .fb-input { min-height: 36px; text-align: right; }
+.fb-input.bad { border-color: var(--fb-bad); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 4px; }
+.chips .fb-btn { min-height: 30px; }
+.seg-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.seg-row > span { font-size: var(--fb-fs-sm); }
+.fb-tabs .fb-tab { min-height: 28px; }
+
+/* readouts — flat glass panes, digits light up once there is a result (as on the E6B page) */
+.ro, .big {
+  background-color: var(--ro-glass);
+  background-image: var(--fb-sheen, none), var(--fb-glare, none), linear-gradient(transparent, transparent);
+  background-size: 100% 100%, var(--fb-lamp-size, 100vw 100vh), 100% 100%;
+  background-position: 0 0, var(--fb-lamp-pos, 0 0), 0 0;
+  background-repeat: no-repeat;
+  border: 1px solid rgba(255, 255, 255, .05);
+  border-radius: var(--fb-radius-sm);
+  transition: border-color .25s ease;
+}
+.outs { margin-top: 6px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+.ro { display: flex; flex-direction: column; gap: 1px; padding: 6px 10px; min-width: 0; }
+.ro.wide { grid-column: 1 / -1; }
+.ro > span:first-child, .big > span:first-child { font-size: var(--fb-fs-xs); letter-spacing: 1.5px; text-transform: uppercase; color: var(--fb-dim); }
+.ro > b, .big > b {
+  font-family: var(--fb-mono); font-weight: 500; font-size: var(--fb-fs-lg); color: var(--ro-unlit); white-space: nowrap;
+  transition: color .25s ease, text-shadow .25s ease;
+}
+.ro > small, .big > small { font-size: var(--fb-fs-xs); color: var(--fb-dim); line-height: 1.4; }
+.ro.lit, .big.lit {
+  border-color: color-mix(in srgb, var(--fb-accent) 20%, rgba(255, 255, 255, .05));
+  background-image: var(--fb-sheen, none), var(--fb-glare, none), radial-gradient(100% 140% at 50% 110%, color-mix(in srgb, var(--fb-accent) 7%, transparent), transparent 65%);
+}
+.ro.lit > b, .big.lit > b { color: var(--ro-lit); text-shadow: 0 0 6px var(--ro-glow), 0 0 18px rgba(217, 119, 87, .22); }
+.big { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 12px 10px; text-align: center; }
+.big > b { font-size: 40px; line-height: 1.1; }
+.big.go { border-color: color-mix(in srgb, var(--fb-ok) 55%, transparent); }
+.big.go > b { color: var(--fb-ok); text-shadow: 0 0 8px color-mix(in srgb, var(--fb-ok) 60%, transparent); }
+.big.hide > b { filter: blur(9px); }
+.big.hide { cursor: pointer; }
+.ro.hide > b { filter: blur(7px); }
+.ro .u { font-size: .6em; margin-left: .3em; opacity: .75; }
+
+.why { list-style: none; display: flex; flex-direction: column; gap: 4px; margin-top: 6px; font-size: var(--fb-fs-sm); line-height: 1.5; }
+.why li { padding-left: 12px; position: relative; }
+.why li::before { content: ""; position: absolute; left: 0; top: .62em; width: 5px; height: 5px; border-radius: 50%; background: var(--fb-dim); }
+.why .n { font-family: var(--fb-mono); color: var(--fb-bright); }
+.why.hide { filter: blur(6px); }
+.warnline { color: var(--fb-warn); font-size: var(--fb-fs-sm); line-height: 1.5; }
+.warnline[hidden] { display: none; }
+.btns { display: flex; gap: 6px; flex-wrap: wrap; }
+.btns .fb-btn { min-height: 36px; flex: 1 1 auto; }
+
+/* compass rose */
+.rose { width: 100%; max-width: 340px; display: block; margin: 4px auto 0; }
+.rose .z-n { fill: color-mix(in srgb, var(--fb-info) 11%, transparent); }
+.rose .z-s { fill: color-mix(in srgb, var(--fb-warn) 9%, transparent); }
+.rose .ring { fill: none; stroke: var(--fb-border); stroke-width: 1.5; }
+.rose .tick { stroke: var(--fb-dim); stroke-width: 1; }
+.rose .tick.maj { stroke: var(--fb-text); stroke-width: 1.5; }
+.rose text { font-family: var(--fb-mono); text-anchor: middle; }
+.rose .hl { font-size: 10px; fill: var(--fb-dim); }
+.rose .ev { font-size: 12px; font-weight: 600; }
+.rose .ev.n { fill: var(--fb-info); } .rose .ev.s { fill: var(--fb-warn); } .rose .ev.z { fill: var(--fb-dim); }
+.rose .zl { font-family: var(--fb-font); font-size: 9px; letter-spacing: 2.5px; }
+.rose .zl.n { fill: var(--fb-info); } .rose .zl.s { fill: var(--fb-warn); }
+.rose .arc { fill: none; stroke: var(--fb-ok); stroke-width: 2.5; stroke-linecap: round; }
+.rose .ah { fill: var(--fb-ok); }
+.rose .tgt { stroke: var(--fb-accent); stroke-width: 3; stroke-linecap: round; }
+.rose .tgt-dot { fill: var(--fb-accent); }
+.rose .roll { fill: var(--fb-ok); stroke: var(--fb-panel); stroke-width: 2; }
+.rose .roll-l { fill: var(--fb-ok); font-size: 11px; font-weight: 600; }
+.rose .cur { fill: var(--fb-bright); stroke: var(--fb-panel); stroke-width: 2; }
+.legend { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; font-size: var(--fb-fs-xs); color: var(--fb-dim); }
+.legend i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; vertical-align: 0; }
+
+/* tables */
+.tbl-wrap { overflow-x: auto; }
+.tbl { width: 100%; border-collapse: collapse; font-size: var(--fb-fs-sm); }
+.tbl th { text-align: left; font-size: var(--fb-fs-xs); letter-spacing: 1.5px; text-transform: uppercase; color: var(--fb-dim); font-weight: 500; padding: 7px 8px; border-bottom: 1px solid var(--fb-line); white-space: nowrap; }
+.tbl td { padding: 7px 8px; border-bottom: 1px solid var(--fb-line); white-space: nowrap; }
+.tbl .n { font-family: var(--fb-mono); text-align: right; color: var(--fb-bright); }
+.tbl th.n { text-align: right; color: var(--fb-dim); }
+.tbl .k { font-family: var(--fb-mono); color: var(--fb-bright); }
+.tbl .sm { font-family: var(--fb-mono); color: var(--fb-dim); font-size: var(--fb-fs-xs); margin-left: 4px; }
+.tbl tr.sec td { color: var(--fb-dim); font-size: var(--fb-fs-xs); letter-spacing: 1.5px; text-transform: uppercase; padding-top: 12px; }
+.zone-n { color: var(--fb-info); } .zone-s { color: var(--fb-warn); } .zone-z { color: var(--fb-dim); }
+.tbl .short { display: none; }
+@media (max-width: 560px) {                                                   /* phone: zone shown by the error colour */
+  .tbl .zcol { display: none; }
+  .tbl .full { display: none; } .tbl .short { display: inline; }
+  .tbl th, .tbl td { padding: 7px 5px; }
+}
+
+/* brief */
+.brief-top { columns: 340px 3; column-gap: 8px; }                          /* uneven card heights pack without gaps */
+.brief-top > .card { break-inside: avoid; margin-bottom: 8px; }
+.plan { list-style: none; counter-reset: s; display: flex; flex-direction: column; gap: 8px; font-size: var(--fb-fs-sm); line-height: 1.5; }
+.plan li { counter-increment: s; display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 8px; }
+.plan li::before { content: counter(s); font-family: var(--fb-mono); font-size: var(--fb-fs-xs); color: var(--fb-accent); border: 1px solid color-mix(in srgb, var(--fb-accent) 45%, var(--fb-border)); border-radius: 50%; width: 20px; height: 20px; display: grid; place-items: center; }
+.plan b, .kv b, .tb b { color: var(--fb-bright); font-weight: 500; }
+.kv { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; font-size: var(--fb-fs-sm); }
+.kv > div { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px solid var(--fb-line); line-height: 1.45; }
+.kv > div:last-child { border-bottom: 0; }
+.kv span:last-child { font-family: var(--fb-mono); color: var(--fb-bright); text-align: right; }
+.night-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.night-row .fb-input { width: auto; min-height: 34px; font-family: var(--fb-mono); }
+.grp-h { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 18px 2px 8px; flex-wrap: wrap; }
+.grp-h h3 { font-size: var(--fb-fs-xs); letter-spacing: 2.5px; text-transform: uppercase; color: var(--fb-dim); font-weight: 500; }
+.tasks { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 8px; align-items: start; }
+details.task > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 11px var(--fb-pad); min-height: 46px; }
+details.task > summary::-webkit-details-marker { display: none; }
+details.task > summary .t { color: var(--fb-bright); font-size: var(--fb-fs-md); flex: 1; min-width: 0; }
+details.task > summary .chev { width: 12px; height: 12px; stroke: var(--fb-dim); fill: none; stroke-width: 2.5; flex: none; transition: transform var(--fb-ease); }
+details.task[open] > summary .chev { transform: rotate(90deg); stroke: var(--fb-accent); }
+.tag { font-family: var(--fb-mono); font-style: normal; font-size: var(--fb-fs-xs); color: var(--fb-dim); border: 1px solid var(--fb-border); border-radius: 999px; padding: 1px 7px; white-space: nowrap; }
+.tag.fly { color: var(--fb-accent); border-color: color-mix(in srgb, var(--fb-accent) 45%, var(--fb-border)); }
+.tb { padding: 0 var(--fb-pad) var(--fb-pad); border-top: 1px solid var(--fb-line); }
+.tb h4 { font-size: var(--fb-fs-xs); letter-spacing: 2px; text-transform: uppercase; color: var(--fb-accent); font-weight: 500; margin: 12px 0 5px; }
+.tb ul { padding-left: 16px; display: flex; flex-direction: column; gap: 4px; font-size: var(--fb-fs-sm); line-height: 1.5; }
+.tb li::marker { color: var(--fb-dim); }
+.std { margin-top: 12px; font-size: var(--fb-fs-xs); color: var(--fb-ok); line-height: 1.5; }
+.std::before { content: "Standard  "; letter-spacing: 1.5px; text-transform: uppercase; color: var(--fb-dim); }
+.src { margin-top: 4px; font-family: var(--fb-mono); font-size: var(--fb-fs-xs); color: var(--fb-dim); }
+.mini { width: 100%; border-collapse: collapse; font-size: var(--fb-fs-xs); margin-top: 4px; }
+.mini td, .mini th { padding: 4px 6px; border-bottom: 1px solid var(--fb-line); text-align: left; }
+.mini th { color: var(--fb-dim); font-weight: 500; letter-spacing: 1px; text-transform: uppercase; }
+
+@media (max-width: 700px) {
+  .fb-header h1 { font-size: 18px; letter-spacing: 4px; }
+  #viewTabs { width: 100%; justify-content: space-between; }
+  #viewTabs .fb-tab { flex: 1; }
+  .grid, #view-calc, .brief-top, .tasks { grid-template-columns: 1fr; }
+  /* phone order: Setup · Turn · Timer · Rose */
+  #view-calc .stack { display: contents; }
+  #setupCard { order: 1; } #turnCard { order: 2; } #timerCard { order: 3; } #roseCard { order: 4; }
+  .big > b { font-size: 34px; }
+}
+
+/* print: the kneeboard only, black on white */
+@media print {
+  body.fb { background: #fff; color: #000; padding: 0; display: block; }
+  .fb-header, #view-calc, #view-brief, .no-print { display: none !important; }
+  #view-card { display: block !important; }
+  .fb-panel { background: none !important; border: 1px solid #000; box-shadow: none; }
+  .fb-title, .hint, .tbl th, .tbl td, .tbl .n, .tbl .k, .tbl .sm, .zone-n, .zone-s, .zone-z { color: #000 !important; }
+  .tbl td, .tbl th { border-color: #999; }
+}
+</style>
+</head>
+<body class="fb">
+
+<header class="fb-header">
+  <a class="fb-home" href="index.html"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>Flight Bag</a>
+  <div class="titles">
+    <h1>Instrument Airwork</h1>
+    <p>Compass &amp; timed turns · CFII FL 6–7 brief</p>
+  </div>
+  <div class="fb-tabs" id="viewTabs" role="tablist">
+    <button class="fb-tab" role="tab" data-view="calc">Calculator</button>
+    <button class="fb-tab" role="tab" data-view="card">Kneeboard</button>
+    <button class="fb-tab" role="tab" data-view="brief">Lesson Brief</button>
+  </div>
+</header>
+
+<main>
+
+<!-- ═══════════ CALCULATOR ═══════════ -->
+<section class="view grid" id="view-calc">
+
+  <div class="stack">
+  <!-- setup -->
+  <section class="card fb-panel" id="setupCard">
+    <div class="fb-head"><h2 class="fb-title"><svg viewBox="0 0 24 24"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Setup</h2></div>
+    <div class="fb-body">
+      <div class="in"><label for="lat">Latitude (° N, − for S)</label><input class="fb-input" id="lat" type="number" inputmode="decimal" step="0.1" min="-70" max="70"></div>
+      <div class="chips" id="latChips">
+        <button class="fb-btn small" type="button" data-lat="32.8">Dallas 32.8</button>
+        <button class="fb-btn small" type="button" data-lat="33.2">KDTO 33.2</button>
+        <button class="fb-btn small" type="button" data-lat="33.0">KAFW 33.0</button>
+        <button class="fb-btn small" type="button" id="latGps">Use GPS</button>
+      </div>
+      <div class="in"><label for="kt">Airspeed (kt — TAS if you have it)</label><input class="fb-input" id="kt" type="number" inputmode="numeric" step="1" min="40" max="200"></div>
+      <div class="chips" id="ktChips">
+        <button class="fb-btn small" type="button" data-kt="110">172 cruise 110</button>
+        <button class="fb-btn small" type="button" data-kt="105">152 cruise 105</button>
+        <button class="fb-btn small" type="button" data-kt="90">Approach 90</button>
+      </div>
+      <div class="outs">
+        <div class="ro"><span>Std-rate bank</span><b id="oBank">—</b><small id="oBankWhy"></small></div>
+        <div class="ro"><span>Rollout lead</span><b id="oLead">—</b><small>½ the bank</small></div>
+        <div class="ro wide"><span>Compass error here</span><b id="oLatErr">—</b><small id="oLatErrWhy">N/S · 30° off · 60° off · E/W</small></div>
+      </div>
+      <p class="hint" id="latNote">Bank: airspeed ÷ 10 + half of that (USAA p33). Lead: ½ bank (USAA p31).</p>
+    </div>
+  </section>
+
+  <!-- timer -->
+  <section class="card fb-panel" id="timerCard">
+    <div class="fb-head"><h2 class="fb-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>Turn Timer</h2>
+      <div class="fb-tabs" id="rateSeg" role="tablist">
+        <button class="fb-tab" type="button" data-v="std">Standard</button>
+        <button class="fb-tab" type="button" data-v="half">Half std</button>
+      </div></div>
+    <div class="fb-body">
+      <div class="big" id="tBox"><span id="tLbl">Time to roll out</span><b id="tNum">—</b><small id="tSub"></small></div>
+      <div class="btns"><button class="fb-btn primary" type="button" id="tStart">Start</button><button class="fb-btn" type="button" id="tReset">Reset</button></div>
+      <p class="hint">Start the clock once the turn coordinator shows the rate, roll out when it expires (USAA p33) — then read the compass wings-level. Calibrate the TC against the clock first. Beeps and vibrates at zero.</p>
+    </div>
+  </section>
+  </div>
+
+  <!-- turn -->
+  <section class="card fb-panel" id="turnCard">
+    <div class="fb-head"><h2 class="fb-title"><svg viewBox="0 0 24 24"><path d="M5 20v-8a7 7 0 0 1 7-7h7"/><path d="M15 1.5L19 5l-4 3.5"/></svg>Turn</h2>
+      <button class="fb-btn small" type="button" id="drill" title="Random turn; answer hidden until you tap it">Drill me</button></div>
+    <div class="fb-body">
+      <div class="in"><label for="cur">Current heading (compass)</label><input class="fb-input" id="cur" type="number" inputmode="numeric" step="1" min="0" max="360"></div>
+      <div class="in"><label for="tgt">Target heading</label><input class="fb-input" id="tgt" type="number" inputmode="numeric" step="1" min="0" max="360"></div>
+      <div class="seg-row"><span>Direction</span>
+        <div class="fb-tabs" id="dirSeg" role="tablist">
+          <button class="fb-tab" type="button" data-v="auto">Shortest</button>
+          <button class="fb-tab" type="button" data-v="L">Left</button>
+          <button class="fb-tab" type="button" data-v="R">Right</button>
+        </div>
+      </div>
+      <div class="big" id="oRollBox"><span>Start rollout when compass reads</span><b id="oRoll">—</b><small id="oRollSub"></small></div>
+      <div class="outs">
+        <div class="ro"><span>Turn</span><b id="oTurn">—</b></div>
+        <div class="ro"><span>Compass</span><b id="oZone">—</b></div>
+        <div class="ro"><span>Std rate (3°/s)</span><b id="oStd">—</b></div>
+        <div class="ro"><span>Half std (1.5°/s)</span><b id="oHalf">—</b></div>
+      </div>
+      <ul class="why" id="why"></ul>
+      <p class="warnline" id="smallWarn" hidden></p>
+    </div>
+  </section>
+
+  <!-- rose -->
+  <section class="card fb-panel" id="roseCard">
+    <div class="fb-head"><h2 class="fb-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg>Turning Error</h2></div>
+    <div class="fb-body">
+      <svg class="rose" id="rose" viewBox="-150 -150 300 300" role="img" aria-label="Compass turning error by heading"></svg>
+      <div class="legend"><span><i style="background:var(--fb-bright)"></i>now</span><span><i style="background:var(--fb-accent)"></i>target</span><span><i style="background:var(--fb-ok)"></i>start rollout</span></div>
+      <p class="hint">Numbers inside the ring are the turning error at that heading (USAA p36 chart, scaled to your latitude). <b>Undershoot north, overshoot south</b> (UNOS). The real compass card reads "backwards": the heading you want sits on the <b>opposite</b> side of the lubber line — turn away from it. Read it only wings-level and unaccelerated (ANDS on E/W headings).</p>
+    </div>
+  </section>
+
+</section>
+
+<!-- ═══════════ KNEEBOARD ═══════════ -->
+<section class="view" id="view-card" hidden>
+  <section class="card fb-panel">
+    <div class="fb-head"><h2 class="fb-title"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></svg>Compass Rollout Card</h2>
+      <button class="fb-btn small no-print" type="button" id="printCard">Print</button></div>
+    <div class="fb-body">
+      <p class="hint" id="cardHead"></p>
+      <div class="tbl-wrap">
+        <table class="tbl" id="cardTbl">
+          <thead><tr><th>Target</th><th class="zcol">Compass</th><th class="n">Error</th><th class="n"><span class="full">Right turn — roll at</span><span class="short">Right turn</span></th><th class="n"><span class="full">Left turn — roll at</span><span class="short">Left turn</span></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="hint">North half: start rollout <b>early</b> by error + lead. South half: let it pass by error − lead. E/W: lead only. Blue = undershoot, amber = overshoot. Small number = nearest 5° mark on the card. Setup (latitude, airspeed) comes from the Calculator tab.</p>
+    </div>
+  </section>
+</section>
+
+<!-- ═══════════ LESSON BRIEF ═══════════ -->
+<section class="view" id="view-brief" hidden>
+
+  <div class="brief-top">
+    <section class="card fb-panel">
+      <div class="fb-head"><h2 class="fb-title"><svg viewBox="0 0 24 24"><circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h7a3.5 3.5 0 0 0 0-7H9a3.5 3.5 0 0 1 0-7h7"/></svg>Two lessons, one flight</h2></div>
+      <div class="fb-body">
+        <ol class="plan">
+          <li><span><b>Ground (discuss):</b> weather, IFR cross-country plan &amp; alternate, checklists, de-/anti-icing, attitude-instrument fundamentals (pitch · bank · power), positive exchange.</span></li>
+          <li><span><b>Taxi:</b> instrument cockpit check — narrate it on the first turn.</span></li>
+          <li><span><b>Departure climb:</b> constant-airspeed climb (cruise climb).</span></li>
+          <li><span><b>To KAFW:</b> S&amp;L, standard-rate turns on vectors, airspeed change cruise → 90 for the approach; the ILS glideslope is a constant-rate descent. Missed → hold.</span></li>
+          <li><span><b>KLUD RNAV, partial panel:</b> timed turns with the HI covered; circle (daylight preferred).</span></li>
+          <li><span><b>Airwork block:</b> steep turns L/R → compass turns to N &amp; S → constant-rate climb/descent → airspeed change in a turn → unusual attitudes, full then partial panel.</span></li>
+          <li><span><b>KDTO ILS 18L</b> (you teach it), then night full-stop landings.</span></li>
+        </ol>
+        <p class="hint">KAFW runways are 16L/34R and 16R/34L — there is no 36R there (36R is KDTO).</p>
+      </div>
+    </section>
+
+    <section class="card fb-panel">
+      <div class="fb-head"><h2 class="fb-title"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>Night currency</h2></div>
+      <div class="fb-body">
+        <div class="night-row"><label class="hint" for="nDate">Flight date (KDTO)</label><input class="fb-input" type="date" id="nDate"></div>
+        <div class="outs">
+          <div class="ro"><span>Sunset</span><b id="nSet">—</b></div>
+          <div class="ro"><span>Landings count after</span><b id="nCount">—</b></div>
+          <div class="ro"><span>Log night after</span><b id="nCivil">—</b><small>end of civil twilight</small></div>
+          <div class="ro"><span>Position lights</span><b id="nLights">—</b><small>sunset → sunrise</small></div>
+        </div>
+        <p class="hint"><b>61.57(b):</b> to carry passengers at night — 3 takeoffs and landings <b>to a full stop</b> in the preceding 90 days, between 1 hr after sunset and 1 hr before sunrise, as sole manipulator, same category/class. Night logging per 14 CFR 1.1; lights per 91.209. Times computed (NOAA) — confirm with an official table.</p>
+        <p class="hint"><b>ADM:</b> two lessons + approaches + night is a long day — IMSAFE before you go, agree a hard stop, and treat a night circle or night partial panel as a step up in risk.</p>
+      </div>
+    </section>
+
+    <section class="card fb-panel">
+      <div class="fb-head"><h2 class="fb-title"><svg viewBox="0 0 24 24"><path d="M5 9h14M5 15h14M10 4L8 20M16 4l-2 16"/></svg>Numbers to know</h2></div>
+      <div class="fb-body kv">
+        <div><span>Standard rate</span><span>3°/s · 360° in 2 min</span></div>
+        <div><span>Std-rate bank (USAA p33)</span><span>kt ÷ 10 + ½ of that</span></div>
+        <div><span>Rollout lead (p31)</span><span>½ bank</span></div>
+        <div><span>Timed turn (p33)</span><span>degrees ÷ 3 = s</span></div>
+        <div><span>Compass error (p36)</span><span>lat × °off E/W ÷ 90</span></div>
+        <div><span>Dallas ≈ 33°N</span><span>33 · 22 · 11 · 0</span></div>
+        <div><span>Level-off lead (p25, p29)</span><span>10% of VSI</span></div>
+        <div><span>Altitude fix (p23)</span><span>VSI ≈ 2 × error</span></div>
+        <div><span>Pitch correction (p23)</span><span>&lt;100 ft ½ bar · &gt;100 ft 1 bar</span></div>
+        <div><span>Heading fix (p23)</span><span>bank ≤ ° to turn, ≤ std rate</span></div>
+        <div><span>Power (p6, p8)</span><span>100 RPM ≈ 5 kt ≈ 100 fpm</span></div>
+        <div><span>Instrument ACS</span><span>±100 ft · ±10° · ±10 kt · ±5°</span></div>
+      </div>
+    </section>
+
+    <section class="card fb-panel">
+      <div class="fb-head"><h2 class="fb-title"><svg viewBox="0 0 24 24"><path d="M4 16a8 8 0 1 1 16 0"/><path d="M12 16l4-5"/></svg>Power table</h2>
+        <div class="fb-tabs" id="ptSeg" role="tablist">
+          <button class="fb-tab" type="button" data-v="c172">C-172</button>
+          <button class="fb-tab" type="button" data-v="c152">C-152</button>
+        </div></div>
+      <div class="fb-body">
+        <div class="tbl-wrap"><table class="tbl" id="ptTbl"><thead><tr><th>Config (kt)</th><th class="n">Pitch</th><th class="n">Power</th><th class="n">VSI</th></tr></thead><tbody></tbody></table></div>
+        <p class="hint" id="ptSrc"></p>
+      </div>
+    </section>
+  </div>
+
+  <div class="grp-h"><h3>Ground — discuss</h3><button class="fb-btn small" type="button" id="expandAll">Expand all</button></div>
+  <div class="tasks">
+
+    <details class="task fb-panel">
+      <summary><span class="t">Weather Information</span><i class="tag">FL7</i><i class="tag">Discuss</i><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary>
+      <div class="tb">
+        <h4>Know</h4><ul>
+          <li><b>91.103:</b> all available information. Standard briefing (1800wxbrief) + AWC: GFA, G-AIRMETs (Sierra = IFR/mtn obscuration, Tango = turbulence/LLWS, Zulu = icing &amp; freezing level), SIGMETs/convective SIGMETs, PIREPs.</li>
+          <li>METAR/TAF for departure, destination and alternate (KDTO, KAFW, KLUD) — TAF timing vs. ETA drives the 1-2-3 decision.</li>
+          <li>Winds/temps aloft, freezing level (feeds the icing talk), NOTAMs for the ILS/GPS approaches you plan to fly.</li>
+          <li>Night: temperature/dew-point spread closes after sunset — watch for fog and low stratus on the way home.</li></ul>
+        <h4>Teach</h4><ul>
+          <li>Big picture → hazards → route → destination, then a go/no-go against personal minimums.</li></ul>
+        <h4>Common errors</h4><ul>
+          <li>METAR-only briefing; ignoring TAF timing; missing approach/NAVAID NOTAMs.</li></ul>
+        <p class="src">USAA p18 · 14 CFR 91.103</p>
+      </div>
+    </details>
+
+    <details class="task fb-panel">
+      <summary><span class="t">IFR Cross-Country Planning</span><i class="tag">FL7</i><i class="tag">Discuss</i><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary>
+      <div class="tb">
+        <h4>Know</h4><ul>
+          <li><b>Alternate (91.169):</b> required unless the destination, 1 hr before to 1 hr after ETA, forecasts ceiling ≥ 2,000 ft and visibility ≥ 3 SM (1-2-3). Standard alternate minimums: 600-2 precision, 800-2 non-precision.</li>
+          <li><b>Fuel (91.167):</b> to destination, then alternate, then 45 min at normal cruise.</li>
+          <li><b>Clearance (CRAFT):</b> Clearance limit, Route, Altitude, Frequency, Transponder. File to KAFW, practice approaches; pick up a practice clearance back to KDTO.</li>
+          <li><b>Lost comms (91.185):</b> route AVE-F; altitude = highest of MEA, expected, assigned.</li></ul>
+        <h4>Teach</h4><ul>
+          <li>Student builds the plan; you probe: "Why that alternate? What if the glideslope is out of service?"</li></ul>
+        <h4>Common errors</h4><ul>
+          <li>No alternate or fuel analysis; filing below the MEA; no lost-comms plan; read-back errors on the clearance (USAA p19).</li></ul>
+        <p class="src">USAA p18–19 · 14 CFR 91.167, 91.169, 91.185</p>
+      </div>
+    </details>
+
+    <details class="task fb-panel">
+      <summary><span class="t">Use of Checklists</span><i class="tag">FL7</i><i class="tag">Discuss</i><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary>
+      <div class="tb">
+        <h4>Know</h4><ul>
+          <li><b>Read-and-do</b> (each item done as it's read — abnormal/emergency, unfamiliar phases) vs. <b>flow, then verify</b> (normal phases).</li>
+          <li>Why: memory fails under workload, fatigue and interruption — single-pilot IFR at night has all three.</li>
+          <li>Approach phase: in-range briefing before the approach (USAA p56).</li></ul>
+        <h4>Teach</h4><ul>
+          <li>Model it: read, touch, verify aloud. After an interruption, restart that section.</li></ul>
+        <h4>Common errors</h4><ul>
+          <li>Reciting without looking; skipping items when rushed; checklist "from memory".</li></ul>
+        <p class="src">USAA p56</p>
+      </div>
+    </details>
+
+    <details class="task fb-panel">
+      <summary><span class="t">Instrument Cockpit Check</span><i class="tag">FL7</i><i class="tag">Taxi</i><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary>
+      <div class="tb">
+        <h4>Know</h4><ul>
+          <li><b>Before start:</b> VOR check within 30 days (91.171 — VOT/ground checkpoint ±4°, airborne ±6°, dual ±4° between receivers); altimeter/static (91.411) and transponder (91.413) within 24 calendar months; GPS database current, RAIM/WAAS.</li>
+          <li><b>After start:</b> altimeter within ±75 ft of field elevation · COM/NAV set and identified · HI set · GPS loaded for the route · VOR/OBS checks.</li>
+          <li><b>Taxi:</b> compass swings freely, full of fluid · ASI 0 · AI erect within 5 min, ≤ 5° bank in taxi turns · TC shows the turn, ball to the outside, no flag · HI turns correctly and agrees with the compass · VSI 0 (or note the offset as your zero).</li></ul>
+        <h4>Teach</h4><ul>
+          <li>Call it out on the first taxi turn: "Turning left — needle left, ball right, heading decreasing, AI steady."</li></ul>
+        <h4>Common errors</h4><ul>
+          <li>Rushing or skipping checks; not verifying database/RAIM; seeing an abnormal indication and taking off anyway.</li></ul>
+        <p class="src">USAA p20–21 · 14 CFR 91.171, 91.411, 91.413</p>
+      </div>
+    </details>
+
+    <details class="task fb-panel">
+      <summary><span class="t">Positive Exchange of Controls</span><i class="tag">FL7</i><i class="tag">Discuss</i><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary>
+      <div class="tb">
+        <h4>Know</h4><ul>
+          <li>Three steps: "You have the flight controls." → "I have the flight controls." → "You have the flight controls." Plus a visual check that the other pilot has them.</li>
+          <li>Exactly one pilot is flying at all times. Brief it before engine start.</li></ul>
+        <h4>Teach</h4><ul>
+          <li>Rehearse it before unusual attitudes — the recovery starts on "You have the flight controls."</li></ul>
+        <h4>Common errors</h4><ul>
+          <li>"Got it?"; both or neither pilot on the controls; taking the controls without announcing.</li></ul>
+        <p class="src">AFH (FAA-H-8083-3) ch. 1</p>
+      </div>
+    </details>
+
+    <details class="task fb-panel">
+      <summary><span class="t">Aircraft De-icing / Anti-icing</span><i class="tag">FL7</i><i class="tag">Discuss</i><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary>
+      <div class="tb">
+        <h4>Know</h4><ul>
+          <li><b>Anti-ice</b> prevents formation (pitot heat, carb heat, heated windshield, TKS, Type IV ground fluid). <b>De-ice</b> removes ice after it forms (boots, Type I ground fluid).</li>
+          <li>Our Cessnas: pitot heat, carb heat (carbureted) or alternate air (fuel-injected), cabin defrost, alternate static source — <b>not approved for flight into known icing</b>.</li>
+          <li><b>IPH App. A:</b> turn anti-ice on <b>before</b> entering visible moisture at +5 °C or colder; ice is hard to see at night — use a flashlight. Get out: climb to colder air, descend to above-freezing air, leave visible moisture, or turn toward known ice-free air; consider landing.</li>
+          <li>No takeoff with frost, ice or snow adhering to wings, tail or control surfaces.</li>
+          <li>Tailplane stall cues (often at flap extension): pitch buffet, light elevator, sudden nose-down → flaps back to the previous setting, back pressure, reduce power.</li></ul>
+        <h4>Teach</h4><ul>
+          <li>Ask when they'd turn pitot heat on tonight; tie it to the freezing level from the weather brief.</li></ul>
+        <h4>Common errors</h4><ul>
+          <li>Waiting to see ice before using pitot heat; pressing on "to see if it gets better"; not watching OAT.</li></ul>
+        <p class="src">IPH (FAA-H-8083-16B) App. A · AC 91-74B</p>
+      </div>
+    </details>
+
+    <details class="task fb-panel">
+      <summary><span class="t">Attitude Instrument Fundamentals</span><i class="tag">FL7</i><i class="tag">Discuss</i><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary>
+      <div class="tb">
+        <h4>Know</h4><ul>
+          <li>Three skills: <b>cross-check, interpretation, control</b>. Scan patterns: selected radial (AI hub), inverted-V, rectangular. Scan errors: <b>fixation, omission, emphasis</b>.</li>
+          <li><b>Control &amp; performance:</b> set attitude (AI) and power (tach/MP) → check performance (ALT, VSI, ASI, HI, TC). <b>Primary &amp; supporting:</b> which instrument gives the most pertinent pitch/bank/power information right now.</li>
+          <li>In any transition the AI is primary for pitch and bank (USAA p25, p29).</li></ul>
+        <table class="mini">
+          <thead><tr><th>Primary</th><th>Pitch</th><th>Bank</th><th>Power</th></tr></thead>
+          <tbody>
+            <tr><td>Straight &amp; level</td><td>ALT</td><td>HI</td><td>ASI</td></tr>
+            <tr><td>Std-rate turn</td><td>ALT</td><td>TC</td><td>ASI</td></tr>
+            <tr><td>Const-airspeed climb/desc</td><td>ASI</td><td>HI</td><td>Tach/MP</td></tr>
+            <tr><td>Const-rate climb/desc</td><td>VSI</td><td>HI</td><td>ASI</td></tr>
+            <tr><td>Airspeed change</td><td>ALT</td><td>HI</td><td>Tach/MP</td></tr>
+          </tbody>
+        </table>
+        <h4>Pitch control</h4><ul>
+          <li>AI sets it; ALT/VSI/ASI confirm it. Altitude off → VSI about twice the error (USAA caps it at 200 fpm); under 100 ft use a ½-bar change, over 100 ft a full bar. Trim after every change.</li></ul>
+        <h4>Bank control</h4><ul>
+          <li>Bank no more than the degrees to turn, never more than standard rate. HI primary in straight flight, TC in standard-rate turns; ball centred with rudder.</li></ul>
+        <h4>Power control</h4><ul>
+          <li>100 RPM ≈ 5 kt ≈ 100 fpm. Use the power table instead of fishing; tach/MP is primary while power is changing (USAA p28).</li></ul>
+        <h4>Common errors</h4><ul>
+          <li>Fixation, omission, emphasis; over-controlling; chasing the VSI (it lags); not trimming.</li></ul>
+        <p class="src">USAA p23–30</p>
+      </div>
+    </details>
+  </div>
+
+  <div class="grp-h"><h3>Fly — by reference to instruments</h3></div>
+  <div class="tasks">
+
+    <details class="task fb-panel">
+      <summary><span class="t">Straight-and-Level Flight</span><i class="tag">FL6·7</i><i class="tag fly">Fly</i><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary>
+      <div class="tb">
+        <h4>Procedure</h4><ul>
+          <li>Pitch 0° on the AI → set power (172: 2300 RPM ≈ 110 kt) → trim → hold with primary/supporting instruments → include the engine gauges → reset the HI to the compass every 15 min.</li></ul>
+        <h4>Teach</h4><ul>
+          <li>Hands-off trim test. Show that a ½-bar pitch change gives a steady, small climb or descent.</li></ul>
+        <h4>Common errors</h4><ul>
+          <li>Fixation; chasing the VSI; not trimming; fixing altitude while the heading wanders.</li></ul>
+        <p class="std">±100 ft · ±10° · ±10 kt · bank ±5°</p>
+        <p class="src">USAA p23–24</p>
+      </div>
+    </details>
+
+    <details class="task fb-panel">
+      <summary><span class="t">Standard-Rate Turns</span><i class="tag">FL6·7</i><i class="tag fly">Fly</i><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary>
+      <div class="tb">
+        <h4>Procedure</h4><ul>
+          <li>Coordinated roll-in, AI to the approximate bank (≈ 15% of airspeed — 110 kt ≈ 16°), TC confirms standard rate.</li>
+          <li>Back pressure / pitch and power as needed to hold altitude and airspeed.</li>
+          <li>Lead the rollout by ½ the bank; AI during rollout, HI to stop on the heading; reset level pitch and power.</li></ul>
+        <h4>Common errors</h4><ul>
+          <li>Losing altitude in the turn; ballooning on rollout; overbanking; skidding (ball); overshooting the heading.</li></ul>
+        <p class="std">±100 ft · ±10 kt · bank ±5° · rollout ±10°</p>
+        <p class="src">USAA p31–32</p>
+      </div>
+    </details>
+
+    <details class="task fb-panel">
+      <summary><span class="t">Change of Airspeed (level &amp; turning)</span><i class="tag">FL6·7</i><i class="tag fly">Fly</i><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary>
+      <div class="tb">
+        <h4>Procedure</h4><ul>
+          <li><b>Power → Pitch → Trim.</b> About 100 RPM per 5 kt (172: 110 → 90 kt is 2300 → 2000 RPM).</li>
+          <li>Raise the nose as it slows (lower it as it speeds up) to hold altitude.</li>
+          <li>In a turn, reduce bank as you slow to stay at standard rate (110 kt ≈ 16.5°, 90 kt ≈ 13.5°).</li>
+          <li>Tach/MP is primary while the power changes (USAA p28).</li></ul>
+        <h4>Teach</h4><ul>
+          <li>Level flight first, then the same thing in a standard-rate turn — the only new step is the bank.</li></ul>
+        <h4>Common errors</h4><ul>
+          <li>Altitude excursion when power changes; forgetting the bank adjustment; no rudder for the yaw; not trimming.</li></ul>
+        <p class="std">±100 ft · ±10° · ±10 kt · bank ±5°</p>
+        <p class="src">USAA p27–28 · power p6, p8</p>
+      </div>
+    </details>
+
+    <details class="task fb-panel">
+      <summary><span class="t">Constant-Airspeed Climbs &amp; Descents</span><i class="tag">FL6·7</i><i class="tag fly">Fly</i><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary>
+      <div class="tb">
+        <h4>Procedure</h4><ul>
+          <li>Power first, then pitch to the attitude for the airspeed; trim.</li>
+          <li>AI primary during the transition, then ASI primary for pitch, tach for power.</li>
+          <li>172: cruise climb 90 kt, full power, +5° (≈ +500 fpm) · Vy 76 kt, +7° (≈ +800) · cruise descent 100 kt, 2100 RPM, −2° (≈ −500).</li>
+          <li>Level off by leading 10% of the VSI (500 fpm → 50 ft); after a climb, hold climb power until cruise speed, then set cruise power.</li></ul>
+        <h4>Common errors</h4><ul>
+          <li>Chasing airspeed with big pitch changes; not trimming; no level-off lead; forgetting the power after level-off.</li></ul>
+        <p class="std">±10 kt · ±10° · level-off ±100 ft</p>
+        <p class="src">USAA p25–26 · power p8</p>
+      </div>
+    </details>
+
+    <details class="task fb-panel">
+      <summary><span class="t">Constant-Rate Climbs &amp; Descents</span><i class="tag">FL6·7</i><i class="tag fly">Fly</i><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary>
+      <div class="tb">
+        <h4>Procedure</h4><ul>
+          <li>VSI is primary for pitch. When airspeed is also specified, pitch sets the rate and power holds the airspeed.</li>
+          <li>172 precision descent: 85 kt, 1800 RPM, −3°, −500 fpm. Climb: start from the cruise-climb attitude and adjust power for speed.</li>
+          <li>Level-off lead 10% of the VSI; trim.</li></ul>
+        <h4>Teach</h4><ul>
+          <li>Small AI changes, then wait — the VSI lags. The ILS glideslope is the real-world version.</li></ul>
+        <h4>Common errors</h4><ul>
+          <li>Chasing the VSI; using power for rate and pitch for speed in the wrong combination; no power adjustment.</li></ul>
+        <p class="std">±10 kt · ±10° · level-off ±100 ft</p>
+        <p class="src">USAA p29–30 · power p8</p>
+      </div>
+    </details>
+
+    <details class="task fb-panel">
+      <summary><span class="t">Timed Turns to Compass Headings</span><i class="tag">FL6·7</i><i class="tag fly">Fly</i><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary>
+      <div class="tb">
+        <h4>Procedure</h4><ul>
+          <li>Degrees to turn ÷ 3 = seconds at standard rate (30° = 10 s · 90° = 30 s · 180° = 1 min).</li>
+          <li>Roll into standard rate on the TC; <b>start timing once it's established</b>; hold the rate; roll out when time expires; read the compass wings-level.</li>
+          <li>Small changes: less than standard rate (half standard: degrees ÷ 1.5).</li>
+          <li>Calibrate the TC first — time a standard-rate turn each way against the clock.</li></ul>
+        <h4>Teach</h4><ul>
+          <li>HI covered. Student states degrees, direction and time before rolling in. Use the Turn Timer.</li></ul>
+        <h4>Common errors</h4><ul>
+          <li>Wrong arithmetic; starting the clock at roll-in; not holding standard rate; altitude loss on partial panel.</li></ul>
+        <p class="std">±100 ft · ±10 kt · rollout ±10°</p>
+        <p class="src">USAA p33–34</p>
+      </div>
+    </details>
+
+    <details class="task fb-panel">
+      <summary><span class="t">Magnetic Compass Turns</span><i class="tag">FL6·7</i><i class="tag fly">Fly</i><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary>
+      <div class="tb">
+        <h4>Know</h4><ul>
+          <li><b>UNOS</b> — Undershoot North, Overshoot South (turning error from magnetic dip). <b>ANDS</b> — Accelerate North, Decelerate South (on E/W headings; hold airspeed steady to read it).</li>
+          <li>Error ≈ latitude at N/S, 0 at E/W, in between: <b>latitude × (degrees off E/W) ÷ 90</b>. Dallas ≈ 33°N: 33 at 360/180 · 22 at 030/330/150/210 · 11 at 060/300/120/240 · 0 at 090/270.</li>
+          <li><b>North half:</b> roll out early by error + ½ bank. <b>South half:</b> roll out late by error − ½ bank. <b>E/W:</b> ½-bank lead only.</li>
+          <li>At 110 kt (16° bank, 8° lead): right to 360 → start rollout at <b>319</b> · left to 360 → <b>041</b> · right to 180 → <b>205</b> · left to 180 → <b>155</b>.</li>
+          <li>The card reads "backwards" — turn away from the number you want. Also oscillation (read the average) and deviation (check the card).</li></ul>
+        <h4>Teach</h4><ul>
+          <li>Student calls it before rolling in: "North half, undershoot 33 plus 8 — roll out at 319." Drill with the calculator's Drill me button.</li></ul>
+        <h4>Common errors</h4><ul>
+          <li>UNOS backwards; forgetting the bank lead; reading the compass while turning or accelerating.</li></ul>
+        <p class="std">±100 ft · ±10 kt · rollout ±10°</p>
+        <p class="src">USAA p35–36 (chart drawn for ≈30°N)</p>
+      </div>
+    </details>
+
+    <details class="task fb-panel">
+      <summary><span class="t">Steep Turns (IR)</span><i class="tag">FL6·7</i><i class="tag fly">Fly</i><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary>
+      <div class="tb">
+        <h4>Procedure</h4><ul>
+          <li>45° bank, 180° or 360°, left then right; enter at or below V<sub>A</sub> (2300 RPM).</li>
+          <li>Passing ~30° of bank: add back pressure (AI pitch slightly up), add ~100–200 RPM, trim as required.</li>
+          <li>AI is primary for bank (the TC is past standard rate), ALT for pitch, VSI shows the trend.</li>
+          <li>Roll out about ½ the bank early (~20°); reduce power; release back pressure and take the trim out, or it balloons.</li>
+          <li>45° = 1.41 G — stall speed up about 19%.</li></ul>
+        <h4>Teach</h4><ul>
+          <li>If it's descending, shallow the bank first, then raise the nose, then re-establish the bank.</li></ul>
+        <h4>Common errors</h4><ul>
+          <li>Not enough back pressure (altitude loss); overbanking tendency; ballooning on rollout; fixing altitude with bank alone.</li></ul>
+        <p class="std">±100 ft · ±10 kt · bank ±5° · rollout ±10°</p>
+        <p class="src">SEL Maneuvers Guide p38–39, flown on instruments</p>
+      </div>
+    </details>
+
+    <details class="task fb-panel">
+      <summary><span class="t">Recovery from Unusual Attitudes</span><i class="tag">FL6·7</i><i class="tag fly">Fly</i><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary>
+      <div class="tb">
+        <h4>Setup</h4><ul>
+          <li>Student hands off, head down, eyes closed; you maneuver to disorient; "You have the flight controls."</li></ul>
+        <h4>Nose high — airspeed decreasing</h4><ul>
+          <li>Full power → forward elevator to lower the pitch → level when the airspeed stops moving → level the wings with the TC.</li></ul>
+        <h4>Nose low — airspeed increasing</h4><ul>
+          <li>Close the throttle → level the wings with the TC → gently pull out → level when the airspeed stops moving.</li></ul>
+        <h4>Know</h4><ul>
+          <li>Pitch from the ASI and altimeter, bank from the TC — don't use the AI for pitch (it may have tumbled). The sequence depends on the attitude when the recovery starts.</li></ul>
+        <h4>Teach</h4><ul>
+          <li>Recognize → say it ("nose low, airspeed increasing") → recover. Full panel first, then partial panel.</li></ul>
+        <h4>Common errors</h4><ul>
+          <li>Pulling with the wings banked (tightens the spiral, over-G); wrong sequence; overcorrecting into the opposite attitude; fixating on the AI.</li></ul>
+        <p class="std">Recognize nose-high and nose-low; recover in the correct sequence to stabilized level flight</p>
+        <p class="src">USAA p46–47</p>
+      </div>
+    </details>
+  </div>
+</section>
+
+</main>
+
+<script src="theme/flightbag-theme.js"></script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const R2D = 180 / Math.PI;
+  const norm = h => ((h % 360) + 360) % 360;
+  const hdg = h => { const r = Math.round(norm(h)) % 360; return String(r === 0 ? 360 : r).padStart(3, '0'); };
+  const card5 = h => hdg(Math.round(norm(h) / 5) * 5);                       // nearest 5° mark on the compass card
+  const fromN = h => Math.min(norm(h), 360 - norm(h));                       // 0 at N … 180 at S
+  const offEW = h => Math.abs(90 - fromN(h));                                // degrees away from E/W
+  const signedErr = (h, lat) => lat * (90 - fromN(h)) / 90;                  // + = compass lags (undershoot), − = leads (overshoot); USAA p36
+  const bankFor = kt => kt / 10 * 1.5;                                       // airspeed ÷ 10 + ½ of that (USAA p33)
+  const secs = s => s < 60 ? `${Math.round(s)} s` : `${Math.floor(Math.round(s) / 60)}:${String(Math.round(s) % 60).padStart(2, '0')}`;
+
+  // ── state (localStorage: airworkCalc) ──
+  const KEY = 'airworkCalc';
+  const S = { lat: 32.8, kt: 110, cur: 270, tgt: 360, dir: 'auto', rate: 'std', pt: 'c172' };
+  try { Object.assign(S, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+  const LIMITS = { lat: [-70, 70], kt: [40, 200], cur: [0, 360], tgt: [0, 360] };
+  const valid = () => Object.keys(LIMITS).every(k => Number.isFinite(S[k]) && S[k] >= LIMITS[k][0] && S[k] <= LIMITS[k][1]);
+
+  // Solve one turn. Errors and lead are rounded to whole degrees first, the way you'd do it in your head,
+  // so the explanation's arithmetic matches the answer.
+  function solve() {
+    const right = norm(S.tgt - S.cur), left = norm(S.cur - S.tgt);
+    const d = S.dir === 'R' ? 1 : S.dir === 'L' ? -1 : (right <= left ? 1 : -1);
+    const deg = Math.round(d === 1 ? right : left);
+    const bank = bankFor(S.kt), L = Math.round(bank / 2);
+    const E = Math.round(signedErr(S.tgt, S.lat)) || 0;
+    const early = E + L;                                                      // degrees before the target to start rolling out (− = past it)
+    return { d, deg, bank, L, E, early, roll: norm(S.tgt - d * early), off: Math.round(offEW(S.tgt)) };
+  }
+
+  // ── inputs ──
+  const fields = ['lat', 'kt', 'cur', 'tgt'];
+  fields.forEach(k => {
+    const el = $(k);
+    el.value = S[k];
+    el.addEventListener('input', () => {
+      const v = parseFloat(el.value);
+      S[k] = v;
+      el.classList.toggle('bad', !(Number.isFinite(v) && v >= LIMITS[k][0] && v <= LIMITS[k][1]));
+      if (k === 'lat') $('latNote').textContent = 'Bank: airspeed ÷ 10 + half of that (USAA p33). Lead: ½ bank (USAA p31).';
+      hideAnswer(false);
+      render();
+    });
+  });
+  function setField(k, v) { S[k] = v; $(k).value = v; $(k).classList.remove('bad'); }
+
+  $('latChips').addEventListener('click', e => {
+    const b = e.target.closest('[data-lat]'); if (!b) return;
+    setField('lat', parseFloat(b.dataset.lat)); render();
+  });
+  $('ktChips').addEventListener('click', e => {
+    const b = e.target.closest('[data-kt]'); if (!b) return;
+    setField('kt', parseFloat(b.dataset.kt)); render();
+  });
+  $('latGps').addEventListener('click', () => {
+    const btn = $('latGps'), note = $('latNote');
+    if (!navigator.geolocation) { note.textContent = 'Location is not available here — enter latitude.'; return; }
+    btn.disabled = true; note.textContent = 'Getting position…';
+    navigator.geolocation.getCurrentPosition(p => {
+      btn.disabled = false;
+      setField('lat', Math.round(p.coords.latitude * 10) / 10);
+      note.textContent = `Latitude from GPS: ${S.lat.toFixed(1)}°.`;
+      render();
+    }, err => {
+      btn.disabled = false;
+      note.textContent = err.code === 1 ? 'Location permission denied — enter latitude.' : 'Could not get a position — enter latitude.';
+      console.warn('[airwork] geolocation', err);
+    }, { timeout: 10000, maximumAge: 600000 });
+  });
+
+  function bindSeg(id, key, after) {
+    const seg = $(id);
+    const paint = () => seg.querySelectorAll('[data-v]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.v === S[key])));
+    seg.addEventListener('click', e => {
+      const b = e.target.closest('[data-v]'); if (!b) return;
+      S[key] = b.dataset.v; paint(); if (after) after(); else render();
+    });
+    paint();
+  }
+  bindSeg('dirSeg', 'dir', () => { hideAnswer(false); render(); });
+  bindSeg('rateSeg', 'rate');
+  bindSeg('ptSeg', 'pt', () => { powerTable(); save(); });
+
+  // Drill: random turn, answer hidden until tapped
+  let hidden = false;
+  function hideAnswer(on) {
+    hidden = on;
+    ['oRollBox', 'why'].forEach(id => $(id).classList.toggle('hide', on));
+    $('oZone').closest('.ro').classList.toggle('hide', on);
+    if (on) $('oRollSub').textContent = 'Work it out, then tap to check';
+  }
+  $('drill').addEventListener('click', () => {
+    const pick = () => Math.floor(Math.random() * 36) * 10;
+    let cur = pick(), tgt = pick();
+    while (tgt === cur) tgt = pick();
+    setField('cur', cur); setField('tgt', tgt);
+    S.dir = Math.random() < 0.5 ? 'L' : 'R';
+    $('dirSeg').querySelectorAll('[data-v]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.v === S.dir)));
+    hideAnswer(true);
+    render();
+  });
+  $('oRollBox').addEventListener('click', () => { if (hidden) { hideAnswer(false); render(); } });
+
+  // ── render ──
+  const set = (id, html, lit) => { const el = $(id); el.innerHTML = html; const box = el.closest('.ro, .big'); if (box) box.classList.toggle('lit', !!lit); };
+  function render() {
+    save();
+    if (!valid()) {
+      ['oBank', 'oLead', 'oLatErr', 'oRoll', 'oTurn', 'oZone', 'oStd', 'oHalf'].forEach(id => set(id, '—', false));
+      $('oBankWhy').textContent = ''; $('oRollSub').textContent = 'Check the highlighted inputs';
+      $('why').innerHTML = ''; $('smallWarn').hidden = true; $('rose').innerHTML = '';
+      kneeboard(); timerIdle();
+      return;
+    }
+    const r = solve();
+    const latTxt = `${Math.abs(S.lat).toFixed(1)}°${S.lat < 0 ? 'S' : 'N'}`;
+    set('oBank', `${r.bank.toFixed(1)}<span class="u">°</span>`, true);
+    $('oBankWhy').textContent = `${S.kt} ÷ 10 = ${(S.kt / 10).toFixed(1)}, + ½ = ${r.bank.toFixed(1)}°`;
+    set('oLead', `${r.L}<span class="u">°</span>`, true);
+    const e30 = Math.round(Math.abs(S.lat) * 2 / 3), e60 = Math.round(Math.abs(S.lat) / 3);
+    set('oLatErr', `${Math.round(Math.abs(S.lat))} · ${e30} · ${e60} · 0`, true);
+    $('oLatErrWhy').textContent = `${latTxt}: N/S · 30° off · 60° off · E/W`;
+
+    const noTurn = r.deg === 0;
+    set('oTurn', noTurn ? 'none' : `${r.deg}°<span class="u">${r.d > 0 ? 'right' : 'left'}</span>`, !noTurn);
+    set('oStd', noTurn ? '—' : secs(r.deg / 3), !noTurn);
+    set('oHalf', noTurn ? '—' : secs(r.deg / 1.5), !noTurn);
+    const zone = r.E > 0 ? 'undershoot' : r.E < 0 ? 'overshoot' : 'no error';
+    set('oZone', r.E ? `${Math.abs(r.E)}°<span class="u">${zone}</span>` : 'E/W · none', true);
+    set('oRoll', noTurn ? '—' : hdg(r.roll), !noTurn);
+    if (!hidden) $('oRollSub').textContent = noTurn ? 'Already on heading' : `${r.d > 0 ? 'Right' : 'Left'} turn to ${hdg(S.tgt)} · nearest card mark ${card5(r.roll)}`;
+
+    // worked steps
+    const n = v => `<span class="n">${v}</span>`;
+    const steps = [];
+    if (!noTurn) steps.push(`Turn ${n(r.deg + '°')} ${r.d > 0 ? 'right' : 'left'} → ${n(r.deg)} ÷ 3 = ${n(secs(r.deg / 3))} at standard rate.`);
+    steps.push(`${n(hdg(S.tgt))} is ${n(r.off + '°')} off E/W → error = ${n(Math.abs(S.lat).toFixed(1))} × ${n(r.off)} ÷ 90 = ${n(Math.abs(r.E) + '°')}${r.E ? ` (${zone})` : ''}.`);
+    steps.push(`Lead = ½ × ${n(r.bank.toFixed(1))} = ${n(r.L + '°')}.`);
+    if (!noTurn) {
+      if (r.E > 0) steps.push(`Undershoot: start rollout ${n(r.E)} + ${n(r.L)} = ${n(r.early + '°')} before ${n(hdg(S.tgt))} → compass ${n(hdg(r.roll))}.`);
+      else if (r.E < 0 && r.early < 0) steps.push(`Overshoot: let it pass ${n(-r.E)} − ${n(r.L)} = ${n(-r.early + '°')} beyond ${n(hdg(S.tgt))} → compass ${n(hdg(r.roll))}.`);
+      else if (r.E < 0) steps.push(`Overshoot ${n(-r.E)} is no more than the lead ${n(r.L)} → start rollout ${n(r.early + '°')} before ${n(hdg(S.tgt))} → compass ${n(hdg(r.roll))}.`);
+      else steps.push(`E/W: no turning error — normal lead, start rollout at ${n(hdg(r.roll))}.`);
+    }
+    $('why').innerHTML = steps.map(s => `<li>${s}</li>`).join('');
+
+    const tooSmall = !noTurn && r.early >= r.deg;
+    $('smallWarn').hidden = !tooSmall;
+    if (tooSmall) $('smallWarn').textContent = `A ${r.deg}° change is smaller than the ${r.early}° compass lead — use a shallow bank (no more than ${r.deg}°) or turn by time (${secs(r.deg / 3)}), then read the compass wings-level.`;
+
+    rose(r, noTurn, tooSmall);
+    kneeboard();
+    if (!T.run) T.done = false;                                               // a new turn re-arms the timer
+    timerIdle();
+  }
+
+  // ── compass rose (north up) ──
+  function rose(r, noTurn, tooSmall) {
+    const R = 112, P = (a, rad) => [+(rad * Math.sin(a / R2D)).toFixed(1), +(-rad * Math.cos(a / R2D)).toFixed(1)];
+    const north = S.lat >= 0 ? 'n' : 's', south = S.lat >= 0 ? 's' : 'n';
+    let s = `<defs><marker id="ah" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path class="ah" d="M0 0L10 5L0 10z"/></marker></defs>`;
+    s += `<path class="z-${north}" d="M${-R} 0A${R} ${R} 0 0 1 ${R} 0Z"/><path class="z-${south}" d="M${R} 0A${R} ${R} 0 0 1 ${-R} 0Z"/>`;
+    s += `<circle class="ring" r="${R}"/>`;
+    for (let a = 0; a < 360; a += 5) {
+      const len = a % 30 === 0 ? 12 : a % 10 === 0 ? 7 : 4, [x1, y1] = P(a, R), [x2, y2] = P(a, R - len);
+      s += `<line class="tick${a % 30 === 0 ? ' maj' : ''}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`;
+    }
+    for (let a = 0; a < 360; a += 30) {
+      const [hx, hy] = P(a, R + 17), [ex, ey] = P(a, R - 26), e = signedErr(a, S.lat), v = Math.round(Math.abs(e));
+      s += `<text class="hl" x="${hx}" y="${hy}" dy=".35em">${hdg(a)}</text>`;
+      s += `<text class="ev ${v === 0 ? 'z' : e > 0 ? 'n' : 's'}" x="${ex}" y="${ey}" dy=".35em">${v}</text>`;
+    }
+    s += `<text class="zl ${north}" y="-40">${S.lat >= 0 ? 'UNDERSHOOT' : 'OVERSHOOT'}</text><text class="zl ${south}" y="48">${S.lat >= 0 ? 'OVERSHOOT' : 'UNDERSHOOT'}</text>`;
+    const span = r.deg - r.early;                                             // degrees from now to the rollout point, along the turn
+    if (!noTurn && !tooSmall && !hidden && span > 0 && span < 360) {
+      const rr = R * 0.66, [x1, y1] = P(S.cur, rr), [x2, y2] = P(r.roll, rr);
+      s += `<path class="arc" d="M${x1} ${y1}A${rr} ${rr} 0 ${span > 180 ? 1 : 0} ${r.d > 0 ? 1 : 0} ${x2} ${y2}" marker-end="url(#ah)"/>`;
+    }
+    const [tx, ty] = P(S.tgt, R), [tx0, ty0] = P(S.tgt, R - 18);
+    s += `<line class="tgt" x1="${tx0}" y1="${ty0}" x2="${tx}" y2="${ty}"/><circle class="tgt-dot" cx="${tx}" cy="${ty}" r="4.5"/>`;
+    const [cx, cy] = P(S.cur, R * 0.66);
+    s += `<circle class="cur" cx="${cx}" cy="${cy}" r="5"/>`;
+    if (!noTurn && !hidden) {
+      const [rx, ry] = P(r.roll, R), [lx, ly] = P(r.roll, R - 44);
+      s += `<circle class="roll" cx="${rx}" cy="${ry}" r="6"/><text class="roll-l" x="${lx}" y="${ly}" dy=".35em">${hdg(r.roll)}</text>`;
+    }
+    $('rose').innerHTML = s;
+  }
+
+  // ── kneeboard ──
+  function kneeboard() {
+    const tb = $('cardTbl').querySelector('tbody');
+    if (!valid()) { tb.innerHTML = ''; $('cardHead').textContent = 'Fix the setup inputs on the Calculator tab.'; return; }
+    const bank = bankFor(S.kt), L = Math.round(bank / 2);
+    $('cardHead').innerHTML = `Latitude <b>${Math.abs(S.lat).toFixed(1)}°${S.lat < 0 ? 'S' : 'N'}</b> · <b>${S.kt} kt</b> · standard-rate bank <b>${bank.toFixed(1)}°</b> · lead <b>${L}°</b>`;
+    let rows = '';
+    for (let h = 0; h < 360; h += 30) {
+      const E = Math.round(signedErr(h, S.lat)) || 0, early = E + L;
+      const z = E > 0 ? ['zone-n', 'undershoot'] : E < 0 ? ['zone-s', 'overshoot'] : ['zone-z', 'lead only'];
+      const rt = norm(h - early), lt = norm(h + early);
+      rows += `<tr><td class="k">${hdg(h)}</td><td class="zcol ${z[0]}">${z[1]}</td><td class="n"><span class="${z[0]}">${Math.abs(E)}°</span></td>` +
+        `<td class="n">${hdg(rt)}<span class="sm">${card5(rt)}</span></td><td class="n">${hdg(lt)}<span class="sm">${card5(lt)}</span></td></tr>`;
+    }
+    tb.innerHTML = rows;
+  }
+  $('printCard').addEventListener('click', () => window.print());
+
+  // ── turn timer ──
+  const T = { run: false, t0: 0, dur: 0, raf: 0, to: 0, ac: null, done: false };
+  const tDuration = () => { if (!valid()) return 0; const r = solve(); return S.rate === 'half' ? r.deg / 1.5 : r.deg / 3; };
+  const fmtT = s => s >= 60 ? `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}` : s.toFixed(1);
+  function timerIdle() {
+    if (T.run || T.done) return;
+    T.dur = tDuration();
+    const r = valid() ? solve() : null;
+    set('tNum', T.dur > 0 ? fmtT(T.dur) : '—', T.dur > 0);
+    $('tLbl').textContent = 'Time to roll out';
+    $('tSub').textContent = r && r.deg ? `${r.deg}° ${r.d > 0 ? 'right' : 'left'} · ${S.rate === 'half' ? '1.5' : '3'}°/s` : 'Set a turn on the Turn card';
+    $('tBox').classList.remove('go');
+    $('tStart').disabled = !(T.dur > 0);
+  }
+  function tick() {
+    const left = T.dur - (performance.now() - T.t0) / 1000;
+    if (left > 0) { set('tNum', fmtT(left), true); }
+    else {
+      $('tBox').classList.add('go');
+      $('tLbl').textContent = 'Roll out';
+      set('tNum', 'ROLL OUT', true);
+      $('tSub').textContent = `+${(-left).toFixed(1)} s`;
+    }
+    if (T.run) T.raf = requestAnimationFrame(tick);
+  }
+  function beep() {
+    try {
+      const ac = T.ac, t = ac.currentTime, o = ac.createOscillator(), g = ac.createGain();
+      o.frequency.value = 880;
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.3, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.4);
+      o.connect(g).connect(ac.destination); o.start(t); o.stop(t + 0.45);
+    } catch (e) { console.warn('[airwork] beep', e); }
+    if (navigator.vibrate) navigator.vibrate([200, 80, 200]);
+  }
+  $('tStart').addEventListener('click', () => {
+    if (T.run) {                                                              // stop
+      T.run = false; cancelAnimationFrame(T.raf); clearTimeout(T.to);
+      $('tStart').textContent = 'Start';
+      return;
+    }
+    T.dur = tDuration(); if (!(T.dur > 0)) return;
+    try { T.ac = T.ac || new (window.AudioContext || window.webkitAudioContext)(); T.ac.resume(); } catch (e) { T.ac = null; }
+    T.run = true; T.done = true; T.t0 = performance.now();
+    $('tStart').textContent = 'Stop';
+    $('tLbl').textContent = 'Time to roll out';
+    clearTimeout(T.to); T.to = setTimeout(() => { if (T.run && T.ac) beep(); else if (T.run && navigator.vibrate) navigator.vibrate([200, 80, 200]); }, T.dur * 1000);
+    tick();
+  });
+  $('tReset').addEventListener('click', () => {
+    T.run = false; T.done = false; cancelAnimationFrame(T.raf); clearTimeout(T.to);
+    $('tStart').textContent = 'Start';
+    timerIdle();
+  });
+
+  // ── power table (USAA IR guide p6 C-152, p8 C-172; flaps 0° unless noted) ──
+  const PT = {
+    c172: { src: 'USAA IR p8 — all C-172. Varies with weather and density altitude.', rows: [
+      ['Climb Vx 60', '+8°', 'Full', '+700'], ['Climb Vy 76', '+7°', 'Full', '+800'], ['Cruise climb 90', '+5°', 'Full', '+500'],
+      ['Level cruise 110', '0°', '2300', '0'], ['Cruise descent 100', '−2°', '2100', '−500'], ['Precision descent 85', '−3°', '1800', '−500'],
+      ['Approach level 90', '+1°', '2000', '0'], ['Non-precision descent 85', '−3°', '1600', '−700'],
+      ['Flaps 10°'], ['Approach level 90', '+1°', '2200', '0'], ['Precision descent 80', '−2°', '1700', '−500'], ['Non-precision 80', '−4°', '1500–1600', '−800']] },
+    c152: { src: 'USAA IR p6 — C-152. Varies with weather and density altitude.', rows: [
+      ['Climb Vx 55', '+8°', 'Full', '+700'], ['Climb Vy 67', '+7°', 'Full', '+800'], ['Cruise climb 80', '+5°', 'Full', '+500'],
+      ['Level cruise 105', '0°', '2300', '0'], ['Cruise descent 100', '−2°', '2100', '−500'], ['Precision descent 80', '−3°', '1700', '−500'],
+      ['Approach level 90', '+1°', '2000', '0'], ['Non-precision descent 80', '−3°', '1500', '−700'],
+      ['Flaps 10°'], ['Approach level 90', '+1°', '2200', '0'], ['Precision descent 70', '−2°', '1700', '−500'], ['Non-precision 75', '−4°', '1500–1600', '−800']] }
+  };
+  function powerTable() {
+    const t = PT[S.pt] || PT.c172;
+    $('ptTbl').querySelector('tbody').innerHTML = t.rows.map(r => r.length === 1
+      ? `<tr class="sec"><td colspan="4">${r[0]}</td></tr>`
+      : `<tr><td>${r[0]}</td><td class="n">${r[1]}</td><td class="n">${r[2]}</td><td class="n">${r[3]}</td></tr>`).join('');
+    $('ptSrc').textContent = t.src;
+  }
+
+  // ── night currency: sunset at KDTO (NOAA solar calculator, iterated) ──
+  const KDTO = { lat: 33.2017, lon: -97.1981 }, TZ = 'America/Chicago';
+  function sunEvent(y, m, d, zen, rise) {                                     // → Date (UTC)
+    const r = Math.PI / 180, base = Date.UTC(y, m - 1, d), jd0 = base / 864e5 + 2440587.5;
+    let t = rise ? 720 : 1080;
+    for (let i = 0; i < 3; i++) {
+      const T = (jd0 + t / 1440 - 2451545) / 36525;
+      const L0 = (280.46646 + T * (36000.76983 + T * 0.0003032)) % 360;
+      const M = 357.52911 + T * (35999.05029 - 0.0001537 * T);
+      const e = 0.016708634 - T * (0.000042037 + 0.0000001267 * T);
+      const C = Math.sin(M * r) * (1.914602 - T * (0.004817 + 0.000014 * T)) + Math.sin(2 * M * r) * (0.019993 - 0.000101 * T) + Math.sin(3 * M * r) * 0.000289;
+      const om = 125.04 - 1934.136 * T, lam = L0 + C - 0.00569 - 0.00478 * Math.sin(om * r);
+      const eps = 23 + (26 + (21.448 - T * (46.815 + T * (0.00059 - T * 0.001813))) / 60) / 60 + 0.00256 * Math.cos(om * r);
+      const dec = Math.asin(Math.sin(eps * r) * Math.sin(lam * r)), yv = Math.tan(eps * r / 2) ** 2;
+      const eqt = 4 / r * (yv * Math.sin(2 * L0 * r) - 2 * e * Math.sin(M * r) + 4 * e * yv * Math.sin(M * r) * Math.cos(2 * L0 * r) - 0.5 * yv * yv * Math.sin(4 * L0 * r) - 1.25 * e * e * Math.sin(2 * M * r));
+      const ha = Math.acos(Math.cos(zen * r) / (Math.cos(KDTO.lat * r) * Math.cos(dec)) - Math.tan(KDTO.lat * r) * Math.tan(dec)) / r;
+      t = 720 - 4 * (KDTO.lon + (rise ? ha : -ha)) - eqt;
+    }
+    return new Date(base + t * 6e4);
+  }
+  const clock = dt => dt.toLocaleTimeString('en-GB', { timeZone: TZ, hour: '2-digit', minute: '2-digit' });
+  function night() {
+    const v = $('nDate').value; if (!v) return;
+    const [y, m, d] = v.split('-').map(Number);
+    const ss = sunEvent(y, m, d, 90.833, false), ce = sunEvent(y, m, d, 96, false);
+    // local date shifts: sunset in Texas is after 00:00 UTC, so the UTC base date is one day early
+    const fix = dt => (Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(dt) === v ? dt : new Date(dt.getTime() + 864e5));
+    const s = fix(ss), c = fix(ce), next = new Date(y, m - 1, d + 1);
+    const sr = sunEvent(next.getFullYear(), next.getMonth() + 1, next.getDate(), 90.833, true);
+    set('nSet', clock(s), true);
+    set('nCount', clock(new Date(s.getTime() + 36e5)), true);
+    set('nCivil', clock(c), true);
+    set('nLights', `${clock(s)}–${clock(sr)}`, true);
+  }
+  $('nDate').value = Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(new Date());
+  $('nDate').addEventListener('change', night);
+
+  // ── brief: expand / collapse all ──
+  $('expandAll').addEventListener('click', () => {
+    const all = [...document.querySelectorAll('details.task')], open = !all.every(d => d.open);
+    all.forEach(d => { d.open = open; });
+    $('expandAll').textContent = open ? 'Collapse all' : 'Expand all';
+    if (window.FlightBagTheme) window.FlightBagTheme.place();
+  });
+  document.querySelectorAll('details.task').forEach(d => d.addEventListener('toggle', () => { if (window.FlightBagTheme) window.FlightBagTheme.place(); }));
+
+  // ── views (#hash wins, else last used) ──
+  const VIEWS = ['calc', 'card', 'brief'];
+  function show(v) {
+    if (!VIEWS.includes(v)) v = 'calc';
+    VIEWS.forEach(id => { $('view-' + id).hidden = id !== v; });
+    $('viewTabs').querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.view === v)));
+    try { localStorage.setItem('airworkView', v); } catch (e) {}
+    if (location.hash.slice(1) !== v) history.replaceState(null, '', '#' + v);
+    if (window.FlightBagTheme) window.FlightBagTheme.place();
+  }
+  $('viewTabs').addEventListener('click', e => { const b = e.target.closest('[data-view]'); if (b) show(b.dataset.view); });
+  window.addEventListener('hashchange', () => show(location.hash.slice(1)));
+  let start = location.hash.slice(1);
+  if (!VIEWS.includes(start)) { try { start = localStorage.getItem('airworkView') || 'calc'; } catch (e) { start = 'calc'; } }
+
+  // glass readouts catch the page lamp (theme script places --fb-glare / --fb-sheen per element)
+  document.querySelectorAll('.ro, .big').forEach(el => el.classList.add('fb-glass'));
+  powerTable();
+  night();
+  render();
+  show(start);
+  window.__airwork = { S, solve, signedErr, bankFor, sunEvent };              // console debugging
+})();
+</script>
+</body>
+</html>

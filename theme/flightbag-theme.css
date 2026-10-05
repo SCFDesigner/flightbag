@@ -1,5 +1,5 @@
 /* Flight Bag theme — shared by every page. Mirrors the My Stuff dashboard
-   (~/Desktop/mystuff/public/index.html): warm charcoal tokens, terracotta accent,
+   (~/Desktop/Desktop Stuff/Projects/mystuff/public/index.html): warm charcoal tokens, terracotta accent,
    system sans UI + mono for numbers, and "hardware" panels (overlay grain, a top
    catch-light, a dark rim, one soft light over the whole page — see flightbag-theme.js).
    Pages opt in by linking this file + the script and tagging containers with .fb-panel. */
