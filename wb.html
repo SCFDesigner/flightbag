@@ -6961,6 +6961,22 @@ function removeCGPoint(button) {
     }
 }
 
+// Keep the METAR current while the page is open: re-check every 5 min and when the tab comes back,
+// and only touch the form when a newer report has actually been issued.
+let lastWxObsMs = 0, wxRefreshBusy = false;
+async function refreshWeatherIfNewer() {
+    const code = (document.getElementById('airportCode')?.value || '').trim();
+    if (!code || wxRefreshBusy || document.visibilityState !== 'visible') return;
+    wxRefreshBusy = true;
+    try {
+        const wx = await fetchWeatherFromAPIs(code.toUpperCase());
+        const t = wx ? metarObsMs(wx.obsTime) : 0;
+        if (t > lastWxObsMs) { updateWeatherPanel(wx); lastWxObsMs = t; console.log(`Weather refreshed: ${wx.obsTime}`); }
+    } finally { wxRefreshBusy = false; }
+}
+setInterval(refreshWeatherIfNewer, 5 * 60 * 1000);
+document.addEventListener('visibilitychange', refreshWeatherIfNewer);
+
 async function fetchWeatherData(airportCode) {
     try {
         const upperCode = airportCode.toUpperCase();
@@ -6976,6 +6992,7 @@ async function fetchWeatherData(airportCode) {
         // Update weather displays
         if (weatherData) {
             updateWeatherPanel(weatherData);
+            lastWxObsMs = metarObsMs(weatherData.obsTime);
         } else {
             updateWeatherPanel(null, 'No live weather for this airport — enter conditions by hand (1800wxbrief.com)');
         }
@@ -6997,7 +7014,7 @@ async function fetchWeatherData(airportCode) {
 // aviationweather.gov. Its 5-minute observations carry no text, so take the newest one that has the raw METAR.
 async function fetchNwsRawMetar(code) {
     const res = await fetch(`https://api.weather.gov/stations/${encodeURIComponent(code)}/observations?limit=25`, {
-        headers: { Accept: 'application/geo+json' }, signal: AbortSignal.timeout(8000),
+        headers: { Accept: 'application/geo+json' }, signal: AbortSignal.timeout(8000), cache: 'no-store',
     });
     if (!res.ok) return null;
     const data = await res.json();
@@ -7008,36 +7025,41 @@ async function fetchNwsRawMetar(code) {
     return hit.rawMessage.trim();
 }
 
+// METAR 'DDHHMMZ' -> epoch ms (this month, or last month if that day is still ahead of us)
+function metarObsMs(obs) {
+    const m = /^(\d{2})(\d{2})(\d{2})Z$/.exec(obs || '');
+    if (!m) return 0;
+    const now = new Date();
+    let t = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), +m[1], +m[2], +m[3]);
+    if (t > Date.now() + 6 * 3600e3) t = Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, +m[1], +m[2], +m[3]);
+    return t;
+}
+
 async function fetchWeatherFromAPIs(airportCode) {
     try {
         const upperCode = airportCode.toUpperCase();
         let weatherData = null;
 
-        try {
-            const raw = await fetchNwsRawMetar(upperCode);
-            if (raw) { weatherData = parseRawMETAR(raw); console.log('Current weather data from NWS:', weatherData); return weatherData; }
-        } catch (nwsError) {
-            console.log('NWS observations failed, trying AWC proxies...', nwsError.message);
-        }
-        
-        // Fallbacks (non-US fields, NWS outage): AWC and NOAA text through public CORS proxies plus AWC direct,
-        // all at once — first good answer wins, nothing waits longer than 8 s.
+        // Ask every source at once and keep the NEWEST report. NWS (api.weather.gov) is often 30–60 min late
+        // posting the hourly METAR, so taking it first left the form a report behind. Nothing waits past 8 s.
+        const fromNws = fetchNwsRawMetar(upperCode).then(raw => { if (!raw) throw new Error('empty'); return parseRawMETAR(raw); });
         const awcUrl = `https://aviationweather.gov/api/data/metar?ids=${upperCode}&format=json`;
         const noaaUrl = `https://tgftp.nws.noaa.gov/data/observations/metar/stations/${upperCode}.TXT`;
         const proxies = ['https://api.allorigins.win/raw?url=', 'https://corsproxy.io/?', 'https://api.codetabs.com/v1/proxy?quest='];
-        const get = url => fetch(url, { signal: AbortSignal.timeout(8000) }).then(r => { if (!r.ok) throw new Error(r.status); return r; });
+        const get = url => fetch(url, { signal: AbortSignal.timeout(8000), cache: 'no-store' }).then(r => { if (!r.ok) throw new Error(r.status); return r; });
         const fromAwc = url => get(url).then(r => r.json()).then(d => { if (!d?.length) throw new Error('empty'); return convertAWCData(d[0]); });
         const fromNoaa = url => get(url).then(r => r.text()).then(t => { const l = t.trim().split('\n'); if (l.length < 2) throw new Error('empty'); return parseRawMETAR(l[1].trim()); });
-        try {
-            weatherData = await Promise.any([
-                ...proxies.map(p => fromAwc(p + encodeURIComponent(awcUrl))),
-                ...proxies.map(p => fromNoaa(p + encodeURIComponent(noaaUrl))),
-                fromAwc(awcUrl),
-            ]);
-            console.log('Current weather data from a fallback source:', weatherData);
-        } catch (fallbackError) {
-            console.log('All fallback weather sources failed');
+        const results = await Promise.allSettled([
+            fromNws,
+            ...proxies.map(p => fromAwc(p + encodeURIComponent(awcUrl))),
+            ...proxies.map(p => fromNoaa(p + encodeURIComponent(noaaUrl))),
+            fromAwc(awcUrl),
+        ]);
+        for (const r of results) {
+            if (r.status !== 'fulfilled' || !r.value) continue;
+            if (!weatherData || metarObsMs(r.value.obsTime) > metarObsMs(weatherData.obsTime)) weatherData = r.value;
         }
+        if (weatherData) console.log(`Newest METAR for ${upperCode}: ${weatherData.obsTime}`, weatherData);
 
         // No live source answered: say so rather than filling the form with invented weather.
         if (!weatherData) {
