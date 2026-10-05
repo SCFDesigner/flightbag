@@ -3509,11 +3509,15 @@
             const top = r0[b.i] + (r0[b.i + 1] - r0[b.i]) * b.t, bot = r1[b.i] + (r1[b.i + 1] - r1[b.i]) * b.t;
             return { value: top + (bot - top) * a.t, paOut: a.out, tempOut: b.out };
         }
-        function perfLookup(tables, temps, weight, pa, oat){
+        // coverMax: weight the heaviest table is approved to cover (e.g. a gross-weight STC that leaves performance unchanged)
+        function perfLookup(tables, temps, weight, pa, oat, coverMax){
             const ws = Object.keys(tables).map(Number).sort((x, y) => x - y);
             const notes = [];
             let wLo = ws[0], wHi = ws[0], tw = 0;
-            if (weight > ws[ws.length - 1]) { wLo = wHi = ws[ws.length - 1]; notes.push(`weight ${Math.round(weight)} lb is above the heaviest table (${wHi} lb)`); }
+            if (weight > ws[ws.length - 1]) {
+                wLo = wHi = ws[ws.length - 1];
+                if (!(coverMax && weight <= coverMax)) notes.push(`weight ${Math.round(weight)} lb is above the heaviest table (${wHi} lb)`);
+            }
             else if (weight > ws[0]) {
                 let i = 0; while (weight > ws[i + 1]) i++;
                 wLo = ws[i]; wHi = ws[i + 1]; tw = (weight - wLo) / (wHi - wLo);
@@ -3629,7 +3633,8 @@
 
         /* Which tables / corrections apply to the selected aircraft (and its model / MTOW configuration) */
         function perfModel(aircraftType){
-            if (aircraftType === 'C-152') return { temps: C152_TAKEOFF_DATA.temperatures, to: { 1670: c152Table(C152_TAKEOFF_DATA) }, ldg: { 1670: c152Table(C152_LANDING_DATA) }, corr: CESSNA_CORRECTIONS };
+            // STC SA02034WI (1710 lb MTOW): AFMS Section 5 says performance is unchanged, so the 1670 lb take-off table covers up to 1710 lb
+            if (aircraftType === 'C-152') return { temps: C152_TAKEOFF_DATA.temperatures, to: { 1670: c152Table(C152_TAKEOFF_DATA) }, ldg: { 1670: c152Table(C152_LANDING_DATA) }, toCoverMax: 1710, corr: CESSNA_CORRECTIONS };
             if (aircraftType === 'P2006T') { const p = P2006T_PERF[p2006tConfig()]; return { temps: [-25, 0, 25, 50], to: p.to, ldg: p.ldg, corr: P2006T_CORRECTIONS }; }
             if (aircraftType === 'C-172') {
                 const v = C172_MODELS[c172Model()];
@@ -3653,7 +3658,7 @@
                 return { gr: Math.round(c.gr), ob: Math.round(c.ob), baseGr: Math.round(c.baseGr), baseOb: Math.round(c.baseOb), basis: c.basis,
                          notes: c.notes, correction: c.correction, headwind: hw, surface, temperature, pressureAltitude, weight };
             }
-            const base = perfLookup(phase === 'to' ? model.to : model.ldg, model.temps, weight, pressureAltitude, temperature);
+            const base = perfLookup(phase === 'to' ? model.to : model.ldg, model.temps, weight, pressureAltitude, temperature, phase === 'to' ? model.toCoverMax : undefined);
             const w = model.corr.wind(base, hw, phase);
             const s = model.corr.surface(w, surface, phase, base.gr);
             const notes = base.notes.slice();
