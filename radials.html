@@ -138,8 +138,16 @@ main { padding: 8px; }
         <div class="fb-tabs" id="typeTabs">
           <button class="fb-tab active" data-type="diff">DIFFERENCE</button>
           <button class="fb-tab" data-type="turn">TURN</button>
+          <button class="fb-tab" data-type="time">TIME</button>
           <button class="fb-tab" data-type="recip">RECIPROCAL</button>
           <button class="fb-tab" data-type="mix">MIX</button>
+        </div>
+      </div>
+      <div class="opt hidden" id="rateOpt">
+        <span class="fb-label">Rate</span>
+        <div class="fb-tabs" id="rateTabs">
+          <button class="fb-tab active" data-rate="3">STD</button>
+          <button class="fb-tab" data-rate="1.5">½ STD</button>
         </div>
       </div>
       <div class="opt">
@@ -239,7 +247,7 @@ main { padding: 8px; }
       <tr><td class="m">90°</td><td class="m">30 s</td><td class="m">60 s</td></tr>
       <tr><td class="m">180°</td><td class="m">60 s</td><td class="m">120 s</td></tr>
     </table>
-    <p>Every quiz answer shows the standard-rate time for that turn so the two numbers get linked in your head.</p>
+    <p><b>Time</b> mode asks for the seconds directly: degrees between the headings, then ÷ 3 (or ÷ 1.5 at half rate). Within a second counts, so 40° → 13.3 s takes 13 or 14.</p>
   </section>
 
 </div>
@@ -253,24 +261,26 @@ main { padding: 8px; }
   const LS = 'radial_score';
 
   /* ── state ── */
-  let type = 'diff', step = 10, q = null, dir = null, answered = false, t0 = 0;
+  let type = 'diff', step = 10, rate = 3, q = null, dir = null, answered = false, t0 = 0;
   let stats = { correct: 0, total: 0, streak: 0, best: 0, times: [] };
   try { const s = JSON.parse(localStorage.getItem(LS)); if (s && typeof s.total === 'number') stats = Object.assign(stats, s, { times: s.times || [] }); } catch (e) {}
-  try { type = localStorage.getItem('radial_type') || type; step = +localStorage.getItem('radial_step') || step; } catch (e) {}
+  try { type = localStorage.getItem('radial_type') || type; step = +localStorage.getItem('radial_step') || step; rate = +localStorage.getItem('radial_rate') || rate; } catch (e) {}
 
   /* ── math ── */
   const diff = (a, b) => { const r = Math.abs(a - b) % 360; return r > 180 ? 360 - r : r; };
   const signed = (from, to) => ((to - from + 540) % 360) - 180; // −180..180, + = right
   const stdRate = d => `${Math.round(d / 3)} s`;
+  const fmtS = x => (Math.round(x * 10) / 10).toString();
 
   const rnd = () => { const n = 360 / step; return (Math.floor(Math.random() * n) * step) % 360; };
   function newQ() {
-    const t = type === 'mix' ? ['diff', 'turn', 'recip'][Math.floor(Math.random() * 3)] : type;
+    const t = type === 'mix' ? ['diff', 'turn', 'time', 'recip'][Math.floor(Math.random() * 4)] : type;
     let from = rnd(), to;
     if (t === 'recip') { to = (from + 180) % 360; }
     else { do { to = rnd(); } while (to === from); }
     q = { t, from, to };
     if (t === 'diff') q.ans = diff(from, to);
+    else if (t === 'time') { q.deg = diff(from, to); q.secs = q.deg / rate; q.ans = Math.round(q.secs); }
     else if (t === 'turn') { const s = signed(from, to); q.ans = Math.abs(s); q.dir = s > 0 ? 'R' : s < 0 ? 'L' : 'E'; }
     else { q.ans = to; q.toBearing = Math.random() < 0.5; }
     render();
@@ -313,6 +323,10 @@ main { padding: 8px; }
       $('qPrompt').textContent = 'How many degrees between';
       $('qFromLbl').textContent = 'on radial'; $('qTo').textContent = pad3(to); $('qToLbl').textContent = 'to radial';
       $('ansIn').placeholder = '°';
+    } else if (t === 'time') {
+      $('qPrompt').textContent = rate === 3 ? 'Seconds at standard rate' : 'Seconds at half standard rate';
+      $('qFromLbl').textContent = 'heading'; $('qTo').textContent = pad3(to); $('qToLbl').textContent = 'turn to';
+      $('ansIn').placeholder = 's';
     } else if (t === 'turn') {
       $('qPrompt').textContent = 'Shortest turn, direction and degrees';
       $('qFromLbl').textContent = 'heading'; $('qTo').textContent = pad3(to); $('qToLbl').textContent = 'turn to';
@@ -323,6 +337,7 @@ main { padding: 8px; }
       $('qTo').textContent = '???'; $('qToLbl').textContent = q.toBearing ? 'bearing to' : 'reciprocal'; toWrap.classList.add('masked');
       $('ansIn').placeholder = '°';
     }
+    $('rateOpt').classList.toggle('hidden', !(type === 'time' || type === 'mix'));
     rose(from, to, false);
     $('ansIn').value = ''; $('ansIn').disabled = false; padEnabled(true);
     $('goBtn').textContent = 'CHECK';
@@ -335,6 +350,7 @@ main { padding: 8px; }
   function explain() {
     const { t, from, to, ans } = q, hi = Math.max(from, to), lo = Math.min(from, to), raw = hi - lo;
     const F = pad3(from), T = pad3(to);
+    if (t === 'time') { const d = raw <= 180 ? `${pad3(hi)} − ${pad3(lo)} = ${raw}` : `360 − (${pad3(hi)} − ${pad3(lo)}) = ${q.deg}`; return `${d} → ${q.deg} ÷ ${rate} = ${fmtS(q.secs)} s`; }
     if (t === 'recip') return from < 180 ? `${F} + 180 = ${pad3(ans)}` : `${F} − 180 = ${pad3(ans)}`;
     let m = raw <= 180 ? `${pad3(hi)} − ${pad3(lo)} = ${raw}`
       : `${pad3(hi)} − ${pad3(lo)} = ${raw}, over 180 → 360 − ${raw} = ${ans}<br><span style="color:var(--fb-dim)">through north: ${360 - hi} + ${lo} = ${ans}</span>`;
@@ -366,9 +382,9 @@ main { padding: 8px; }
       $('lrRow').classList.remove('nudge'); void $('lrRow').offsetWidth; $('lrRow').classList.add('nudge');
       return;
     }
-    const n = ((parseInt(v, 10) % 360) + 360) % 360;
+    const n = q.t === 'time' ? parseInt(v, 10) : ((parseInt(v, 10) % 360) + 360) % 360;
     const sec = (performance.now() - t0) / 1000;
-    const degOk = q.t === 'recip' ? n === q.ans % 360 : n === q.ans;
+    const degOk = q.t === 'recip' ? n === q.ans % 360 : q.t === 'time' ? Math.abs(n - q.secs) < 1 : n === q.ans;
     const dirOk = q.t !== 'turn' || q.dir === 'E' || dir === q.dir;
     const ok = degOk && dirOk;
     answered = true;
@@ -376,8 +392,8 @@ main { padding: 8px; }
     stats.times.push(+sec.toFixed(1)); if (stats.times.length > 50) stats.times.shift();
     try { localStorage.setItem(LS, JSON.stringify(stats)); } catch (e) {}
     const r = $('result'); r.className = 'fb-result ' + (ok ? 'ok' : 'bad');
-    const ansTxt = q.t === 'recip' ? pad3(q.ans) : (q.t === 'turn' && q.dir !== 'E' ? (q.dir === 'R' ? 'Right ' : 'Left ') : '') + q.ans + '°';
-    const turnDeg = q.t === 'recip' ? 180 : q.ans;
+    const ansTxt = q.t === 'recip' ? pad3(q.ans) : q.t === 'time' ? fmtS(q.secs) + ' s' : (q.t === 'turn' && q.dir !== 'E' ? (q.dir === 'R' ? 'Right ' : 'Left ') : '') + q.ans + '°';
+    const turnDeg = q.t === 'recip' ? 180 : q.t === 'time' ? q.deg : q.ans;
     const verdict = ok ? 'Correct' : degOk ? `${q.ans}° is right, but the turn is ${q.dir === 'R' ? 'Right' : 'Left'}` : !dirOk ? `Not quite — ${ansTxt}, and the other way` : 'Not quite — ' + ansTxt;
     r.innerHTML = `<div class="verdict">${verdict}</div><div class="math">${explain()}</div>`
       + `<span class="time">Std rate <b>${stdRate(turnDeg)}</b> · ½ std <b>${stdRate(turnDeg * 2)}</b> · you took <b>${sec.toFixed(1)} s</b></span>`;
@@ -416,10 +432,11 @@ main { padding: 8px; }
       box.querySelectorAll('.fb-tab').forEach(x => x.classList.toggle('active', x === b));
       cb(b.dataset[attr]);
     });
-    const cur = box.querySelector(`.fb-tab[data-${attr}="${attr === 'type' ? type : step}"]`);
+    const cur = box.querySelector(`.fb-tab[data-${attr}="${attr === 'type' ? type : attr === 'rate' ? rate : step}"]`);
     if (cur) box.querySelectorAll('.fb-tab').forEach(x => x.classList.toggle('active', x === cur));
   }
   wireTabs('typeTabs', 'type', v => { type = v; try { localStorage.setItem('radial_type', v); } catch (e) {} newQ(); });
+  wireTabs('rateTabs', 'rate', v => { rate = +v; try { localStorage.setItem('radial_rate', v); } catch (e) {} newQ(); });
   wireTabs('stepTabs', 'step', v => { step = +v; try { localStorage.setItem('radial_step', v); } catch (e) {} newQ(); });
 
   /* ── mode ── */
