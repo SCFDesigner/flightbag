@@ -66,6 +66,11 @@ main { padding: 8px; }
 .lr .fb-btn { flex: 1; min-height: 40px; font-weight: 600; letter-spacing: 2px; }
 .lr .fb-btn.on { border-color: var(--fb-accent); color: var(--fb-accent); }
 
+.pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.pad .fb-btn { min-height: 46px; font-family: var(--fb-mono); font-size: 20px; font-weight: 600; padding: 0; display: flex; align-items: center; justify-content: center; touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select: none; }
+.pad .fb-btn.dim { color: var(--fb-dim); font-family: var(--fb-font); font-size: var(--fb-fs-md); }
+.pad .fb-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.pad .fb-btn:disabled { opacity: .35; }
 .fb-result { border-radius: var(--fb-radius-sm); padding: 10px 12px; background: var(--fb-cell); border-left: 3px solid var(--fb-line); min-height: 44px; }
 .fb-result.ok { border-left-color: var(--fb-ok); }
 .fb-result.bad { border-left-color: var(--fb-bad); }
@@ -94,7 +99,14 @@ main { padding: 8px; }
 .learn th { font-size: var(--fb-fs-xs); letter-spacing: 2px; text-transform: uppercase; color: var(--fb-dim); font-weight: 500; }
 .learn td.m { font-family: var(--fb-mono); color: var(--fb-bright); }
 
+@media (max-width: 560px) {
+  #rose { max-width: 170px; }
+  .trainer > section { padding: 10px var(--fb-pad); }
+}
 @media (max-width: 420px) {
+  header { gap: 8px; }
+  .home-t { display: none; }
+  header h1 { letter-spacing: 1.5px; }
   .q-nums .n { font-size: 38px; }
   .stats { grid-template-columns: repeat(2, 1fr); }
   .tab { padding: 0 10px; }
@@ -103,7 +115,7 @@ main { padding: 8px; }
 </head>
 <body class="fb">
 <header>
-  <a class="fb-home" href="index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Flight Bag</a>
+  <a class="fb-home" href="index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg><span class="home-t">Flight Bag</span></a>
   <h1><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/><path d="M12 12L15.5 7"/></svg>Radial Math</h1>
   <div class="tabs fb-tabs" role="tablist">
     <button class="tab fb-tab active" data-mode="quiz" onclick="setMode('quiz')">QUIZ</button>
@@ -154,11 +166,17 @@ main { padding: 8px; }
           <button class="fb-btn" data-dir="R" onclick="pickDir('R')">RIGHT ▶</button>
         </div>
         <div class="ans-row">
-          <input id="ansIn" class="fb-input" type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="360" placeholder="°" autocomplete="off" aria-label="Degrees">
+          <input id="ansIn" class="fb-input" type="text" inputmode="none" readonly placeholder="°" autocomplete="off" aria-label="Degrees">
           <button id="goBtn" class="fb-btn primary" onclick="go()">CHECK</button>
         </div>
+        <div class="pad" id="pad" aria-label="Number pad">
+          <button class="fb-btn" data-k="1">1</button><button class="fb-btn" data-k="2">2</button><button class="fb-btn" data-k="3">3</button>
+          <button class="fb-btn" data-k="4">4</button><button class="fb-btn" data-k="5">5</button><button class="fb-btn" data-k="6">6</button>
+          <button class="fb-btn" data-k="7">7</button><button class="fb-btn" data-k="8">8</button><button class="fb-btn" data-k="9">9</button>
+          <button class="fb-btn dim" data-k="clr" aria-label="Clear">C</button><button class="fb-btn" data-k="0">0</button><button class="fb-btn dim" data-k="del" aria-label="Backspace"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 6H8l-5 6 5 6h13zM18 9l-6 6M12 9l6 6"/></svg></button>
+        </div>
         <div id="result" class="fb-result" aria-live="polite">
-          <div class="note">Type the answer, hit <b>Enter</b>. Rose shows where you are; the target is drawn after you answer.</div>
+          <div class="note">Tap the answer, then <b>Check</b>. The rose shows where you are; the target is drawn after you answer.</div>
         </div>
       </div>
     </div>
@@ -301,13 +319,12 @@ main { padding: 8px; }
       $('ansIn').placeholder = '°';
     }
     rose(from, to, false);
-    $('ansIn').value = ''; $('ansIn').disabled = false;
+    $('ansIn').value = ''; $('ansIn').disabled = false; padEnabled(true);
     $('goBtn').textContent = 'CHECK';
     $('result').className = 'fb-result';
-    $('result').innerHTML = '<div class="note">Type the answer, hit <b>Enter</b>.</div>';
+    $('result').innerHTML = '<div class="note">Tap the answer, then <b>Check</b>.</div>';
     t0 = performance.now();
     if (window.FlightBagTheme) FlightBagTheme.place();
-    setTimeout(() => $('ansIn').focus({ preventScroll: true }), 0);
   }
 
   function explain() {
@@ -320,12 +337,24 @@ main { padding: 8px; }
     return m;
   }
 
+  /* ── keypad ── */
+  const padBtns = [...document.querySelectorAll('#pad .fb-btn')];
+  function pad(k) {
+    if (answered) return;
+    const inp = $('ansIn');
+    if (k === 'clr') inp.value = '';
+    else if (k === 'del') inp.value = inp.value.slice(0, -1);
+    else if (inp.value.length < 3) inp.value += k;
+  }
+  $('pad').addEventListener('click', e => { const b = e.target.closest('.fb-btn'); if (b) pad(b.dataset.k); });
+  function padEnabled(on) { padBtns.forEach(b => b.disabled = !on); }
+
   /* ── answer flow ── */
-  window.pickDir = d => { if (answered) return; dir = d; $('lrRow').querySelectorAll('.fb-btn').forEach(b => b.classList.toggle('on', b.dataset.dir === d)); $('ansIn').focus({ preventScroll: true }); };
+  window.pickDir = d => { if (answered) return; dir = d; $('lrRow').querySelectorAll('.fb-btn').forEach(b => b.classList.toggle('on', b.dataset.dir === d)); };
 
   window.go = function () {
     if (answered) { newQ(); return; }
-    const v = $('ansIn').value.trim(); if (v === '') { $('ansIn').focus(); return; }
+    const v = $('ansIn').value.trim(); if (v === '') return;
     const n = ((parseInt(v, 10) % 360) + 360) % 360;
     const sec = (performance.now() - t0) / 1000;
     let ok = q.t === 'recip' ? n === q.ans % 360 || (q.ans === 0 && n === 0) : n === q.ans;
@@ -342,8 +371,7 @@ main { padding: 8px; }
       + `<span class="time">Std rate <b>${stdRate(turnDeg)}</b> · ½ std <b>${stdRate(turnDeg * 2)}</b> · you took <b>${sec.toFixed(1)} s</b></span>`;
     rose(q.from, q.to, true);
     if (q.t === 'recip') { $('qTo').textContent = pad3(q.ans); $('qToWrap').classList.remove('masked'); }
-    $('ansIn').disabled = true; $('goBtn').textContent = 'NEXT';
-    $('goBtn').focus({ preventScroll: true });
+    $('ansIn').disabled = true; $('goBtn').textContent = 'NEXT'; padEnabled(false);
     drawStats();
     if (window.FlightBagTheme) FlightBagTheme.place();
   };
@@ -357,11 +385,15 @@ main { padding: 8px; }
   /* ── keys ── */
   document.addEventListener('keydown', e => {
     if (e.key === 'Enter') { e.preventDefault(); go(); return; }
+    if (/^[0-9]$/.test(e.key)) { e.preventDefault(); pad(e.key); return; }
+    if (e.key === 'Backspace') { e.preventDefault(); pad('del'); return; }
+    if (e.key === 'Escape') { pad('clr'); return; }
     if (q && q.t === 'turn' && !answered) {
       if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'l') { e.preventDefault(); pickDir('L'); }
       if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'r') { e.preventDefault(); pickDir('R'); }
     }
     if (answered && e.key === ' ') { e.preventDefault(); newQ(); }
+    if (e.key === ' ' && e.target.closest && e.target.closest('.fb-btn')) e.preventDefault();
   });
 
   /* ── option tabs ── */
@@ -384,7 +416,6 @@ main { padding: 8px; }
     document.querySelectorAll('.mode-quiz').forEach(s => s.classList.toggle('hidden', m !== 'quiz'));
     document.querySelectorAll('.mode-learn').forEach(s => s.classList.toggle('hidden', m !== 'learn'));
     if (window.FlightBagTheme) FlightBagTheme.place();
-    if (m === 'quiz') setTimeout(() => $('ansIn').focus({ preventScroll: true }), 0);
   };
 
   drawStats();
