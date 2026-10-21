@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Radial Math</title>
+<link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="theme/flightbag-theme.css">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { min-height: 100vh; }
+header {
+  display: flex; align-items: center; gap: 14px;
+  padding: max(10px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 10px max(16px, env(safe-area-inset-left));
+  border-bottom: 1px solid var(--fb-line);
+}
+header h1 {
+  display: flex; align-items: center; gap: 9px; white-space: nowrap;
+  font-size: var(--fb-fs-xs); font-weight: 500; letter-spacing: 2.5px; text-transform: uppercase; color: var(--fb-bright);
+}
+header h1 svg, .card h2 svg { width: 15px; height: 15px; stroke: var(--fb-accent); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.fb-home { min-height: 36px; white-space: nowrap; }
+.tabs { margin-left: auto; }
+.tab { min-height: 32px; padding: 0 14px; font-weight: 600; letter-spacing: 2px; }
+main { padding: 8px; }
+.trainer { max-width: 600px; margin: 0 auto; }
+.trainer > section { padding: var(--fb-pad); }
+.trainer > section + section { border-top: 1px solid var(--fb-line); }
+.card h2 { display: flex; align-items: center; gap: 8px; font-size: var(--fb-fs-xs); letter-spacing: 2.5px; text-transform: uppercase; font-weight: 500; color: var(--fb-dim); margin-bottom: 10px; }
+.hidden { display: none !important; }
+
+/* ── settings row ── */
+.opts { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+.opt { display: flex; align-items: center; gap: 8px; }
+.opt .fb-label { white-space: nowrap; }
+
+/* ── question ── */
+.q { text-align: center; }
+.q-prompt { font-size: var(--fb-fs-sm); color: var(--fb-dim); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; min-height: 1.2em; }
+.q-nums { display: flex; justify-content: center; align-items: baseline; gap: 14px; font-family: var(--fb-mono); color: var(--fb-bright); }
+.q-nums .n { font-size: 46px; font-weight: 600; letter-spacing: 1px; line-height: 1; }
+.q-nums .n small { display: block; font-family: var(--fb-font); font-size: var(--fb-fs-xs); letter-spacing: 2px; color: var(--fb-dim); text-transform: uppercase; margin-top: 6px; font-weight: 500; }
+.q-nums .arrow { width: 26px; height: 26px; stroke: var(--fb-accent); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; align-self: center; }
+.q-nums .n.target.masked { color: var(--fb-dim); }
+
+/* ── rose + answer side by side on wide screens ── */
+.work { display: grid; grid-template-columns: 1fr; gap: 14px; align-items: center; }
+@media (min-width: 560px) { .work { grid-template-columns: 240px 1fr; } }
+#rose { display: block; width: 100%; max-width: 240px; aspect-ratio: 1; margin: 0 auto; border-radius: 50%; background: var(--fb-cell); }
+.rose-tick { stroke: var(--fb-dim); stroke-width: 1; }
+.rose-tick.major { stroke: var(--fb-text); stroke-width: 1.5; }
+.rose-lbl { fill: var(--fb-dim); font-family: var(--fb-font); font-size: 9px; letter-spacing: 1px; text-anchor: middle; dominant-baseline: middle; }
+.rose-from { stroke: var(--fb-bright); stroke-width: 2.5; stroke-linecap: round; }
+.rose-to { stroke: var(--fb-accent); stroke-width: 2.5; stroke-linecap: round; }
+.rose-arc { fill: none; stroke: var(--fb-accent); stroke-width: 7; opacity: .45; stroke-linecap: butt; }
+.rose-dot { fill: var(--fb-panel); stroke: var(--fb-line); stroke-width: 1; }
+.rose-mid { fill: var(--fb-bright); font-family: var(--fb-mono); font-size: 15px; font-weight: 600; text-anchor: middle; dominant-baseline: middle; }
+
+.answer { display: flex; flex-direction: column; gap: 10px; }
+.ans-row { display: flex; gap: 8px; align-items: stretch; }
+.ans-row .fb-input { flex: 1; font-family: var(--fb-mono); font-size: 26px; text-align: center; min-height: 48px; letter-spacing: 2px; }
+.ans-row .fb-btn { min-width: 84px; font-weight: 600; letter-spacing: 1.5px; }
+.lr { display: flex; gap: 8px; }
+.lr .fb-btn { flex: 1; min-height: 40px; font-weight: 600; letter-spacing: 2px; }
+.lr .fb-btn.on { border-color: var(--fb-accent); color: var(--fb-accent); }
+
+.fb-result { border-radius: var(--fb-radius-sm); padding: 10px 12px; background: var(--fb-cell); border-left: 3px solid var(--fb-line); min-height: 44px; }
+.fb-result.ok { border-left-color: var(--fb-ok); }
+.fb-result.bad { border-left-color: var(--fb-bad); }
+.fb-result .verdict { font-size: var(--fb-fs-xs); letter-spacing: 2.5px; text-transform: uppercase; font-weight: 600; margin-bottom: 4px; }
+.fb-result.ok .verdict { color: var(--fb-ok); }
+.fb-result.bad .verdict { color: var(--fb-bad); }
+.fb-result .math { font-family: var(--fb-mono); color: var(--fb-bright); font-size: var(--fb-fs-md); line-height: 1.5; }
+.fb-result .note { color: var(--fb-dim); font-size: var(--fb-fs-sm); line-height: 1.45; margin-top: 4px; }
+.fb-result .time { display: inline-block; margin-top: 6px; font-family: var(--fb-mono); color: var(--fb-text); font-size: var(--fb-fs-sm); }
+.fb-result .time b { color: var(--fb-bright); font-weight: 600; }
+
+/* ── stats ── */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.stat { background: var(--fb-cell); border-radius: var(--fb-radius-sm); padding: 8px 6px; text-align: center; }
+.stat .v { font-family: var(--fb-mono); font-size: var(--fb-fs-lg); color: var(--fb-bright); font-weight: 600; }
+.stat .k { font-size: var(--fb-fs-xs); letter-spacing: 2px; text-transform: uppercase; color: var(--fb-dim); margin-top: 2px; }
+.stats-foot { display: flex; justify-content: flex-end; margin-top: 8px; }
+
+/* ── learn ── */
+.learn p, .learn li { font-size: 13px; line-height: 1.55; color: var(--fb-text); }
+.learn ul { padding-left: 18px; margin: 4px 0 10px; }
+.learn b { color: var(--fb-bright); font-weight: 600; }
+.learn code { font-family: var(--fb-mono); color: var(--fb-bright); background: var(--fb-cell); padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+.learn table { width: 100%; border-collapse: collapse; margin: 6px 0 10px; font-size: 12.5px; }
+.learn th, .learn td { padding: 5px 6px; border-bottom: 1px solid var(--fb-line); text-align: left; }
+.learn th { font-size: var(--fb-fs-xs); letter-spacing: 2px; text-transform: uppercase; color: var(--fb-dim); font-weight: 500; }
+.learn td.m { font-family: var(--fb-mono); color: var(--fb-bright); }
+
+@media (max-width: 420px) {
+  .q-nums .n { font-size: 38px; }
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .tab { padding: 0 10px; }
+}
+</style>
+</head>
+<body class="fb">
+<header>
+  <a class="fb-home" href="index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Flight Bag</a>
+  <h1><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/><path d="M12 12L15.5 7"/></svg>Radial Math</h1>
+  <div class="tabs fb-tabs" role="tablist">
+    <button class="tab fb-tab active" data-mode="quiz" onclick="setMode('quiz')">QUIZ</button>
+    <button class="tab fb-tab" data-mode="learn" onclick="setMode('learn')">LEARN</button>
+  </div>
+</header>
+<main>
+<div class="trainer fb-panel">
+
+  <!-- ════ QUIZ ════ -->
+  <section id="quizOpts" class="card mode-quiz">
+    <div class="opts">
+      <div class="opt">
+        <span class="fb-label">Ask</span>
+        <div class="fb-tabs" id="typeTabs">
+          <button class="fb-tab active" data-type="diff">DIFFERENCE</button>
+          <button class="fb-tab" data-type="turn">TURN</button>
+          <button class="fb-tab" data-type="recip">RECIPROCAL</button>
+          <button class="fb-tab" data-type="mix">MIX</button>
+        </div>
+      </div>
+      <div class="opt">
+        <span class="fb-label">Step</span>
+        <div class="fb-tabs" id="stepTabs">
+          <button class="fb-tab active" data-step="10">10°</button>
+          <button class="fb-tab" data-step="5">5°</button>
+          <button class="fb-tab" data-step="1">1°</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card mode-quiz q">
+    <div class="q-prompt" id="qPrompt"></div>
+    <div class="q-nums">
+      <div class="n"><span id="qFrom">180</span><small id="qFromLbl">on radial</small></div>
+      <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16M14 6l6 6-6 6"/></svg>
+      <div class="n target" id="qToWrap"><span id="qTo">270</span><small id="qToLbl">to radial</small></div>
+    </div>
+  </section>
+
+  <section class="card mode-quiz">
+    <div class="work">
+      <svg id="rose" viewBox="-110 -110 220 220" aria-label="Compass rose"></svg>
+      <div class="answer">
+        <div class="lr hidden" id="lrRow">
+          <button class="fb-btn" data-dir="L" onclick="pickDir('L')">◀ LEFT</button>
+          <button class="fb-btn" data-dir="R" onclick="pickDir('R')">RIGHT ▶</button>
+        </div>
+        <div class="ans-row">
+          <input id="ansIn" class="fb-input" type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="360" placeholder="°" autocomplete="off" aria-label="Degrees">
+          <button id="goBtn" class="fb-btn primary" onclick="go()">CHECK</button>
+        </div>
+        <div id="result" class="fb-result" aria-live="polite">
+          <div class="note">Type the answer, hit <b>Enter</b>. Rose shows where you are; the target is drawn after you answer.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card mode-quiz">
+    <h2><svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16M8 15l4-6 4 3 4-7"/></svg>Session</h2>
+    <div class="stats">
+      <div class="stat"><div class="v" id="sCorrect">0</div><div class="k">Correct</div></div>
+      <div class="stat"><div class="v" id="sTotal">0</div><div class="k">Asked</div></div>
+      <div class="stat"><div class="v" id="sStreak">0</div><div class="k">Streak</div></div>
+      <div class="stat"><div class="v" id="sAvg">—</div><div class="k">Avg sec</div></div>
+    </div>
+    <div class="stats-foot"><button class="fb-btn small" onclick="resetStats()">Reset</button></div>
+  </section>
+
+  <!-- ════ LEARN ════ -->
+  <section class="card learn mode-learn hidden">
+    <h2><svg viewBox="0 0 24 24"><path d="M12 3v18M4 21h16M3 8h18"/></svg>Degrees between two radials</h2>
+    <p>Subtract the smaller from the larger. If you get more than <b>180</b>, you went the long way round: take it from <b>360</b>.</p>
+    <ul>
+      <li><code>180 → 270</code>: 270 − 180 = <b>90</b></li>
+      <li><code>350 → 020</code>: 350 − 20 = 330, over 180 → 360 − 330 = <b>30</b>. Or go through north: 10 to 360, plus 20 = <b>30</b>.</li>
+      <li><code>090 → 270</code>: <b>180</b> either way (it's the reciprocal).</li>
+    </ul>
+  </section>
+
+  <section class="card learn mode-learn hidden">
+    <h2><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-3-6.2"/><path d="M17 2v4h4"/></svg>Which way to turn</h2>
+    <p>Numbers <b>increase clockwise</b>. Target bigger than current → <b>right</b> turn, unless the gap is over 180 — then the short way is <b>left</b> through north. Exactly 180 is a toss-up.</p>
+    <ul>
+      <li><code>180 → 270</code>: bigger, 90 apart → <b>right 90</b></li>
+      <li><code>030 → 300</code>: bigger, but 270 apart → <b>left 90</b> through north</li>
+      <li><code>300 → 030</code>: smaller, but 270 apart → <b>right 90</b> through north</li>
+    </ul>
+  </section>
+
+  <section class="card learn mode-learn hidden">
+    <h2><svg viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17"/><circle cx="12" cy="12" r="9"/></svg>Reciprocal</h2>
+    <p>Add or subtract 180. Quick trick: <b>+200 then −20</b> for anything under 180, <b>−200 then +20</b> for anything 180 and up.</p>
+    <ul>
+      <li><code>040</code>: 040 + 200 = 240, − 20 = <b>220</b></li>
+      <li><code>310</code>: 310 − 200 = 110, + 20 = <b>130</b></li>
+    </ul>
+    <p>On the <b>R-180</b> your bearing <b>TO</b> the station is the reciprocal, <b>360</b>. Radial = FROM, bearing = TO.</p>
+  </section>
+
+  <section class="card learn mode-learn hidden">
+    <h2><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg>Timed turns</h2>
+    <p>Standard rate is <b>3° per second</b>, so seconds = degrees ÷ 3. Half-standard rate doubles it.</p>
+    <table>
+      <tr><th>Turn</th><th>Std rate</th><th>½ std</th></tr>
+      <tr><td class="m">30°</td><td class="m">10 s</td><td class="m">20 s</td></tr>
+      <tr><td class="m">45°</td><td class="m">15 s</td><td class="m">30 s</td></tr>
+      <tr><td class="m">90°</td><td class="m">30 s</td><td class="m">60 s</td></tr>
+      <tr><td class="m">180°</td><td class="m">60 s</td><td class="m">120 s</td></tr>
+    </table>
+    <p>Every quiz answer shows the standard-rate time for that turn so the two numbers get linked in your head.</p>
+  </section>
+
+</div>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const pad3 = n => String(((n % 360) + 360) % 360 || 360).padStart(3, '0'); // 0 shown as 360
+  const LS = 'radial_score';
+
+  /* ── state ── */
+  let type = 'diff', step = 10, q = null, dir = null, answered = false, t0 = 0;
+  let stats = { correct: 0, total: 0, streak: 0, best: 0, times: [] };
+  try { const s = JSON.parse(localStorage.getItem(LS)); if (s && typeof s.total === 'number') stats = Object.assign(stats, s, { times: s.times || [] }); } catch (e) {}
+  try { type = localStorage.getItem('radial_type') || type; step = +localStorage.getItem('radial_step') || step; } catch (e) {}
+
+  /* ── math ── */
+  const diff = (a, b) => { const r = Math.abs(a - b) % 360; return r > 180 ? 360 - r : r; };
+  const signed = (from, to) => ((to - from + 540) % 360) - 180; // −180..180, + = right
+  const stdRate = d => `${Math.round(d / 3)} s`;
+
+  const rnd = () => { const n = 360 / step; return (Math.floor(Math.random() * n) * step) % 360; };
+  function newQ() {
+    const t = type === 'mix' ? ['diff', 'turn', 'recip'][Math.floor(Math.random() * 3)] : type;
+    let from = rnd(), to;
+    if (t === 'recip') { to = (from + 180) % 360; }
+    else { do { to = rnd(); } while (to === from); }
+    q = { t, from, to };
+    if (t === 'diff') q.ans = diff(from, to);
+    else if (t === 'turn') { const s = signed(from, to); q.ans = Math.abs(s); q.dir = s > 0 ? 'R' : s < 0 ? 'L' : 'E'; }
+    else { q.ans = to; q.toBearing = Math.random() < 0.5; }
+    render();
+  }
+
+  /* ── rose ── */
+  const P = (deg, r) => { const a = (deg - 90) * Math.PI / 180; return [r * Math.cos(a), r * Math.sin(a)]; };
+  function rose(from, to, reveal) {
+    const R = 100; let s = '';
+    for (let d = 0; d < 360; d += 5) {
+      const maj = d % 30 === 0, len = maj ? 12 : d % 10 === 0 ? 8 : 4;
+      const [x1, y1] = P(d, R), [x2, y2] = P(d, R - len);
+      s += `<line class="rose-tick${maj ? ' major' : ''}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`;
+      if (maj) { const [lx, ly] = P(d, R - 22); s += `<text class="rose-lbl" x="${lx}" y="${ly}">${d === 0 ? 'N' : d === 90 ? 'E' : d === 180 ? 'S' : d === 270 ? 'W' : d / 10}</text>`; }
+    }
+    if (reveal) {
+      const sw = signed(from, to), ccw = sw < 0, mag = Math.abs(sw);
+      const [ax, ay] = P(from, R - 40), [bx, by] = P(to, R - 40);
+      s += `<path class="rose-arc" d="M${ax} ${ay} A${R - 40} ${R - 40} 0 ${mag > 180 ? 1 : 0} ${ccw ? 0 : 1} ${bx} ${by}"/>`;
+      const [tx, ty] = P(to, R - 14), [tx0, ty0] = P(to, 28); s += `<line class="rose-to" x1="${tx0}" y1="${ty0}" x2="${tx}" y2="${ty}"/>`;
+      const [mx, my] = P(from + sw / 2, 0);
+      s += `<circle class="rose-dot" r="22"/><text class="rose-mid" x="${mx}" y="${my + 1}">${mag}°</text>`;
+    } else {
+      s += `<circle class="rose-dot" r="22"/><text class="rose-mid">?</text>`;
+    }
+    const [fx, fy] = P(from, R - 14), [fx0, fy0] = P(from, 28); s += `<line class="rose-from" x1="${fx0}" y1="${fy0}" x2="${fx}" y2="${fy}"/>`;
+    $('rose').innerHTML = s;
+  }
+
+  /* ── render ── */
+  function render() {
+    answered = false; dir = null;
+    const { t, from, to } = q;
+    $('qFrom').textContent = pad3(from);
+    const toWrap = $('qToWrap'), lrRow = $('lrRow');
+    lrRow.classList.toggle('hidden', t !== 'turn');
+    lrRow.querySelectorAll('.fb-btn').forEach(b => b.classList.remove('on'));
+    toWrap.classList.remove('masked'); toWrap.classList.remove('hidden');
+    if (t === 'diff') {
+      $('qPrompt').textContent = 'How many degrees between';
+      $('qFromLbl').textContent = 'on radial'; $('qTo').textContent = pad3(to); $('qToLbl').textContent = 'to radial';
+      $('ansIn').placeholder = '°';
+    } else if (t === 'turn') {
+      $('qPrompt').textContent = 'Shortest turn, direction and degrees';
+      $('qFromLbl').textContent = 'heading'; $('qTo').textContent = pad3(to); $('qToLbl').textContent = 'turn to';
+      $('ansIn').placeholder = '°';
+    } else {
+      $('qPrompt').textContent = q.toBearing ? 'Bearing TO the station' : 'Reciprocal';
+      $('qFromLbl').textContent = q.toBearing ? 'on radial' : 'of';
+      $('qTo').textContent = '???'; $('qToLbl').textContent = q.toBearing ? 'bearing to' : 'reciprocal'; toWrap.classList.add('masked');
+      $('ansIn').placeholder = '°';
+    }
+    rose(from, to, false);
+    $('ansIn').value = ''; $('ansIn').disabled = false;
+    $('goBtn').textContent = 'CHECK';
+    $('result').className = 'fb-result';
+    $('result').innerHTML = '<div class="note">Type the answer, hit <b>Enter</b>.</div>';
+    t0 = performance.now();
+    if (window.FlightBagTheme) FlightBagTheme.place();
+    setTimeout(() => $('ansIn').focus({ preventScroll: true }), 0);
+  }
+
+  function explain() {
+    const { t, from, to, ans } = q, hi = Math.max(from, to), lo = Math.min(from, to), raw = hi - lo;
+    const F = pad3(from), T = pad3(to);
+    if (t === 'recip') return from < 180 ? `${F} + 180 = ${pad3(ans)}` : `${F} − 180 = ${pad3(ans)}`;
+    let m = raw <= 180 ? `${pad3(hi)} − ${pad3(lo)} = ${raw}`
+      : `${pad3(hi)} − ${pad3(lo)} = ${raw}, over 180 → 360 − ${raw} = ${ans}<br><span style="color:var(--fb-dim)">through north: ${360 - hi} + ${lo} = ${ans}</span>`;
+    if (t === 'turn') m += `<br>${q.dir === 'E' ? 'Either way — 180' : (q.dir === 'R' ? 'Right' : 'Left') + (raw > 180 ? ' (through north)' : (to > from) === (q.dir === 'R') ? ' — bigger number = clockwise' : '')}`;
+    return m;
+  }
+
+  /* ── answer flow ── */
+  window.pickDir = d => { if (answered) return; dir = d; $('lrRow').querySelectorAll('.fb-btn').forEach(b => b.classList.toggle('on', b.dataset.dir === d)); $('ansIn').focus({ preventScroll: true }); };
+
+  window.go = function () {
+    if (answered) { newQ(); return; }
+    const v = $('ansIn').value.trim(); if (v === '') { $('ansIn').focus(); return; }
+    const n = ((parseInt(v, 10) % 360) + 360) % 360;
+    const sec = (performance.now() - t0) / 1000;
+    let ok = q.t === 'recip' ? n === q.ans % 360 || (q.ans === 0 && n === 0) : n === q.ans;
+    if (q.t === 'turn' && q.dir !== 'E') ok = ok && dir === q.dir;
+    if (q.t === 'turn' && q.dir === 'E' && !dir) ok = ok; // 180: direction optional
+    answered = true;
+    stats.total++; if (ok) { stats.correct++; stats.streak++; stats.best = Math.max(stats.best, stats.streak); } else stats.streak = 0;
+    stats.times.push(+sec.toFixed(1)); if (stats.times.length > 50) stats.times.shift();
+    try { localStorage.setItem(LS, JSON.stringify(stats)); } catch (e) {}
+    const r = $('result'); r.className = 'fb-result ' + (ok ? 'ok' : 'bad');
+    const ansTxt = q.t === 'recip' ? pad3(q.ans) : (q.t === 'turn' && q.dir !== 'E' ? (q.dir === 'R' ? 'Right ' : 'Left ') : '') + q.ans + '°';
+    const turnDeg = q.t === 'recip' ? 180 : q.ans;
+    r.innerHTML = `<div class="verdict">${ok ? 'Correct' : 'Not quite — ' + ansTxt}</div><div class="math">${explain()}</div>`
+      + `<span class="time">Std rate <b>${stdRate(turnDeg)}</b> · ½ std <b>${stdRate(turnDeg * 2)}</b> · you took <b>${sec.toFixed(1)} s</b></span>`;
+    rose(q.from, q.to, true);
+    if (q.t === 'recip') { $('qTo').textContent = pad3(q.ans); $('qToWrap').classList.remove('masked'); }
+    $('ansIn').disabled = true; $('goBtn').textContent = 'NEXT';
+    $('goBtn').focus({ preventScroll: true });
+    drawStats();
+    if (window.FlightBagTheme) FlightBagTheme.place();
+  };
+
+  function drawStats() {
+    $('sCorrect').textContent = stats.correct; $('sTotal').textContent = stats.total; $('sStreak').textContent = stats.streak;
+    const t = stats.times; $('sAvg').textContent = t.length ? (t.reduce((a, b) => a + b, 0) / t.length).toFixed(1) : '—';
+  }
+  window.resetStats = () => { stats = { correct: 0, total: 0, streak: 0, best: 0, times: [] }; try { localStorage.removeItem(LS); } catch (e) {} drawStats(); };
+
+  /* ── keys ── */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); go(); return; }
+    if (q && q.t === 'turn' && !answered) {
+      if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'l') { e.preventDefault(); pickDir('L'); }
+      if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'r') { e.preventDefault(); pickDir('R'); }
+    }
+    if (answered && e.key === ' ') { e.preventDefault(); newQ(); }
+  });
+
+  /* ── option tabs ── */
+  function wireTabs(id, attr, cb) {
+    const box = $(id);
+    box.addEventListener('click', e => {
+      const b = e.target.closest('.fb-tab'); if (!b) return;
+      box.querySelectorAll('.fb-tab').forEach(x => x.classList.toggle('active', x === b));
+      cb(b.dataset[attr]);
+    });
+    const cur = box.querySelector(`.fb-tab[data-${attr}="${attr === 'type' ? type : step}"]`);
+    if (cur) box.querySelectorAll('.fb-tab').forEach(x => x.classList.toggle('active', x === cur));
+  }
+  wireTabs('typeTabs', 'type', v => { type = v; try { localStorage.setItem('radial_type', v); } catch (e) {} newQ(); });
+  wireTabs('stepTabs', 'step', v => { step = +v; try { localStorage.setItem('radial_step', v); } catch (e) {} newQ(); });
+
+  /* ── mode ── */
+  window.setMode = m => {
+    document.querySelectorAll('.tab[data-mode]').forEach(b => b.classList.toggle('active', b.dataset.mode === m));
+    document.querySelectorAll('.mode-quiz').forEach(s => s.classList.toggle('hidden', m !== 'quiz'));
+    document.querySelectorAll('.mode-learn').forEach(s => s.classList.toggle('hidden', m !== 'learn'));
+    if (window.FlightBagTheme) FlightBagTheme.place();
+    if (m === 'quiz') setTimeout(() => $('ansIn').focus({ preventScroll: true }), 0);
+  };
+
+  drawStats();
+  newQ();
+})();
+</script>
+<script src="theme/flightbag-theme.js"></script>
+</body>
+</html>
