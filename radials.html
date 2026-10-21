@@ -74,6 +74,11 @@ main { padding: 8px; }
 .fb-result { border-radius: var(--fb-radius-sm); padding: 10px 12px; background: var(--fb-cell); border-left: 3px solid var(--fb-line); min-height: 44px; }
 .fb-result.ok { border-left-color: var(--fb-ok); }
 .fb-result.bad { border-left-color: var(--fb-bad); }
+.fb-result.warn { border-left-color: var(--fb-warn); }
+.fb-result.warn .note { color: var(--fb-text); }
+@keyframes nudge { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+.lr.nudge { animation: nudge .3s ease; }
+.lr .fb-btn.on { background: var(--fb-cell); }
 .fb-result .verdict { font-size: var(--fb-fs-xs); letter-spacing: 2.5px; text-transform: uppercase; font-weight: 600; margin-bottom: 4px; }
 .fb-result.ok .verdict { color: var(--fb-ok); }
 .fb-result.bad .verdict { color: var(--fb-bad); }
@@ -355,11 +360,17 @@ main { padding: 8px; }
   window.go = function () {
     if (answered) { newQ(); return; }
     const v = $('ansIn').value.trim(); if (v === '') return;
+    if (q.t === 'turn' && !dir) {
+      const r = $('result'); r.className = 'fb-result warn';
+      r.innerHTML = '<div class="note">Which way? Tap <b>◀ LEFT</b> or <b>RIGHT ▶</b>, then Check.</div>';
+      $('lrRow').classList.remove('nudge'); void $('lrRow').offsetWidth; $('lrRow').classList.add('nudge');
+      return;
+    }
     const n = ((parseInt(v, 10) % 360) + 360) % 360;
     const sec = (performance.now() - t0) / 1000;
-    let ok = q.t === 'recip' ? n === q.ans % 360 || (q.ans === 0 && n === 0) : n === q.ans;
-    if (q.t === 'turn' && q.dir !== 'E') ok = ok && dir === q.dir;
-    if (q.t === 'turn' && q.dir === 'E' && !dir) ok = ok; // 180: direction optional
+    const degOk = q.t === 'recip' ? n === q.ans % 360 : n === q.ans;
+    const dirOk = q.t !== 'turn' || q.dir === 'E' || dir === q.dir;
+    const ok = degOk && dirOk;
     answered = true;
     stats.total++; if (ok) { stats.correct++; stats.streak++; stats.best = Math.max(stats.best, stats.streak); } else stats.streak = 0;
     stats.times.push(+sec.toFixed(1)); if (stats.times.length > 50) stats.times.shift();
@@ -367,7 +378,8 @@ main { padding: 8px; }
     const r = $('result'); r.className = 'fb-result ' + (ok ? 'ok' : 'bad');
     const ansTxt = q.t === 'recip' ? pad3(q.ans) : (q.t === 'turn' && q.dir !== 'E' ? (q.dir === 'R' ? 'Right ' : 'Left ') : '') + q.ans + '°';
     const turnDeg = q.t === 'recip' ? 180 : q.ans;
-    r.innerHTML = `<div class="verdict">${ok ? 'Correct' : 'Not quite — ' + ansTxt}</div><div class="math">${explain()}</div>`
+    const verdict = ok ? 'Correct' : degOk ? `${q.ans}° is right, but the turn is ${q.dir === 'R' ? 'Right' : 'Left'}` : !dirOk ? `Not quite — ${ansTxt}, and the other way` : 'Not quite — ' + ansTxt;
+    r.innerHTML = `<div class="verdict">${verdict}</div><div class="math">${explain()}</div>`
       + `<span class="time">Std rate <b>${stdRate(turnDeg)}</b> · ½ std <b>${stdRate(turnDeg * 2)}</b> · you took <b>${sec.toFixed(1)} s</b></span>`;
     rose(q.from, q.to, true);
     if (q.t === 'recip') { $('qTo').textContent = pad3(q.ans); $('qToWrap').classList.remove('masked'); }
