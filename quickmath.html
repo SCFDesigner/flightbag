@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Quick Math</title>
+<link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="theme/flightbag-theme.css">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { min-height: 100vh; }
+header {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  padding: max(10px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 10px max(16px, env(safe-area-inset-left));
+  border-bottom: 1px solid var(--fb-line);
+}
+header h1 { display: flex; align-items: center; gap: 9px; font-size: var(--fb-fs-xs); font-weight: 500; letter-spacing: 2.5px; text-transform: uppercase; color: var(--fb-bright); white-space: nowrap; }
+header h1 svg, .card h2 svg { width: 15px; height: 15px; stroke: var(--fb-accent); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.fb-home { min-height: 36px; white-space: nowrap; }
+.search { margin-left: auto; min-width: 180px; max-width: 280px; flex: 1; }
+main { padding: 12px 8px 40px; }
+.wrap { max-width: 980px; margin: 0 auto; }
+.intro { color: var(--fb-dim); font-size: var(--fb-fs-sm); line-height: 1.5; padding: 0 6px 12px; }
+.intro b { color: var(--fb-text); font-weight: 600; }
+.jump { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 6px 14px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; }
+.card { padding: var(--fb-pad); scroll-margin-top: 70px; }
+.card h2 { display: flex; align-items: center; gap: 8px; font-size: var(--fb-fs-xs); letter-spacing: 2.5px; text-transform: uppercase; font-weight: 500; color: var(--fb-dim); margin-bottom: 10px; }
+.card h2 .src { margin-left: auto; letter-spacing: 1px; font-size: 9px; color: var(--fb-dim); opacity: .8; text-transform: none; }
+.f { font-family: var(--fb-mono); color: var(--fb-bright); font-size: var(--fb-fs-md); line-height: 1.6; padding: 8px 10px; background: var(--fb-cell); border-radius: var(--fb-radius-sm); margin-bottom: 8px; white-space: pre-line; }
+.rule { font-size: 13px; line-height: 1.55; color: var(--fb-text); margin-bottom: 8px; }
+.rule b { color: var(--fb-bright); font-weight: 600; }
+.ex { font-size: 12.5px; line-height: 1.55; color: var(--fb-dim); border-left: 2px solid var(--fb-line); padding-left: 10px; }
+.ex b { color: var(--fb-text); font-weight: 600; }
+.ex .m { font-family: var(--fb-mono); color: var(--fb-bright); }
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-bottom: 6px; }
+th, td { padding: 4px 6px; border-bottom: 1px solid var(--fb-line); text-align: left; }
+th { font-size: var(--fb-fs-xs); letter-spacing: 2px; text-transform: uppercase; color: var(--fb-dim); font-weight: 500; }
+td.m { font-family: var(--fb-mono); color: var(--fb-bright); }
+.card.hide { display: none; }
+.sec { grid-column: 1 / -1; font-size: var(--fb-fs-xs); letter-spacing: 3px; text-transform: uppercase; color: var(--fb-accent); padding: 10px 6px 0; }
+.sec.hide { display: none; }
+</style>
+</head>
+<body class="fb">
+<header>
+  <a class="fb-home" href="index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Flight Bag</a>
+  <h1><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5v14"/><path d="M5 19l14-14" opacity=".4"/></svg>Quick Math</h1>
+  <input id="q" class="fb-input search" type="search" placeholder="Filter: cloud, PA, °F…" aria-label="Filter cards">
+</header>
+<main><div class="wrap">
+  <p class="intro">Rules of thumb for doing it <b>by hand</b>: on the written, in the oral, or when the calculator is in the other bag. Each card gives the formula, the shortcut, and one worked example. These are the standard approximations from the <b>PHAK</b>, <b>Instrument Flying Handbook</b> and <b>AIM</b>. Where a test wants chart precision, use the chart; use these to check that the chart answer makes sense.</p>
+  <div class="jump">
+    <a class="fb-btn small" href="#atmo">Atmosphere</a>
+    <a class="fb-btn small" href="#wx">Weather</a>
+    <a class="fb-btn small" href="#nav">Navigation</a>
+    <a class="fb-btn small" href="#ifr">Instrument</a>
+    <a class="fb-btn small" href="#conv">Conversions</a>
+  </div>
+
+  <div class="grid" id="grid">
+
+  <div class="sec" id="atmo">Atmosphere &amp; performance</div>
+
+  <section class="card fb-panel" data-k="pressure altitude PA altimeter 29.92 standard">
+    <h2><svg viewBox="0 0 24 24"><path d="M12 3v18M4 21h16M3 8h18"/></svg>Pressure altitude<span class="src">PHAK ch. 4</span></h2>
+    <div class="f">PA = field elevation + (29.92 − altimeter) × 1000</div>
+    <p class="rule"><b>1 inHg ≈ 1000 ft.</b> Altimeter lower than 29.92 → add; higher → subtract. Think "low pressure, high PA".</p>
+    <p class="ex"><b>Example</b> · Field 650 ft, altimeter 30.12<br><span class="m">29.92 − 30.12 = −0.20 → −200 ft</span><br><span class="m">650 − 200 = 450 ft PA</span></p>
+  </section>
+
+  <section class="card fb-panel" data-k="density altitude DA ISA temperature OAT 120">
+    <h2><svg viewBox="0 0 24 24"><path d="M12 3v18M4 21h16M3 8h18"/></svg>Density altitude<span class="src">PHAK ch. 11</span></h2>
+    <div class="f">DA ≈ PA + 120 × (OAT − ISA temp)
+ISA temp = 15 − 2 × (PA ÷ 1000)</div>
+    <p class="rule"><b>+120 ft per °C warmer than standard.</b> Standard temp drops 2 °C per 1000 ft from 15 °C at sea level.</p>
+    <p class="ex"><b>Example</b> · PA 2000 ft, OAT 30 °C<br><span class="m">ISA at 2000 = 15 − 4 = 11 °C</span><br><span class="m">30 − 11 = +19 °C → 19 × 120 = 2280</span><br><span class="m">2000 + 2280 ≈ 4300 ft DA</span></p>
+  </section>
+
+  <section class="card fb-panel" data-k="ISA standard atmosphere lapse rate 15 29.92 1013">
+    <h2><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/></svg>Standard atmosphere<span class="src">PHAK ch. 4</span></h2>
+    <table>
+      <tr><th>Sea level</th><th>Lapse per 1000 ft</th></tr>
+      <tr><td class="m">15 °C / 59 °F</td><td class="m">−2 °C / −3.5 °F</td></tr>
+      <tr><td class="m">29.92 inHg / 1013.2 hPa</td><td class="m">−1 inHg (≈ −30 hPa)</td></tr>
+    </table>
+    <p class="rule">Everything above is measured against this. <b>ISA deviation</b> = actual − standard at that altitude.</p>
+  </section>
+
+  <section class="card fb-panel" data-k="true airspeed TAS CAS 2% per thousand">
+    <h2><svg viewBox="0 0 24 24"><path d="M3 12h13l5-3-5-3H3zM3 18h18"/></svg>True airspeed<span class="src">PHAK ch. 8</span></h2>
+    <div class="f">TAS ≈ CAS + 2% per 1000 ft (of altitude)</div>
+    <p class="rule">Air thins with altitude, so the same indicated speed is a faster true speed. Use <b>density altitude</b> for the best estimate.</p>
+    <p class="ex"><b>Example</b> · 100 KCAS at 6000 ft<br><span class="m">6 × 2% = 12% → 100 × 1.12 = 112 KTAS</span></p>
+  </section>
+
+  <section class="card fb-panel" data-k="hydroplaning speed tire pressure 9 square root">
+    <h2><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M4 20c3-2 5-2 8 0s5 2 8 0"/></svg>Hydroplaning speed<span class="src">AIM 4-3-23 / PHAK ch. 11</span></h2>
+    <div class="f">V ≈ 9 × √(tire pressure, psi)</div>
+    <p class="ex"><b>Example</b> · tire at 36 psi<br><span class="m">√36 = 6 → 9 × 6 = 54 kt</span></p>
+  </section>
+
+  <div class="sec" id="wx">Weather</div>
+
+  <section class="card fb-panel" data-k="cloud base ceiling temperature dew point spread 2.5 4.4 convective">
+    <h2><svg viewBox="0 0 24 24"><path d="M7 18a4 4 0 0 1-.5-8 6 6 0 0 1 11.5 1.5A3.5 3.5 0 0 1 17.5 18z"/></svg>Cloud base (cumulus)<span class="src">PHAK ch. 12</span></h2>
+    <div class="f">Base AGL ≈ (Temp − Dew point) ÷ 2.5 × 1000   [°C]
+Base AGL ≈ (Temp − Dew point) ÷ 4.4 × 1000   [°F]</div>
+    <p class="rule"><b>°C spread × 400 ft</b> is the same thing and quicker. Unsaturated air cools 3 °C per 1000 ft while the dew point drops about 0.5 °C, so they meet at 2.5 °C per 1000 ft. For convective (fair-weather cumulus) bases only.</p>
+    <p class="ex"><b>Example</b> · METAR 28/16<br><span class="m">spread 12 ÷ 2.5 = 4.8 → ≈ 4800 ft AGL</span></p>
+  </section>
+
+  <section class="card fb-panel" data-k="freezing level icing 0 degrees lapse">
+    <h2><svg viewBox="0 0 24 24"><path d="M12 2v20M4 7l16 10M4 17L20 7"/></svg>Freezing level<span class="src">PHAK ch. 12 (2 °C lapse)</span></h2>
+    <div class="f">Freezing level AGL ≈ surface temp (°C) ÷ 2 × 1000</div>
+    <p class="rule">Assumes the standard 2 °C per 1000 ft. Real lapse rates vary; a <b>Skew-T</b> or the icing forecast beats this.</p>
+    <p class="ex"><b>Example</b> · surface 8 °C<br><span class="m">8 ÷ 2 = 4 → ≈ 4000 ft AGL</span></p>
+  </section>
+
+  <section class="card fb-panel" data-k="celsius fahrenheit temperature conversion C F double add 30">
+    <h2><svg viewBox="0 0 24 24"><path d="M14 4v10a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0z"/></svg>°C ↔ °F<span class="src">exact + shortcut</span></h2>
+    <div class="f">°F = °C × 9⁄5 + 32        quick: double it, add 30
+°C = (°F − 32) × 5⁄9    quick: take away 30, halve it</div>
+    <p class="rule">The shortcut is within about 2° in the normal flying range. Anchors: <b>−40 = −40 · 0 °C = 32 °F · 10 = 50 · 20 = 68 · 30 = 86 · 37 = 98.6</b>.</p>
+    <p class="ex"><b>Example</b> · 25 °C<br><span class="m">exact 25 × 1.8 + 32 = 77 °F · quick 50 + 30 = 80 °F</span></p>
+  </section>
+
+  <section class="card fb-panel" data-k="crosswind headwind component clock rule sine 30 45 60 degrees">
+    <h2><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>Crosswind: the clock rule<span class="src">PHAK ch. 9 (sine)</span></h2>
+    <table>
+      <tr><th>Wind off runway</th><th>Crosswind</th><th>Headwind</th></tr>
+      <tr><td class="m">15°</td><td class="m">¼ of wind</td><td class="m">~all</td></tr>
+      <tr><td class="m">30°</td><td class="m">½</td><td class="m">~90%</td></tr>
+      <tr><td class="m">45°</td><td class="m">¾</td><td class="m">~70%</td></tr>
+      <tr><td class="m">60°+</td><td class="m">all of it</td><td class="m">½ at 60°</td></tr>
+    </table>
+    <p class="rule">Minutes past the hour → fraction of the hour. <b>Crosswind = wind × sin(angle)</b>, headwind = wind × cos(angle). Use the gust for the crosswind limit.</p>
+    <p class="ex"><b>Example</b> · RWY 18, wind 230 at 20<br><span class="m">50° off → ~¾ × 20 ≈ 15 kt crosswind, ~13 kt headwind</span></p>
+  </section>
+
+  <div class="sec" id="nav">Navigation &amp; fuel</div>
+
+  <section class="card fb-panel" data-k="time speed distance groundspeed minutes NM per minute 60">
+    <h2><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg>Time · speed · distance<span class="src">PHAK ch. 16</span></h2>
+    <div class="f">minutes = distance ÷ GS × 60
+NM per minute = GS ÷ 60
+distance = GS × minutes ÷ 60</div>
+    <p class="rule"><b>Know your miles-per-minute:</b> 90 kt = 1.5, 100 = 1.67, 120 = 2, 150 = 2.5. Then distance ÷ mpm is the time.</p>
+    <p class="ex"><b>Example</b> · 32 NM at 96 kt<br><span class="m">96 ÷ 60 = 1.6 NM/min → 32 ÷ 1.6 = 20 min</span></p>
+  </section>
+
+  <section class="card fb-panel" data-k="fuel burn GPH gallons hours reserve pounds avgas 6">
+    <h2><svg viewBox="0 0 24 24"><path d="M5 21V5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16M3 21h14M16 9h2a2 2 0 0 1 2 2v6a1.5 1.5 0 0 0 3 0V9l-3-3"/></svg>Fuel<span class="src">PHAK ch. 16</span></h2>
+    <div class="f">gallons = GPH × hours
+endurance (hr) = usable gal ÷ GPH
+avgas 6 lb/gal · Jet A 6.7 · oil 7.5</div>
+    <p class="rule">Day VFR reserve is <b>30 min</b>, night <b>45</b>, IFR <b>45</b> after the alternate (14 CFR 91.151 / 91.167). Plan with the POH cruise GPH plus start/taxi/climb.</p>
+    <p class="ex"><b>Example</b> · 24.5 gal usable, 6.1 GPH<br><span class="m">24.5 ÷ 6.1 = 4.0 hr total → 3.5 hr with a 30-min reserve</span></p>
+  </section>
+
+  <section class="card fb-panel" data-k="1 in 60 rule off course correction degrees">
+    <h2><svg viewBox="0 0 24 24"><path d="M3 20L21 4M3 20h18"/></svg>1-in-60 rule<span class="src">IFH ch. 9</span></h2>
+    <div class="f">1 NM off per 60 NM flown = 1° off course
+correction to parallel = off ÷ flown × 60
+to rejoin at destination add: off ÷ remaining × 60</div>
+    <p class="ex"><b>Example</b> · 3 NM off after 45 NM, 90 NM to go<br><span class="m">3 ÷ 45 × 60 = 4° to parallel</span><br><span class="m">3 ÷ 90 × 60 = 2° more → turn 6° toward course</span></p>
+  </section>
+
+  <section class="card fb-panel" data-k="reciprocal heading 180 plus 200 minus 20">
+    <h2><svg viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17"/><circle cx="12" cy="12" r="9"/></svg>Reciprocal<span class="src">—</span></h2>
+    <div class="f">under 180: +200 then −20
+180 and up: −200 then +20</div>
+    <p class="ex"><span class="m">040 → 240 − 20 = 220 · 310 → 110 + 20 = 130</span> · Drill it in <a href="radials.html">Radial Math</a>.</p>
+  </section>
+
+  <section class="card fb-panel" data-k="VOR time to station distance bearing change wing tip 90 degrees">
+    <h2><svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18"/><path d="M8.5 6h7l3.5 6-3.5 6h-7L5 12z"/></svg>VOR time / distance to station<span class="src">IFH ch. 9</span></h2>
+    <div class="f">time to station (min) = minutes flown × 60 ÷ degrees of bearing change
+distance (NM) = TAS × minutes flown ÷ degrees of bearing change</div>
+    <p class="rule">Fly perpendicular to the radial (needle off the wing tip), time a <b>10° bearing change</b>, plug in.</p>
+    <p class="ex"><b>Example</b> · 10° took 2.5 min at 120 KTAS<br><span class="m">2.5 × 60 ÷ 10 = 15 min to station</span><br><span class="m">120 × 2.5 ÷ 10 = 30 NM</span></p>
+  </section>
+
+  <div class="sec" id="ifr">Instrument flying</div>
+
+  <section class="card fb-panel" data-k="descent planning top of descent 3 degree glidepath 300 feet per NM rate 5 groundspeed">
+    <h2><svg viewBox="0 0 24 24"><path d="M3 6l18 12M21 18H9"/></svg>Descent planning · 3°<span class="src">IFH ch. 10 / AIM 5-4-5</span></h2>
+    <div class="f">3° path = 300 ft per NM (≈ 318 exactly)
+NM to descend = altitude to lose ÷ 300
+rate (fpm) for 3° = groundspeed × 5
+any gradient: fpm = GS ÷ 60 × ft per NM</div>
+    <p class="rule"><b>Three times the thousands</b>: lose 6000 ft → start 18–20 NM out. At 90 kt GS a 3° path needs 450 fpm; at 120 kt, 600.</p>
+    <p class="ex"><b>Example</b> · 7000 → 2000 at 100 kt GS<br><span class="m">5000 ÷ 300 ≈ 17 NM · 100 × 5 = 500 fpm</span></p>
+  </section>
+
+  <section class="card fb-panel" data-k="VDP visual descent point HAT 300 10 percent timing">
+    <h2><svg viewBox="0 0 24 24"><path d="M3 18L21 6M3 18h18M15 6h6v6"/></svg>Visual descent point<span class="src">IFH ch. 10</span></h2>
+    <div class="f">VDP distance (NM from threshold) = HAT ÷ 300
+timing VDP: subtract 10% of HAT (in seconds) from the approach time</div>
+    <p class="ex"><b>Example</b> · MDA 1200, TDZE 600 → HAT 600<br><span class="m">600 ÷ 300 = 2 NM from the threshold</span><br><span class="m">timed: 60 s before the MAP</span></p>
+  </section>
+
+  <section class="card fb-panel" data-k="standard rate turn bank angle 3 degrees per second timed turn seconds">
+    <h2><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-3-6.2"/><path d="M17 2v4h4"/></svg>Standard rate &amp; timed turns<span class="src">IFH ch. 5 / USAA IR Guide p31–36</span></h2>
+    <div class="f">standard rate = 3°/s → seconds = degrees ÷ 3
+bank for standard rate ≈ KIAS ÷ 10 + half of that
+roll-out lead ≈ half the bank angle</div>
+    <p class="ex"><b>Example</b> · 100 KIAS, turn 090 → 270<br><span class="m">bank 10 + 5 = 15° · 180 ÷ 3 = 60 s · lead 7–8°</span> · Compass errors (UNOS) are in <a href="airwork.html#calc">Compass &amp; Timed Turns</a>.</p>
+  </section>
+
+  <section class="card fb-panel" data-k="DME arc lead radial lead distance groundspeed 200 60">
+    <h2><svg viewBox="0 0 24 24"><path d="M4 20a16 16 0 0 1 16-16"/><path d="M4 4h16v16"/></svg>DME arc lead<span class="src">IFH ch. 9</span></h2>
+    <div class="f">lead distance (NM) ≈ GS ÷ 200   (½% of GS)
+lead radial (°) = 60 × lead NM ÷ arc DME</div>
+    <p class="ex"><b>Example</b> · 120 kt GS, 10 DME arc<br><span class="m">120 ÷ 200 = 0.6 NM → 60 × 0.6 ÷ 10 ≈ 4° lead</span> · Fly one in the <a href="dme.html">DME Arc Trainer</a>.</p>
+  </section>
+
+  <section class="card fb-panel" data-k="glideslope rate of descent ILS GS times 5 half groundspeed">
+    <h2><svg viewBox="0 0 24 24"><path d="M3 5l18 14"/><path d="M3 19h18"/></svg>Glideslope descent rate<span class="src">IFH ch. 10</span></h2>
+    <div class="f">fpm ≈ groundspeed × 5     (3° glideslope)
+or: half the groundspeed, add a zero</div>
+    <p class="ex"><span class="m">90 kt → 450 fpm · 110 kt → 550 fpm</span>. Set it before glideslope intercept, then trim and bracket.</p>
+  </section>
+
+  <div class="sec" id="conv">Conversions</div>
+
+  <section class="card fb-panel" data-k="nautical statute miles kilometers knots mph conversion 1.15 1.852">
+    <h2><svg viewBox="0 0 24 24"><path d="M3 12h18M7 9v6M12 9v6M17 9v6"/></svg>Distance &amp; speed<span class="src">—</span></h2>
+    <table>
+      <tr><td class="m">1 NM</td><td class="m">1.15 SM · 1.852 km · 6076 ft</td></tr>
+      <tr><td class="m">1 SM</td><td class="m">0.87 NM · 1.609 km · 5280 ft</td></tr>
+      <tr><td class="m">1 kt</td><td class="m">1.15 mph · 1.852 km/h</td></tr>
+      <tr><td class="m">1 m</td><td class="m">3.28 ft</td></tr>
+      <tr><td class="m">1° latitude</td><td class="m">60 NM (1′ = 1 NM)</td></tr>
+    </table>
+    <p class="rule">Shortcut: <b>NM → SM add 15%</b>; SM → NM take off 13%. Visibility in METARs is statute; everything else you fly is nautical.</p>
+  </section>
+
+  <section class="card fb-panel" data-k="weight pounds kilograms gallons liters avgas jet oil water conversion 2.2 3.785">
+    <h2><svg viewBox="0 0 24 24"><path d="M12 3v18M4 21h16M3 8h18M6 8l-3 7a3 3 0 0 0 6 0zM18 8l-3 7a3 3 0 0 0 6 0z"/></svg>Weight &amp; volume<span class="src">PHAK ch. 10</span></h2>
+    <table>
+      <tr><td class="m">1 kg</td><td class="m">2.2 lb</td></tr>
+      <tr><td class="m">1 US gal</td><td class="m">3.785 L · 0.83 imp gal</td></tr>
+      <tr><td class="m">Avgas</td><td class="m">6.0 lb/gal</td></tr>
+      <tr><td class="m">Jet A</td><td class="m">6.7 lb/gal</td></tr>
+      <tr><td class="m">Oil</td><td class="m">7.5 lb/gal (1 qt = 1.875 lb)</td></tr>
+      <tr><td class="m">Water</td><td class="m">8.35 lb/gal</td></tr>
+    </table>
+    <p class="ex"><b>Example</b> · 24.5 gal avgas<br><span class="m">24.5 × 6 = 147 lb</span> · P2006T in kg: <span class="m">lb ÷ 2.2</span>.</p>
+  </section>
+
+  <section class="card fb-panel" data-k="pressure inches mercury hectopascals millibars conversion 33.86 QNH">
+    <h2><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 12l4-4"/></svg>Pressure<span class="src">—</span></h2>
+    <table>
+      <tr><td class="m">1 inHg</td><td class="m">33.86 hPa (mb) · ≈ 1000 ft</td></tr>
+      <tr><td class="m">1 hPa</td><td class="m">0.0295 inHg · ≈ 30 ft</td></tr>
+      <tr><td class="m">29.92 inHg</td><td class="m">1013.2 hPa</td></tr>
+    </table>
+    <p class="rule">Altimeter set 1 inHg too high reads <b>1000 ft too high</b>. "High to low, look out below."</p>
+  </section>
+
+  </div>
+</div></main>
+
+<script>
+(function () {
+  const q = document.getElementById('q'), cards = [...document.querySelectorAll('#grid .card')], secs = [...document.querySelectorAll('#grid .sec')];
+  function filter() {
+    const t = q.value.trim().toLowerCase();
+    cards.forEach(c => c.classList.toggle('hide', !!t && !(c.dataset.k + ' ' + c.textContent).toLowerCase().includes(t)));
+    secs.forEach(s => { let n = s.nextElementSibling, any = false; while (n && !n.classList.contains('sec')) { if (!n.classList.contains('hide')) any = true; n = n.nextElementSibling; } s.classList.toggle('hide', !any); });
+    if (window.FlightBagTheme) FlightBagTheme.place();
+  }
+  q.addEventListener('input', filter);
+})();
+</script>
+<script src="theme/flightbag-theme.js"></script>
+</body>
+</html>
