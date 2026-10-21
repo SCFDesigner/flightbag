@@ -61,7 +61,7 @@ main { padding: 8px; }
 .answer { display: flex; flex-direction: column; gap: 10px; }
 .ans-row { display: flex; gap: 8px; align-items: stretch; }
 .ans-row .fb-input { flex: 1; font-family: var(--fb-mono); font-size: 26px; text-align: center; min-height: 48px; letter-spacing: 2px; }
-.ans-row .fb-btn { min-width: 84px; font-weight: 600; letter-spacing: 1.5px; }
+.go { min-height: 48px; font-weight: 600; letter-spacing: 2px; font-size: var(--fb-fs-md); }
 .lr { display: flex; gap: 8px; }
 .lr .fb-btn { flex: 1; min-height: 40px; font-weight: 600; letter-spacing: 2px; }
 .lr .fb-btn.on { border-color: var(--fb-accent); color: var(--fb-accent); }
@@ -166,13 +166,8 @@ main { padding: 8px; }
     <div class="work">
       <svg id="rose" viewBox="-110 -110 220 220" aria-label="Compass rose"></svg>
       <div class="answer">
-        <div class="lr hidden" id="lrRow">
-          <button class="fb-btn" data-dir="L" onclick="pickDir('L')">◀ LEFT</button>
-          <button class="fb-btn" data-dir="R" onclick="pickDir('R')">RIGHT ▶</button>
-        </div>
         <div class="ans-row">
           <input id="ansIn" class="fb-input" type="text" inputmode="none" readonly placeholder="°" autocomplete="off" aria-label="Degrees">
-          <button id="goBtn" class="fb-btn primary" onclick="go()">CHECK</button>
         </div>
         <div class="pad" id="pad" aria-label="Number pad">
           <button class="fb-btn" data-k="1">1</button><button class="fb-btn" data-k="2">2</button><button class="fb-btn" data-k="3">3</button>
@@ -180,6 +175,11 @@ main { padding: 8px; }
           <button class="fb-btn" data-k="7">7</button><button class="fb-btn" data-k="8">8</button><button class="fb-btn" data-k="9">9</button>
           <button class="fb-btn dim" data-k="clr" aria-label="Clear">C</button><button class="fb-btn" data-k="0">0</button><button class="fb-btn dim" data-k="del" aria-label="Backspace"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 6H8l-5 6 5 6h13zM18 9l-6 6M12 9l6 6"/></svg></button>
         </div>
+        <div class="lr hidden" id="lrRow">
+          <button class="fb-btn" data-dir="L" onclick="pickDir('L')">◀ LEFT</button>
+          <button class="fb-btn" data-dir="R" onclick="pickDir('R')">RIGHT ▶</button>
+        </div>
+        <button id="goBtn" class="fb-btn primary go" onclick="go()">CHECK</button>
         <div id="result" class="fb-result" aria-live="polite">
           <div class="note">Tap the answer, then <b>Check</b>. The rose shows where you are; the target is drawn after you answer.</div>
         </div>
