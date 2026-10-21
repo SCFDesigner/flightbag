@@ -316,7 +316,7 @@ main { padding: 8px; }
     if (t === 'recip') return from < 180 ? `${F} + 180 = ${pad3(ans)}` : `${F} − 180 = ${pad3(ans)}`;
     let m = raw <= 180 ? `${pad3(hi)} − ${pad3(lo)} = ${raw}`
       : `${pad3(hi)} − ${pad3(lo)} = ${raw}, over 180 → 360 − ${raw} = ${ans}<br><span style="color:var(--fb-dim)">through north: ${360 - hi} + ${lo} = ${ans}</span>`;
-    if (t === 'turn') m += `<br>${q.dir === 'E' ? 'Either way — 180' : (q.dir === 'R' ? 'Right' : 'Left') + (raw > 180 ? ' (through north)' : (to > from) === (q.dir === 'R') ? ' — bigger number = clockwise' : '')}`;
+    if (t === 'turn') m += `<br>${q.dir === 'E' ? 'Either way — 180' : (q.dir === 'R' ? 'Right' : 'Left') + (raw > 180 ? ' — short way is through north' : q.dir === 'R' ? ' — bigger number = clockwise' : ' — smaller number = counter-clockwise')}`;
     return m;
   }
 
