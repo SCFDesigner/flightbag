@@ -442,10 +442,10 @@ document.addEventListener("keydown", e => {
   if ((e.key === "Enter" || e.key === " ") && e.target.matches(".card")) { e.preventDefault(); openFor(e.target, true); }
 });
 addEventListener("scroll", () => { if (!pop.hidden && !pinned && !touchMode()) close(); }, { passive: true });
-function jumpTo(id, openIt) {
+function jumpTo(id, openIt, instant) {
   const c = $("#t-" + id); if (!c) return; close();
   if ($("#f").value) { $("#f").value = ""; applyFilter(); }
-  c.scrollIntoView({ block: "center" }); c.classList.remove("flash"); void c.offsetWidth; c.classList.add("flash");
+  c.scrollIntoView({ block: "center", behavior: instant ? "instant" : "smooth" }); c.classList.remove("flash"); void c.offsetWidth; c.classList.add("flash");
   if (openIt) setTimeout(() => openFor(c, true), 350);
 }
 
@@ -479,6 +479,11 @@ function applyFilter() {
   $("#none").hidden = any || !$("#symbols").hidden;
 }
 fin.addEventListener("input", applyFilter);
+
+/* deep link: #t-<topic id> (from the FII test pages) scrolls to the card and opens it */
+const fromHash = instant => { const m = location.hash.match(/^#t-([\w-]+)$/); if (m && byId[m[1]]) jumpTo(m[1], true, instant === true); };
+addEventListener("hashchange", fromHash);
+setTimeout(() => fromHash(true), 120);
 
 /* chapter chip highlighting */
 const chipFor = id => $(`#chips a[href="#${id}"]`);

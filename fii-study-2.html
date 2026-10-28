@@ -6,6 +6,7 @@
 <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="stylesheet" href="theme/flightbag-theme.css">
+<script src="ifr/topic-match.js"></script>
 <style>
 :root{--bg:var(--fb-bg);--panel:var(--fb-panel);--panel2:var(--fb-cell);--line:var(--fb-border);--hair:var(--fb-line);
 --text:var(--fb-text);--muted:var(--fb-dim);--bright:var(--fb-bright);--accent:var(--fb-accent);--accentsoft:color-mix(in srgb,var(--fb-accent) 50%,transparent);
@@ -638,7 +639,8 @@ function qsFor(c){if(c==='All')return D.questions.slice();
   if(c===MISSCAT)return D.questions.filter(q=>missedEver.has(q.id));
   return D.questions.filter(q=>q.cat===c);}
 function catQuestions(c){return qsFor(c).sort((x,y)=>seq==='a'?x.a-y.a:x.b-y.b);}
-function pool(){let a=qsFor(query?'All':activeCat).filter(q=>matches(q)&&(!markedOnly||marks.has(q.id)));
+let focusQ=null; /* ?q=<id>: show one question, opened from the FII test's "Prepware explanation" link */
+function pool(){if(focusQ&&mode==='scroll'&&QID[focusQ])return [QID[focusQ]];let a=qsFor(query?'All':activeCat).filter(q=>matches(q)&&(!markedOnly||marks.has(q.id)));
   a.sort((x,y)=>seq==='a'?x.a-y.a:x.b-y.b);return a;}
 function subsetOf(items,pct){if(pct>=100||items.length<2)return items;
   const n=Math.max(1,Math.round(items.length*pct/100));
@@ -655,6 +657,16 @@ function choicesFor(q){if(answers==='correct')return q.choices.filter(c=>c.c).ma
   if(!q._sh)q._sh=shuffle(q.choices);const L=['A','B','C','D'];return q._sh.map((c,i)=>({l:L[i],t:c.t,c:c.c}));}
 
 function expIsOpen(id){return expOpen.has(id)?true:expOpen.has('!'+id)?false:expOn;}
+const IFR_COURSES=new Set(['fii','fii2']);
+/* Related-study links under an explanation: the scraped Prepware explanation (FII test only, ifr/fii-prepware.js)
+   and the IFR Atlas / Quick Review topics this question is about (ifr/topic-match.js). New tab, so a test isn't lost. */
+function ifrLinks(q){if(!window.IFRMatch||!IFR_COURSES.has(course))return '';
+  const ts=IFRMatch.match({stem:q.stem,answer:q.choices.filter(c=>c.c).map(c=>c.t).join(' '),exp:q.exp});
+  const pw=(course==='fii'&&window.FII_PREPWARE)?FII_PREPWARE[q.id]:null;
+  if(!ts.length&&!pw)return '';
+  const a=(h,t,cls)=>`<a class="ifrlink ${cls}" href="${h}" target="_blank" rel="noopener">${t}</a>`;
+  return `<div class="ifrrow">`+(pw?a('fii-study-2.html?q='+encodeURIComponent(pw[0]),pw[1]?'Prepware explanation':'Similar Prepware question','pw'):'')+
+    ts.map(t=>a('ifr/index.html#n-'+t.id,'IFR Atlas: '+esc(t.t),'map')+a('ifr/quick-review.html#t-'+t.id,'Quick card','card')).join('')+`</div>`;}
 function figSrc(f){return f?FIGS[(D.figpfx||'')+f]:null;}
 function figAttr(v){return v.startsWith('enc:')?`src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-enc="${esc(v.slice(4))}"`:`src="${v}"`;}
 function figHTML(q){const fs=[q.fig,q.fig2].filter(figSrc);const sp=q.sup||[];if(!fs.length&&!sp.length)return '';
@@ -673,7 +685,7 @@ function cardHTML(q,single,withBar){
       <span class="qactions"><button class="mini expbtn">${open?'− Explanation':'+ Explanation'}</button>
       <button class="flag${on?' on':''}" title="Mark for review"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.2l1.1-6.2L3 9.6l6.2-.9z"/></svg></button></span></div>
     <div class="qsplit${(q.fig||q.sup)?' two':''}"><div class="qtext"><p class="stem">${hl(q.stem)}</p>${ch}</div>${figHTML(q)}</div></div>`;
-  const expcard=open?`<div class="card expcard" data-id="${q.id}"><div class="eh" style="display:flex;align-items:center;gap:8px">Explanation<button class="mini expread" title="Read this explanation aloud"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5L6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 010 7M18.5 5.5a9 9 0 010 13"/></svg> Read</button></div><div class="etext">${hl(q.exp)}</div></div>`:'';
+  const expcard=open?`<div class="card expcard" data-id="${q.id}"><div class="eh" style="display:flex;align-items:center;gap:8px">Explanation<button class="mini expread" title="Read this explanation aloud"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5L6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 010 7M18.5 5.5a9 9 0 010 13"/></svg> Read</button></div><div class="etext">${hl(q.exp)}</div>${ifrLinks(q)}</div>`:'';
   return qcard+expcard;}
 function bindCards(scope){
   scope.querySelectorAll('.expbtn').forEach(b=>b.onclick=()=>{const id=b.closest('.card').dataset.id;const cur=expIsOpen(id);
@@ -713,10 +725,10 @@ function render(){stopBar();clearNotePause();
   const items=pool();document.getElementById('showing').textContent=items.length+(markedOnly?' marked':' shown');
   {const sc=document.getElementById('scount');if(sc)sc.textContent=query?items.length+' match'+(items.length===1?'':'es')+' \u00b7 all categories':items.length+' in '+(activeCat==='All'?'all categories':activeCat);}
   kwRender();{const ss=document.getElementById('ssearch');if(ss)ss.classList.toggle('hasq',!!document.getElementById('search').value.trim());}
-  let body=query?'':catBar();
+  let body=(focusQ&&QID[focusQ])?`<div class="focusbar">Opened from the FII test \u00b7 Prepware question #${esc(focusQ)}<button class="mini" id="focusAll">Show all questions</button></div>`:(query?'':catBar());
   if(!items.length)body+='<div class="empty">No questions match.</div>';
   else body+=items.map(q=>cardHTML(q,false,false)).join('');
-  content.innerHTML=body;
+  content.innerHTML=body;{const fa=document.getElementById('focusAll');if(fa)fa.onclick=()=>{focusQ=null;history.replaceState(null,'',location.pathname);render();};}
   content.querySelectorAll('.cbchip').forEach(b=>b.onclick=()=>{activeCat=b.dataset.c;store.set(PFX+'cat',activeCat);render();});
   bindCards(content);
   renderSide();}
@@ -984,7 +996,7 @@ function renderReview(){
       <div class="qmeta"><span class="qleft"><span class="qtag">${esc(q.cat)}</span><span class="qid">#${esc(q.id)}</span>${q.fig?`<span class="figchip">FIG ${esc(q.fig)}${q.fig2?'/'+esc(q.fig2):''}</span>`:''}${varWarn(q)}</span></div>
       <div class="qsplit${(q.fig||q.sup)?' two':''}"><div class="qtext"><p class="stem">${esc(q.stem)}</p>
       <div id="tchoices">${chs.map((c,k)=>`<div class="tchoice disabled${c.c?' show-correct':''}${(p.i===k&&!c.c)?' pick-wrong':''}"><span class="lt">${c.l})</span><span>${esc(c.t)}</span>${(p.i===k)?'<span class="yourpick">your pick</span>':''}</div>`).join('')}</div>
-      ${q.exp?`<div class="revexp"><b>Why:</b> ${esc(q.exp)}</div>`:''}
+      ${q.exp?`<div class="revexp"><b>Why:</b> ${esc(q.exp)}</div>`:''}${ifrLinks(q)}
       </div>${figHTML(q)}</div></div>
     <div class="navbar"><button class="btn" id="rvPrev"${i<=0?' disabled style="opacity:.45"':''}>\u2039 Prev</button>
       <span class="pos">${i+1} / ${tIdx}</span>
@@ -1165,7 +1177,7 @@ function renderRecallCard(){
       <button data-r="1">~ Shaky<small>2</small></button>
       <button data-r="2">✓ Got it<small>3</small></button></div>
     <div style="text-align:center;margin-top:10px"><button class="mini" id="rcExp">${expIsOpen(q.id)?'− Explanation':'+ Explanation'}</button></div>
-    ${expIsOpen(q.id)?`<div class="rcprompt" style="text-align:left;font-style:normal">${esc(q.exp)}</div>`:''}
+    ${expIsOpen(q.id)?`<div class="rcprompt" style="text-align:left;font-style:normal">${esc(q.exp)}</div>${ifrLinks(q)}`:''}
     </div>${figHTML(q)}</div></div>`;
   if(ttsOn&&ttsUserAct)speak(ans,null);
   content.querySelectorAll('.rcrate button').forEach(b=>b.onclick=()=>rcRate(+b.dataset.r));
@@ -1868,6 +1880,8 @@ bindNotes();
   if(location.protocol!=='file:'){const f=document.querySelector('.hfoot');
     if(f)f.innerHTML='Progress is saved separately for each course.';}
   const u=new URLSearchParams(location.search),p=u.get('course');
+  const fq=u.get('q');if(fq){const ck=Object.keys(ALL.courses).find(k=>ALL.courses[k].questions.some(x=>x.id===fq));
+    if(ck){openCourse(ck);if(QID[fq]){focusQ=fq;mode='scroll';expOpen.add(fq);render();}return;}}
   if(p&&ALL.courses[p]){openCourse(p);return;}
   const last=store.get('fii2_course',null);
   if(last&&ALL.courses[last]){openCourse(last);}
@@ -1964,6 +1978,16 @@ body.vlocked .wrap,body.vlocked .home{display:none!important}
     ask();})();
 })();
 </script>
+<style>
+.ifrrow{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.ifrlink{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;line-height:1.2;padding:5px 11px;border-radius:999px;text-decoration:none;
+  border:1px solid var(--fb-border,#3a3935);background:var(--fb-cell,#282827);color:var(--fb-bright,#f0eee6)}
+.ifrlink:hover{border-color:var(--fb-accent,#d97757)}
+.ifrlink.pw{border-color:color-mix(in srgb,var(--fb-accent,#d97757) 60%,transparent);color:var(--fb-accent,#d97757)}
+.ifrlink.card{color:var(--fb-dim,#85837a);padding:5px 9px}
+.focusbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 12px;padding:10px 14px;border-radius:10px;
+  border:1px solid color-mix(in srgb,var(--fb-accent,#d97757) 50%,transparent);color:var(--fb-bright,#f0eee6);font-size:13px}
+</style>
 <script src="theme/flightbag-theme.js"></script>
 <script>
 // Flight Bag panels: this page builds its cards from JS on every render, so tag them as .fb-panel
