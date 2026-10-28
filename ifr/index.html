@@ -385,6 +385,7 @@ aside.panel{border-radius:0;border:0;border-left:1px solid var(--fb-rim)}
   <nav class="tabs fb-tabs" role="tablist" aria-label="Views">
     <button class="fb-tab" role="tab" data-view="map" aria-selected="true">Map &amp; Tour</button>
     <button class="fb-tab" role="tab" data-view="symbols">Chart Symbols</button>
+    <button class="fb-tab" role="tab" data-view="symtest">Symbol Test</button>
     <button class="fb-tab" role="tab" data-view="cards">Flashcards</button>
     <button class="fb-tab" role="tab" data-view="mnemonics">Mnemonics</button>
     <button class="fb-tab" role="tab" data-view="updates">Updated Info<span class="count" id="upd-count"></span></button>
@@ -413,6 +414,7 @@ aside.panel{border-radius:0;border:0;border-left:1px solid var(--fb-rim)}
   </section>
 
   <section class="view page" id="view-symbols" hidden><div class="page-in" id="sym-in"></div></section>
+  <section class="view page" id="view-symtest" hidden><div class="page-in" id="symtest-in"><div><h1>Symbol Quick Test</h1><p class="lede">One chart symbol, three answers. The wrong answers come from the same look-alike family, so you learn to tell VOR from VOR/DME, minimum from maximum altitude, front course from back course. Misses and slow answers come back more often.</p></div><div id="symtest"></div></div></section>
   <section class="view page" id="view-cards" hidden><div class="page-in" id="cards-in"></div></section>
   <section class="view page" id="view-mnemonics" hidden><div class="page-in" id="mn-in"></div></section>
   <section class="view page" id="view-updates" hidden><div class="page-in" id="up-in"></div></section>
@@ -422,6 +424,7 @@ aside.panel{border-radius:0;border:0;border-left:1px solid var(--fb-rim)}
 
 <script src="data.js"></script>
 <script src="visuals.js"></script>
+<script src="symtest.js"></script>
 <script>
 (() => {
 const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -630,7 +633,7 @@ function renderIntro() {
     <ol><li><b>Next</b> walks the topics in flight order, one idea at a time. The map pans to each one and lights up what it connects to.</li>
       <li>Click any bubble or chapter box to jump. Drag to pan, scroll or pinch to zoom.</li>
       <li>Dotted acronyms show their meaning on hover or tap.</li>
-      <li><b>Chart Symbols</b> has the enroute and approach-plate legends with a clickable plate. <b>Flashcards</b> drills symbols and questions.</li></ol>
+      <li><b>Chart Symbols</b> has the enroute and approach-plate legends with a clickable plate. <b>Symbol Test</b> is a rapid multiple-choice drill on 85 single symbols; <b>Flashcards</b> drills mnemonics and questions.</li></ol>
     <button type="button" class="go-sym fb-btn primary" data-go="${TOUR[0]}">Start the tour →</button>
     <div><div class="sect-h">Chapters</div><div class="cl-list">${TOUR_CHAPTERS.map((k, i) => { const l = NODES.filter(n => n.c === k); const d = l.filter(n => seen.has(n.id)).length;
       return `<button type="button" data-cl="${k}" class="h-${hueOf(k)}"><span class="sw"></span><b>${i + 1}. ${esc(CLUSTERS[k].name)}</b><small>${d}/${l.length}</small></button>`; }).join("")}</div></div>
@@ -718,6 +721,7 @@ function showView(v, keepHash) {
   $$("main .view").forEach(s => s.hidden = s.id !== "view-" + v);
   if (v === "symbols" && !$("#sym-in").childElementCount) buildSymbols();
   if (v === "cards" && !$("#cards-in").childElementCount) buildCards();
+  if (v === "symtest" && !$("#symtest").childElementCount) IFRSymTest.mount($("#symtest"), { img: "img/sym/" });
   if (v === "mnemonics") buildMnemonics();
   if (v === "updates" && !$("#up-in").childElementCount) buildUpdates();
   if (!keepHash) setHash(v === "map" ? (current ? "n-" + current : "map") : v);
@@ -832,11 +836,11 @@ $("#upd-count").textContent = NODES.reduce((s, n) => s + (n.up ? n.up.length : 0
 /* boot */
 function boot() {
   const h = location.hash.slice(1);
-  if (["symbols", "cards", "mnemonics", "updates"].includes(h)) { showView(h, true); fit(0); renderIntro(); syncTour(); return; }
+  if (["symbols", "symtest", "cards", "mnemonics", "updates"].includes(h)) { showView(h, true); fit(0); renderIntro(); syncTour(); return; }
   fit(0); renderIntro(); syncTour();
   if (h.startsWith("n-") && byId[h.slice(2)]) select(h.slice(2), { keepHash: true });
 }
-addEventListener("hashchange", () => { const h = location.hash.slice(1); if (h.startsWith("n-") && byId[h.slice(2)] && h.slice(2) !== current) { showView("map", true); requestAnimationFrame(() => select(h.slice(2), { keepHash: true })); } else if (["symbols", "cards", "mnemonics", "updates", "map"].includes(h) && h !== activeView) showView(h, true); });
+addEventListener("hashchange", () => { const h = location.hash.slice(1); if (h.startsWith("n-") && byId[h.slice(2)] && h.slice(2) !== current) { showView("map", true); requestAnimationFrame(() => select(h.slice(2), { keepHash: true })); } else if (["symbols", "symtest", "cards", "mnemonics", "updates", "map"].includes(h) && h !== activeView) showView(h, true); });
 new ResizeObserver(() => { if (!current && activeView === "map" && !svg.classList.contains("focus")) fit(0); }).observe(svg);
 boot();
 })();

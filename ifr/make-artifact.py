@@ -24,7 +24,7 @@ for name in ("index.html", "quick-review.html"):
     body = body.replace('href="index.html">Concept map</a>', f'href="{ATLAS}" target="_blank" rel="noopener">Concept map {EXT}</a>')
     open(os.path.join(out, name), "w").write(head + "\n" + body.strip("\n") + "\n")
 
-for f in ("data.js", "visuals.js"):
+for f in ("data.js", "visuals.js", "symtest.js"):
     shutil.copy(os.path.join(here, f), out)
 shutil.copytree(os.path.join(here, "img"), os.path.join(out, "img"), dirs_exist_ok=True)
 shutil.copytree(os.path.join(here, "..", "theme"), os.path.join(out, "theme"), dirs_exist_ok=True)
