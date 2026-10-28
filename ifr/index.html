@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}img{max-width:100%}</style>
+<title>IFR Atlas</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="../theme/flightbag-theme.css">
+<script src="../theme/flightbag-theme.js"></script>
+<style>
+/* Layout: one-screen app. Header bar · concept map (left, pannable "enroute chart") + reading panel (right). Other views scroll. */
+:root{
+  --paper:var(--fb-bg); --panel:var(--fb-panel); --raise:var(--fb-cell); --ink:var(--fb-bright); --ink-2:var(--fb-text); --ink-3:var(--fb-dim); --line:var(--fb-border); --grid:#232322;
+  --ifr:#8fa3b4; --green:#8fa77f; --brown:#c39a6b; --mag:#c4849a; --amber:var(--fb-warn); --cyan:#8fa3b4; --rose:#c48b8b; --teal:#7fa79c; --slate:#a19e93; --navy:#b8ad94;
+  --accent:var(--fb-accent); --upd-bg:color-mix(in srgb,var(--fb-warn) 9%,var(--fb-panel)); --upd-line:color-mix(in srgb,var(--fb-warn) 38%,transparent);
+  --good:var(--fb-ok); --bad:var(--fb-bad); --warn:var(--fb-warn);
+  --pop-bg:var(--fb-cell); --pop-raise:#323230; --pop-line:#4a4944; --scrim:rgba(0,0,0,.55); --shadow:rgba(0,0,0,.5);
+  --f-disp:var(--fb-font); --f-body:var(--fb-font); --f-mono:var(--fb-mono);
+  --hdr:56px; --panel-w:450px;
+  color-scheme:dark;
+}
+
+html,body{height:100%}
+[hidden]{display:none!important}
+body{background:var(--paper);color:var(--ink);font:15px/1.55 var(--f-body);overflow:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--panel)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.app{display:grid;grid-template-rows:auto 1fr;grid-template-columns:minmax(0,1fr);height:100%}
+
+/* header */
+header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--panel);border-bottom:1px solid var(--line);
+  padding-block:8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));position:relative;z-index:5}
+.brand{display:flex;align-items:baseline;gap:8px;font-family:var(--f-disp);font-weight:700;font-size:24px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.brand small{font:500 12px var(--f-mono);letter-spacing:0;color:var(--ink-3);text-transform:none}
+nav.tabs{display:flex;gap:2px;flex-wrap:wrap}
+nav.tabs button{background:none;border:0;padding:6px 10px;border-radius:6px;font-family:var(--f-disp);font-weight:600;font-size:16px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-2);cursor:pointer}
+nav.tabs button[aria-selected="true"]{color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent)}
+nav.tabs button:hover{color:var(--ink)}
+.count{font:500 11px var(--f-mono);color:var(--amber);margin-left:3px}
+.search{margin-left:auto;position:relative;min-width:0;flex:0 1 260px}
+.search input{width:100%;box-sizing:border-box;border:1px solid var(--line);background:var(--raise);border-radius:8px;padding:7px 10px;font:inherit;font-size:14px;color:var(--ink)}
+.results{--panel:var(--pop-bg);--raise:var(--pop-raise);--line:var(--pop-line);position:absolute;right:0;top:calc(100% + 4px);width:min(380px,90vw);max-height:60vh;overflow:auto;background:var(--pop-bg);border:2px solid var(--pop-line);border-radius:10px;box-shadow:0 12px 30px rgba(0,0,0,.18);z-index:20;padding:4px}
+.results button{display:block;width:100%;text-align:left;border:0;background:none;padding:8px 10px;border-radius:6px;cursor:pointer}
+.results button:hover,.results button.on{background:var(--raise)}
+.results small{display:block;color:var(--ink-3);font-size:12px}
+.icon-btn{border:1px solid var(--line);background:var(--raise);border-radius:8px;padding:6px 9px;cursor:pointer;font-size:13px;color:var(--ink-2)}
+
+main{position:relative;min-height:0}
+.view{position:absolute;inset:0}
+.view.page{overflow:auto;padding-block:28px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.page-in{max-width:1180px;margin:0 auto;display:grid;gap:28px}
+.page h1{font:700 40px/1 var(--f-disp);letter-spacing:.03em;text-transform:uppercase;margin:0;text-wrap:balance}
+.page .lede{color:var(--ink-2);max-width:68ch;margin:6px 0 0}
+
+/* map view */
+#view-map{display:grid;grid-template-columns:minmax(0,1fr) var(--panel-w)}
+.mapwrap{position:relative;min-width:0;min-height:0;overflow:hidden;background:var(--paper)}
+#map{width:100%;height:100%;display:block;touch-action:none;cursor:grab;user-select:none}
+#map.drag{cursor:grabbing}
+.graticule line{stroke:var(--grid);stroke-width:1}
+.graticule text{fill:var(--ink-3);font:500 11px var(--f-mono);opacity:.7}
+.cl-bg{fill-opacity:.07;stroke-opacity:.35;stroke-width:1.5;stroke-dasharray:2 6}
+.cl-hub rect{fill:var(--panel);stroke-width:3}
+.cl-hub text{font:700 24px var(--f-disp);letter-spacing:.08em;text-transform:uppercase}
+.cl-hub{cursor:pointer}
+.spoke{stroke-width:1.2;fill:none;opacity:.45}
+.link{stroke:var(--ink-3);stroke-width:1.2;fill:none;opacity:.16;stroke-dasharray:5 5}
+.flow-arrow{fill:none;stroke:var(--ink-3);stroke-width:3;opacity:.25}
+.flow-label{font:700 18px var(--f-disp);letter-spacing:.3em;fill:var(--ink-3);opacity:.6}
+.node{cursor:pointer}
+.node rect{fill:var(--panel);stroke:var(--line);stroke-width:1.2;transition:stroke .2s}
+.node text{font:500 15px var(--f-body);fill:var(--ink)}
+.node .dot{stroke-width:2;fill:var(--panel)}
+.node.seen .dot{fill:currentColor}
+.node:hover rect{stroke:var(--ink-2)}
+.node .upd{fill:var(--amber)}
+svg.focus .node,svg.focus .cl-hub{opacity:.28}
+svg.focus .spoke{opacity:.12}
+svg.focus .link{opacity:.05}
+svg.focus .node.nb,svg.focus .node.sel,svg.focus .cl-hub.nb{opacity:1}
+svg.focus .link.hot{opacity:.95;stroke:var(--accent);stroke-dasharray:none;stroke-width:2.2}
+svg.focus .spoke.hot{opacity:.8}
+.node.sel rect{stroke:var(--accent);stroke-width:3}
+.mapctl{position:absolute;right:calc(12px + env(safe-area-inset-right,0px));top:12px;display:flex;flex-direction:column;gap:6px}
+.mapctl button{width:36px;height:36px;border-radius:8px;border:1px solid var(--line);background:var(--panel);cursor:pointer;font-size:18px;line-height:1}
+.tourbar{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:6px;box-shadow:0 8px 24px rgba(0,0,0,.14);max-width:calc(100% - 24px)}
+.tourbar button.step{border:0;border-radius:999px;padding:9px 16px;background:var(--raise);cursor:pointer;font-weight:600;white-space:nowrap}
+.tourbar button.next{background:var(--accent);color:var(--panel)}
+.tourbar .where{display:flex;flex-direction:column;align-items:center;min-width:0;padding:0 6px}
+.tourbar select{border:0;background:none;font:600 14px var(--f-disp);letter-spacing:.06em;text-transform:uppercase;color:var(--ink);max-width:200px;cursor:pointer}
+.tourbar .num{font:500 11px var(--f-mono);color:var(--ink-3)}
+.legend-map{position:absolute;left:calc(12px + env(safe-area-inset-left,0px));top:12px;background:color-mix(in srgb,var(--panel) 88%,transparent);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:12px;color:var(--ink-2);display:grid;gap:3px}
+.legend-map i{display:inline-block;width:18px;vertical-align:middle;margin-right:6px}
+
+/* reading panel */
+aside.panel{background:var(--panel);border-left:1px solid var(--line);overflow:auto;min-height:0}
+.pin{padding:22px 24px 90px;display:grid;gap:18px}
+.eyebrow{display:flex;align-items:center;gap:8px;font:600 13px var(--f-disp);letter-spacing:.12em;text-transform:uppercase}
+.eyebrow .sw{width:10px;height:10px;border-radius:50%;background:currentColor}
+.eyebrow .ref{margin-left:auto;font:500 11px var(--f-mono);letter-spacing:0;text-transform:none;color:var(--ink-3)}
+.pin h2{font:700 34px/1.02 var(--f-disp);letter-spacing:.02em;margin:0;text-wrap:balance}
+.key{font-size:17px;line-height:1.45;font-weight:500;margin:0;padding:12px 14px;background:var(--raise);border-radius:10px;border:1px solid var(--line)}
+.bul{margin:0;padding-left:18px;display:grid;gap:6px;color:var(--ink)}
+.bul li::marker{color:var(--ink-3)}
+.sect-h{font:600 13px var(--f-disp);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin:0 0 6px}
+.mn{display:grid;gap:6px}
+.mn-word{font:700 30px/1 var(--f-disp);letter-spacing:.12em}
+.mn-rows{display:grid;gap:4px}
+.mn-row{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:baseline}
+.mn-row b{font:700 20px/1.1 var(--f-disp);min-width:30px;text-align:center;padding:2px 6px;border-radius:6px;background:color-mix(in srgb,currentColor 12%,transparent)}
+.mn-row span{color:var(--ink)}
+.upd{background:var(--upd-bg);border:1px solid var(--upd-line);border-radius:10px;padding:12px 14px;display:grid;gap:8px}
+.upd .sect-h{color:var(--amber);margin:0}
+.upd-item{display:grid;gap:3px;font-size:14px}
+.upd-item .old{color:var(--ink-3);text-decoration:line-through;text-decoration-color:color-mix(in srgb,var(--amber) 60%,transparent)}
+.upd-item .src{font:500 11px var(--f-mono);color:var(--ink-3)}
+.conn{display:grid;gap:6px}
+.conn button{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;align-items:center;text-align:left;border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:8px 10px;cursor:pointer}
+.conn button:hover{border-color:var(--ink-3)}
+.conn .sw{width:9px;height:9px;border-radius:50%;background:currentColor;grid-row:span 2}
+.conn b{font-weight:600;color:var(--ink)}
+.conn small{color:var(--ink-2);font-size:13px}
+.quiz{border:1px dashed var(--line);border-radius:10px;padding:12px 14px;display:grid;gap:8px}
+.quiz p{margin:0}
+.quiz button{justify-self:start;border:1px solid var(--line);background:var(--raise);border-radius:8px;padding:6px 12px;cursor:pointer;font-weight:600}
+.quiz .ans{color:var(--green);font-weight:500}
+.chiprow{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--raise);border-radius:999px;padding:5px 11px;cursor:pointer;font-size:13px}
+.intro p{margin:0;color:var(--ink-2)}
+.intro ol{margin:0;padding-left:20px;display:grid;gap:6px}
+.cl-list{display:grid;gap:6px}
+.cl-list button{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:9px 12px;cursor:pointer;text-align:left}
+.cl-list button .sw{width:10px;height:10px;border-radius:50%;background:currentColor;flex:none}
+.cl-list button b{font-weight:600;color:var(--ink)}
+.cl-list button small{margin-left:auto;font:500 11px var(--f-mono);color:var(--ink-3)}
+.go-sym{justify-self:start;border:1px solid var(--accent);color:var(--accent);background:none;border-radius:8px;padding:7px 12px;cursor:pointer;font-weight:600}
+
+abbr.ac{text-decoration:underline dotted var(--ink-3);text-underline-offset:3px;cursor:help}
+#tip{position:fixed;z-index:50;max-width:260px;background:var(--ink);color:var(--panel);padding:6px 9px;border-radius:7px;font-size:13px;pointer-events:none}
+
+/* visuals */
+.fig{margin:0}
+.dia{width:100%;height:auto;display:block;font-family:var(--f-body)}
+.dia .lbl{font:700 15px var(--f-disp);letter-spacing:.08em;fill:var(--ink)}
+.dia .sm{font-size:13.5px;fill:var(--ink-2)}
+.dia .g{font:700 14px var(--f-disp);fill:var(--ink)}
+.dia .b{font-weight:600;fill:var(--ink)}
+.dia .muted{fill:var(--ink-3)}
+.dia .c-green{fill:var(--green);stroke:var(--green)} .dia text.c-green{stroke:none}
+.dia .c-accent{fill:var(--ifr);stroke:var(--ifr)} .dia text.c-accent{stroke:none}
+.dia .c-mag{fill:var(--mag);stroke:var(--mag)} .dia text.c-mag{stroke:none}
+.dia .c-pitot{fill:var(--rose)} .dia .c-static{fill:var(--ifr)}
+.dia .f-ink{fill:var(--ink)} .dia .f-panel{fill:var(--panel)} .dia .f-accent{fill:var(--ifr)} .dia .f-mag{fill:var(--mag)}
+.dia .s-ink{stroke:var(--ink);stroke-width:1.5} .dia .s-line{stroke:var(--ink-3);stroke-width:1.2}
+.dia .pipe{fill:none;stroke-width:4;stroke-linecap:round}
+.dia .pipe.pitot{stroke:var(--rose)} .dia .pipe.static{stroke:var(--ifr)}
+.dia .gauge{fill:var(--raise);stroke:var(--ink);stroke-width:2}
+.dia .sector{stroke:var(--ink-3);stroke-width:1.2;stroke-dasharray:4 4;fill:none}
+.dia .race{fill:none;stroke:var(--ink);stroke-width:2}
+.dia .race-in{fill:none;stroke-width:2.4}
+.dia .race-in:not([class*="c-"]){stroke:var(--ifr)}
+.dia .terrain{fill:color-mix(in srgb,var(--brown) 30%,var(--paper));stroke:var(--brown);stroke-width:1}
+.dia .sig{fill:color-mix(in srgb,var(--green) 16%,transparent)}
+.dia .mea{stroke:var(--ink);stroke-width:3}
+.dia .mea.c-green{stroke:var(--green)} .dia .mea.c-accent{stroke:var(--ifr)} .dia .mea.c-mag{stroke:var(--mag)}
+.dia .moca{stroke:var(--ink-2);stroke-width:1.6;stroke-dasharray:6 5;fill:none}
+.dia .moca.c-green{stroke:var(--green)} .dia .moca.c-accent{stroke:var(--ifr)} .dia .moca.c-mag{stroke:var(--mag)}
+.dia .climb{fill:none;stroke:var(--mag);stroke-width:2.5}
+.dia .climb.c-green{stroke:var(--green)}
+.dia .fixline{stroke:var(--ink-3);stroke-width:1;stroke-dasharray:2 3}
+.dia .nav{fill:var(--panel);stroke:var(--ink);stroke-width:2}
+.dia .rwy{fill:var(--ink)}
+.dia .fan{fill:color-mix(in srgb,var(--ifr) 12%,transparent);stroke:var(--ifr);stroke-width:1}
+.dia .fan2{fill:color-mix(in srgb,var(--ifr) 22%,transparent)}
+.svgz{display:block;width:100%;border:0;padding:0;background:none;cursor:zoom-in}
+.lb-svg{position:absolute;left:0;top:0;transform-origin:0 0;background:var(--panel);border-radius:8px}
+.fig.img .zoomable{display:block;border:1px solid var(--line);border-radius:10px;padding:8px;background:#fff;cursor:zoom-in;width:100%}
+.fig.img img{display:block;margin:0 auto;max-height:420px;width:auto;max-width:100%}
+.fig figcaption,.cap{font-size:12px;color:var(--ink-3);margin:6px 0 0}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+.tbl{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
+.tbl th{font:600 12px var(--f-disp);letter-spacing:.1em;text-transform:uppercase;text-align:left;color:var(--ink-3);background:var(--raise)}
+.tbl th,.tbl td{padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl tr:last-child td{border-bottom:0}
+.tbl.num td:not(:first-child),.tbl.num th:not(:first-child){text-align:center}
+.track{display:grid;grid-template-columns:1fr 1fr 1fr;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+.track .seg{padding:10px;display:grid;gap:2px;font-size:13px}
+.track .seg span{color:var(--ink-2)}
+.track .ok{background:color-mix(in srgb,var(--good) 14%,transparent)} .track .warn{background:color-mix(in srgb,var(--warn) 14%,transparent)} .track .bad{background:color-mix(in srgb,var(--bad) 14%,transparent)}
+.flow{display:grid;gap:8px;font-size:13.5px}
+.fsplit{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fsplit>div{display:grid;gap:6px;align-content:start}
+.fbox{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--panel)}
+.fbox.q{background:var(--raise);font-weight:600}
+.fbox.ok{border-color:var(--good);color:var(--good)} .fbox.bad{border-color:var(--bad);color:var(--bad)}
+.yn{font:600 12px var(--f-disp);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.tok{display:flex;flex-wrap:wrap;gap:6px;font-family:var(--f-mono)}
+.tk{border:1px solid var(--line);background:var(--raise);border-radius:6px;padding:4px 8px;cursor:pointer;font:500 13px var(--f-mono)}
+.tk.on{border-color:var(--accent);color:var(--accent)}
+.tok-out{min-height:1.5em;font-size:14px !important;color:var(--ink) !important}
+.clr{font-family:var(--f-mono);font-size:13.5px;line-height:1.8;margin:0}
+.clr mark,.legend span{background:none;border-bottom:3px solid;color:inherit;padding:0 1px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;margin-top:6px}
+.c1{border-color:var(--ifr)!important}.c2{border-color:var(--green)!important}.c3{border-color:var(--mag)!important}.c4{border-color:var(--amber)!important}.c5{border-color:var(--cyan)!important}
+.fpl{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px}
+.fpl div{border:1px solid var(--line);border-radius:6px;padding:6px 8px;display:grid}
+.fpl span{font-size:11px;color:var(--ink-3)} .fpl b{font:500 14px var(--f-mono)}
+
+/* symbols view */
+.filter{display:flex;gap:6px;flex-wrap:wrap}
+.filter button{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:6px 14px;cursor:pointer;font:600 14px var(--f-disp);letter-spacing:.08em;text-transform:uppercase}
+.filter button[aria-pressed="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.anat{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:24px;align-items:start}
+.anat-img{position:relative;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;max-width:560px}
+.anat-img img{display:block;width:100%;height:auto}
+.hs{position:absolute;border:2px solid transparent;border-radius:4px;background:transparent;cursor:pointer;padding:0}
+.hs:hover,.hs.on{border-color:var(--mag);background:color-mix(in srgb,var(--mag) 14%,transparent)}
+.anat-info{position:sticky;top:0;display:grid;gap:10px}
+.anat-info h3{font:700 28px/1.05 var(--f-disp);margin:0;letter-spacing:.02em}
+.anat-list{display:flex;flex-wrap:wrap;gap:6px}
+.sgroup{display:grid;gap:14px}
+.sgroup-h{display:flex;align-items:baseline;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:6px}
+.sgroup-h h2{font:700 26px/1 var(--f-disp);letter-spacing:.05em;text-transform:uppercase;margin:0}
+.sgroup-h span{font:500 12px var(--f-mono);color:var(--ink-3)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.scard{display:grid;grid-template-rows:auto 1fr;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel)}
+.scard .zoomable{border:0;border-bottom:1px solid var(--line);background:#fff;padding:10px;cursor:zoom-in;height:220px;display:flex;align-items:center;justify-content:center}
+.scard img{max-height:200px;max-width:100%;width:auto;display:block}
+.scard .txt{padding:12px 14px;display:grid;gap:4px;align-content:start}
+.scard h3{font:600 17px/1.2 var(--f-body);margin:0}
+.scard p{margin:0;color:var(--ink-2);font-size:14px}
+.scard .pg{font:500 11px var(--f-mono);color:var(--ink-3)}
+
+/* lightbox */
+.lb{position:fixed;inset:0;z-index:60;background:rgba(10,14,24,.88);display:grid;grid-template-rows:auto 1fr}
+.lb-bar{display:flex;gap:8px;justify-content:flex-end;padding:calc(10px + env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) 10px max(12px,env(safe-area-inset-left,0px))}
+.lb-bar button{background:#fff;color:#111;border:0;border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:600}
+.lb-stage{overflow:hidden;touch-action:none;cursor:grab;position:relative}
+.lb-stage img{position:absolute;left:0;top:0;transform-origin:0 0;background:#fff;max-width:none}
+
+/* flashcards */
+.deck-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.fc-wrap{display:grid;justify-items:center;gap:16px}
+.fc{width:min(560px,100%);min-height:340px;border:1px solid var(--line);border-radius:16px;background:var(--panel);display:grid;grid-template-rows:1fr auto;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.08)}
+.fc-face{padding:24px;display:grid;place-items:center;text-align:center;gap:12px}
+.fc-face .sym{background:#fff;border-radius:10px;padding:14px;border:1px solid var(--line)}
+.fc-face .sym img{max-height:150px;max-width:100%;display:block}
+.fc-q{font:600 20px/1.35 var(--f-body);max-width:40ch}
+.fc-a{font:700 26px/1.15 var(--f-disp);letter-spacing:.02em;color:var(--accent)}
+.fc-d{color:var(--ink-2);max-width:46ch}
+.fc-act{display:flex;gap:8px;justify-content:center;padding:14px;border-top:1px solid var(--line);background:var(--raise);flex-wrap:wrap}
+.fc-act button{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:10px 18px;cursor:pointer;font-weight:600}
+.fc-act .primary{background:var(--accent);color:var(--panel);border-color:var(--accent)}
+.fc-meta{font:500 12px var(--f-mono);color:var(--ink-3)}
+
+/* mnemonics + updates */
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
+.mcard{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:14px;display:grid;gap:8px;text-align:left;cursor:pointer}
+.mcard:hover{border-color:var(--ink-3)}
+.mcard .t{font-size:13px;color:var(--ink-3)}
+.ulist{display:grid;gap:12px}
+.urow{display:grid;grid-template-columns:220px 1fr;gap:16px;border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:14px;text-align:left;cursor:pointer}
+.urow:hover{border-color:var(--ink-3)}
+.urow h3{margin:0;font:700 20px/1.1 var(--f-disp);letter-spacing:.03em}
+.urow .old{color:var(--ink-3);text-decoration:line-through;font-size:14px;margin:0}
+.urow .now{margin:4px 0 0}
+.urow .src{font:500 11px var(--f-mono);color:var(--ink-3)}
+
+/* cluster hue classes */
+.h-navy{color:var(--navy)} .h-slate{color:var(--slate)} .h-rose{color:var(--rose)} .h-blue{color:var(--accent)} .h-cyan{color:var(--cyan)}
+.h-teal{color:var(--teal)} .h-green{color:var(--green)} .h-brown{color:var(--brown)} .h-magenta{color:var(--mag)}
+
+@media (max-width: 900px){
+  :root{--panel-w:100%}
+  #view-map{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(240px,44%) minmax(0,1fr)}
+  aside.panel{border-left:0;border-top:1px solid var(--line)}
+  .pin{padding:18px 16px 40px}
+  .legend-map{display:none}
+  .tourbar .where select{max-width:130px}
+  .tourbar button.step{padding:8px 12px}
+  .anat{grid-template-columns:1fr}
+  .urow{grid-template-columns:1fr;gap:6px}
+  header{gap:8px}
+  .brand{order:0;font-size:21px}
+  header a.qr-link{order:1;margin-left:auto}
+  nav.tabs{order:2;flex:1 0 100%;min-width:0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  nav.tabs button{padding:5px 8px;font-size:15px;white-space:nowrap}
+  .search{order:3;flex:1 0 100%;margin-left:0;min-width:0}
+  .brand small{display:none}
+}
+@media (prefers-reduced-motion: reduce){ *{transition:none!important;animation:none!important} }
+/* ── Flight Bag skin ── */
+.tools{display:flex;flex-wrap:wrap;gap:8px}
+.go-tool{font-size:12.5px;padding:7px 14px}
+body{background:var(--fb-bg);color:var(--fb-text);font-family:var(--fb-font)}
+body::before{background:var(--fb-panel)}
+.ico{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;flex:none}
+header{background:var(--fb-panel);border-bottom:1px solid var(--fb-rim);box-shadow:0 2px 10px rgba(0,0,0,.35)}
+.brand{font:500 12px/1 var(--fb-font);letter-spacing:2.5px;color:var(--fb-bright);align-items:center}
+.brand small{font:400 11px var(--fb-mono);letter-spacing:.5px}
+nav.tabs.fb-tabs{gap:2px}
+nav.tabs button.fb-tab{font:500 12px var(--fb-font);letter-spacing:.3px;text-transform:none;padding:5px 12px;color:var(--fb-dim)}
+nav.tabs button.fb-tab:hover{color:var(--fb-bright)}
+.count{font-family:var(--fb-mono);color:var(--fb-warn)}
+.search input.fb-input{background:linear-gradient(180deg,var(--fb-well-top) 0%,var(--fb-well) 45%,var(--fb-well) 100%);border:1px solid var(--fb-well-rim);border-radius:999px;padding:7px 14px;font-size:13px}
+.qr-link{font-size:12px}
+.mapwrap{background:var(--fb-bg)}
+.graticule line{stroke:#232322}
+.cl-hub text{font:600 17px var(--fb-font);letter-spacing:3px}
+.cl-hub rect{fill:var(--fb-panel)}
+.node rect{fill:var(--fb-panel);stroke:var(--fb-rim)}
+.node text{font:500 15px var(--fb-font);fill:var(--fb-bright)}
+.node .upd{fill:var(--fb-warn)}
+.flow-label{font:500 15px var(--fb-font);letter-spacing:.35em}
+svg.focus .link.hot{stroke:var(--fb-accent)}
+.node.sel rect{stroke:var(--fb-accent)}
+.mapctl .fb-btn{width:38px;height:38px;padding:0;font-size:17px;--glass-radius:10px}
+.tourbar{gap:10px;padding:6px 8px;border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.tourbar button.step{padding:8px 16px;font-size:13px;font-weight:600;background:none}
+.tourbar select{font:500 11px var(--fb-font);letter-spacing:1.5px;color:var(--fb-bright);background:none}
+.tourbar select option{background:var(--fb-panel)}
+.tourbar .num{font-family:var(--fb-mono)}
+.legend-map{color:var(--fb-text);border-radius:var(--fb-radius)}
+aside.panel{border-radius:0;border:0;border-left:1px solid var(--fb-rim)}
+.eyebrow{font:500 10px var(--fb-font);letter-spacing:2.5px}
+.eyebrow .ref{font-family:var(--fb-mono)}
+.pin h2{font:600 26px/1.15 var(--fb-font);letter-spacing:-.01em;color:var(--fb-bright)}
+.key{background:var(--fb-well);border-color:var(--fb-well-rim);box-shadow:inset 0 2px 4px rgba(0,0,0,.5);color:var(--fb-bright);font-size:16px}
+.sect-h{font:500 10px var(--fb-font);letter-spacing:2.5px;color:var(--fb-dim);display:flex;align-items:center;gap:6px}
+.mn-word{font:600 24px/1 var(--fb-mono);letter-spacing:.18em}
+.mn-row b{font:600 15px/1.2 var(--fb-mono)}
+.upd .sect-h{color:var(--fb-warn)}
+.quiz{border-color:var(--fb-border)} .quiz .ans{color:var(--fb-ok)}
+.conn button,.cl-list button{background:var(--fb-cell);border-color:var(--fb-rim)}
+.conn button:hover,.cl-list button:hover{border-color:var(--fb-accent)}
+.cl-list button small{font-family:var(--fb-mono)}
+.go-sym.fb-btn{justify-self:start;padding:8px 16px;font-size:13px}
+.chip{background:var(--fb-cell);border-color:var(--fb-rim);color:var(--fb-text)}
+.fig.img .zoomable{border-color:var(--fb-rim)}
+.tbl th{font:500 10px var(--fb-font);letter-spacing:2px;color:var(--fb-dim);background:var(--fb-cell)}
+.tbl-wrap{border-color:var(--fb-rim)}
+.yn{font:500 10px var(--fb-font);letter-spacing:2px}
+.fbox{background:var(--fb-cell);border-color:var(--fb-rim)} .fbox.q{background:var(--fb-well)}
+.tk{font-family:var(--fb-mono);background:var(--fb-cell)}
+#tip{background:var(--fb-bright);color:var(--fb-bg)}
+.page h1{font:600 30px/1.1 var(--fb-font);letter-spacing:-.01em;text-transform:none;color:var(--fb-bright)}
+.filter button{font:500 11px var(--fb-font);letter-spacing:1.5px;background:var(--fb-cell);border-color:var(--fb-rim);color:var(--fb-text)}
+.filter button[aria-pressed="true"]{background:var(--fb-panel);color:var(--fb-accent);border-color:color-mix(in srgb,var(--fb-accent) 55%,transparent)}
+.anat-img{border-color:var(--fb-rim)}
+.anat-info h3{font:600 22px/1.15 var(--fb-font);color:var(--fb-bright)}
+.hs:hover,.hs.on{border-color:var(--fb-accent);background:color-mix(in srgb,var(--fb-accent) 16%,transparent)}
+.sgroup-h{border-bottom:1px solid var(--fb-line)}
+.sgroup-h h2{font:500 12px/1 var(--fb-font);letter-spacing:2.5px;color:var(--fb-bright)}
+.sgroup-h span{font-family:var(--fb-mono)}
+.scard,.mcard,.urow{border:1px solid var(--fb-rim)}
+.scard .zoomable{border-bottom-color:var(--fb-rim)}
+.scard h3{font:600 15px/1.25 var(--fb-font);color:var(--fb-bright)}
+.scard p{color:var(--fb-text)}
+.scard .pg{font-family:var(--fb-mono)}
+.fc{border:1px solid var(--fb-rim)}
+.fc-face .sym{border-color:var(--fb-rim)}
+.fc-q{font:600 19px/1.35 var(--fb-font);color:var(--fb-bright)}
+.fc-a{font:600 22px/1.2 var(--fb-font);color:var(--fb-accent)}
+.fc-act{background:transparent;border-top:1px solid var(--fb-line)}
+.fc-act .fb-btn{padding:9px 18px;font-size:13px}
+.fc-meta{font-family:var(--fb-mono)}
+.mcard .t{color:var(--fb-dim)}
+.urow h3{font:600 17px/1.2 var(--fb-font);color:var(--fb-bright)}
+.urow .now{color:var(--fb-bright)}
+.urow .src{font-family:var(--fb-mono)}
+.lb{background:rgba(8,8,7,.9)}
+.lb-svg{background:var(--fb-panel)}
+.fb-home{flex:none}
+@media (max-width: 900px){ .fb-home{display:none} header .qr-link{order:1;margin-left:auto} }
+</style>
+</head>
+<body class="fb">
+
+<div class="app">
+<header>
+  <a class="fb-home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Flight Bag</a>
+  <div class="brand">IFR Atlas <small>v2026.10</small></div>
+  <nav class="tabs fb-tabs" role="tablist" aria-label="Views">
+    <button class="fb-tab" role="tab" data-view="map" aria-selected="true">Map &amp; Tour</button>
+    <button class="fb-tab" role="tab" data-view="symbols">Chart Symbols</button>
+    <button class="fb-tab" role="tab" data-view="cards">Flashcards</button>
+    <button class="fb-tab" role="tab" data-view="mnemonics">Mnemonics</button>
+    <button class="fb-tab" role="tab" data-view="updates">Updated Info<span class="count" id="upd-count"></span></button>
+  </nav>
+  <div class="search"><input id="q" class="fb-input" type="search" placeholder="Search topics or acronyms (MEA, ARROW…)" autocomplete="off" aria-label="Search"><div class="results" id="results" hidden></div></div>
+  <a class="fb-btn qr-link" href="quick-review.html">Quick review</a>
+</header>
+
+<main>
+  <section class="view" id="view-map">
+    <div class="mapwrap">
+      <svg id="map" aria-label="Concept map of IFR topics"><g id="world"></g></svg>
+      <div class="legend-map fb-panel" aria-hidden="true">
+        <div><i><svg width="18" height="8"><line x1="0" y1="4" x2="18" y2="4" stroke="currentColor" stroke-dasharray="4 3"/></svg></i>connection between topics</div>
+        <div><i><svg width="18" height="10"><circle cx="9" cy="5" r="4" fill="var(--amber)"/></svg></i>has updated info</div>
+        <div><i><svg width="18" height="10"><circle cx="9" cy="5" r="4" fill="currentColor"/></svg></i>visited</div>
+      </div>
+      <div class="mapctl"><button type="button" class="fb-btn" id="zin" aria-label="Zoom in">+</button><button type="button" class="fb-btn" id="zout" aria-label="Zoom out">−</button><button type="button" class="fb-btn" id="zfit" aria-label="Show whole map"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button></div>
+      <div class="tourbar fb-panel">
+        <button class="step fb-btn" type="button" id="prev" aria-label="Previous topic"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Prev</button>
+        <div class="where"><select id="chapter" aria-label="Chapter"></select><span class="num" id="stepnum"></span></div>
+        <button class="step next fb-btn primary" type="button" id="next" aria-label="Next topic">Next<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+      </div>
+    </div>
+    <aside class="panel fb-panel" id="panel" aria-live="polite"></aside>
+  </section>
+
+  <section class="view page" id="view-symbols" hidden><div class="page-in" id="sym-in"></div></section>
+  <section class="view page" id="view-cards" hidden><div class="page-in" id="cards-in"></div></section>
+  <section class="view page" id="view-mnemonics" hidden><div class="page-in" id="mn-in"></div></section>
+  <section class="view page" id="view-updates" hidden><div class="page-in" id="up-in"></div></section>
+</main>
+</div>
+<div id="tip" hidden></div>
+
+<script src="data.js"></script>
+<script src="visuals.js"></script>
+<script>
+(() => {
+const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const byId = Object.fromEntries(NODES.map(n => [n.id, n]));
+const store = { get(k, d) { try { const v = localStorage.getItem("ifr-atlas:" + k); return v ? JSON.parse(v) : d; } catch { return d; } },
+                set(k, v) { try { localStorage.setItem("ifr-atlas:" + k, JSON.stringify(v)); } catch {} } };
+const seen = new Set(store.get("seen", []));
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const onSite = location.hostname === "scfdesigner.github.io";
+const toolLinks = id => (typeof FB_TOOLS !== "undefined" && FB_TOOLS[id] || []).map(([t, u]) => `<a class="fb-btn go-tool" href="${u}"${onSite ? "" : ' target="_blank" rel="noopener"'}><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Practice: ${esc(t)}</a>`).join("");
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const hueOf = c => CLUSTERS[c].hue;
+
+/* links: undirected, keep a reason for each direction */
+const adj = {}; const edges = []; const ekey = new Set();
+NODES.forEach(n => (n.ln || []).forEach(([to, why]) => {
+  (adj[n.id] ||= []).push({ id: to, why }); (adj[to] ||= []);
+  if (!adj[to].some(x => x.id === n.id)) adj[to].push({ id: n.id, why: null });
+  const k = [n.id, to].sort().join("|"); if (!ekey.has(k)) { ekey.add(k); edges.push([n.id, to]); }
+}));
+
+/* tour order */
+const TOUR = TOUR_CHAPTERS.flatMap(c => NODES.filter(n => n.c === c).map(n => n.id));
+
+/* ───── layout ───── */
+const SX = 1.3, SY = 1.3;
+const pillW = t => Math.round(t.length * 8.2 + 44);
+const hubPos = {};
+for (const [k, c] of Object.entries(CLUSTERS)) hubPos[k] = { x: c.x * SX, y: c.y * SY };
+for (const [k] of Object.entries(CLUSTERS)) {
+  const list = NODES.filter(n => n.c === k), N = list.length;
+  const inner = N <= 9 ? N : Math.min(8, Math.ceil(N * 0.42));
+  list.forEach((n, i) => {
+    const ring = i < inner ? 0 : 1, idx = ring ? i - inner : i, cnt = ring ? N - inner : inner;
+    const a = -Math.PI / 2 + (idx + (ring ? 0.5 : 0)) / cnt * Math.PI * 2;
+    const rx = ring ? 450 : 290, ry = ring ? 330 : 185;
+    n.x = hubPos[k].x + Math.cos(a) * rx; n.y = hubPos[k].y + Math.sin(a) * ry; n.w = pillW(n.t); n.h = 38;
+  });
+}
+(function relax() {
+  const pad = 14, hubs = Object.entries(hubPos).map(([k, p]) => ({ x: p.x, y: p.y, w: pillW(CLUSTERS[k].name) * 1.45, h: 56, fixed: true }));
+  const all = [...NODES, ...hubs];
+  for (let it = 0; it < 220; it++) {
+    let moved = false;
+    for (let i = 0; i < all.length; i++) for (let j = i + 1; j < all.length; j++) {
+      const a = all[i], b = all[j];
+      const ox = (a.w + b.w) / 2 + pad - Math.abs(a.x - b.x), oy = (a.h + b.h) / 2 + pad - Math.abs(a.y - b.y);
+      if (ox > 0 && oy > 0) {
+        moved = true;
+        const sa = a.fixed ? 0 : (b.fixed ? 1 : .5), sb = 1 - sa;
+        if (ox / (a.w + b.w) < oy / (a.h + b.h)) { const d = (a.x < b.x ? -1 : 1) * ox; a.x += d * sa; b.x -= d * sb; }
+        else { const d = (a.y < b.y ? -1 : 1) * oy; a.y += d * sa; b.y -= d * sb; }
+      }
+    }
+    if (!moved) break;
+  }
+})();
+const bounds = (() => { let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9; NODES.forEach(n => { x0 = Math.min(x0, n.x - n.w / 2); x1 = Math.max(x1, n.x + n.w / 2); y0 = Math.min(y0, n.y - 30); y1 = Math.max(y1, n.y + 30); }); return { x0: x0 - 60, y0: y0 - 80, x1: x1 + 60, y1: y1 + 60 }; })();
+
+/* ───── draw ───── */
+const svg = $("#map"), world = $("#world"), NS = "http://www.w3.org/2000/svg";
+const el = (tag, attrs = {}, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent && parent.appendChild(e); return e; };
+function draw() {
+  world.innerHTML = "";
+  const g0 = el("g", { class: "graticule" }, world);
+  for (let x = Math.floor(bounds.x0 / 400) * 400; x < bounds.x1; x += 400) { el("line", { x1: x, y1: bounds.y0, x2: x, y2: bounds.y1 }, g0); }
+  for (let y = Math.floor(bounds.y0 / 400) * 400; y < bounds.y1; y += 400) { el("line", { x1: bounds.x0, y1: y, x2: bounds.x1, y2: y }, g0); }
+  /* phase-of-flight arrow through the middle row */
+  const fy = hubPos.departure.y - 470;
+  el("path", { class: "flow-arrow", d: `M${hubPos.departure.x - 300} ${fy} H${hubPos.approach.x + 300} m-18 -12 l18 12 l-18 12` }, world);
+  const ft = el("text", { class: "flow-label", x: (hubPos.departure.x + hubPos.approach.x) / 2, y: fy - 14, "text-anchor": "middle" }, world);
+  ft.textContent = "PHASE OF FLIGHT  →  DEPART · ENROUTE · ARRIVE · APPROACH";
+  for (const [k, p] of Object.entries(hubPos)) {
+    const ns = NODES.filter(n => n.c === k); let r = 0; ns.forEach(n => r = Math.max(r, Math.hypot(n.x - p.x, n.y - p.y) + n.w / 3));
+    el("ellipse", { class: "cl-bg h-" + hueOf(k), cx: p.x, cy: p.y, rx: r + 40, ry: r * 0.8 + 30, fill: "currentColor", stroke: "currentColor" }, world);
+  }
+  const gl = el("g", {}, world);
+  NODES.forEach(n => { const p = hubPos[n.c]; el("path", { class: "spoke h-" + hueOf(n.c), "data-a": n.id, d: `M${p.x} ${p.y} L${n.x} ${n.y}`, stroke: "currentColor" }, gl); });
+  edges.forEach(([a, b]) => {
+    const A = byId[a], B = byId[b], mx = (A.x + B.x) / 2, my = (A.y + B.y) / 2, dx = B.x - A.x, dy = B.y - A.y, L = Math.hypot(dx, dy) || 1, off = Math.min(160, L * .18);
+    el("path", { class: "link", "data-a": a, "data-b": b, d: `M${A.x} ${A.y} Q${mx - dy / L * off} ${my + dx / L * off} ${B.x} ${B.y}` }, gl);
+  });
+  NODES.forEach(n => {
+    const g = el("g", { class: "node h-" + hueOf(n.c) + (seen.has(n.id) ? " seen" : ""), "data-id": n.id, transform: `translate(${n.x},${n.y})`, tabindex: 0, role: "button", "aria-label": n.t }, world);
+    el("rect", { x: -n.w / 2, y: -19, width: n.w, height: 38, rx: 19 }, g);
+    el("circle", { class: "dot", cx: -n.w / 2 + 16, cy: 0, r: 5.5, stroke: "currentColor" }, g);
+    const t = el("text", { x: -n.w / 2 + 31, y: 5.5 }, g); t.textContent = n.t;
+    if (n.up) el("circle", { class: "upd", cx: n.w / 2 - 6, cy: -12, r: 5 }, g);
+  });
+  for (const [k, p] of Object.entries(hubPos)) {
+    const g = el("g", { class: "cl-hub h-" + hueOf(k), "data-cl": k, transform: `translate(${p.x},${p.y})`, tabindex: 0, role: "button", "aria-label": CLUSTERS[k].name }, world);
+    const w = pillW(CLUSTERS[k].name) * 1.45;
+    el("rect", { x: -w / 2, y: -26, width: w, height: 52, rx: 4, stroke: "currentColor" }, g);
+    el("rect", { x: -w / 2 + 5, y: -21, width: w - 10, height: 42, rx: 2, stroke: "currentColor", "stroke-width": 1, style: "fill:none" }, g);
+    const t = el("text", { "text-anchor": "middle", y: 8, fill: "currentColor" }, g); t.textContent = CLUSTERS[k].name;
+  }
+}
+draw();
+function sizeHubs() { /* fit chapter boxes to the rendered label width */
+  $$(".cl-hub", world).forEach(g => { const t = g.querySelector("text"), L = t.getComputedTextLength(); if (!L) return; const [o, i] = g.querySelectorAll("rect");
+    o.setAttribute("x", -L / 2 - 26); o.setAttribute("width", L + 52); i.setAttribute("x", -L / 2 - 21); i.setAttribute("width", L + 42); });
+}
+sizeHubs(); document.fonts && document.fonts.ready.then(sizeHubs);
+
+/* ───── camera ───── */
+const cam = { x: 0, y: 0, k: .3 };
+const apply = () => { world.setAttribute("transform", `translate(${cam.x},${cam.y}) scale(${cam.k})`);
+  const s = Math.min(3.4, Math.max(1, .5 / cam.k)); /* keep chapter labels legible when zoomed out */
+  $$(".cl-hub", world).forEach(g => { const p = hubPos[g.dataset.cl]; g.setAttribute("transform", `translate(${p.x},${p.y}) scale(${s})`); }); };
+const size = () => { const r = svg.getBoundingClientRect(); return { w: r.width, h: r.height }; };
+let anim;
+function tween(to, ms = 520) {
+  cancelAnimationFrame(anim);
+  if (reduce || ms === 0) { Object.assign(cam, to); apply(); return; }
+  const from = { ...cam }, t0 = performance.now();
+  const step = now => { const t = Math.min(1, (now - t0) / ms), e = t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+    cam.x = from.x + (to.x - from.x) * e; cam.y = from.y + (to.y - from.y) * e; cam.k = from.k + (to.k - from.k) * e; apply(); if (t < 1) anim = requestAnimationFrame(step); };
+  anim = requestAnimationFrame(step);
+}
+function fit(ms) { const { w, h } = size(); const k = Math.min(w / (bounds.x1 - bounds.x0), h / (bounds.y1 - bounds.y0)) * .98;
+  tween({ k, x: w / 2 - (bounds.x0 + bounds.x1) / 2 * k, y: h / 2 - (bounds.y0 + bounds.y1) / 2 * k }, ms); }
+function focusOn(x, y, k) { const { w, h } = size(); k = k ?? (w < 600 ? .78 : .92); tween({ k, x: w / 2 - x * k, y: h / 2 - y * k }); }
+function zoomAt(f, sx, sy) { const { w, h } = size(); sx ??= w / 2; sy ??= h / 2; const k = Math.max(.08, Math.min(2.4, cam.k * f));
+  cam.x = sx - (sx - cam.x) * (k / cam.k); cam.y = sy - (sy - cam.y) * (k / cam.k); cam.k = k; apply(); }
+
+/* pan / pinch / wheel */
+const ptrs = new Map(); let dragMoved = false, pinchD = 0;
+svg.addEventListener("pointerdown", e => { svg.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY }); dragMoved = false; svg.classList.add("drag");
+  if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinchD = Math.hypot(a.x - b.x, a.y - b.y); } });
+svg.addEventListener("pointermove", e => { if (!ptrs.has(e.pointerId)) return; const p = ptrs.get(e.pointerId), dx = e.clientX - p.x, dy = e.clientY - p.y;
+  if (ptrs.size === 1) { if (Math.abs(dx) + Math.abs(dy) > 2) dragMoved = true; cam.x += dx; cam.y += dy; apply(); }
+  p.x = e.clientX; p.y = e.clientY;
+  if (ptrs.size === 2) { const [a, b] = [...ptrs.values()], d = Math.hypot(a.x - b.x, a.y - b.y), r = svg.getBoundingClientRect();
+    if (pinchD) zoomAt(d / pinchD, (a.x + b.x) / 2 - r.left, (a.y + b.y) / 2 - r.top); pinchD = d; dragMoved = true; } });
+const up = e => { ptrs.delete(e.pointerId); if (ptrs.size < 2) pinchD = 0; if (!ptrs.size) svg.classList.remove("drag"); };
+svg.addEventListener("pointerup", up); svg.addEventListener("pointercancel", up);
+svg.addEventListener("wheel", e => { e.preventDefault(); const r = svg.getBoundingClientRect(); zoomAt(Math.exp(-e.deltaY * .0015), e.clientX - r.left, e.clientY - r.top); }, { passive: false });
+svg.addEventListener("click", e => { if (dragMoved) return; const n = e.target.closest(".node"), h = e.target.closest(".cl-hub");
+  if (n) select(n.dataset.id); else if (h) selectCluster(h.dataset.cl); else clearFocus(); });
+svg.addEventListener("keydown", e => { if (e.key !== "Enter" && e.key !== " ") return; const n = e.target.closest(".node"), h = e.target.closest(".cl-hub");
+  if (n) { e.preventDefault(); select(n.dataset.id); } else if (h) { e.preventDefault(); selectCluster(h.dataset.cl); } });
+$("#zin").onclick = () => zoomAt(1.3); $("#zout").onclick = () => zoomAt(1 / 1.3); $("#zfit").onclick = () => { clearFocus(); fit(); };
+
+/* ───── focus highlighting ───── */
+function highlight(id) {
+  svg.classList.add("focus");
+  $$(".node,.cl-hub", world).forEach(g => g.classList.remove("nb", "sel"));
+  $$(".link,.spoke", world).forEach(p => p.classList.remove("hot"));
+  if (!id) return;
+  const nb = new Set((adj[id] || []).map(x => x.id));
+  $$(".node", world).forEach(g => { if (g.dataset.id === id) g.classList.add("sel"); else if (nb.has(g.dataset.id)) g.classList.add("nb"); });
+  $$(".link", world).forEach(p => { if (p.dataset.a === id || p.dataset.b === id) p.classList.add("hot"); });
+  $$(".spoke", world).forEach(p => { if (p.dataset.a === id) p.classList.add("hot"); });
+  const hub = $(`.cl-hub[data-cl="${byId[id].c}"]`, world); hub && hub.classList.add("nb");
+}
+function clearFocus() { svg.classList.remove("focus"); $$(".node,.cl-hub", world).forEach(g => g.classList.remove("nb", "sel")); current = null; renderIntro(); syncTour(); }
+
+/* ───── panel ───── */
+const panel = $("#panel"); let current = null;
+const swatch = c => `<span class="sw h-${hueOf(c)}"></span>`;
+function mnHTML(mn, c) { return `<section class="mn h-${hueOf(c)}"><div class="sect-h">Mnemonic</div><div class="mn-word">${esc(mn.word)}</div>
+  <div class="mn-rows">${mn.rows.map(([l, t]) => `<div class="mn-row"><b>${esc(l)}</b><span>${esc(t)}</span></div>`).join("")}</div></section>`; }
+function updHTML(up) { return `<section class="upd"><div class="sect-h"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 21h20L12 3z"/><path d="M12 10v5M12 18h.01"/></svg> Updated / reconciled</div>${up.map(u => `<div class="upd-item"><span class="old">${esc(u.old)}</span><span>${esc(u.now)}</span><span class="src">${esc(u.src)}</span></div>`).join("")}</section>`; }
+function select(id, opts = {}) {
+  const n = byId[id]; if (!n) return; current = id;
+  seen.add(id); store.set("seen", [...seen]);
+  const g = $(`.node[data-id="${id}"]`, world); g && g.classList.add("seen");
+  highlight(id); if (!opts.noPan) focusOn(n.x, n.y);
+  const conns = (adj[id] || []).map(x => { const m = byId[x.id]; const why = x.why || (byId[x.id].ln || []).find(l => l[0] === id)?.[1] || "";
+    return `<button type="button" data-go="${m.id}" class="h-${hueOf(m.c)}"><span class="sw"></span><b>${esc(m.t)}</b><small>${esc(why)}</small></button>`; }).join("");
+  const symGroup = n.sym ? SYMBOL_GROUPS.find(s => s.id === n.sym) : null;
+  panel.innerHTML = `<div class="pin">
+    <div class="eyebrow h-${hueOf(n.c)}"><span class="sw"></span>${esc(CLUSTERS[n.c].name)}<span class="ref">${esc(n.ref || "")}</span></div>
+    <h2>${esc(n.t)}</h2>
+    <p class="key">${esc(n.k)}</p>
+    ${n.mn ? mnHTML(n.mn, n.c) : ""}
+    ${n.b ? `<ul class="bul">${n.b.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+    ${renderVis(n.vis)}
+    ${symGroup ? `<button type="button" class="go-sym fb-btn primary" data-sym="${symGroup.id}">Open ${esc(symGroup.t)} symbols →</button>` : ""}
+    ${toolLinks(id) ? `<div class="tools">${toolLinks(id)}</div>` : ""}
+    ${n.up ? updHTML(n.up) : ""}
+    ${n.q ? `<section class="quiz"><div class="sect-h">Check yourself</div><p>${esc(n.q[0])}</p><button type="button" class="reveal fb-btn small">Show answer</button><p class="ans" hidden>${esc(n.q[1])}</p></section>` : ""}
+    ${conns ? `<section><div class="sect-h">Connects to (${(adj[id] || []).length})</div><div class="conn">${conns}</div></section>` : ""}
+  </div>`;
+  panel.scrollTop = 0; acronymize(panel); syncTour();
+  if (!opts.keepHash) setHash("n-" + id);
+}
+function selectCluster(k) {
+  current = null; const p = hubPos[k], list = NODES.filter(n => n.c === k);
+  svg.classList.add("focus"); $$(".node,.cl-hub", world).forEach(g => g.classList.remove("nb", "sel"));
+  $$(".node", world).forEach(g => { if (byId[g.dataset.id].c === k) g.classList.add("nb"); }); $(`.cl-hub[data-cl="${k}"]`, world).classList.add("nb");
+  $$(".link,.spoke", world).forEach(x => x.classList.remove("hot")); $$(".spoke", world).forEach(x => { if (byId[x.dataset.a].c === k) x.classList.add("hot"); });
+  focusOn(p.x, p.y, Math.min(size().w / 1300, size().h / 900, 1));
+  panel.innerHTML = `<div class="pin"><div class="eyebrow h-${hueOf(k)}"><span class="sw"></span>Chapter ${TOUR_CHAPTERS.indexOf(k) + 1} of ${TOUR_CHAPTERS.length}</div>
+    <h2>${esc(CLUSTERS[k].name)}</h2><p class="key">${list.length} topics. Start the chapter or jump to one.</p>
+    <button type="button" class="go-sym fb-btn primary" data-go="${list[0].id}">Start chapter →</button>
+    <div class="cl-list">${list.map(n => `<button type="button" data-go="${n.id}" class="h-${hueOf(k)}"><span class="sw"></span><b>${esc(n.t)}</b>${n.up ? '<small style="color:var(--amber)">updated</small>' : seen.has(n.id) ? "<small>seen</small>" : ""}</button>`).join("")}</div></div>`;
+  panel.scrollTop = 0; $("#chapter").value = k; $("#stepnum").textContent = "chapter overview";
+}
+function renderIntro() {
+  const total = NODES.length, done = NODES.filter(n => seen.has(n.id)).length;
+  panel.innerHTML = `<div class="pin intro">
+    <div class="eyebrow h-blue"><span class="sw"></span>Instrument rating study map<span class="ref">${done}/${total} visited</span></div>
+    <h2>Everything for the IFR checkride, on one chart.</h2>
+    <p>Four study guides and the FAA Chart Users' Guide, merged into ${total} linked topics. Outdated items from the older guides are corrected and flagged.</p>
+    <ol><li><b>Next</b> walks the topics in flight order, one idea at a time. The map pans to each one and lights up what it connects to.</li>
+      <li>Click any bubble or chapter box to jump. Drag to pan, scroll or pinch to zoom.</li>
+      <li>Dotted acronyms show their meaning on hover or tap.</li>
+      <li><b>Chart Symbols</b> has the enroute and approach-plate legends with a clickable plate. <b>Flashcards</b> drills symbols and questions.</li></ol>
+    <button type="button" class="go-sym fb-btn primary" data-go="${TOUR[0]}">Start the tour →</button>
+    <div><div class="sect-h">Chapters</div><div class="cl-list">${TOUR_CHAPTERS.map((k, i) => { const l = NODES.filter(n => n.c === k); const d = l.filter(n => seen.has(n.id)).length;
+      return `<button type="button" data-cl="${k}" class="h-${hueOf(k)}"><span class="sw"></span><b>${i + 1}. ${esc(CLUSTERS[k].name)}</b><small>${d}/${l.length}</small></button>`; }).join("")}</div></div>
+  </div>`;
+}
+panel.addEventListener("click", e => {
+  const go = e.target.closest("[data-go]"); if (go) return select(go.dataset.go);
+  const cl = e.target.closest("[data-cl]"); if (cl) return selectCluster(cl.dataset.cl);
+  const sy = e.target.closest("[data-sym]"); if (sy) { showView("symbols"); requestAnimationFrame(() => $("#sg-" + sy.dataset.sym)?.scrollIntoView({ behavior: reduce ? "auto" : "smooth" })); return; }
+  const rv = e.target.closest(".reveal"); if (rv) { rv.nextElementSibling.hidden = false; rv.remove(); return; }
+});
+
+/* tokens (METAR/TAF) and image zoom — delegated on document */
+document.addEventListener("click", e => {
+  const tk = e.target.closest(".tk"); if (tk) { const box = tk.closest(".tok"); $$(".tk", box).forEach(b => b.classList.toggle("on", b === tk)); box.nextElementSibling.textContent = tk.textContent + " → " + tk.dataset.m; return; }
+  const z = e.target.closest(".zoomable"); if (z) openLightbox(z.dataset.img, z.classList.contains("svgz") ? z.querySelector("svg") : null);
+});
+
+/* ───── tour ───── */
+const chapSel = $("#chapter");
+chapSel.innerHTML = TOUR_CHAPTERS.map((k, i) => `<option value="${k}">${i + 1}. ${esc(CLUSTERS[k].name)}</option>`).join("");
+chapSel.onchange = () => selectCluster(chapSel.value);
+function syncTour() {
+  const i = current ? TOUR.indexOf(current) : -1;
+  $("#stepnum").textContent = i >= 0 ? `topic ${i + 1} of ${TOUR.length}` : `${TOUR.length} topics`;
+  if (current) chapSel.value = byId[current].c;
+  $("#prev").disabled = i <= 0 && !!current;
+}
+function step(d) { const i = current ? TOUR.indexOf(current) : -1; const j = Math.max(0, Math.min(TOUR.length - 1, i + d)); select(TOUR[j]); }
+$("#next").onclick = () => step(1); $("#prev").onclick = () => step(-1);
+document.addEventListener("keydown", e => {
+  if (e.target.matches("input,select,textarea")) return;
+  if (activeView === "map" && (e.key === "ArrowRight" || e.key === "ArrowLeft")) { e.preventDefault(); step(e.key === "ArrowRight" ? 1 : -1); }
+  if (activeView === "cards" && (e.key === " " || e.key === "Enter")) { e.preventDefault(); $("#fc-flip")?.click(); }
+  if (e.key === "Escape") closeLightbox();
+});
+
+/* ───── acronym tooltips ───── */
+const gKeys = Object.keys(GLOSSARY).sort((a, b) => b.length - a.length).map(k => k.replace(/[.*+?^${}()|[\]\\/]/g, "\\$&"));
+const gRe = new RegExp(`(?<![A-Za-z0-9/-])(${gKeys.join("|")})(?![A-Za-z0-9-])`, "g");
+function acronymize(root) {
+  const used = new Set(); const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: t =>
+    t.parentElement.closest(".mn-word,.mn-row b,h2,.tok,.fpl,button.go-sym,abbr,svg,.ref") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
+  const texts = []; while (walker.nextNode()) texts.push(walker.currentNode);
+  texts.forEach(t => { const s = t.nodeValue; gRe.lastIndex = 0; if (!gRe.test(s)) return; gRe.lastIndex = 0;
+    const frag = document.createDocumentFragment(); let last = 0, m;
+    while ((m = gRe.exec(s))) { const k = m[1]; if (used.has(k)) continue; used.add(k);
+      frag.append(s.slice(last, m.index)); const a = document.createElement("abbr"); a.className = "ac"; a.tabIndex = 0; a.dataset.d = GLOSSARY[k]; a.textContent = k; frag.append(a); last = m.index + k.length; }
+    if (last) { frag.append(s.slice(last)); t.replaceWith(frag); } });
+}
+const tip = $("#tip");
+const showTip = a => { tip.textContent = a.textContent + " — " + a.dataset.d; tip.hidden = false; const r = a.getBoundingClientRect();
+  const x = Math.min(window.innerWidth - tip.offsetWidth - 8, Math.max(8, r.left)); tip.style.left = x + "px"; tip.style.top = (r.top - tip.offsetHeight - 6 < 4 ? r.bottom + 6 : r.top - tip.offsetHeight - 6) + "px"; };
+document.addEventListener("pointerover", e => { const a = e.target.closest("abbr.ac"); if (a) showTip(a); });
+document.addEventListener("pointerout", e => { if (e.target.closest("abbr.ac")) tip.hidden = true; });
+document.addEventListener("focusin", e => { const a = e.target.closest("abbr.ac"); if (a) showTip(a); else tip.hidden = true; });
+document.addEventListener("click", e => { const a = e.target.closest("abbr.ac"); if (a) showTip(a); else if (!e.target.closest("abbr")) tip.hidden = true; }, true);
+
+/* ───── search ───── */
+const q = $("#q"), res = $("#results"); let hits = [], hi = 0;
+q.addEventListener("input", () => {
+  const s = q.value.trim().toLowerCase(); if (!s) { res.hidden = true; return; }
+  const gloss = Object.entries(GLOSSARY).filter(([k, v]) => k.toLowerCase() === s || v.toLowerCase().includes(s)).slice(0, 4);
+  hits = NODES.map(n => { const hay = (n.t + " " + n.k + " " + (n.mn ? n.mn.word + " " + n.mn.rows.map(r => r[1]).join(" ") : "") + " " + (n.b || []).join(" ")).toLowerCase();
+    const sc = n.t.toLowerCase().includes(s) ? 3 : (n.mn && n.mn.word.toLowerCase().replace(/\s/g, "").includes(s.replace(/\s/g, ""))) ? 2.5 : hay.includes(s) ? 1 : 0; return { n, sc }; })
+    .filter(x => x.sc).sort((a, b) => b.sc - a.sc).slice(0, 10).map(x => x.n);
+  hi = 0;
+  res.innerHTML = gloss.map(([k, v]) => `<div style="padding:6px 10px;font-size:13px;color:var(--ink-2)"><b style="color:var(--ink)">${esc(k)}</b> = ${esc(v)}</div>`).join("") +
+    (hits.length ? hits.map((n, i) => `<button type="button" data-hit="${n.id}" class="${i === 0 ? "on" : ""}">${esc(n.t)}<small>${esc(CLUSTERS[n.c].name)} · ${esc(n.k.slice(0, 70))}${n.k.length > 70 ? "…" : ""}</small></button>`).join("") : `<div style="padding:8px 10px;color:var(--ink-3)">No topics match.</div>`);
+  res.hidden = false;
+});
+q.addEventListener("keydown", e => {
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); hi = (hi + (e.key === "ArrowDown" ? 1 : -1) + hits.length) % Math.max(1, hits.length); $$("[data-hit]", res).forEach((b, i) => b.classList.toggle("on", i === hi)); }
+  if (e.key === "Enter" && hits[hi]) { goTopic(hits[hi].id); }
+  if (e.key === "Escape") { res.hidden = true; q.blur(); }
+});
+res.addEventListener("click", e => { const b = e.target.closest("[data-hit]"); if (b) goTopic(b.dataset.hit); });
+document.addEventListener("click", e => { if (!e.target.closest(".search")) res.hidden = true; });
+function goTopic(id) { res.hidden = true; q.value = ""; showView("map"); requestAnimationFrame(() => select(id)); }
+
+/* ───── views ───── */
+let activeView = "map";
+function showView(v, keepHash) {
+  activeView = v; $$("nav.tabs button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.view === v)));
+  $$("main .view").forEach(s => s.hidden = s.id !== "view-" + v);
+  if (v === "symbols" && !$("#sym-in").childElementCount) buildSymbols();
+  if (v === "cards" && !$("#cards-in").childElementCount) buildCards();
+  if (v === "mnemonics") buildMnemonics();
+  if (v === "updates" && !$("#up-in").childElementCount) buildUpdates();
+  if (!keepHash) setHash(v === "map" ? (current ? "n-" + current : "map") : v);
+}
+$$("nav.tabs button").forEach(b => b.onclick = () => showView(b.dataset.view));
+function setHash(h) { try { history.replaceState(null, "", "#" + h); } catch {} }
+
+/* symbols */
+function buildSymbols() {
+  const charts = [...new Set(SYMBOL_GROUPS.map(g => g.chart))];
+  $("#sym-in").innerHTML = `<div><h1>Chart Symbology</h1><p class="lede">IFR enroute and Terminal Procedures symbols from the FAA Chart Users' Guide (edition of 9 July 2026). Tap any image to zoom. Each card says what to look for.</p></div>
+  <section class="anat" aria-label="Approach plate anatomy">
+    <div class="anat-img"><img src="img/t-anatomy.png" alt="Sample RNAV (GPS) RWY 7 approach plate, Orlando Executive"/>${ANATOMY.map((a, i) => `<button type="button" class="hs" data-hs="${i}" style="left:${a.x}%;top:${a.y}%;width:${a.w}%;height:${a.h}%" aria-label="${esc(a.t)}"></button>`).join("")}</div>
+    <div class="anat-info"><div class="sect-h">Plate anatomy · tap a region</div><h3 id="hs-t">RNAV (GPS) RWY 7, Orlando Exec</h3><p id="hs-d" style="margin:0;color:var(--ink-2)">Brief a plate in this order: title &amp; date → top strip → notes → missed approach → comms → planview → profile → minimums → airport sketch.</p>
+      <button type="button" class="go-sym fb-btn primary" id="hs-go" hidden>Open topic on the map →</button>
+      <div class="anat-list">${ANATOMY.map((a, i) => `<button type="button" class="chip" data-hs="${i}">${esc(a.t)}</button>`).join("")}</div></div>
+  </section>
+  <div class="filter" role="group" aria-label="Filter charts"><button type="button" aria-pressed="true" data-f="all">All</button>${charts.map(c => `<button type="button" aria-pressed="false" data-f="${c}">${c}</button>`).join("")}</div>
+  ${SYMBOL_GROUPS.map(g => `<section class="sgroup" id="sg-${g.id}" data-chart="${g.chart}"><div class="sgroup-h"><h2>${esc(g.t)}</h2><span>${esc(g.chart)} · ${g.cards.length}</span></div>
+    <div class="cards">${g.cards.map(c => `<article class="scard fb-panel"><button type="button" class="zoomable" data-img="${c.img}" aria-label="Enlarge ${esc(c.t)}"><img src="img/${c.img}.png" alt="${esc(c.t)}" loading="lazy"></button>
+      <div class="txt"><h3>${esc(c.t)}</h3><p>${esc(c.d)}</p><span class="pg">CUG p.${c.p}</span></div></article>`).join("")}</div></section>`).join("")}`;
+  acronymize($("#sym-in"));
+  const pick = i => { const a = ANATOMY[i]; $$(".hs").forEach(h => h.classList.toggle("on", +h.dataset.hs === i)); $("#hs-t").textContent = a.t; $("#hs-d").textContent = a.d;
+    const go = $("#hs-go"); go.hidden = !a.go; go.dataset.go = a.go || ""; };
+  $("#sym-in").addEventListener("click", e => {
+    const h = e.target.closest("[data-hs]"); if (h) return pick(+h.dataset.hs);
+    const g = e.target.closest("#hs-go"); if (g) return goTopic(g.dataset.go);
+    const f = e.target.closest("[data-f]"); if (f) { $$("[data-f]").forEach(b => b.setAttribute("aria-pressed", String(b === f))); $$(".sgroup").forEach(s => s.hidden = f.dataset.f !== "all" && s.dataset.chart !== f.dataset.f); }
+  });
+}
+
+/* lightbox */
+let lb = null;
+function openLightbox(id, svgEl) {
+  closeLightbox();
+  lb = document.createElement("div"); lb.className = "lb"; lb.setAttribute("role", "dialog"); lb.setAttribute("aria-label", "Enlarged chart image");
+  lb.innerHTML = `<div class="lb-bar"><button type="button" class="fb-btn" data-z="1.4">Zoom in</button><button type="button" class="fb-btn" data-z="0.7">Zoom out</button><button type="button" class="fb-btn" data-z="fit">Fit</button><button type="button" class="fb-btn primary" data-close>Close</button></div><div class="lb-stage">${svgEl ? `<div class="lb-svg"></div>` : `<img src="img/${id}.png" alt="Chart Users' Guide excerpt">`}</div>`;
+  document.body.appendChild(lb);
+  const stage = $(".lb-stage", lb); let img = $("img", lb); const v = { x: 0, y: 0, k: 1 };
+  if (svgEl) { const box = $(".lb-svg", lb), c = svgEl.cloneNode(true), vb = svgEl.viewBox.baseVal; c.setAttribute("width", 1200); c.setAttribute("height", 1200 * vb.height / vb.width); box.appendChild(c);
+    img = Object.assign(box, { naturalWidth: 1200, naturalHeight: 1200 * vb.height / vb.width, complete: true }); }
+  const ap = () => img.style.transform = `translate(${v.x}px,${v.y}px) scale(${v.k})`;
+  const fitI = () => { const r = stage.getBoundingClientRect(); v.k = Math.min(r.width / img.naturalWidth, r.height / img.naturalHeight) * .96; v.x = (r.width - img.naturalWidth * v.k) / 2; v.y = (r.height - img.naturalHeight * v.k) / 2; ap(); };
+  const zm = (f, sx, sy) => { const r = stage.getBoundingClientRect(); sx ??= r.width / 2; sy ??= r.height / 2; const k = Math.max(.1, Math.min(6, v.k * f)); v.x = sx - (sx - v.x) * k / v.k; v.y = sy - (sy - v.y) * k / v.k; v.k = k; ap(); };
+  img.complete ? fitI() : img.onload = fitI;
+  const P = new Map(); let pd = 0;
+  stage.onpointerdown = e => { stage.setPointerCapture(e.pointerId); P.set(e.pointerId, { x: e.clientX, y: e.clientY }); if (P.size === 2) { const [a, b] = [...P.values()]; pd = Math.hypot(a.x - b.x, a.y - b.y); } };
+  stage.onpointermove = e => { const p = P.get(e.pointerId); if (!p) return; if (P.size === 1) { v.x += e.clientX - p.x; v.y += e.clientY - p.y; ap(); } p.x = e.clientX; p.y = e.clientY;
+    if (P.size === 2) { const [a, b] = [...P.values()], d = Math.hypot(a.x - b.x, a.y - b.y), r = stage.getBoundingClientRect(); if (pd) zm(d / pd, (a.x + b.x) / 2 - r.left, (a.y + b.y) / 2 - r.top); pd = d; } };
+  stage.onpointerup = stage.onpointercancel = e => { P.delete(e.pointerId); pd = 0; };
+  stage.onwheel = e => { e.preventDefault(); const r = stage.getBoundingClientRect(); zm(Math.exp(-e.deltaY * .0015), e.clientX - r.left, e.clientY - r.top); };
+  lb.addEventListener("click", e => { const z = e.target.closest("[data-z]"); if (z) z.dataset.z === "fit" ? fitI() : zm(+z.dataset.z); if (e.target.closest("[data-close]")) closeLightbox(); });
+  $("[data-close]", lb).focus();
+}
+function closeLightbox() { if (lb) { lb.remove(); lb = null; } }
+
+/* flashcards */
+let deck = [], di = 0, flipped = false, deckName = "symbols";
+const known = new Set(store.get("known", []));
+function makeDeck(name) {
+  deckName = name;
+  const base = name === "symbols" ? SYMBOL_CARDS.map(c => ({ key: "s:" + c.img, img: c.img, a: c.a, d: c.w || c.d }))
+    : name === "mnemonics" ? NODES.filter(n => n.mn).map(n => ({ key: "m:" + n.id, q: `What does ${n.mn.word} stand for?`, a: n.t, d: n.mn.rows.map(r => r[0] + " — " + r[1]).join("\n"), go: n.id }))
+    : NODES.filter(n => n.q).map(n => ({ key: "q:" + n.id, q: n.q[0], a: n.q[1], d: n.t, go: n.id }));
+  const todo = base.filter(c => !known.has(c.key)); deck = (todo.length ? todo : base).sort(() => Math.random() - .5); di = 0; flipped = false; renderCard(base.length, base.length - todo.length);
+}
+function renderCard(total, nKnown) {
+  total ??= deck.length; const c = deck[di];
+  const knownCount = nKnown ?? [...known].filter(k => k.startsWith(deckName[0] === "s" ? "s:" : deckName[0] === "m" ? "m:" : "q:")).length;
+  $("#fc-stage").innerHTML = !c ? `<p>Deck done.</p>` : `<div class="fc fb-panel">
+    <div class="fc-face">${c.img ? `<div class="sym"><img src="img/${c.img}.png" alt="Chart symbol to identify"></div><div class="fc-q">What is this symbol?</div>` : `<div class="fc-q">${esc(c.q)}</div>`}
+      ${flipped ? `<div class="fc-a">${esc(c.a)}</div><div class="fc-d" style="white-space:pre-line">${esc(c.d || "")}</div>` : ""}</div>
+    <div class="fc-act">${flipped ? `<button type="button" class="fb-btn" id="fc-again">Again</button><button type="button" class="fb-btn primary" id="fc-got">Got it</button>${c.go ? `<button type="button" class="fb-btn" id="fc-open">Open topic</button>` : ""}` : `<button type="button" class="fb-btn primary" id="fc-flip">Show answer</button>`}</div></div>
+    <div class="fc-meta">card ${di + 1} of ${deck.length} · ${knownCount} marked known in this deck · space to flip</div>`;
+  acronymize($("#fc-stage"));
+}
+function buildCards() {
+  $("#cards-in").innerHTML = `<div><h1>Flashcards</h1><p class="lede">Three decks: chart symbols cut straight from the FAA legend, every mnemonic, and a check question from each topic. "Got it" removes a card from the next round on this device.</p></div>
+    <div class="deck-bar filter" role="group" aria-label="Choose deck"><button type="button" aria-pressed="true" data-deck="symbols">Chart symbols (${SYMBOL_CARDS.length})</button><button type="button" aria-pressed="false" data-deck="mnemonics">Mnemonics (${NODES.filter(n => n.mn).length})</button><button type="button" aria-pressed="false" data-deck="questions">Questions (${NODES.filter(n => n.q).length})</button><button type="button" aria-pressed="false" data-reset>Reset progress</button></div>
+    <div class="fc-wrap" id="fc-stage"></div>`;
+  $("#cards-in").addEventListener("click", e => {
+    const d = e.target.closest("[data-deck]"); if (d) { $$("[data-deck]").forEach(b => b.setAttribute("aria-pressed", String(b === d))); makeDeck(d.dataset.deck); return; }
+    if (e.target.closest("[data-reset]")) { known.clear(); store.set("known", []); makeDeck(deckName); return; }
+    if (e.target.closest("#fc-flip")) { flipped = true; renderCard(); return; }
+    if (e.target.closest("#fc-got")) { known.add(deck[di].key); store.set("known", [...known]); di = (di + 1) % deck.length; flipped = false; renderCard(); return; }
+    if (e.target.closest("#fc-again")) { deck.push(deck[di]); di = (di + 1) % deck.length; flipped = false; renderCard(); return; }
+    if (e.target.closest("#fc-open")) goTopic(deck[di].go);
+  });
+  makeDeck("symbols");
+}
+
+/* mnemonics */
+function buildMnemonics() {
+  const list = NODES.filter(n => n.mn);
+  $("#mn-in").innerHTML = `<div><h1>Mnemonics</h1><p class="lede">All ${list.length} memory aids in one place, in tour order. Tap one to open its topic on the map.</p></div>
+    <div class="mgrid">${TOUR.map(id => byId[id]).filter(n => n.mn).map(n => `<button type="button" class="mcard fb-panel mn h-${hueOf(n.c)}" data-open="${n.id}"><span class="t">${esc(n.t)}</span><div class="mn-word">${esc(n.mn.word)}</div><div class="mn-rows">${n.mn.rows.map(([l, t]) => `<div class="mn-row"><b>${esc(l)}</b><span>${esc(t)}</span></div>`).join("")}</div></button>`).join("")}</div>`;
+  $("#mn-in").onclick = e => { const b = e.target.closest("[data-open]"); if (b) goTopic(b.dataset.open); };
+}
+
+/* updates */
+function buildUpdates() {
+  const list = NODES.filter(n => n.up);
+  $("#up-in").innerHTML = `<div><h1>Updated Info</h1><p class="lede">Items in your older study guides (mostly the 2011 PilotsCafe sheets) that have since changed, plus a few errors in the notes. Struck-through text is what the guide says; below it is current. Tap a row to open the topic.</p></div>
+    <div class="ulist">${list.flatMap(n => n.up.map(u => `<button type="button" class="urow fb-panel" data-open="${n.id}"><div><div class="eyebrow h-${hueOf(n.c)}"><span class="sw"></span>${esc(CLUSTERS[n.c].name)}</div><h3>${esc(n.t)}</h3></div>
+      <div><p class="old">${esc(u.old)}</p><p class="now">${esc(u.now)}</p><span class="src">${esc(u.src)}</span></div></button>`)).join("")}</div>`;
+  acronymize($("#up-in"));
+  $("#up-in").onclick = e => { const b = e.target.closest("[data-open]"); if (b) goTopic(b.dataset.open); };
+}
+$("#upd-count").textContent = NODES.reduce((s, n) => s + (n.up ? n.up.length : 0), 0);
+
+
+/* boot */
+function boot() {
+  const h = location.hash.slice(1);
+  if (["symbols", "cards", "mnemonics", "updates"].includes(h)) { showView(h, true); fit(0); renderIntro(); syncTour(); return; }
+  fit(0); renderIntro(); syncTour();
+  if (h.startsWith("n-") && byId[h.slice(2)]) select(h.slice(2), { keepHash: true });
+}
+addEventListener("hashchange", () => { const h = location.hash.slice(1); if (h.startsWith("n-") && byId[h.slice(2)] && h.slice(2) !== current) { showView("map", true); requestAnimationFrame(() => select(h.slice(2), { keepHash: true })); } else if (["symbols", "cards", "mnemonics", "updates", "map"].includes(h) && h !== activeView) showView(h, true); });
+new ResizeObserver(() => { if (!current && activeView === "map" && !svg.classList.contains("focus")) fit(0); }).observe(svg);
+boot();
+})();
+</script>
+</body>
+</html>
