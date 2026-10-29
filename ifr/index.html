@@ -291,6 +291,14 @@ abbr.ac{text-decoration:underline dotted var(--ink-3);text-underline-offset:3px;
   .brand small{display:none}
 }
 @media (prefers-reduced-motion: reduce){ *{transition:none!important;animation:none!important} }
+/* terms & definitions */
+.terms{columns:3 300px;column-gap:14px}
+.term{break-inside:avoid;margin:0 0 10px;padding:10px 12px;border:1px solid var(--fb-rim);border-radius:10px;background:var(--fb-panel)}
+.term b{display:block;color:var(--fb-bright);font-size:14px;font-weight:600}
+.term .def{margin:3px 0 5px;font-size:13px;line-height:1.45;color:var(--fb-text)}
+.term .tl{font:500 11px var(--fb-mono);color:var(--fb-accent);background:none;border:0;padding:0;cursor:pointer;text-align:left}
+.term .tl:hover{text-decoration:underline}
+.terms-filter{max-width:360px}
 /* ── Flight Bag skin ── */
 .tools{display:flex;flex-wrap:wrap;gap:8px}
 .go-tool{font-size:12.5px;padding:7px 14px}
@@ -388,6 +396,7 @@ aside.panel{border-radius:0;border:0;border-left:1px solid var(--fb-rim)}
     <button class="fb-tab" role="tab" data-view="symtest">Symbol Test</button>
     <button class="fb-tab" role="tab" data-view="cards">Flashcards</button>
     <button class="fb-tab" role="tab" data-view="mnemonics">Mnemonics</button>
+    <button class="fb-tab" role="tab" data-view="terms">Terms</button>
     <button class="fb-tab" role="tab" data-view="updates">Updated Info<span class="count" id="upd-count"></span></button>
   </nav>
   <div class="search"><input id="q" class="fb-input" type="search" placeholder="Search topics or acronyms (MEA, ARROW…)" autocomplete="off" aria-label="Search"><div class="results" id="results" hidden></div></div>
@@ -416,6 +425,7 @@ aside.panel{border-radius:0;border:0;border-left:1px solid var(--fb-rim)}
   <section class="view page" id="view-symbols" hidden><div class="page-in" id="sym-in"></div></section>
   <section class="view page" id="view-symtest" hidden><div class="page-in" id="symtest-in"><div><h1>Symbol Quick Test</h1><p class="lede">One chart symbol, three answers. The wrong answers come from the same look-alike family, so you learn to tell VOR from VOR/DME, minimum from maximum altitude, front course from back course. Misses and slow answers come back more often.</p></div><div id="symtest"></div></div></section>
   <section class="view page" id="view-cards" hidden><div class="page-in" id="cards-in"></div></section>
+  <section class="view page" id="view-terms" hidden><div class="page-in" id="terms-in"></div></section>
   <section class="view page" id="view-mnemonics" hidden><div class="page-in" id="mn-in"></div></section>
   <section class="view page" id="view-updates" hidden><div class="page-in" id="up-in"></div></section>
 </main>
@@ -724,6 +734,7 @@ function showView(v, keepHash) {
   if (v === "cards" && !$("#cards-in").childElementCount) buildCards();
   if (v === "symtest" && !$("#symtest").childElementCount) IFRSymTest.mount($("#symtest"), { img: "img/sym/" });
   if (v === "mnemonics") buildMnemonics();
+  if (v === "terms" && !$("#terms-in").childElementCount) buildTerms();
   if (v === "updates" && !$("#up-in").childElementCount) buildUpdates();
   if (!keepHash) setHash(v === "map" ? (current ? "n-" + current : "map") : v);
 }
@@ -844,6 +855,16 @@ function buildMnemonics() {
   $("#mn-in").onclick = e => { const b = e.target.closest("[data-open]"); if (b) goTopic(b.dataset.open); };
 }
 
+/* terms & definitions */
+function buildTerms() {
+  $("#terms-in").innerHTML = `<div><h1>Terms &amp; Definitions</h1><p class="lede">${TERMS.length} IFR terms in plain words, A–Z. Each one links to its topic on the map.</p></div>
+    <input class="fb-input terms-filter" id="tq" type="search" placeholder="Filter terms (e.g. MDA, ceiling, fix)" autocomplete="off" aria-label="Filter terms">
+    <div class="terms">${TERMS.map(([t, d, id]) => `<div class="term" data-t="${esc((t + " " + d).toLowerCase())}"><b>${esc(t)}</b><p class="def">${esc(d)}</p>${byId[id] ? `<button type="button" class="tl" data-open="${id}">${esc(byId[id].t)} on the map →</button>` : ""}</div>`).join("")}</div>`;
+  acronymize($("#terms-in"));
+  $("#tq").addEventListener("input", e => { const q = e.target.value.trim().toLowerCase(); $$("#terms-in .term").forEach(t => t.hidden = !!q && !t.dataset.t.includes(q)); });
+  $("#terms-in").onclick = e => { const b = e.target.closest("[data-open]"); if (b) goTopic(b.dataset.open); };
+}
+
 /* updates */
 function buildUpdates() {
   const list = NODES.filter(n => n.up);
@@ -859,11 +880,11 @@ $("#upd-count").textContent = NODES.reduce((s, n) => s + (n.up ? n.up.length : 0
 /* boot */
 function boot() {
   const h = location.hash.slice(1);
-  if (["symbols", "symtest", "cards", "mnemonics", "updates"].includes(h)) { showView(h, true); fit(0); renderIntro(); syncTour(); return; }
+  if (["symbols", "symtest", "cards", "terms", "mnemonics", "updates"].includes(h)) { showView(h, true); fit(0); renderIntro(); syncTour(); return; }
   fit(0); renderIntro(); syncTour();
   if (h.startsWith("n-") && byId[h.slice(2)]) select(h.slice(2), { keepHash: true });
 }
-addEventListener("hashchange", () => { const h = location.hash.slice(1); if (h.startsWith("n-") && byId[h.slice(2)] && h.slice(2) !== current) { showView("map", true); requestAnimationFrame(() => select(h.slice(2), { keepHash: true })); } else if (["symbols", "symtest", "cards", "mnemonics", "updates", "map"].includes(h) && h !== activeView) showView(h, true); });
+addEventListener("hashchange", () => { const h = location.hash.slice(1); if (h.startsWith("n-") && byId[h.slice(2)] && h.slice(2) !== current) { showView("map", true); requestAnimationFrame(() => select(h.slice(2), { keepHash: true })); } else if (["symbols", "symtest", "cards", "terms", "mnemonics", "updates", "map"].includes(h) && h !== activeView) showView(h, true); });
 new ResizeObserver(() => { if (!current && activeView === "map" && !svg.classList.contains("focus")) fit(0); }).observe(svg);
 boot();
 })();
