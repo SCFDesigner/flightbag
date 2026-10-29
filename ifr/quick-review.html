@@ -195,6 +195,13 @@ abbr.ac{text-decoration:underline dotted var(--ink-3);text-underline-offset:3px;
   .num b{font-size:21px}
   html{scroll-padding-top:150px}
 }
+/* ── recall mode: answers covered until tapped (practice testing beats rereading) ── */
+.mnc i{font-style:normal}
+body.recall :is(.card .k, .mnc i, .num span, .card .tbl-wrap, .card .track):not(.rv){filter:blur(6px);opacity:.5;cursor:pointer;user-select:none;transition:filter .15s,opacity .15s}
+body.recall :is(.card .k, .mnc i, .num span, .card .tbl-wrap, .card .track):not(.rv):hover{opacity:.7}
+#recall[aria-pressed="true"]{color:var(--fb-accent)}
+.recall-note{display:none;font-size:13px;color:var(--fb-accent)}
+body.recall .recall-note{display:block}
 /* ── Flight Bag skin ── */
 .tools{display:flex;flex-wrap:wrap;gap:8px}
 .go-tool{font-size:12.5px;padding:7px 14px}
@@ -271,6 +278,7 @@ body.fb #pop.fb-panel{background-color:var(--fb-cell)}
     <a class="fb-home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Flight Bag</a>
     <div class="brand">IFR Quick Review <span>2026</span></div>
     <div class="filter"><input id="f" class="fb-input" type="search" placeholder="Filter: MEA, holding, alternate…" autocomplete="off" aria-label="Filter topics"></div>
+    <button type="button" class="fb-btn" id="recall" aria-pressed="false" title="Hide the answers so you recall them first">Test me</button>
     <a id="atlas-link" class="fb-btn" href="index.html">Concept map</a>
   </div>
   <nav class="chips" id="chips" aria-label="Chapters"></nav>
@@ -280,7 +288,7 @@ body.fb #pop.fb-panel{background-color:var(--fb-cell)}
   <div class="intro">
     <div><h1>Everything on one page</h1>
       <p>All four study guides plus the FAA Chart Users' Guide, boiled down to the line you need. Hover a card (tap on a phone) for the full breakdown, diagram and a check question.</p></div>
-    <div class="howto"><span class="key-legend"><span class="dot-upd"></span><b>Updated</b>: an older guide was wrong or out of date</span><span><b>Dotted</b> = acronym, hover for meaning</span><span><b>Click</b> a card to pin it open</span></div>
+    <div class="howto"><span class="recall-note">Test mode: say the answer out loud, then tap the blur to check. Hover pop-ups are off until you leave test mode.</span><span class="key-legend"><span class="dot-upd"></span><b>Updated</b>: an older guide was wrong or out of date</span><span><b>Dotted</b> = acronym, hover for meaning</span><span><b>Click</b> a card to pin it open</span></div>
   </div>
   <section id="numbers" class="h-blue"><div class="nums-h"><h2>Numbers to Know</h2><small>hover for the rule</small></div><div class="nums" id="nums"></div></section>
   <div id="chapters"></div>
@@ -346,7 +354,7 @@ chips.innerHTML = `<a href="#numbers">Numbers</a>` + TOUR_CHAPTERS.map((k, i) =>
 $("#nums").innerHTML = NUMBERS.map(([b, s, id]) => `<button type="button" class="num fb-panel" data-id="${id}"><b>${esc(b)}</b><span>${esc(s)}</span></button>`).join("");
 
 function cardHTML(n) {
-  const mn = n.mn ? `<div class="mnc"><span class="w">${esc(n.mn.word)}</span>${n.mn.rows.map(([l, t]) => `<span><b>${esc(l)}</b>${esc(t.split(/ — |\(/)[0].trim())}</span>`).join("")}</div>` : "";
+  const mn = n.mn ? `<div class="mnc"><span class="w">${esc(n.mn.word)}</span>${n.mn.rows.map(([l, t]) => `<span><b>${esc(l)}</b><i>${esc(t.split(/ — |\(/)[0].trim())}</i></span>`).join("")}</div>` : "";
   const inline = INLINE.has(n.vis) ? renderVis(n.vis) : "";
   const thumb = n.c === "charts" && n.vis && n.vis.startsWith("img:") ? `<div class="thumb"><img src="img/${n.vis.slice(4)}.png" alt="" loading="lazy"></div>` : "";
   const extra = (n.b ? n.b.length : 0) + (n.vis && !INLINE.has(n.vis) ? 1 : 0);
@@ -420,7 +428,7 @@ function openFor(el, pin) {
 }
 const target = e => e.target.closest(".card,.num");
 document.addEventListener("pointerover", e => {
-  if (e.pointerType !== "mouse" || pinned || touchMode()) return; const t = target(e);
+  if (e.pointerType !== "mouse" || pinned || touchMode() || document.body.classList.contains("recall")) return; const t = target(e);
   if (t) { clearTimeout(hideT); clearTimeout(showT); showT = setTimeout(() => openFor(t), popFor ? 60 : 220); }
   else if (e.target.closest("#pop")) clearTimeout(hideT);
 });
@@ -429,6 +437,10 @@ document.addEventListener("pointerout", e => {
   if (from && !(e.relatedTarget && (from.contains(e.relatedTarget) || e.relatedTarget.closest?.("#pop")))) { clearTimeout(showT); hideT = setTimeout(close, 260); }
 });
 document.addEventListener("click", e => {
+  const hid = e.target.closest("body.recall :is(.card .k, .mnc i, .num span, .card .tbl-wrap, .card .track):not(.rv)");
+  if (hid) { hid.classList.add("rv"); return; }
+  if (e.target.closest("#recall")) { const on = document.body.classList.toggle("recall"); e.target.closest("#recall").setAttribute("aria-pressed", String(on));
+    $$(".rv").forEach(x => x.classList.remove("rv")); close(); store.set("recall", on); return; }
   if (e.target.closest("abbr.ac")) { showTip(e.target.closest("abbr.ac")); return; }
   const tk = e.target.closest(".tk"); if (tk) { const box = tk.closest(".tok"); $$(".tk", box).forEach(b => b.classList.toggle("on", b === tk)); box.nextElementSibling.textContent = tk.textContent + " → " + tk.dataset.m; return; }
   const z = e.target.closest(".zoomable"); if (z) { zoom(z); return; }
@@ -483,6 +495,7 @@ function applyFilter() {
 fin.addEventListener("input", applyFilter);
 
 IFRSymTest.mount($("#symtest"), { img: "img/sym/" });
+if (store.get("recall", false)) { document.body.classList.add("recall"); $("#recall").setAttribute("aria-pressed", "true"); }
 
 /* deep link: #t-<topic id> (from the FII test pages) scrolls to the card and opens it */
 const fromHash = instant => { const m = location.hash.match(/^#t-([\w-]+)$/); if (m && byId[m[1]]) jumpTo(m[1], true, instant === true); };

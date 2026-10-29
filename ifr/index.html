@@ -633,7 +633,7 @@ function renderIntro() {
     <ol><li><b>Next</b> walks the topics in flight order, one idea at a time. The map pans to each one and lights up what it connects to.</li>
       <li>Click any bubble or chapter box to jump. Drag to pan, scroll or pinch to zoom.</li>
       <li>Dotted acronyms show their meaning on hover or tap.</li>
-      <li><b>Chart Symbols</b> has the enroute and approach-plate legends with a clickable plate. <b>Symbol Test</b> is a rapid multiple-choice drill on 85 single symbols; <b>Flashcards</b> drills mnemonics and questions.</li></ol>
+      <li><b>Chart Symbols</b> has the enroute and approach-plate legends with a clickable plate. <b>Symbol Test</b> is a rapid multiple-choice drill on 85 single symbols; <b>Flashcards</b> is a spaced-repetition daily mix of symbols, mnemonics and questions.</li></ol>
     <button type="button" class="go-sym fb-btn primary" data-go="${TOUR[0]}">Start the tour →</button>
     <div><div class="sect-h">Chapters</div><div class="cl-list">${TOUR_CHAPTERS.map((k, i) => { const l = NODES.filter(n => n.c === k); const d = l.filter(n => seen.has(n.id)).length;
       return `<button type="button" data-cl="${k}" class="h-${hueOf(k)}"><span class="sw"></span><b>${i + 1}. ${esc(CLUSTERS[k].name)}</b><small>${d}/${l.length}</small></button>`; }).join("")}</div></div>
@@ -668,6 +668,7 @@ document.addEventListener("keydown", e => {
   if (e.target.matches("input,select,textarea")) return;
   if (activeView === "map" && (e.key === "ArrowRight" || e.key === "ArrowLeft")) { e.preventDefault(); step(e.key === "ArrowRight" ? 1 : -1); }
   if (activeView === "cards" && (e.key === " " || e.key === "Enter")) { e.preventDefault(); $("#fc-flip")?.click(); }
+  if (activeView === "cards" && flipped && (e.key === "1" || e.key === "2")) { e.preventDefault(); grade(e.key === "2"); }
   if (e.key === "Escape") closeLightbox();
 });
 
@@ -778,39 +779,61 @@ function openLightbox(id, svgEl) {
 }
 function closeLightbox() { if (lb) { lb.remove(); lb = null; } }
 
-/* flashcards */
-let deck = [], di = 0, flipped = false, deckName = "symbols";
-const known = new Set(store.get("known", []));
+/* flashcards — spaced repetition (Leitner boxes) + an interleaved "Daily mix" deck.
+   Right → next box, due again in 1 / 3 / 7 / 14 / 30 days. Miss → box 1 and back in this session 3 cards later.
+   Due cards first, then at most NEW_PER_SESSION unseen cards. State per card in localStorage "ifr-atlas:srs". */
+const DAY = 864e5, BOXES = [0, 1, 3, 7, 14, 30], NEW_PER_SESSION = 15;
+const srs = store.get("srs", {});
+let deck = [], di = 0, flipped = false, deckName = "mix", sess = { right: 0, miss: 0 };
+const cardsFor = name => {
+  const sym = SYMBOL_CARDS.map(c => ({ key: "s:" + c.img, kind: "Symbol", img: c.img, a: c.a, d: c.w || c.d }));
+  const mn = NODES.filter(n => n.mn).map(n => ({ key: "m:" + n.id, kind: "Mnemonic", q: `What does ${n.mn.word} stand for?`, a: n.t, d: n.mn.rows.map(r => r[0] + " — " + r[1]).join("\n"), go: n.id }));
+  const qs = NODES.filter(n => n.q).map(n => ({ key: "q:" + n.id, kind: "Question", q: n.q[0], a: n.q[1], d: n.t, go: n.id }));
+  return name === "symbols" ? sym : name === "mnemonics" ? mn : name === "questions" ? qs : [...sym, ...mn, ...qs];
+};
+const isDue = c => srs[c.key] && srs[c.key].due <= Date.now();
 function makeDeck(name) {
-  deckName = name;
-  const base = name === "symbols" ? SYMBOL_CARDS.map(c => ({ key: "s:" + c.img, img: c.img, a: c.a, d: c.w || c.d }))
-    : name === "mnemonics" ? NODES.filter(n => n.mn).map(n => ({ key: "m:" + n.id, q: `What does ${n.mn.word} stand for?`, a: n.t, d: n.mn.rows.map(r => r[0] + " — " + r[1]).join("\n"), go: n.id }))
-    : NODES.filter(n => n.q).map(n => ({ key: "q:" + n.id, q: n.q[0], a: n.q[1], d: n.t, go: n.id }));
-  const todo = base.filter(c => !known.has(c.key)); deck = (todo.length ? todo : base).sort(() => Math.random() - .5); di = 0; flipped = false; renderCard(base.length, base.length - todo.length);
+  deckName = name; sess = { right: 0, miss: 0 };
+  const all = cardsFor(name), due = all.filter(isDue), fresh = all.filter(c => !srs[c.key]);
+  const shuf = a => a.map(v => [Math.random(), v]).sort((x, y) => x[0] - y[0]).map(x => x[1]);
+  deck = [...shuf(due), ...shuf(fresh).slice(0, NEW_PER_SESSION)]; di = 0; flipped = false; renderCard();
 }
-function renderCard(total, nKnown) {
-  total ??= deck.length; const c = deck[di];
-  const knownCount = nKnown ?? [...known].filter(k => k.startsWith(deckName[0] === "s" ? "s:" : deckName[0] === "m" ? "m:" : "q:")).length;
-  $("#fc-stage").innerHTML = !c ? `<p>Deck done.</p>` : `<div class="fc fb-panel">
-    <div class="fc-face">${c.img ? `<div class="sym"><img src="img/${c.img}.png" alt="Chart symbol to identify"></div><div class="fc-q">What is this symbol?</div>` : `<div class="fc-q">${esc(c.q)}</div>`}
-      ${flipped ? `<div class="fc-a">${esc(c.a)}</div><div class="fc-d" style="white-space:pre-line">${esc(c.d || "")}</div>` : ""}</div>
-    <div class="fc-act">${flipped ? `<button type="button" class="fb-btn" id="fc-again">Again</button><button type="button" class="fb-btn primary" id="fc-got">Got it</button>${c.go ? `<button type="button" class="fb-btn" id="fc-open">Open topic</button>` : ""}` : `<button type="button" class="fb-btn primary" id="fc-flip">Show answer</button>`}</div></div>
-    <div class="fc-meta">card ${di + 1} of ${deck.length} · ${knownCount} marked known in this deck · space to flip</div>`;
+function nextDue(name) { const t = cardsFor(name).filter(c => srs[c.key]).map(c => srs[c.key].due).sort((a, b) => a - b)[0]; return t; }
+function renderCard() {
+  const c = deck[di], all = cardsFor(deckName), learned = all.filter(x => srs[x.key] && srs[x.key].box >= 3).length;
+  if (!c) { const nd = nextDue(deckName);
+    $("#fc-stage").innerHTML = `<div class="fc fb-panel"><div class="fc-face"><div class="fc-q">Done for now</div><div class="fc-d">${sess.right} right · ${sess.miss} missed this session. ${nd ? "Next card is due " + (nd - Date.now() < DAY ? "later today" : "in " + Math.ceil((nd - Date.now()) / DAY) + " days") + "." : ""} Coming back tomorrow beats cramming more now.</div></div>
+      <div class="fc-act"><button type="button" class="fb-btn" data-more>Study ${NEW_PER_SESSION} new cards anyway</button></div></div>
+      <div class="fc-meta">${learned} of ${all.length} cards solid (seen right 3+ times in a row)</div>`; return; }
+  const box = srs[c.key] ? srs[c.key].box : 0;
+  $("#fc-stage").innerHTML = `<div class="fc fb-panel">
+    <div class="fc-face"><div class="fc-meta">${c.kind}${box ? " · box " + box : " · new"}</div>${c.img ? `<div class="sym"><img src="img/${c.img}.png" alt="Chart symbol to identify"></div><div class="fc-q">What is this symbol?</div>` : `<div class="fc-q">${esc(c.q)}</div>`}
+      ${flipped ? `<div class="fc-a">${esc(c.a)}</div><div class="fc-d" style="white-space:pre-line">${esc(c.d || "")}</div>` : `<div class="fc-d">Answer in your head first, then flip.</div>`}</div>
+    <div class="fc-act">${flipped ? `<button type="button" class="fb-btn" id="fc-again">Missed it</button><button type="button" class="fb-btn primary" id="fc-got">Got it</button>${c.go ? `<button type="button" class="fb-btn" id="fc-open">Open topic</button>` : ""}` : `<button type="button" class="fb-btn primary" id="fc-flip">Show answer</button>`}</div></div>
+    <div class="fc-meta">${deck.length - di} left this session · ${sess.right} right · ${sess.miss} missed · ${learned}/${all.length} solid · space flips, 1 = missed, 2 = got it</div>`;
   acronymize($("#fc-stage"));
 }
+function grade(ok) {
+  const c = deck[di], s = srs[c.key] || { box: 0 };
+  if (ok) { s.box = Math.min(BOXES.length - 1, s.box + 1); s.due = Date.now() + BOXES[s.box] * DAY - 36e5; sess.right++; }
+  else { s.box = 1; s.due = Date.now(); sess.miss++; deck.splice(Math.min(deck.length, di + 4), 0, c); }
+  srs[c.key] = s; store.set("srs", srs); di++; flipped = false; renderCard();
+}
 function buildCards() {
-  $("#cards-in").innerHTML = `<div><h1>Flashcards</h1><p class="lede">Three decks: chart symbols cut straight from the FAA legend, every mnemonic, and a check question from each topic. "Got it" removes a card from the next round on this device.</p></div>
-    <div class="deck-bar filter" role="group" aria-label="Choose deck"><button type="button" aria-pressed="true" data-deck="symbols">Chart symbols (${SYMBOL_CARDS.length})</button><button type="button" aria-pressed="false" data-deck="mnemonics">Mnemonics (${NODES.filter(n => n.mn).length})</button><button type="button" aria-pressed="false" data-deck="questions">Questions (${NODES.filter(n => n.q).length})</button><button type="button" aria-pressed="false" data-reset>Reset progress</button></div>
+  const n = name => cardsFor(name).filter(c => isDue(c) || !srs[c.key]).length;
+  $("#cards-in").innerHTML = `<div><h1>Flashcards</h1><p class="lede">Spaced repetition: answer from memory, then grade yourself. Cards you get right come back in 1, 3, 7, 14, then 30 days; misses come back a few cards later. Each session is the cards due today plus up to ${NEW_PER_SESSION} new ones — about 10 minutes. <b>Daily mix</b> interleaves symbols, mnemonics and questions, which builds the ability to tell topics apart.</p></div>
+    <div class="deck-bar filter" role="group" aria-label="Choose deck"><button type="button" aria-pressed="true" data-deck="mix">Daily mix (${n("mix")} ready)</button><button type="button" aria-pressed="false" data-deck="symbols">Symbols (${n("symbols")})</button><button type="button" aria-pressed="false" data-deck="mnemonics">Mnemonics (${n("mnemonics")})</button><button type="button" aria-pressed="false" data-deck="questions">Questions (${n("questions")})</button><button type="button" aria-pressed="false" data-reset>Reset progress</button></div>
     <div class="fc-wrap" id="fc-stage"></div>`;
   $("#cards-in").addEventListener("click", e => {
     const d = e.target.closest("[data-deck]"); if (d) { $$("[data-deck]").forEach(b => b.setAttribute("aria-pressed", String(b === d))); makeDeck(d.dataset.deck); return; }
-    if (e.target.closest("[data-reset]")) { known.clear(); store.set("known", []); makeDeck(deckName); return; }
+    if (e.target.closest("[data-reset]")) { for (const k in srs) delete srs[k]; store.set("srs", srs); makeDeck(deckName); return; }
+    if (e.target.closest("[data-more]")) { deck = cardsFor(deckName).filter(c => !srs[c.key]).sort(() => Math.random() - .5).slice(0, NEW_PER_SESSION); di = 0; renderCard(); return; }
     if (e.target.closest("#fc-flip")) { flipped = true; renderCard(); return; }
-    if (e.target.closest("#fc-got")) { known.add(deck[di].key); store.set("known", [...known]); di = (di + 1) % deck.length; flipped = false; renderCard(); return; }
-    if (e.target.closest("#fc-again")) { deck.push(deck[di]); di = (di + 1) % deck.length; flipped = false; renderCard(); return; }
+    if (e.target.closest("#fc-got")) { grade(true); return; }
+    if (e.target.closest("#fc-again")) { grade(false); return; }
     if (e.target.closest("#fc-open")) goTopic(deck[di].go);
   });
-  makeDeck("symbols");
+  makeDeck("mix");
 }
 
 /* mnemonics */
