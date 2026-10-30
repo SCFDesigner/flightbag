@@ -1717,12 +1717,35 @@ function supDoc(part){if(!supDocs[part])supDocs[part]=supLoadLib().then(supIndex
   pdfjsLib.getDocument({url:ix.parts[part].file,disableAutoFetch:true,disableStream:true,rangeChunkSize:262144}).promise);return supDocs[part];}
 function supRef(ref){const part=ref[0]==='L'?'legends':'figures',n=ref.slice(1);const pages=(SUPIDX&&SUPIDX[part][n])||[];return {part,n,pages};}
 function rotKey(part,p){return part[0]+p;}
+/* Sideways charts show upright by default. Most are scans placed on the page at 90°, so the page is turned to
+   undo the angle of its largest image (when that image covers a fair part of the page); otherwise it follows
+   the way most of its text runs. A Rotate press stores an absolute angle in supRot, which wins. */
+const supAuto=store.get('fii2_supauto2',{});
+function curRot(part,p){const k=rotKey(part,p);return (k in supRot)?supRot[k]:(supAuto[k]||0);}
+const mat=(m,n)=>[m[0]*n[0]+m[2]*n[1],m[1]*n[0]+m[3]*n[1],m[0]*n[2]+m[2]*n[3],m[1]*n[2]+m[3]*n[3],m[0]*n[4]+m[2]*n[5]+m[4],m[1]*n[4]+m[3]*n[5]+m[5]];
+async function imgRot(page){try{const O=pdfjsLib.OPS,ops=await page.getOperatorList(),vp=page.getViewport({scale:1,rotation:0});
+    let m=[1,0,0,1,0,0],big=null;const st=[];
+    ops.fnArray.forEach((f,i)=>{if(f===O.save)st.push(m);else if(f===O.restore)m=st.pop()||[1,0,0,1,0,0];else if(f===O.transform)m=mat(m,ops.argsArray[i]);
+      else if(f===O.paintImageXObject||f===O.paintInlineImageXObject){const a=Math.abs(m[0]*m[3]-m[1]*m[2]);if(!big||a>big.a)big={a,m};}});
+    if(!big||big.a<vp.width*vp.height*0.2)return null;
+    return ((Math.round(Math.atan2(big.m[1],big.m[0])*2/Math.PI)*90)%360+360)%360;}catch(e){return null;}}
+async function textRot(page){try{const tc=await page.getTextContent();const w={0:0,90:0,180:0,270:0};
+    tc.items.forEach(it=>{const n=(it.str||'').trim().length;if(!n)return;
+      const a=((Math.round(Math.atan2(it.transform[1],it.transform[0])*2/Math.PI)*90)%360+360)%360;w[a]+=n;});
+    const tot=w[0]+w[90]+w[180]+w[270],best=[90,180,270].reduce((x,y)=>w[y]>w[x]?y:x,0);
+    return (tot>=40&&w[best]>tot*0.6)?best:0;}catch(e){return 0;}}
+async function pageRot(part,p,page){const k=rotKey(part,p);if(k in supRot)return supRot[k];
+  if(!(k in supAuto)){const ir=await imgRot(page);supAuto[k]=ir||await textRot(page);store.set('fii2_supauto2',supAuto);if(supAuto[k])console.info('supplement',k,'auto-rotated',supAuto[k]);}
+  return supAuto[k];}
 function supBoxHTML(ref){const kind=ref[0]==='L'?'Legend':'Figure';
   return `<div class="supbox" data-ref="${esc(ref)}"><div class="supwrap" title="Open in the supplement viewer"><div class="supload">Loading ${kind} ${esc(ref.slice(1))}…</div></div>
     <div class="supcap"><span class="sp">FAA Supplement · ${kind} ${esc(ref.slice(1))}<span class="suppg"></span></span><button class="suprot" title="Rotate this page">↻ Rotate</button></div></div>`;}
-async function supRender(part,pageNo,canvas,cssWidth){const doc=await supDoc(part);const page=await doc.getPage(pageNo);
-  const rot=(supRot[rotKey(part,pageNo)]||0);const base=page.getViewport({scale:1,rotation:rot});
-  const scale=cssWidth/base.width,dpr=Math.min(window.devicePixelRatio||1,2.5);const vp=page.getViewport({scale:scale*dpr,rotation:rot});
+/* over: extra resolution for inline copies, which are cropped to the figure and then stretched back to full width */
+async function supRender(part,pageNo,canvas,cssWidth,over){const doc=await supDoc(part);const page=await doc.getPage(pageNo);
+  const rot=await pageRot(part,pageNo,page);const base=page.getViewport({scale:1,rotation:rot});
+  const scale=cssWidth/base.width;let dpr=Math.min(window.devicePixelRatio||1,2.5)*(over||1);
+  const px=base.width*base.height*scale*scale*dpr*dpr;if(px>14e6)dpr*=Math.sqrt(14e6/px);   // stay under mobile canvas limits
+  const vp=page.getViewport({scale:scale*dpr,rotation:rot});
   canvas.width=Math.round(vp.width);canvas.height=Math.round(vp.height);canvas.style.width=Math.round(vp.width/dpr)+'px';canvas.style.height=Math.round(vp.height/dpr)+'px';
   await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;}
 /* inline pages in question cards: render when scrolled into view */
@@ -1739,10 +1762,10 @@ async function supHydrate(box){try{await supIndex();const {part,pages}=supRef(bo
   if(!pages.length){wrap.innerHTML='<div class="supload">Not in the supplement index</div>';return;}
   box.querySelector('.suppg').textContent=' · page '+pages.join(', ');
   const W=Math.max(240,wrap.clientWidth||400),out=[];   // keep "Loading…" showing until the pages are drawn
-  for(const pg of pages){const off=document.createElement('canvas');await supRender(part,pg,off,W);const c=supTrim(off);c.style.width='100%';c.style.height='auto';out.push(c);}
-  wrap.replaceChildren(...out);
+  for(const pg of pages){const off=document.createElement('canvas');await supRender(part,pg,off,W,2);const c=supTrim(off);c.style.width='100%';c.style.height='auto';out.push(c);}
+  wrap.replaceChildren(...out);box.dataset.rot=pages.map(pg=>curRot(part,pg)).join(',');
   wrap.onclick=()=>openSupp(part,pages[0]);
-  box.querySelector('.suprot').onclick=async e=>{e.stopPropagation();for(const pg of pages){const k=rotKey(part,pg);supRot[k]=((supRot[k]||0)+90)%360;}
+  box.querySelector('.suprot').onclick=async e=>{e.stopPropagation();for(const pg of pages){supRot[rotKey(part,pg)]=(curRot(part,pg)+90)%360;}
     store.set('fii2_suprot',supRot);supHydrate(box);};
 }catch(err){const w=box.querySelector('.supwrap');if(w)w.innerHTML='<div class="supload">Couldn’t load the supplement page</div>';console.warn('supplement',err);}}
 new MutationObserver(()=>document.querySelectorAll('.supbox:not([data-seen])').forEach(b=>{b.dataset.seen=1;if(supIO)supIO.observe(b);else supHydrate(b);}))
@@ -1751,22 +1774,25 @@ new MutationObserver(()=>document.querySelectorAll('.supbox:not([data-seen])').f
 const svIO=('IntersectionObserver' in window)?new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){svIO.unobserve(e.target);svPaint(e.target);}}),{root:document.getElementById('svpages'),rootMargin:'800px'}):null;
 function svWidth(){const el=document.getElementById('svpages');return Math.min(1100,(el.clientWidth||900)-32)*supZoom;}
 async function svPaint(el){const p=+el.dataset.p;el.innerHTML='';const c=document.createElement('canvas');el.appendChild(c);
-  try{await supRender(supPart,p,c,svWidth());el.style.width=c.style.width;el.style.height=c.style.height;}catch(err){el.textContent='Couldn’t load page '+p;}}
+  try{await supRender(supPart,p,c,svWidth());el.dataset.rot=curRot(supPart,p);el.style.width=c.style.width;el.style.height=c.style.height;}catch(err){el.textContent='Couldn’t load page '+p;}}
 function svLabel(part,p){if(!SUPIDX)return 'Page '+p;const names=Object.entries(SUPIDX[part]).filter(([,ps])=>ps.includes(p)).map(([n])=>(part==='legends'?'Legend ':'Figure ')+n);
   return (names.join(', ')||'Page')+' · p. '+p;}
 async function svBuild(){const box=document.getElementById('svpages');box.innerHTML='<div class="supload">Loading…</div>';
   const doc=await supDoc(supPart);const first=await doc.getPage(1);const vp1=first.getViewport({scale:1});box.innerHTML='';
   document.querySelectorAll('#supv .svtabs button').forEach(b=>b.classList.toggle('on',b.dataset.p===supPart));
-  for(let p=1;p<=doc.numPages;p++){const rot=supRot[rotKey(supPart,p)]||0,w=svWidth(),ratio=(rot%180?vp1.width/vp1.height:vp1.height/vp1.width);
+  for(let p=1;p<=doc.numPages;p++){const rot=curRot(supPart,p),w=svWidth(),ratio=(rot%180?vp1.width/vp1.height:vp1.height/vp1.width);
     const pg=document.createElement('div');pg.className='svpage';pg.dataset.p=p;pg.id='svp-'+supPart+'-'+p;pg.style.width=w+'px';pg.style.height=Math.round(w*ratio)+'px';pg.textContent='Page '+p;
     const lab=document.createElement('div');lab.className='svplabel';lab.innerHTML=`<span>${esc(svLabel(supPart,p))}</span><button class="suprot" data-p="${p}">↻ Rotate page</button>`;
     box.appendChild(pg);box.appendChild(lab);if(svIO)svIO.observe(pg);else svPaint(pg);}
-  box.querySelectorAll('.svplabel .suprot').forEach(b=>b.onclick=()=>{const p=+b.dataset.p,k=rotKey(supPart,p);supRot[k]=((supRot[k]||0)+90)%360;store.set('fii2_suprot',supRot);
+  box.querySelectorAll('.svplabel .suprot').forEach(b=>b.onclick=()=>{const p=+b.dataset.p;supRot[rotKey(supPart,p)]=(curRot(supPart,p)+90)%360;store.set('fii2_suprot',supRot);
     const pg=document.getElementById('svp-'+supPart+'-'+p);svPaint(pg);});}
 async function openSupp(part,page){ttsStop&&ttsStop();document.getElementById('supv').classList.add('on');document.body.style.overflow='hidden';
   await supIndex();if(part&&part!==supPart){supPart=part;await svBuild();}else if(!document.querySelector('#svpages .svpage'))await svBuild();
+  else document.querySelectorAll('#svpages .svpage[data-rot]').forEach(el=>{if(+el.dataset.rot!==curRot(supPart,+el.dataset.p))svPaint(el);});  // rotated inline since last open
   if(page){const el=document.getElementById('svp-'+supPart+'-'+page);if(el){el.scrollIntoView({block:'start'});document.querySelectorAll('.svpage.hit').forEach(x=>x.classList.remove('hit'));el.classList.add('hit');}}}
-function closeSupp(){document.getElementById('supv').classList.remove('on');document.body.style.overflow='';}
+function closeSupp(){document.getElementById('supv').classList.remove('on');document.body.style.overflow='';
+  document.querySelectorAll('.supbox[data-rot]').forEach(b=>{const {part,pages}=supRef(b.dataset.ref);   // rotated in the viewer
+    if(b.dataset.rot!==pages.map(pg=>curRot(part,pg)).join(','))supHydrate(b);});}
 function svGo(){const v=document.getElementById('svgo').value.trim().toUpperCase();if(!v||!SUPIDX)return;
   const legend=v.startsWith('L'),n=v.replace(/^(L|LEGEND|F|FIG|FIGURE)\s*/,'');const part=legend?'legends':'figures';const ps=SUPIDX[part][n];
   if(ps)openSupp(part,ps[0]);else{const p=parseInt(n,10);if(p)openSupp(part,p);}}
