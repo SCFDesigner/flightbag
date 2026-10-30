@@ -670,6 +670,8 @@ function ifrLinks(q){if(!window.IFRMatch||!IFR_COURSES.has(course))return '';
     ts.map(t=>a('ifr/index.html#n-'+t.id,'IFR Atlas: '+esc(t.t),'map')+a('ifr/quick-review.html#t-'+t.id,'Quick card','card')).join('')+`</div>`;}
 function figSrc(f){return f?FIGS[(D.figpfx||'')+f]:null;}
 function figAttr(v){return v.startsWith('enc:')?`src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-enc="${esc(v.slice(4))}"`:`src="${v}"`;}
+/* Questions that need a figure or the FAA supplement get no test clock — reading the chart takes as long as it takes. */
+function untimed(q){return !!(q.fig||(q.sup&&q.sup.length));}
 function figHTML(q){const fs=[q.fig,q.fig2].filter(figSrc);const sp=q.sup||[];if(!fs.length&&!sp.length)return '';
   return `<div class="figbox">${fs.map(f=>`<img class="figimg" ${figAttr(figSrc(f))} alt="Figure ${esc(f)}"><div class="figcap">${sp.length?'Prepware ':''}Figure ${esc(f)} \u00b7 click to enlarge</div>`).join('')}${sp.map(supBoxHTML).join('')}</div>`;}
 function varWarn(q){return (q.var||q.cg)?`<span class="vwarn" title="Another question uses this same wording but has a different correct answer \u2014 read the choices carefully.">\u26a0 look-alike</span>`:'';}
@@ -854,13 +856,13 @@ function resumeSaved(s){const by={};D.questions.forEach(q=>by[q.id]=q);
 function pauseTest(){if(!tActive||tPaused||tAnswered)return;
   barSuspended=false;document.body.classList.remove('notepaused');
   tPaused=true;
-  tLeft=(tOrder[tIdx]&&tOrder[tIdx].fig)?0:Math.max(1,barS.secs-(performance.now()-barS.start)/1000);
+  tLeft=(tOrder[tIdx]&&untimed(tOrder[tIdx]))?0:Math.max(1,barS.secs-(performance.now()-barS.start)/1000);
   stopBar();ttsStop();saveTest();renderPause();}
 function renderPause(){
   wrap.classList.add('testing');
   content.innerHTML=`<div class="card"><div class="tdone"><div>Paused</div>
     <div class="big">${tIdx+1} / ${tOrder.length}</div>
-    <div style="color:var(--muted)">\u2713 ${tScore} \u00b7 \u2717 ${tWrong.length} \u00b7 ${tLeft?Math.ceil(tLeft)+'s left on this question':'untimed figure question'}</div>
+    <div style="color:var(--muted)">\u2713 ${tScore} \u00b7 \u2717 ${tWrong.length} \u00b7 ${tLeft?Math.ceil(tLeft)+'s left on this question':'untimed (figure / supplement)'}</div>
     <p><button class="btn active" id="pResume" style="padding:9px 18px">Resume \u25b8</button>
        <button class="btn" id="pExit" style="padding:9px 18px">Save &amp; exit</button></p>
     <div style="color:var(--muted);font-size:12px;margin-top:6px">Saved. You can close the tab and pick this up later.</div></div></div>`;
@@ -990,8 +992,8 @@ function renderTest(){
   const pvb=document.getElementById('testPrev');if(pvb)pvb.style.display=(tIdx>0)?'flex':'none';
   document.querySelectorAll('#tchoices .tchoice').forEach(el=>el.onclick=()=>pick(el,q));
   const tb=document.getElementById('tbedge');
-  if(q.fig){tResumeLeft=0;if(tb)tb.style.display='none';
-    const tc=document.getElementById('tclock');if(tc)tc.textContent='untimed \u00b7 figure';}
+  if(untimed(q)){tResumeLeft=0;if(tb)tb.style.display='none';
+    const tc=document.getElementById('tclock');if(tc)tc.textContent='untimed \u00b7 '+(q.fig?'figure':'supplement');}
   else{const secs=tResumeLeft>0?tResumeLeft:speedSecs;tResumeLeft=0;
     if(tb&&secs<speedSecs)tb.style.width=(secs/speedSecs*100)+'%';
     runBar(tb,secs,()=>timeUp(q),document.getElementById('tclock'),speedSecs);}}
