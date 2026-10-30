@@ -37,7 +37,8 @@
 .st-opt:disabled{cursor:default}
 .st-why{border-radius:10px;padding:10px 12px;background:var(--fb-well);border:1px solid var(--fb-well-rim);font-size:13.5px;line-height:1.45;color:var(--fb-text);display:grid;gap:6px}
 .st-why b{color:var(--fb-bright)}
-.st-why .no{color:var(--fb-bad)} .st-why .yes{color:var(--fb-ok)}
+.st-why .no{color:var(--fb-bad)}
+.st-why .st-m{border-top:1px solid var(--fb-well-rim);padding-top:6px} .st-why .yes{color:var(--fb-ok)}
 .st-actions{display:flex;gap:8px;justify-content:space-between;align-items:center;flex-wrap:wrap}
 .st-hint{font:500 11px var(--fb-mono);color:var(--fb-dim)}
 .st-big{font:600 40px/1 var(--fb-mono);color:var(--fb-bright)}
@@ -58,7 +59,7 @@
   function mount(root, opts = {}) {
     const IMG = opts.img || "img/sym/";
     if (!document.getElementById("st-css")) { const s = document.createElement("style"); s.id = "st-css"; s.textContent = CSS; document.head.appendChild(s); }
-    const bank = SYM_TEST, byId = Object.fromEntries(bank.map(x => [x.id, x]));
+    const bank = SYM_TEST.filter(x => x.q !== false), byId = Object.fromEntries(bank.map(x => [x.id, x]));
     const groups = ["All", ...new Set(bank.map(x => x.g))];
     const stats = load(KEY, {});
     const prefs = Object.assign({ group: "All", len: 20, auto: true }, load(PREFS, {}));
@@ -128,8 +129,9 @@
       root.querySelectorAll(".st-opt").forEach((b, i) => { b.disabled = true; if (r.choices[i].id === x.id) b.classList.add("ok"); else if (i === k) b.classList.add("bad"); });
       root.querySelector(".st-clock").textContent = (ms / 1000).toFixed(1) + " s";
       const why = document.createElement("div"); why.className = "st-why";
-      why.innerHTML = ok ? `<div><span class="yes">Right.</span> ${esc(x.tip)}</div>`
-        : `<div><span class="no">That's not ${esc(c.a)}.</span> It's <b>${esc(x.a)}</b>: ${esc(x.tip)}</div><div><b>${esc(c.a)}</b> looks like this instead: ${esc(c.tip)}</div>`;
+      why.innerHTML = (ok ? `<div><span class="yes">Right.</span> ${esc(x.tip)}</div>`
+        : `<div><span class="no">That's not ${esc(c.a)}.</span> It's <b>${esc(x.a)}</b>: ${esc(x.tip)}</div><div><b>${esc(c.a)}</b> looks like this instead: ${esc(c.tip)}</div>`)
+        + (x.m ? `<div class="st-m"><b>What it means:</b> ${esc(x.m)}</div>` : "");
       const acts = root.querySelector(".st-actions");
       acts.before(why);
       acts.innerHTML = `<button type="button" class="fb-btn small st-quit">End round</button><button type="button" class="fb-btn primary st-next">${r.i + 1 < r.items.length ? "Next" : "Results"}</button>`;
@@ -174,5 +176,45 @@
     });
     setup();
   }
-  window.IFRSymTest = { mount };
+  /* Symbol reference: every symbol on its own row, grouped by chart legend (SYM_SECTIONS / s / ss). */
+  const RCSS = `
+.sr{display:grid;gap:26px}
+.sr-nav{display:flex;flex-wrap:wrap;gap:6px}
+.sr-nav button{font:500 12px var(--fb-font);padding:5px 11px;border-radius:999px;border:1px solid var(--fb-rim);background:var(--fb-cell);color:var(--fb-text);cursor:pointer}
+.sr-nav button[aria-pressed="true"]{color:var(--fb-accent);border-color:color-mix(in srgb,var(--fb-accent) 55%,transparent);background:var(--fb-panel)}
+.sr-sec{display:grid;gap:14px}
+.sr-sec>h3{margin:0;font:500 12px var(--fb-font);letter-spacing:2.5px;text-transform:uppercase;color:var(--fb-bright);border-bottom:1px solid var(--fb-line);padding-bottom:6px}
+.sr-sub{display:grid;gap:8px}
+.sr-sub>h4{margin:6px 0 0;font:600 13px var(--fb-font);color:var(--fb-accent)}
+.sr-rows{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,520px),1fr));gap:8px}
+.sr-row{display:grid;grid-template-columns:140px minmax(0,1fr);gap:14px;align-items:start;padding:10px 12px;border:1px solid var(--fb-rim);border-radius:10px;background:var(--fb-panel)}
+.sr-row .im{background:#fff;border:0;border-radius:6px;min-height:76px;max-height:150px;padding:6px;display:flex;align-items:center;justify-content:center;cursor:zoom-in;overflow:hidden}
+.sr-row .im img{max-height:136px;max-width:100%;width:auto}
+.sr-row.big{grid-template-columns:minmax(0,1fr)}
+.sr-row.big .im{max-height:none}
+.sr-row.big .im img{max-height:340px}
+.sr-row b{display:block;color:var(--fb-bright);font-weight:600;font-size:14px;margin-bottom:3px}
+.sr-row p{margin:0;font-size:13px;line-height:1.5;color:var(--fb-text)}
+.sr-row .tell{margin-top:5px;font-size:12px;color:var(--fb-dim)}
+.sr-row .tell span{color:var(--fb-accent)}
+@media (max-width:720px){.sr-row{grid-template-columns:96px minmax(0,1fr);gap:10px}.sr-row .im{min-height:60px}}
+`;
+  function reference(root, opts = {}) {
+    const IMG = opts.img || "img/sym/";
+    if (!document.getElementById("sr-css")) { const s = document.createElement("style"); s.id = "sr-css"; s.textContent = RCSS; document.head.appendChild(s); }
+    const subs = {}; SYM_TEST.forEach(x => { ((subs[x.s] ||= {})[x.ss] ||= []).push(x); });
+    root.classList.add("sr");
+    root.innerHTML = `<div class="sr-nav" role="group" aria-label="Chart legend">${[["all", "All charts"], ...SYM_SECTIONS].map(([k, n], i) => `<button type="button" data-sec="${k}" aria-pressed="${i === 0}">${esc(n)}</button>`).join("")}</div>` +
+      SYM_SECTIONS.map(([k, n]) => `<section class="sr-sec" data-s="${k}"><h3>${esc(n)}</h3>${Object.entries(subs[k] || {}).map(([ss, xs]) => `<div class="sr-sub"><h4>${esc(ss)}</h4><div class="sr-rows">${xs.map(x =>
+        `<div class="sr-row${x.s === "lights" ? " big" : ""}" data-sym="${x.id}" data-t="${esc((x.a + " " + x.m + " " + ss).toLowerCase())}"><button type="button" class="im zoomable" data-img="sym/${x.id}" aria-label="Enlarge ${esc(x.a)}"><img src="${IMG}${x.id}.png" alt="" loading="lazy"></button><div><b>${esc(x.a)}</b><p>${esc(x.m)}</p>${x.tip ? `<p class="tell"><span>Look for:</span> ${esc(x.tip)}</p>` : ""}</div></div>`).join("")}</div></div>`).join("")}</section>`).join("");
+    root.querySelector(".sr-nav").addEventListener("click", e => { const b = e.target.closest("[data-sec]"); if (!b) return;
+      root.querySelectorAll(".sr-nav button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+      root.querySelectorAll(".sr-sec").forEach(s => s.hidden = b.dataset.sec !== "all" && s.dataset.s !== b.dataset.sec); });
+    return { filter(q) { q = (q || "").trim().toLowerCase(); let any = false;
+      root.querySelectorAll(".sr-row").forEach(r => { r.hidden = !!q && !r.dataset.t.includes(q); any ||= !r.hidden; });
+      root.querySelectorAll(".sr-sub").forEach(s => s.hidden = !s.querySelector(".sr-row:not([hidden])"));
+      root.querySelectorAll(".sr-sec").forEach(s => s.hidden = !s.querySelector(".sr-sub:not([hidden])"));
+      return any; } };
+  }
+  window.IFRSymTest = { mount, reference };
 })();

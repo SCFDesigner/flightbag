@@ -301,7 +301,7 @@ body.fb #pop.fb-panel{background-color:var(--fb-cell)}
   <div id="chapters"></div>
   <section id="terms-sec" class="h-slate"><div class="sec-h"><h2>Terms &amp; Definitions</h2><small id="terms-n"> · the filter box searches these too</small></div><div class="terms" id="terms"></div></section>
   <section id="symtest-sec" class="h-brown"><div class="sec-h"><h2>Symbol Quick Test</h2><small>85 single symbols · wrong answers are look-alikes · keys 1 2 3</small></div><div id="symtest"></div></section>
-  <section id="symbols" class="h-brown"><div class="sec-h"><h2>Symbol Quick Key</h2><small>FAA Chart Users' Guide · 9 Jul 2026 · tap a symbol to enlarge</small></div><div class="symkey" id="symkey"></div></section>
+  <section id="symbols" class="h-brown"><div class="sec-h"><h2>Symbol Reference</h2><small>Every symbol by chart legend · FAA Chart Users' Guide 9 Jul 2026 · tap a symbol to enlarge</small></div><div id="symkey"></div></section>
   <p class="empty" id="none" hidden>No topics match that filter.</p>
 </div>
 
@@ -374,9 +374,7 @@ function cardHTML(n) {
 chapters.innerHTML = TOUR_CHAPTERS.map((k, i) => { const list = NODES.filter(n => n.c === k);
   return `<section class="ch h-${hue(k)}" id="ch-${k}" data-ch="${k}"><div class="sec-h"><span class="n">${String(i + 1).padStart(2, "0")}</span><h2>${esc(CLUSTERS[k].name)}</h2><small>${list.length} topics</small></div>
     <div class="cards">${list.map(cardHTML).join("")}</div></section>`; }).join("");
-const symGroups = [...new Set(SYMBOL_CARDS.map(c => c.g))];
-$("#symkey").innerHTML = symGroups.map(g => `<div class="symgrp"><div class="fb-label">${esc(g)}</div>${SYMBOL_CARDS.map((c, i) => [c, i]).filter(([c]) => c.g === g).map(([c, i]) =>
-  `<div class="symrow fb-panel" data-sym="${i}"><button type="button" class="im zoomable" data-img="${c.img}" aria-label="Enlarge ${esc(c.a)} symbol"><img src="img/${c.img}.png" alt="" loading="lazy"></button><div class="st"><b>${esc(c.a)}</b><p>${esc(c.w)}</p></div></div>`).join("")}</div>`).join("");
+const symRef = IFRSymTest.reference($("#symkey"), { img: "img/sym/" });
 
 /* ───── acronyms ───── */
 const gKeys = Object.keys(GLOSSARY).sort((a, b) => b.length - a.length).map(k => k.replace(/[.*+?^${}()|[\]\\/]/g, "\\$&"));
@@ -390,7 +388,7 @@ function acronymize(root, perBlock) {
       while ((m = gRe.exec(s))) { const k = m[1]; if (used.has(k)) continue; used.add(k); frag.append(s.slice(last, m.index)); const a = document.createElement("abbr"); a.className = "ac"; a.dataset.d = GLOSSARY[k]; a.textContent = k; frag.append(a); last = m.index + k.length; }
       if (last) { frag.append(s.slice(last)); t.replaceWith(frag); } }); });
 }
-acronymize(chapters, ".card"); acronymize($("#symkey"), ".symrow");
+acronymize(chapters, ".card"); acronymize($("#symkey"), ".sr-row");
 const tip = $("#tip");
 function showTip(a) { tip.textContent = a.textContent + " — " + a.dataset.d; tip.hidden = false; const r = a.getBoundingClientRect();
   tip.style.left = Math.min(innerWidth - tip.offsetWidth - 8, Math.max(8, r.left)) + "px"; tip.style.top = (r.top - tip.offsetHeight - 6 < 4 ? r.bottom + 6 : r.top - tip.offsetHeight - 6) + "px"; }
@@ -496,9 +494,7 @@ function applyFilter() {
     c.hidden = !show; any ||= show; });
   $$("section.ch").forEach(s => s.hidden = !$$(".card", s).some(c => !c.hidden));
   $("#numbers").hidden = !!q; $("#symtest-sec").hidden = !!q;
-  let anyTerm = false; $$(".term").forEach(t => { t.hidden = !!q && !t.dataset.t.includes(q); anyTerm ||= !t.hidden; }); $("#terms-sec").hidden = !anyTerm; any ||= !!q && anyTerm; $("#symbols").hidden = !!q && !SYMBOL_CARDS.some(c => (c.a + " " + c.w).toLowerCase().includes(q));
-  $$(".symrow").forEach(b => { const c = SYMBOL_CARDS[+b.dataset.sym]; b.hidden = !!q && !(c.a + " " + c.w).toLowerCase().includes(q); });
-  $$(".symgrp").forEach(g => g.hidden = !$$(".symrow", g).some(r => !r.hidden));
+  let anyTerm = false; $$(".term").forEach(t => { t.hidden = !!q && !t.dataset.t.includes(q); anyTerm ||= !t.hidden; }); $("#terms-sec").hidden = !anyTerm; any ||= !!q && anyTerm; $("#symbols").hidden = !!q && !symRef.filter(q); if (!q) symRef.filter("");
   $("#none").hidden = any || !$("#symbols").hidden;
 }
 fin.addEventListener("input", applyFilter);

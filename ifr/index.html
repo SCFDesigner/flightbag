@@ -299,6 +299,7 @@ abbr.ac{text-decoration:underline dotted var(--ink-3);text-underline-offset:3px;
 .term .tl{font:500 11px var(--fb-mono);color:var(--fb-accent);background:none;border:0;padding:0;cursor:pointer;text-align:left}
 .term .tl:hover{text-decoration:underline}
 .terms-filter{max-width:360px}
+.refsec{display:grid;gap:14px}
 /* ── Flight Bag skin ── */
 .tools{display:flex;flex-wrap:wrap;gap:8px}
 .go-tool{font-size:12.5px;padding:7px 14px}
@@ -744,17 +745,23 @@ function setHash(h) { try { history.replaceState(null, "", "#" + h); } catch {} 
 /* symbols */
 function buildSymbols() {
   const charts = [...new Set(SYMBOL_GROUPS.map(g => g.chart))];
-  $("#sym-in").innerHTML = `<div><h1>Chart Symbology</h1><p class="lede">IFR enroute and Terminal Procedures symbols from the FAA Chart Users' Guide (edition of 9 July 2026). Tap any image to zoom. Each card says what to look for.</p></div>
+  $("#sym-in").innerHTML = `<div><h1>Chart Symbology</h1><p class="lede">Every IFR symbol on its own, grouped by the chart legend it comes from (enroute, approach plate, DP, STAR, airport diagram, lighting), with what it means and how to tell it from look-alikes. Full FAA legend pages follow below. Source: FAA Chart Users' Guide, 9 July 2026. Tap any image to zoom.</p></div>
   <section class="anat" aria-label="Approach plate anatomy">
     <div class="anat-img"><img src="img/t-anatomy.png" alt="Sample RNAV (GPS) RWY 7 approach plate, Orlando Executive"/>${ANATOMY.map((a, i) => `<button type="button" class="hs" data-hs="${i}" style="left:${a.x}%;top:${a.y}%;width:${a.w}%;height:${a.h}%" aria-label="${esc(a.t)}"></button>`).join("")}</div>
     <div class="anat-info"><div class="sect-h">Plate anatomy · tap a region</div><h3 id="hs-t">RNAV (GPS) RWY 7, Orlando Exec</h3><p id="hs-d" style="margin:0;color:var(--ink-2)">Brief a plate in this order: title &amp; date → top strip → notes → missed approach → comms → planview → profile → minimums → airport sketch.</p>
       <button type="button" class="go-sym fb-btn primary" id="hs-go" hidden>Open topic on the map →</button>
       <div class="anat-list">${ANATOMY.map((a, i) => `<button type="button" class="chip" data-hs="${i}">${esc(a.t)}</button>`).join("")}</div></div>
   </section>
+  <section class="refsec" id="sg-ref"><div class="sgroup-h"><h2>Symbol by symbol</h2><span>${SYM_TEST.length} symbols by chart legend · what each one means</span></div>
+    <input class="fb-input" id="sr-q" type="search" placeholder="Filter symbols (e.g. hold, MEA, PAPI)" autocomplete="off" aria-label="Filter symbols" style="max-width:360px">
+    <div id="symref"></div></section>
+  <div class="sgroup-h"><h2>Full legend pages</h2><span>the original FAA pages, for context</span></div>
   <div class="filter" role="group" aria-label="Filter charts"><button type="button" aria-pressed="true" data-f="all">All</button>${charts.map(c => `<button type="button" aria-pressed="false" data-f="${c}">${c}</button>`).join("")}</div>
   ${SYMBOL_GROUPS.map(g => `<section class="sgroup" id="sg-${g.id}" data-chart="${g.chart}"><div class="sgroup-h"><h2>${esc(g.t)}</h2><span>${esc(g.chart)} · ${g.cards.length}</span></div>
     <div class="cards">${g.cards.map(c => `<article class="scard fb-panel"><button type="button" class="zoomable" data-img="${c.img}" aria-label="Enlarge ${esc(c.t)}"><img src="img/${c.img}.png" alt="${esc(c.t)}" loading="lazy"></button>
       <div class="txt"><h3>${esc(c.t)}</h3><p>${esc(c.d)}</p><span class="pg">CUG p.${c.p}</span></div></article>`).join("")}</div></section>`).join("")}`;
+  const symRef = IFRSymTest.reference($("#symref"), { img: "img/sym/" });
+  $("#sr-q").addEventListener("input", e => symRef.filter(e.target.value));
   acronymize($("#sym-in"));
   const pick = i => { const a = ANATOMY[i]; $$(".hs").forEach(h => h.classList.toggle("on", +h.dataset.hs === i)); $("#hs-t").textContent = a.t; $("#hs-d").textContent = a.d;
     const go = $("#hs-go"); go.hidden = !a.go; go.dataset.go = a.go || ""; };
@@ -797,7 +804,7 @@ const DAY = 864e5, BOXES = [0, 1, 3, 7, 14, 30], NEW_PER_SESSION = 15;
 const srs = store.get("srs", {});
 let deck = [], di = 0, flipped = false, deckName = "mix", sess = { right: 0, miss: 0 };
 const cardsFor = name => {
-  const sym = SYMBOL_CARDS.map(c => ({ key: "s:" + c.img, kind: "Symbol", img: c.img, a: c.a, d: c.w || c.d }));
+  const sym = SYM_TEST.filter(x => x.q !== false).map(x => ({ key: "s:" + x.id, kind: "Symbol", img: "sym/" + x.id, a: x.a, d: x.m }));
   const mn = NODES.filter(n => n.mn).map(n => ({ key: "m:" + n.id, kind: "Mnemonic", q: `What does ${n.mn.word} stand for?`, a: n.t, d: n.mn.rows.map(r => r[0] + " — " + r[1]).join("\n"), go: n.id }));
   const qs = NODES.filter(n => n.q).map(n => ({ key: "q:" + n.id, kind: "Question", q: n.q[0], a: n.q[1], d: n.t, go: n.id }));
   return name === "symbols" ? sym : name === "mnemonics" ? mn : name === "questions" ? qs : [...sym, ...mn, ...qs];
