@@ -214,6 +214,7 @@ mark{background:var(--warn);color:var(--fb-bg);border-radius:3px}
 font-size:14px;cursor:pointer;display:flex;justify-content:space-between;transition:border-color .12s}
 .topt:hover{border-color:var(--accent)}.topt.active{background:color-mix(in srgb,var(--accent) 10%,var(--panel2));border-color:var(--accent);color:var(--accent)}
 .topt span{color:var(--muted)}.topt.active span{color:var(--muted)}
+.tretry{display:inline-block;margin-right:6px;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:600;color:var(--fb-warn);border:1px solid var(--fb-warn)}
 .tbar{display:flex;justify-content:space-between;align-items:center;font-size:13px;gap:12px;flex-wrap:wrap;margin-bottom:6px;color:var(--muted)}
 .tchoice{display:flex;gap:10px;padding:13px 14px;border:0;border-left:2px solid transparent;border-radius:var(--fb-radius-sm);margin:8px 0;
 background:linear-gradient(90deg,var(--hi2),var(--hi));cursor:pointer;transition:background .12s,border-color .12s}
@@ -837,7 +838,7 @@ function barResumeNote(){
 /* ---- save / resume any test in progress ---- */
 function saveTest(){if(!tActive||!tOrder.length)return;
   store.set(PFX+'tsave',{ids:tOrder.map(q=>q.id),i:tIdx,sc:tScore,wr:tWR,to:tTO,wrong:tWrong,
-    ctx:testCtx,drill:testDrill,left:tPaused?tLeft:0,stage:currentStage,chunk:studyChunk,picks:tPicks,ts:Date.now()});}
+    ctx:testCtx,drill:testDrill,rt:tRetry,rq:tOrder.map((q,i)=>q._retry?i:-1).filter(i=>i>=0),left:tPaused?tLeft:0,stage:currentStage,chunk:studyChunk,picks:tPicks,ts:Date.now()});}
 function clearTest(){store.set(PFX+'tsave',null);}
 function loadTest(){const s=store.get(PFX+'tsave',null);
   return (s&&s.ids&&s.ids.length&&s.i<s.ids.length)?s:null;}
@@ -846,7 +847,8 @@ function resumeSaved(s){const by={};D.questions.forEach(q=>by[q.id]=q);
   if(items.length!==s.ids.length)return false;
   tActive=true;tOrder=items;tOrder.forEach(q=>delete q._tsh);tIdx=s.i||0;tScore=s.sc||0;
   tWR=s.wr||0;tTO=s.to||0;tWrong=s.wrong||[];testCtx=s.ctx||'test';testDrill=!!s.drill;
-  lastTestItems=items;tPaused=false;tResumeLeft=s.left||0;tAnswered=false;tPicks=s.picks||{};tReview=-1;
+  tRetry=!!s.rt;(s.rq||[]).forEach(i=>{if(tOrder[i])tOrder[i]=retryCopy(tOrder[i]);});
+  lastTestItems=tOrder.filter(q=>!q._retry);tPaused=false;tResumeLeft=s.left||0;tAnswered=false;tPicks=s.picks||{};tReview=-1;
   renderTest();return true;}
 
 function pauseTest(){if(!tActive||tPaused||tAnswered)return;
@@ -875,9 +877,17 @@ function buildRandom100(){const target=100;let picks=[];
   return picks;}
 let testDrill=false,testType='normal',testScope='random',qstreak={},drillKey='all';
 const DRILL_TARGET=1;
+/* Second chance: a miss (wrong pick or timeout) comes back RETRY_GAP questions later, again until it's
+   answered right. Only the first attempt is scored and the first miss stays in the missed bank (marks). */
+const RETRY_GAP=3;
+let testRetry=true,tRetry=false;
+function retryCopy(q){const o=q._retry?Object.getPrototypeOf(q):q;const c=Object.create(o);c._retry=true;c._tsh=null;return c;}
+function requeue(q){if(!tRetry)return;tOrder.splice(Math.min(tIdx+1+RETRY_GAP,tOrder.length),0,retryCopy(q));}
+function firstTries(){return tOrder.filter(q=>!q._retry);}
+function retriesLeft(){return tOrder.slice(tIdx+1).filter(q=>q._retry).length;}
 function startTestWith(items,ctx,drill){if(!items.length){alert('No questions for that test.');return;}
   clearTest();tPaused=false;tResumeLeft=0;tPicks={};tReview=-1;
-  testDrill=!!drill;tActive=true;lastTestItems=items;tOrder=shuffle(items);tOrder.forEach(q=>delete q._tsh);tIdx=0;tScore=0;tWrong=[];tWR=0;tTO=0;testCtx=ctx;renderTest();}
+  testDrill=!!drill;tRetry=testRetry&&ctx==='test';tActive=true;lastTestItems=items;tOrder=shuffle(items);tOrder.forEach(q=>delete q._tsh);tIdx=0;tScore=0;tWrong=[];tWR=0;tTO=0;testCtx=ctx;renderTest();}
 function startDrill(scope){drillKey=scope;
   const items=scope==='all'?D.questions.filter(q=>marks.has(q.id)):qsFor(scope.slice(4)).filter(q=>marks.has(q.id));
   if(!items.length){alert('No missed questions in that selection yet — get some wrong first!');return;}
@@ -899,6 +909,9 @@ function renderTest(){
     content.innerHTML=`<div class="tsetup">${resumeHTML}<h2>Timed Test</h2>
       <div class="slabel" style="text-align:left;max-width:420px;margin:6px auto 5px">Test type</div>
       <div style="display:flex;gap:8px;max-width:420px;margin:0 auto 12px"><button class="btn${testType==='normal'?' active':''}" id="ttNormal" style="flex:1">Normal</button><button class="btn${testType==='missed'?' active':''}" id="ttMissed" style="flex:1">Missed / marked</button></div>
+      <div class="slabel" style="text-align:left;max-width:420px;margin:0 auto 5px">Wrong answers</div>
+      <div style="display:flex;gap:8px;max-width:420px;margin:0 auto 4px"><button class="btn${testRetry?' active':''}" id="trOn" style="flex:1">Come back ${RETRY_GAP} later</button><button class="btn${testRetry?'':' active'}" id="trOff" style="flex:1">Ask once</button></div>
+      <div style="max-width:420px;margin:0 auto 12px;text-align:left;color:var(--muted);font-size:12px">${testRetry?'A miss returns until you get it right. Only the first try is scored, and it still goes to the missed bank.':'Each question is asked once.'}</div>
       <div class="slabel" style="text-align:left;max-width:420px;margin:0 auto 5px">${testType==='normal'?'Category':'Which misses'}</div>
       <div class="testopts">${catOpts}</div>
       ${testType==='normal'?`<div class="slabel" style="text-align:left;max-width:420px;margin:2px auto 5px">Length — <span id="lenNote">${testLen===100?'every question':testLen+'% (weakest first)'}</span></div>
@@ -913,6 +926,8 @@ function renderTest(){
     if(db2)db2.onclick=()=>{clearTest();renderTest();};
     document.getElementById('ttNormal').onclick=()=>{testType='normal';testScope='random';store.set(PFX+'testtype',testType);store.set(PFX+'testscope',testScope);renderTest();};
     document.getElementById('ttMissed').onclick=()=>{testType='missed';testScope='all';store.set(PFX+'testtype',testType);store.set(PFX+'testscope',testScope);renderTest();};
+    document.getElementById('trOn').onclick=()=>{testRetry=true;store.set(PFX+'retry',true);renderTest();};
+    document.getElementById('trOff').onclick=()=>{testRetry=false;store.set(PFX+'retry',false);renderTest();};
     content.querySelectorAll('.topt').forEach(b=>b.onclick=()=>{testScope=b.dataset.s;store.set(PFX+'testscope',testScope);renderTest();});
     content.querySelectorAll('.lenb').forEach(b=>b.onclick=()=>{testLen=+b.dataset.l;store.set(PFX+'testlen',testLen);renderTest();});
     document.getElementById('tsecR').oninput=e=>{speedSecs=+e.target.value;document.getElementById('tsecL').textContent=speedSecs;store.set(PFX+'speed',speedSecs);};
@@ -922,12 +937,15 @@ function renderTest(){
     return;}
   if(tIdx>=tOrder.length){ // DONE
     wrap.classList.remove('testing');clearTest();tAnswered=false;tPaused=false;
-    const total=tOrder.length,pct=Math.round(tScore/total*100);
+    const total=firstTries().length,pct=Math.round(tScore/total*100);
+    const nRetry=tOrder.length-total;
+    const retryNote=nRetry?` \u00b7 ${nRetry} second-chance repeat${nRetry>1?'s':''}`:'';
+    const missedHere=D.questions.filter(q=>tWrong.includes(q.id));
     if(testDrill){
       const scopeQs=drillKey==='all'?D.questions.filter(q=>marks.has(q.id)):qsFor(drillKey.slice(4)).filter(q=>marks.has(q.id));
       const scopeRem=scopeQs.length;
       const headline=scopeRem===0?'All missed cleared!':'Round done';
-      const sub=`Got ${tScore}/${total} \u00b7 ${scopeRem} still to clear \u2014 one right answer clears a question. Run it again until it hits zero.`;
+      const sub=`Got ${tScore}/${total} first try${retryNote} \u00b7 ${scopeRem} still to clear \u2014 one right answer clears a question. Run it again until it hits zero.`;
       const btns=`<button class="btn active" id="tDrill" style="padding:9px 18px" ${scopeRem?'':'disabled style="opacity:.45"'}>Drill again (${scopeRem} left)</button><button class="btn" id="tMenu" style="padding:9px 18px">Test menu</button>`;
       content.innerHTML=`<div class="card"><div class="tdone"><div>${headline}</div><div class="big">${tScore} / ${total}</div><div style="color:var(--muted)">${sub}</div><p>${btns}</p></div></div>`;
       const dr=document.getElementById('tDrill');if(dr)dr.onclick=()=>startDrill(drillKey);
@@ -947,11 +965,12 @@ function renderTest(){
       document.getElementById('showing').textContent='set done';return;}
     const btns=testCtx==='study'
       ? `<button class="btn active" id="tCont" style="padding:9px 18px">Continue ▸</button><button class="btn" id="tRestart" style="padding:9px 18px">Restart</button>`
-      : `<button class="btn active" id="tRestart" style="padding:9px 18px">Restart</button><button class="btn" id="tReview" style="padding:9px 18px">Review flagged ›</button><button class="btn" id="tMenu" style="padding:9px 18px">Test menu</button>`;
+      : `${missedHere.length?`<button class="btn active" id="tRetest" style="padding:9px 18px">Retest the ${missedHere.length} missed</button>`:''}<button class="btn${missedHere.length?'':' active'}" id="tRestart" style="padding:9px 18px">Restart</button><button class="btn" id="tReview" style="padding:9px 18px">Review flagged ›</button><button class="btn" id="tMenu" style="padding:9px 18px">Test menu</button>`;
     content.innerHTML=`<div class="card"><div class="tdone"><div>Test complete</div>
-      <div class="big">${tScore} / ${total}</div><div style="color:var(--muted)">${pct}% correct · ✗ ${tWR} wrong pick · <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/></svg> ${tTO} timed out · ${tWrong.length} flagged</div>
+      <div class="big">${tScore} / ${total}</div><div style="color:var(--muted)">${pct}% first try${retryNote} · ✗ ${tWR} wrong pick · <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/></svg> ${tTO} timed out · ${tWrong.length} flagged</div>
       <p>${btns}</p></div></div>`;
     const rb=document.getElementById('tRestart');if(rb)rb.onclick=()=>startTestWith(lastTestItems,testCtx,false);
+    const rt=document.getElementById('tRetest');if(rt)rt.onclick=()=>startTestWith(missedHere,'test',false);
     const cb=document.getElementById('tCont');if(cb)cb.onclick=nextStage;
     const rv=document.getElementById('tReview');if(rv)rv.onclick=()=>{mode='scroll';markedOnly=true;activeCat='All';expOn=true;tActive=false;render();};
     const mb=document.getElementById('tMenu');if(mb)mb.onclick=()=>{tActive=false;render();};
@@ -960,7 +979,8 @@ function renderTest(){
   wrap.classList.add('testing');
   const q=tOrder[tIdx];tAnswered=false;
   const chs=(function(){if(!q._tsh)q._tsh=shuffle(q.choices);const L=['A','B','C','D'];return q._tsh.map((c,i)=>({l:L[i],t:c.t,c:c.c}));})();
-  content.innerHTML=`<div class="tbar"><span>Question ${tIdx+1} / ${tOrder.length}</span><span>✓ ${tScore} &nbsp; ✗ ${tWrong.length} &nbsp;·&nbsp; <span id="tclock">${speedSecs}s</span></span></div>
+  const rl=retriesLeft();
+  content.innerHTML=`<div class="tbar"><span>${q._retry?'<span class="tretry" title="You missed this earlier">Again</span>':''}Question ${tIdx+1} / ${tOrder.length}${rl?` \u00b7 ${rl} coming back`:''}</span><span>✓ ${tScore} &nbsp; ✗ ${tWrong.length} &nbsp;·&nbsp; <span id="tclock">${speedSecs}s</span></span></div>
     <div class="card" data-id="${esc(q.id)}"><div class="timebar" id="tbedge"></div>
       <div class="qmeta"><span class="qleft"><span class="qtag">${esc(q.cat)}</span><span class="qid">#${esc(q.id)}</span>${q.fig?`<span class="figchip">FIG ${esc(q.fig)}${q.fig2?'/'+esc(q.fig2):''}</span>`:''}</span></div>
       <div class="qsplit${(q.fig||q.sup)?' two':''}"><div class="qtext"><p class="stem">${esc(q.stem)}</p>
@@ -1014,17 +1034,25 @@ function pick(el,q){if(tAnswered)return;tAnswered=true;stopBar();
   tPicks[tIdx]={i:+el.dataset.i,ok:el.dataset.c==='1'};
   document.querySelectorAll('#tchoices .tchoice').forEach(x=>x.classList.add('disabled'));
   const ok=el.dataset.c==='1';
+  if(q._retry){ // second chance: not scored, and getting it right now doesn't clear the first miss
+    if(ok)el.classList.add('pick-correct');
+    else{el.classList.add('pick-wrong');showMissed();requeue(q);}
+    tNextT=setTimeout(next,ok?1500:4000);return;}
   if(ok){el.classList.add('pick-correct');tScore++;schedRate(q.id,2);if(!testDrill&&marks.has(q.id)){marks.delete(q.id);delete qstreak[q.id];store.set(PFX+'marks',[...marks]);store.set(PFX+'qstreak',qstreak);}if(overconf[q.id]){delete overconf[q.id];store.set(PFX+'overconf',overconf);}
     if(testDrill){const s=(qstreak[q.id]||0)+1;if(s>=DRILL_TARGET){marks.delete(q.id);delete qstreak[q.id];}else{qstreak[q.id]=s;}store.set(PFX+'qstreak',qstreak);store.set(PFX+'marks',[...marks]);}}
   else{el.classList.add('pick-wrong');tWrong.push(q.id);tWR++;marks.add(q.id);qstreak[q.id]=0;store.set(PFX+'marks',[...marks]);store.set(PFX+'qstreak',qstreak);
     if(tQStart&&(performance.now()-tQStart)<speedSecs*400){overconf[q.id]=1;store.set(PFX+'overconf',overconf);}
-    schedRate(q.id,0);
-    document.querySelectorAll('#tchoices .tchoice').forEach(x=>{if(x.dataset.c==='1')x.classList.add('show-correct');});
-    const tb2=document.querySelector('.tbar span:last-child');if(tb2)tb2.innerHTML+=' &nbsp;<span style="color:var(--muted);font-size:11.5px">space \u2192 next</span>';}
+    schedRate(q.id,0);showMissed();requeue(q);}
   recordTest(q,ok?'right':'wrong');tNextT=setTimeout(next,ok?1500:4000);}
-function timeUp(q){if(tAnswered)return;tAnswered=true;tPicks[tIdx]={i:-1,ok:false,to:1};tWrong.push(q.id);tTO++;marks.add(q.id);qstreak[q.id]=0;store.set(PFX+'marks',[...marks]);store.set(PFX+'qstreak',qstreak);
+function showMissed(){
+  document.querySelectorAll('#tchoices .tchoice').forEach(x=>{if(x.dataset.c==='1')x.classList.add('show-correct');});
+  const tb2=document.querySelector('.tbar>span:last-child');if(tb2)tb2.innerHTML+=' &nbsp;<span style="color:var(--muted);font-size:11.5px">space \u2192 next'+(tRetry?' \u00b7 it comes back':'')+'</span>';}
+function timeUp(q){if(tAnswered)return;tAnswered=true;tPicks[tIdx]={i:-1,ok:false,to:1};
+  if(q._retry){document.querySelectorAll('#tchoices .tchoice').forEach(x=>{x.classList.add('disabled');if(x.dataset.c==='1')x.classList.add('show-correct');});
+    requeue(q);tNextT=setTimeout(next,4000);return;}
+  tWrong.push(q.id);tTO++;marks.add(q.id);qstreak[q.id]=0;store.set(PFX+'marks',[...marks]);store.set(PFX+'qstreak',qstreak);
   document.querySelectorAll('#tchoices .tchoice').forEach(x=>{x.classList.add('disabled');if(x.dataset.c==='1')x.classList.add('show-correct');});
-  const card=document.querySelector('.card');if(card)card.style.animation='shake .5s';recordTest(q,'timeout');tNextT=setTimeout(next,4000);}
+  const card=document.querySelector('.card');if(card)card.style.animation='shake .5s';requeue(q);recordTest(q,'timeout');tNextT=setTimeout(next,4000);}
 function next(){if(!tActive)return;tIdx++;renderTest();renderSide();}
 
 /* ---------- STUDY POSITION ---------- */
@@ -1633,7 +1661,7 @@ function initCourse(key){
   reviewed=new Set(store.get(PFX+'rev',[]));
   qtest=store.get(PFX+'test',{});qlast=store.get(PFX+'qlast',{});
   currentStage=store.get(PFX+'stage',0);
-  testType=store.get(PFX+'testtype','normal');testScope=store.get(PFX+'testscope','random');
+  testType=store.get(PFX+'testtype','normal');testRetry=store.get(PFX+'retry',true);testScope=store.get(PFX+'testscope','random');
   qstreak=store.get(PFX+'qstreak',{});
   sched=store.get(PFX+'sched',{});overconf=store.get(PFX+'overconf',{});
   tPaused=false;tResumeLeft=0;
