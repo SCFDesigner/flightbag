@@ -2,7 +2,7 @@
 <html lang="en"><head>
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow, noarchive, nosnippet"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>FII Study 2 — Prepware</title>
+<title>FII — ASA Prepware</title>
 <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="stylesheet" href="theme/flightbag-theme.css">
@@ -475,7 +475,7 @@ body.gloss .glosscol{display:flex}
 <body class="fb">
 <div class="home" id="home"><div class="homeinner">
   <a class="fb-home fbnav" href="index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Flight Bag</a>
-  <h1>FII Study 2</h1>
+  <h1>FII · ASA Prepware</h1>
   <p class="hsub">Pick a course to study</p>
   <div class="hcards" id="hcards"></div>
   <div class="hfoot">Progress is saved separately for each course.</div>
@@ -640,7 +640,7 @@ function qsFor(c){if(c==='All')return D.questions.slice();
   if(c===MISSCAT)return D.questions.filter(q=>missedEver.has(q.id));
   return D.questions.filter(q=>q.cat===c);}
 function catQuestions(c){return qsFor(c).sort((x,y)=>seq==='a'?x.a-y.a:x.b-y.b);}
-let focusQ=null; /* ?q=<id>: show one question, opened from the FII test's "Prepware explanation" link */
+let focusQ=null; /* ?q=<id>: deep link that shows one question with its explanation */
 function pool(){if(focusQ&&mode==='scroll'&&QID[focusQ])return [QID[focusQ]];let a=qsFor(query?'All':activeCat).filter(q=>matches(q)&&(!markedOnly||marks.has(q.id)));
   a.sort((x,y)=>seq==='a'?x.a-y.a:x.b-y.b);return a;}
 function subsetOf(items,pct){if(pct>=100||items.length<2)return items;
@@ -659,14 +659,13 @@ function choicesFor(q){if(answers==='correct')return q.choices.filter(c=>c.c).ma
 
 function expIsOpen(id){return expOpen.has(id)?true:expOpen.has('!'+id)?false:expOn;}
 const IFR_COURSES=new Set(['fii','fii2']);
-/* Related-study links under an explanation: the scraped Prepware explanation (FII test only, ifr/fii-prepware.js)
-   and the IFR Atlas / Quick Review topics this question is about (ifr/topic-match.js). New tab, so a test isn't lost. */
+/* Related-study links under an explanation: the IFR Atlas / Quick Review topics this question is about
+   (ifr/topic-match.js). New tab, so a test isn't lost. The Sheppard Air and ASA Prepware banks are kept separate. */
 function ifrLinks(q){if(!window.IFRMatch||!IFR_COURSES.has(course))return '';
   const ts=IFRMatch.match({stem:q.stem,answer:q.choices.filter(c=>c.c).map(c=>c.t).join(' '),exp:q.exp});
-  const pw=(course==='fii'&&window.FII_PREPWARE)?FII_PREPWARE[q.id]:null;
-  if(!ts.length&&!pw)return '';
+  if(!ts.length)return '';
   const a=(h,t,cls)=>`<a class="ifrlink ${cls}" href="${h}" target="_blank" rel="noopener">${t}</a>`;
-  return `<div class="ifrrow">`+(pw?a('fii-study-2.html?q='+encodeURIComponent(pw[0]),pw[1]?'Prepware explanation':'Similar Prepware question','pw'):'')+
+  return `<div class="ifrrow">`+
     ts.map(t=>a('ifr/index.html#n-'+t.id,'IFR Atlas: '+esc(t.t),'map')+a('ifr/quick-review.html#t-'+t.id,'Quick card','card')).join('')+`</div>`;}
 function figSrc(f){return f?FIGS[(D.figpfx||'')+f]:null;}
 function figAttr(v){return v.startsWith('enc:')?`src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-enc="${esc(v.slice(4))}"`:`src="${v}"`;}
@@ -1574,7 +1573,7 @@ function buildSteps(){const s=[];
 let STEPS=[];
 function buildPlan(){const total=STEPS.length,done=STEPS.filter(s=>planDone.has(s.id)).length;
   let phases=[],cur=null;STEPS.forEach(s=>{if(!cur||cur.name!==s.ph){cur={name:s.ph,items:[]};phases.push(cur);}cur.items.push(s);});
-  let html=`<div class="phdr"><h2>Sheppard Study Strategy — your progress</h2><div class="goal">Target: finish all 5 steps in ~14 days (21 max). <b id="pcount">${done}</b>/${total} done.</div><div class="bar"><i id="pfill" style="width:${Math.round(done/total*100)}%"></i></div></div><div class="pbody">`;
+  let html=`<div class="phdr"><h2>Study Strategy — your progress</h2><div class="goal">Target: finish all 5 steps in ~14 days (21 max). <b id="pcount">${done}</b>/${total} done.</div><div class="bar"><i id="pfill" style="width:${Math.round(done/total*100)}%"></i></div></div><div class="pbody">`;
   phases.forEach(p=>{html+=`<div class="phase"><div class="pt">${esc(p.name)}</div>`;
     p.items.forEach(s=>{const idx=STEPS.indexOf(s);html+=`<div class="step${planDone.has(s.id)?' done':''}" data-id="${s.id}"><input type="checkbox" ${planDone.has(s.id)?'checked':''}><span class="lbl">${esc(s.lbl)}<small>${esc(s.ph)}</small></span><button class="start" data-idx="${idx}">Go ▸</button></div>`;});html+='</div>';});
   html+='</div>';const plan=document.getElementById('plan');const wasOpen=plan.classList.contains('open');plan.innerHTML=html;if(wasOpen)plan.classList.add('open');
@@ -1682,7 +1681,7 @@ function initCourse(key){
   document.getElementById('total').textContent=D.questions.length;
   document.querySelector('.btitle').textContent=D.short+' Study';
   document.getElementById('csub').textContent=D.name.replace(/^[A-Z]+ \u2014 /,'');
-  document.title='FII Study 2 \u2014 Prepware';
+  document.title='FII \u2014 ASA Prepware';
   const s=document.getElementById('search');if(s)s.value='';
   notesLoad();clearNotePause();
   const mt=document.getElementById('mtitle');if(mt)mt.innerHTML=esc(D.short)+' Study <span class="msub">\u00b7 '+D.questions.length+' Q</span>';
@@ -1946,8 +1945,8 @@ bindNotes();
 <div class="vlock" id="vlock" hidden>
   <form class="vcard fb-panel" id="vform" autocomplete="off">
     <svg class="vico" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>
-    <h1>FII Study 2</h1>
-    <p class="vsub">FOI · FIA · FII question banks. Enter the password to open them.</p>
+    <h1>FII · ASA Prepware</h1>
+    <p class="vsub">ASA Prepware FII question bank. Enter the password to open them.</p>
     <label class="fb-label" for="vpw">Password</label>
     <input class="fb-input" id="vpw" type="password" autocomplete="current-password" required>
     <label class="vrem"><input type="checkbox" id="vrem" checked> Remember on this device</label>
@@ -2039,7 +2038,6 @@ body.vlocked .wrap,body.vlocked .home{display:none!important}
 .ifrlink{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;line-height:1.2;padding:5px 11px;border-radius:999px;text-decoration:none;
   border:1px solid var(--fb-border,#3a3935);background:var(--fb-cell,#282827);color:var(--fb-bright,#f0eee6)}
 .ifrlink:hover{border-color:var(--fb-accent,#d97757)}
-.ifrlink.pw{border-color:color-mix(in srgb,var(--fb-accent,#d97757) 60%,transparent);color:var(--fb-accent,#d97757)}
 .ifrlink.card{color:var(--fb-dim,#85837a);padding:5px 9px}
 .focusbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 12px;padding:10px 14px;border-radius:10px;
   border:1px solid color-mix(in srgb,var(--fb-accent,#d97757) 50%,transparent);color:var(--fb-bright,#f0eee6);font-size:13px}
