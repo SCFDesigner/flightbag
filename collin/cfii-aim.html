@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#191918">
+<title>CFII AIM Augmentation</title>
+<link rel="icon" type="image/svg+xml" href="../icons/favicon.svg">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+<link rel="stylesheet" href="../theme/flightbag-theme.css">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body.fb { min-height: 100dvh; padding: max(12px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom)); }
+svg.i { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+#app { max-width: 1120px; margin: 0 auto; }
+.top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.top h1 { font-size: var(--fb-fs-sm); font-weight: 400; letter-spacing: 3px; text-transform: uppercase; color: var(--fb-bright); }
+.top .sp { flex: 1; }
+.iconbtn { background: none; border: 1px solid var(--fb-border); color: var(--fb-text); border-radius: var(--fb-radius-sm); height: 36px; min-width: 36px; padding: 0 10px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; font: inherit; font-size: var(--fb-fs-xs); }
+.iconbtn:hover { border-color: var(--fb-accent); color: var(--fb-bright); }
+.ed { font-size: var(--fb-fs-xs); color: var(--fb-dim); line-height: 1.5; margin-bottom: 10px; }
+.ed b { color: var(--fb-text); font-weight: 600; }
+
+/* sticky tool bar: filter + contents toggle (phone) */
+.bar { position: sticky; top: 0; z-index: 5; display: flex; gap: 8px; align-items: center; padding: 8px 0; background: var(--fb-bg); }
+.bar .fb-input { flex: 1; min-width: 0; height: 40px; }
+.bar .cnt { font-family: var(--fb-mono); font-size: var(--fb-fs-xs); color: var(--fb-dim); white-space: nowrap; }
+#btnToc { display: inline-flex; }
+
+.layout { display: grid; grid-template-columns: 1fr; gap: 16px; align-items: start; }
+#toc { display: none; }
+body.toc #toc { display: block; position: fixed; z-index: 20; left: 0; right: 0; top: 0; bottom: 0; overflow-y: auto; padding: max(14px, env(safe-area-inset-top)) 16px 24px; background: var(--fb-panel); }
+#toc .th { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+#toc .th b { flex: 1; font-weight: 400; letter-spacing: 2px; text-transform: uppercase; font-size: var(--fb-fs-xs); color: var(--fb-dim); }
+#toc .ar { margin: 12px 0 4px; font-size: var(--fb-fs-xs); letter-spacing: 1.5px; text-transform: uppercase; color: var(--fb-accent); }
+#toc details { border-bottom: 1px solid var(--fb-rim, var(--fb-border)); }
+#toc summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: 58px 1fr auto; gap: 8px; align-items: baseline; padding: 7px 4px; color: var(--fb-text); font-size: var(--fb-fs-sm); }
+#toc summary::-webkit-details-marker { display: none; }
+#toc summary:hover { color: var(--fb-bright); }
+#toc summary .id { font-family: var(--fb-mono); font-size: var(--fb-fs-xs); color: var(--fb-dim); }
+#toc summary .n { font-family: var(--fb-mono); font-size: var(--fb-fs-xs); color: var(--fb-dim); }
+#toc .opt { color: var(--fb-warn); font-size: 10px; letter-spacing: 1px; margin-left: 4px; }
+#toc ol { list-style: none; padding: 0 0 8px 66px; display: flex; flex-direction: column; gap: 2px; }
+#toc ol a { color: var(--fb-dim); text-decoration: none; font-size: var(--fb-fs-sm); line-height: 1.35; display: block; padding: 3px 0; }
+#toc ol a:hover, #toc ol a.cur { color: var(--fb-bright); }
+#toc .hide { display: none; }
+#toc .tclose { display: inline-flex; }
+
+/* content */
+#content { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+.area { font-size: var(--fb-fs-xs); letter-spacing: 2px; text-transform: uppercase; color: var(--fb-accent); margin: 10px 0 -4px; }
+.lesson { padding: 16px; scroll-margin-top: 64px; }
+.lesson > h2 { font-size: 20px; line-height: 1.25; color: var(--fb-bright); font-weight: 600; margin-bottom: 4px; }
+.lesson > h2 .id { font-family: var(--fb-mono); font-size: 14px; color: var(--fb-dim); margin-right: 8px; font-weight: 400; }
+.lesson .opt { color: var(--fb-warn); font-size: var(--fb-fs-xs); letter-spacing: 1px; text-transform: uppercase; }
+.topic { border-top: 1px solid var(--fb-border); margin-top: 14px; padding-top: 12px; scroll-margin-top: 64px; }
+.topic > h3 { display: flex; align-items: baseline; gap: 8px; font-size: 17px; line-height: 1.3; color: var(--fb-bright); font-weight: 600; margin-bottom: 10px; }
+.topic > h3 a.pl { color: var(--fb-dim); text-decoration: none; font-family: var(--fb-mono); font-size: 13px; font-weight: 400; margin-left: auto; padding-left: 8px; }
+.topic > h3 a.pl:hover { color: var(--fb-accent); }
+.topic.flash { animation: flash 1.6s ease-out; }
+@keyframes flash { 0% { background: color-mix(in srgb, var(--fb-accent) 22%, transparent); } 100% { background: transparent; } }
+mark { background: color-mix(in srgb, var(--fb-accent) 35%, transparent); color: inherit; border-radius: 2px; }
+.empty { text-align: center; color: var(--fb-dim); padding: 40px 10px; font-size: 16px; }
+.hide { display: none !important; }
+
+@media (min-width: 960px) {
+  .layout { grid-template-columns: 300px 1fr; }
+  #toc, body.toc #toc { display: block; position: sticky; top: 64px; max-height: calc(100dvh - 76px); overflow-y: auto; padding: 4px 12px 12px; background: none; z-index: auto; }
+  #btnToc, #toc .tclose { display: none; }
+  .bar { padding-left: 316px; }
+}
+
+/* gate */
+#gate { position: fixed; inset: 0; z-index: 50; background: var(--fb-bg); display: flex; align-items: center; justify-content: center; padding: 16px; }
+#gate.hidden { display: none; }
+#gate .box { width: 100%; max-width: 340px; padding: 22px; display: flex; flex-direction: column; gap: 12px; }
+#gate .err { color: var(--fb-bad); font-size: var(--fb-fs-sm); display: none; }
+#gate .err.show { display: block; }
+</style>
+</head>
+<body class="fb">
+
+<div id="gate">
+  <div class="box fb-panel">
+    <div class="fb-title">CFII AIM Augmentation</div>
+    <input id="gate-pw" class="fb-input" type="password" placeholder="Password" autocomplete="current-password">
+    <button id="gate-go" class="fb-btn">Unlock</button>
+    <div id="gate-err" class="err">Wrong password.</div>
+    <a class="fb-home" href="./"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>Back</a>
+  </div>
+</div>
+
+<div id="app">
+  <div class="top">
+    <a class="fb-home" href="cfii-oral.html"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>CFII Oral deck</a>
+    <h1>AIM Augmentation</h1>
+    <span class="sp"></span>
+    <a class="fb-home" href="./"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>Collin</a>
+    <a class="fb-home" href="../index.html"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7M5 10v10h14V10"/></svg>Home</a>
+  </div>
+  <p class="ed" id="ed"></p>
+  <div class="bar">
+    <button class="iconbtn" id="btnToc" aria-controls="toc" aria-expanded="false"><svg class="i" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>Contents</button>
+    <input class="fb-input" id="q" type="search" placeholder="Filter: topic, text, 5-3-8" aria-label="Filter topics">
+    <span class="cnt" id="cnt"></span>
+  </div>
+  <div class="layout">
+    <nav id="toc" aria-label="Table of contents">
+      <div class="th"><b>Contents</b><button class="iconbtn tclose" id="btnTocClose" aria-label="Close contents"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+      <div id="tocList"></div>
+    </nav>
+    <main id="content"><div class="empty">Loading the AIM&hellip;</div></main>
+  </div>
+</div>
+
+<script src="../theme/flightbag-theme.js"></script>
+<script src="cfii-aim.js"></script>
+<script src="cfii-aim-data.js"></script>
+<script>
+(function () {
+'use strict';
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+const fmt = s => esc(s).replace(/\*\*(.+?)\*\*/g, '$1');
+const D = window.CFII_AIM;
+const ICON_LINK = '#';
+
+/* ---------- build: area -> lesson -> topic, in deck order ---------- */
+const TOPICS = [];   // {el, sid, ci, text}
+function build() {
+  const e = D.edition;
+  $('#ed').innerHTML = 'Further reading for every CFII Oral topic: the AIM paragraphs that cover it, quoted verbatim. Source: <b>' + esc(e.title) + '</b>, ' +
+    esc(e.edition) + ', effective <b>' + esc(e.effective) + '</b>; change: ' + esc(e.change) + '. ' + esc(e.note);
+  let html = '', toc = '', area = '';
+  D.topics.forEach(s => {
+    if (s.area !== area) { area = s.area; html += '<div class="area">' + esc(area) + '</div>'; toc += '<div class="ar" data-area="' + esc(area) + '">' + esc(area) + '</div>'; }
+    html += '<section class="lesson fb-panel" id="' + esc(s.id) + '" data-sid="' + esc(s.id) + '"><h2><span class="id">' + esc(s.id) + '</span>' + esc(s.title) + '</h2>' +
+      (s.optional ? '<div class="opt">Extra lesson (not PTS/ACS)</div>' : '');
+    toc += '<details data-sid="' + esc(s.id) + '"><summary><span class="id">' + esc(s.id) + '</span><span>' + esc(s.title) + (s.optional ? '<span class="opt">EXTRA</span>' : '') +
+      '</span><span class="n">' + s.cards.length + '</span></summary><ol>';
+    s.cards.forEach(([ci, h]) => {
+      const id = CFIIAim.anchor(s.id, ci);
+      html += '<article class="topic" id="' + esc(id) + '" data-sid="' + esc(s.id) + '" data-ci="' + ci + '"><h3>' + fmt(h) +
+        '<a class="pl" href="#' + encodeURIComponent(id) + '" aria-label="Link to this topic">' + ICON_LINK + '</a></h3>' + CFIIAim.html(CFIIAim.list(s.id, ci)) + '</article>';
+      toc += '<li><a href="#' + encodeURIComponent(id) + '" data-id="' + esc(id) + '">' + fmt(h) + '</a></li>';
+    });
+    html += '</section>';
+    toc += '</ol></details>';
+  });
+  $('#content').innerHTML = html;
+  $('#tocList').innerHTML = toc;
+  document.querySelectorAll('.topic').forEach(el => {
+    const lst = CFIIAim.list(el.dataset.sid, el.dataset.ci);
+    TOPICS.push({ el, sid: el.dataset.sid, text: (el.textContent + ' ' + lst.map(x => x[0]).join(' ')).toLowerCase(), base: el.innerHTML });
+  });
+  const n = TOPICS.length, np = Object.keys(D.paras).length;
+  $('#cnt').textContent = n + ' topics';
+  console.log('[cfii-aim] ' + D.topics.length + ' lessons, ' + n + ' topics, ' + np + ' AIM paragraphs');
+}
+
+/* ---------- filter ---------- */
+let ft = null;
+function applyFilter() {
+  const raw = $('#q').value.trim(), q = raw.toLowerCase().replace(/[−–]/g, '-');
+  let shown = 0;
+  TOPICS.forEach(t => {
+    if (t.hl) { t.el.innerHTML = t.base; t.hl = false; }
+    const hit = !q || q.split(/\s+/).every(w => t.text.replace(/−/g, '-').includes(w));
+    t.el.classList.toggle('hide', !hit);
+    if (hit) { shown++; if (q) { highlight(t.el, q.split(/\s+/).filter(w => w.length > 1)); t.hl = true; } }
+  });
+  document.querySelectorAll('.lesson').forEach(l => l.classList.toggle('hide', !l.querySelector('.topic:not(.hide)')));
+  document.querySelectorAll('.area').forEach(a => {
+    let n = a.nextElementSibling, any = false;
+    while (n && !n.classList.contains('area')) { if (!n.classList.contains('hide')) any = true; n = n.nextElementSibling; }
+    a.classList.toggle('hide', !any);
+  });
+  document.querySelectorAll('#toc details').forEach(d => {
+    let any = false;
+    d.querySelectorAll('li').forEach(li => { const el = document.getElementById(li.firstChild.dataset.id); const v = el && !el.classList.contains('hide'); li.classList.toggle('hide', !v); any = any || v; });
+    d.classList.toggle('hide', !any); if (q) d.open = any;
+  });
+  document.querySelectorAll('#toc .ar').forEach(a => {
+    let n = a.nextElementSibling, any = false;
+    while (n && n.tagName === 'DETAILS') { if (!n.classList.contains('hide')) any = true; n = n.nextElementSibling; }
+    a.classList.toggle('hide', !any);
+  });
+  $('#cnt').textContent = (q ? shown + ' / ' : '') + TOPICS.length + ' topics';
+  if (!shown) { if (!$('#none')) $('#content').insertAdjacentHTML('beforeend', '<div class="empty" id="none">No topic matches.</div>'); }
+  else if ($('#none')) $('#none').remove();
+  place();
+}
+function highlight(root, words) {
+  if (!words.length) return;
+  const rx = new RegExp('(' + words.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/-/g, '[-−]')).join('|') + ')', 'gi');
+  const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT), nodes = [];
+  while (walk.nextNode()) nodes.push(walk.currentNode);
+  nodes.forEach(n => {
+    if (!rx.test(n.nodeValue)) return; rx.lastIndex = 0;
+    const span = document.createElement('span');
+    span.innerHTML = esc(n.nodeValue).replace(rx, '<mark>$1</mark>');
+    n.parentNode.replaceChild(span, n);
+  });
+}
+
+/* ---------- table of contents + deep links ---------- */
+function openToc(v) { document.body.classList.toggle('toc', v); $('#btnToc').setAttribute('aria-expanded', v ? 'true' : 'false'); }
+function goHash(smooth) {
+  const id = decodeURIComponent(location.hash.slice(1)); if (!id) return;
+  const el = document.getElementById(id); if (!el) { console.warn('[cfii-aim] no anchor', id); return; }
+  if (el.classList.contains('hide')) { $('#q').value = ''; applyFilter(); }
+  el.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
+  if (el.classList.contains('topic')) { el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }
+  const d = document.querySelector('#toc details[data-sid="' + CSS.escape(el.dataset.sid || id) + '"]'); if (d) d.open = true;
+  document.querySelectorAll('#toc ol a').forEach(a => a.classList.toggle('cur', a.dataset.id === id));
+}
+function place() { if (window.FlightBagTheme && FlightBagTheme.place) FlightBagTheme.place(); }
+
+function start() {
+  if (!D) { $('#content').innerHTML = '<div class="empty">Could not load cfii-aim-data.js.</div>'; return; }
+  build();
+  $('#q').addEventListener('input', () => { clearTimeout(ft); ft = setTimeout(applyFilter, 120); });
+  $('#btnToc').onclick = () => openToc(!document.body.classList.contains('toc'));
+  $('#btnTocClose').onclick = () => openToc(false);
+  $('#tocList').addEventListener('click', e => { if (e.target.closest('a')) openToc(false); });
+  window.addEventListener('hashchange', () => goHash(true));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && document.body.classList.contains('toc')) openToc(false);
+    else if (e.key === '/' && !e.target.matches('input, textarea')) { e.preventDefault(); $('#q').focus(); }
+  });
+  window.addEventListener('resize', place);
+  place();
+  // deep links win over the browser's scroll restoration (reload / back)
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  requestAnimationFrame(() => goHash(false));
+  window.addEventListener('load', () => goHash(false));
+}
+
+/* ---------- password gate (same gate and device unlock as cfii-oral.html / the CFI Binder) ---------- */
+const PW_HASH = 'bb6aaa1408ba3d7cbc2c3365af590db79904ea29004f7117ebfed98dec4b6651';
+async function sha256(s) {
+  if (!(window.crypto && crypto.subtle)) return null;
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+function unlock() { $('#gate').classList.add('hidden'); place(); goHash(false); }
+let unlocked = false; try { unlocked = localStorage.getItem('cfi-unlocked') === '1'; } catch (e) {}
+start();
+if (unlocked) unlock();
+else {
+  const tryGo = async () => {
+    const h = await sha256($('#gate-pw').value);
+    if (h === PW_HASH) { try { localStorage.setItem('cfi-unlocked', '1'); } catch (e) {} unlock(); }
+    else { $('#gate-err').classList.add('show'); $('#gate-pw').select(); }
+  };
+  $('#gate-go').onclick = tryGo;
+  $('#gate-pw').addEventListener('keydown', e => { if (e.key === 'Enter') tryGo(); });
+  setTimeout(() => $('#gate-pw').focus(), 100);
+}
+window.__cfiiAim = { applyFilter, goHash, openToc, TOPICS };
+
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  navigator.serviceWorker.register('cfii-oral-sw.js').catch(err => console.warn('[cfii-aim] sw', err));
+}
+})();
+</script>
+</body>
+</html>

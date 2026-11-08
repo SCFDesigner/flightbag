@@ -124,6 +124,26 @@ body.menu #drawer { transform: none; }
 #gate .err { color: var(--fb-bad); font-size: var(--fb-fs-sm); display: none; }
 #gate .err.show { display: block; }
 
+/* AIM Augmentation button + sheet */
+.aimbtn { background: none; border: 1px solid var(--fb-border); color: var(--fb-text); border-radius: var(--fb-radius-sm); height: 30px; padding: 0 9px; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; font: inherit; font-size: var(--fb-fs-xs); letter-spacing: 1px; }
+.aimbtn svg.i { width: 15px; height: 15px; }
+.aimbtn:hover { border-color: var(--fb-accent); color: var(--fb-bright); }
+#aimScrim { position: fixed; inset: 0; background: rgba(0,0,0,.55); opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 30; }
+#aimSheet { position: fixed; left: 50%; bottom: 0; width: min(760px, 100%); max-height: 86dvh; transform: translate(-50%, 104%); transition: transform .24s var(--fb-ease, ease); z-index: 31;
+  background: var(--fb-panel); border: 1px solid var(--fb-border); border-bottom: none; border-radius: 14px 14px 0 0; display: flex; flex-direction: column; padding-bottom: env(safe-area-inset-bottom); }
+body.aim #aimScrim { opacity: 1; pointer-events: auto; }
+body.aim #aimSheet { transform: translate(-50%, 0); }
+#aimSheet .sh { display: flex; align-items: center; gap: 8px; padding: 12px 14px 10px; border-bottom: 1px solid var(--fb-border); }
+#aimSheet .sh .tt { flex: 1; min-width: 0; }
+#aimSheet .sh .k { font-size: var(--fb-fs-xs); letter-spacing: 2px; text-transform: uppercase; color: var(--fb-accent); }
+#aimSheet .sh .h { font-size: 16px; color: var(--fb-bright); font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; }
+#aimBody { flex: 1; min-height: 0; overflow-y: auto; padding: 14px 16px 12px; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+#aimSheet .sf { padding: 10px 16px 12px; border-top: 1px solid var(--fb-border); display: flex; flex-direction: column; gap: 6px; font-size: var(--fb-fs-xs); color: var(--fb-dim); }
+#aimSheet .sf a { color: var(--fb-accent); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-size: var(--fb-fs-sm); }
+#aimSheet .sf a:hover { text-decoration: underline; }
+#drawer a.dlink { display: flex; align-items: center; gap: 8px; color: var(--fb-text); text-decoration: none; }
+#drawer a.dlink:hover { color: var(--fb-bright); }
+
 @media (min-width: 700px) {
   h2.ch { font-size: 26px; }
   ul.pts li { font-size: 19px; }
@@ -189,12 +209,25 @@ body.menu #drawer { transform: none; }
       <button class="iconbtn" id="btnStart">Go to start</button>
       <button class="iconbtn" id="btnResetSeen">Reset progress</button>
     </div>
+    <a class="dlink" href="cfii-aim.html"><svg class="i" viewBox="0 0 24 24"><path d="M4 5h6a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H4zM20 5h-6a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h7z"/></svg>AIM Augmentation: every topic, inline</a>
   </div>
   <div id="toc"></div>
 </aside>
 
+<div id="aimScrim"></div>
+<div id="aimSheet" role="dialog" aria-modal="true" aria-labelledby="aimTitle" aria-hidden="true" inert>
+  <div class="sh">
+    <div class="tt"><div class="k">AIM Augmentation</div><div class="h" id="aimTitle"></div></div>
+    <button class="iconbtn" id="aimClose" aria-label="Close AIM"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div id="aimBody"></div>
+  <div class="sf"><a id="aimInline" href="cfii-aim.html"><svg class="i" viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7"/></svg><span>Open in the inline AIM page</span></a><span id="aimEd"></span></div>
+</div>
+
 <script src="../theme/flightbag-theme.js"></script>
 <script src="cfii-oral-data.js"></script>
+<script src="cfii-aim-index.js"></script>
+<script src="cfii-aim.js"></script>
 <script>
 (function () {
 'use strict';
@@ -203,6 +236,16 @@ const LS = 'cfii-oral:';
 const load = (k, d) => { try { const v = localStorage.getItem(LS + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } };
 const save = (k, v) => { try { localStorage.setItem(LS + k, JSON.stringify(v)); } catch (e) {} };
 const SECS = window.CFII_ORAL || [];
+const AIMIX = window.CFII_AIM_INDEX || {};
+const ICON_AIM = '<svg class="i" viewBox="0 0 24 24"><path d="M4 5h6a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H4zM20 5h-6a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h7z"/></svg>';
+/* card -> AIM target: script card {sid, ci}; L1 lesson card {sid, ci: null} when any topic has excerpts */
+function aimTarget(c) {
+  if (!c || !c.sid || !AIMIX[c.sid]) return null;
+  if (c.t === 'p1') return { sid: c.sid, ci: null };
+  if (c.t !== 's') return null;
+  const ci = +c.key.split('#')[1];
+  return AIMIX[c.sid].includes(ci) ? { sid: c.sid, ci } : null;
+}
 const ICON_STAR = '<svg class="i" viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg>';
 
 /* ---------- all cards, flattened in eBook order ---------- */
@@ -300,6 +343,7 @@ function kindRow(c, label, cls) {
     (sec ? '<span>' + esc(sec.id) + '</span>' : '') +
     (sec && sec.optional ? '<span class="tag x">Extra</span>' : '') +
     '<span class="sp"></span>' +
+    (aimTarget(c) ? '<button class="aimbtn" id="btnAim" aria-label="AIM Augmentation" title="AIM Augmentation (A)">' + ICON_AIM + 'AIM</button>' : '') +
     (c.t === 's' || c.t === 'r' ? '<button class="star' + (on ? ' on' : '') + '" id="btnStar" aria-label="Star">' + ICON_STAR + '</button>' : '') +
     '</div>';
 }
@@ -318,6 +362,7 @@ function howtoHTML() {
     '<li>Next: <span class="kbd">→</span> or <span class="kbd">Space</span>, swipe left, or the Next button</li>' +
     '<li>Prev: <span class="kbd">←</span>, swipe right</li>' +
     '<li>Star: the star icon or <span class="kbd">S</span>. Review them in <b>Starred</b>.</li>' +
+    '<li>AIM: the <b>AIM</b> button (or <span class="kbd">A</span>) on a topic opens the AIM paragraphs that cover it, verbatim, as further reading; on an L1 lesson card it shows every topic\'s excerpts. <span class="kbd">Esc</span>, the close button or a tap outside closes it. The <a href="cfii-aim.html" style="color:var(--fb-accent)">inline AIM page</a> lists them all with a table of contents.</li>' +
     '<li>Menu (top left): jump to any lesson, see progress, shuffle recall cards, hide the extra non-ACS lessons.</li></ul>' +
     '<h3>Plan</h3><ul><li>First: L1 Top through L3, one pass each.</li><li>Tonight: L4 Full, All cards, start to finish, out loud.</li><li>Tomorrow: Recall only (shuffled), star misses, then Starred.</li></ul>' +
     '<p style="margin-top:14px;color:var(--fb-dim);font-size:13px">Source: The Backseat Pilot CFI-I eBook (Jul 2026), condensed. Your position, stars and progress stay on this device.</p></div>';
@@ -414,6 +459,7 @@ function render() {
   mid.disabled = false;
   mid.textContent = c.t === 'r' ? (revealed ? 'Hide' : 'Reveal') : c.t === 'end' ? 'Next layer' : 'Menu';
   const sb = $('#btnStar'); if (sb) sb.onclick = e => { e.stopPropagation(); toggleStar(); };
+  const ab = $('#btnAim'); if (ab) ab.onclick = e => { e.stopPropagation(); openAim(); };
   inner.querySelectorAll('.tstar').forEach(b => b.onclick = e => { e.stopPropagation(); toggleStarKey(b.dataset.k); });
   const nl = $('#btnNextLayer'); if (nl) nl.onclick = nextLayer;
   // a card counts as seen once shown (recall: once revealed)
@@ -467,6 +513,35 @@ function jumpTo(sid) {
   idx = Math.max(0, i); revealed = false; openMenu(false); render();
 }
 
+/* ---------- AIM Augmentation sheet (data lazy-loaded on first open) ---------- */
+let aimOpen = false, aimReturn = null;
+function openAim() {
+  const c = deck[idx], tg = aimTarget(c); if (!tg || !window.CFIIAim) return;
+  aimOpen = true; aimReturn = document.activeElement;
+  const s = SEC_BY_ID[tg.sid];
+  $('#aimTitle').textContent = tg.ci == null ? s.id + ' ' + s.title + ' (all topics)' : s.cards[tg.ci].h.replace(/\*\*/g, '');
+  $('#aimInline').href = 'cfii-aim.html#' + encodeURIComponent(CFIIAim.anchor(tg.sid, tg.ci));
+  $('#aimBody').innerHTML = '<div class="empty">Loading the AIM&hellip;</div>';
+  $('#aimEd').textContent = '';
+  document.body.classList.add('aim'); $('#aimSheet').setAttribute('aria-hidden', 'false'); $('#aimSheet').inert = false;
+  setTimeout(() => $('#aimClose').focus(), 50);
+  CFIIAim.load('cfii-aim-data.js').then(() => {
+    if (!aimOpen) return;
+    const lst = tg.ci == null ? CFIIAim.lesson(tg.sid) : CFIIAim.list(tg.sid, tg.ci);
+    $('#aimBody').innerHTML = CFIIAim.html(lst); $('#aimBody').scrollTop = 0;
+    $('#aimEd').innerHTML = CFIIAim.edition();
+    console.log('[cfii-oral] AIM ' + CFIIAim.anchor(tg.sid, tg.ci) + ': ' + lst.length + ' excerpt(s)');
+  }).catch(err => { console.warn('[cfii-oral] AIM load failed', err); $('#aimBody').innerHTML = '<div class="empty">Could not load the AIM excerpts (offline?).</div>'; });
+}
+function closeAim() {
+  if (!aimOpen) return;
+  aimOpen = false; document.body.classList.remove('aim'); $('#aimSheet').setAttribute('aria-hidden', 'true'); $('#aimSheet').inert = true;
+  const back = aimReturn && aimReturn !== document.body && document.contains(aimReturn) ? aimReturn : $('#btnAim');
+  if (back && back.focus) back.focus(); else if (document.activeElement) document.activeElement.blur();
+}
+$('#aimClose').onclick = closeAim;
+$('#aimScrim').onclick = closeAim;
+
 /* ---------- menu ---------- */
 function renderToc() {
   const cur = deck[idx] && deck[idx].sid;
@@ -515,12 +590,14 @@ document.addEventListener('keydown', e => {
   if (!$('#gate').classList.contains('hidden')) return;
   if (e.target.matches('input, textarea')) return;
   if (e.metaKey || e.ctrlKey || e.altKey) return;
+  if (aimOpen) { if (e.key === 'Escape' || e.key === 'a' || e.key === 'A') { e.preventDefault(); closeAim(); } return; }   // sheet scrolls natively; deck keys wait
   if (e.key === 'Escape') { openMenu(false); return; }
   if (document.body.classList.contains('menu')) return;
   if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); e.key === ' ' ? advance() : go(1); }
   else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(-1); }
   else if (e.key === 'Enter') { e.preventDefault(); advance(); }
   else if (e.key === 's' || e.key === 'S') toggleStar();
+  else if (e.key === 'a' || e.key === 'A') openAim();
   else if (e.key === 'm' || e.key === 'M') openMenu(true);
   else if (e.key >= '1' && e.key <= '4') setLevel(+e.key);
 });
@@ -559,7 +636,7 @@ else {
 /* ---------- start ---------- */
 document.querySelectorAll('#modeTabs .fb-tab').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
 setLevel(level);
-window.__cfiiOral = { deck: () => deck, idx: () => idx, level: () => level, go, setMode, setLevel, nextLayer, jumpTo, ALL, SECS };
+window.__cfiiOral = { deck: () => deck, idx: () => idx, level: () => level, go, setMode, setLevel, nextLayer, jumpTo, openAim, closeAim, aimOpen: () => aimOpen, aimTarget, ALL, SECS };
 
 /* offline: cache this page, its data and the theme */
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {

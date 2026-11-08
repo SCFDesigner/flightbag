@@ -1,0 +1,289 @@
+{
+ "VI.A": {
+  "3": [
+   {
+    "p": "5-4-11",
+    "b": [
+     6
+    ]
+   }
+  ]
+ },
+ "VI.B": {
+  "2": [
+   {
+    "p": "5-4-11",
+    "b": [
+     6
+    ]
+   }
+  ]
+ },
+ "VI.G": {
+  "1": [
+   {
+    "p": "8-1-5",
+    "b": [
+     1,
+     2,
+     6
+    ]
+   }
+  ]
+ },
+ "VI.H": {
+  "0": [
+   {
+    "p": "8-1-5",
+    "b": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     6,
+     7,
+     10
+    ]
+   }
+  ]
+ },
+ "VII.A": {
+  "0": [
+   {
+    "p": "1-1-3",
+    "b": [
+     0,
+     1,
+     2
+    ]
+   },
+   {
+    "p": "1-1-3",
+    "b": [
+     5,
+     6
+    ]
+   },
+   {
+    "p": "1-1-3",
+    "b": [
+     9
+    ]
+   }
+  ],
+  "1": [
+   {
+    "p": "1-1-3",
+    "b": [
+     3,
+     4
+    ]
+   },
+   {
+    "p": "1-1-3",
+    "b": [
+     7
+    ]
+   }
+  ],
+  "3": [
+   {
+    "p": "1-1-7",
+    "b": [
+     0,
+     1,
+     5
+    ]
+   },
+   {
+    "p": "1-2-3",
+    "b": [
+     12,
+     16
+    ]
+   }
+  ]
+ },
+ "VII.B": {
+  "0": [
+   {
+    "p": "5-3-8",
+    "b": [
+     19,
+     20,
+     21,
+     22
+    ]
+   },
+   {
+    "p": "5-3-8",
+    "b": [
+     23,
+     24,
+     25,
+     26,
+     27
+    ]
+   },
+   {
+    "p": "5-3-8",
+    "b": [
+     10
+    ]
+   },
+   {
+    "p": "5-3-8",
+    "b": [
+     68
+    ]
+   },
+   {
+    "p": "5-3-8",
+    "b": [
+     71,
+     72,
+     73,
+     74,
+     75
+    ]
+   }
+  ],
+  "1": [
+   {
+    "p": "5-3-8",
+    "b": [
+     0,
+     2,
+     3
+    ]
+   },
+   {
+    "p": "5-3-8",
+    "b": [
+     12,
+     13,
+     14,
+     15,
+     16,
+     17
+    ]
+   }
+  ],
+  "2": [
+   {
+    "p": "5-3-8",
+    "b": [
+     4
+    ]
+   },
+   {
+    "p": "5-3-8",
+    "b": [
+     35,
+     36,
+     37,
+     39,
+     40
+    ]
+   },
+   {
+    "p": "5-3-8",
+    "b": [
+     78
+    ]
+   }
+  ],
+  "3": [
+   {
+    "p": "5-3-8",
+    "b": [
+     8
+    ]
+   },
+   {
+    "p": "5-3-8",
+    "b": [
+     41,
+     42,
+     43,
+     44,
+     45,
+     46,
+     47
+    ]
+   },
+   {
+    "p": "5-3-8",
+    "b": [
+     51,
+     63
+    ]
+   }
+  ],
+  "4": [
+   {
+    "p": "5-3-8",
+    "b": [
+     77
+    ]
+   },
+   {
+    "p": "5-3-8",
+    "b": [
+     6,
+     7
+    ]
+   },
+   {
+    "p": "6-4-1",
+    "b": [
+     20,
+     21,
+     22
+    ]
+   }
+  ]
+ },
+ "_notes": {
+  "VI.A": "card 3 partial panel: 5-4-11 c.3 No-Gyro vectors (standard-rate turns with heading indicator inop). Others are IFH technique.",
+  "VI.B": "card 2 partial panel turns: 5-4-11 c.3 No-Gyro (standard / half-standard rate turns).",
+  "VI.G": "card 1 overbank/diving spiral: 8-1-5 b.2(c) graveyard spiral (back pressure tightens the spiral).",
+  "VI.H": "card 0 causes incl. disorientation: 8-1-5 b illusions leading to spatial disorientation (leans, Coriolis, graveyard spiral, somatogravic, false horizon).",
+  "VII.A": "VOR: 1-1-3 (ID/TEST code, accuracy, roughness, to/from station passage, MON; block 3 '?' but reads cleanly); DME arc: 1-1-7 slant range/ID + 1-2-3 c.4 RNAV may fly a DME arc.",
+  "VII.B": "speeds 5-3-8 j.2 (TBL 5-3-1 excluded) + j.8(b) bank; instructions 5-3-8 a-c, i.1-5; entries j.3; timing g, j.4-5, j.7/j.7(c)(2) RNAV; wind j.8(c); lost comms 6-4-1 c.3(c). Skipped garbled blocks: direct entry j.3(c) [39], 175-kt j.2(b)(2) [29], i.6 [18].",
+  "_unmapped": [
+   "VI.A-E[0] control/performance method - IFH technique only",
+   "VI.A-E[2] establish/trim/crosscheck/adjust - IFH technique only",
+   "VI.A-E[3] establish pitch/bank/power - IFH technique only",
+   "VI.A-E[5] crosscheck patterns - IFH technique only",
+   "VI.A-E[6] crosscheck errors - IFH technique only",
+   "VI.A-E[9] adjust - IFH technique only",
+   "VI.A-E[10] straight-and-level - IFH technique only",
+   "VI.A-E[11] constant airspeed climbs/descents - IFH technique only",
+   "VI.A-E[13] constant rate climbs/descents - IFH technique only",
+   "VI.A-E[14] turns to headings - IFH technique only",
+   "VI.A[0] primary/supporting method - IFH technique only",
+   "VI.A[1] pitch control level flight - IFH technique only",
+   "VI.A[2] bank and power - IFH technique only",
+   "VI.B[0] TAS and bank vs rate - not in AIM",
+   "VI.B[1] constant rate turn - IFH technique only",
+   "VI.C[0] airspeed change straight-and-level - IFH technique only",
+   "VI.C[1] airspeed change partial panel - IFH technique only",
+   "VI.C[2] airspeed change in turns - IFH technique only",
+   "VI.D[0] constant airspeed climb - IFH technique only",
+   "VI.D[1] constant airspeed descents - IFH technique only",
+   "VI.E[0] constant rate climb - IFH technique only",
+   "VI.E[1] constant rate descent - IFH technique only",
+   "VI.F[0] magnetic compass operation - not in AIM",
+   "VI.F[1] variation and deviation - not in AIM",
+   "VI.F[2] compass dip/acceleration errors - not in AIM",
+   "VI.F[3] timed turns - IFH technique only",
+   "VI.G[0] full panel steep turn - IFH technique only",
+   "VI.H[1] recovery instruments - IFH technique only",
+   "VI.H[2] nose high recovery - IFH technique only",
+   "VI.H[3] nose low recovery - IFH technique only",
+   "VII.A[2] double-the-difference intercept - eBook method, not in AIM"
+  ]
+ }
+}

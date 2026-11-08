@@ -1,0 +1,295 @@
+{
+ "IX.A": {
+  "0": [
+   {
+    "p": "6-4-1",
+    "b": [
+     1,
+     2,
+     3
+    ]
+   },
+   {
+    "p": "6-4-2",
+    "b": [
+     0,
+     1
+    ]
+   }
+  ],
+  "1": [
+   {
+    "p": "6-4-3",
+    "b": [
+     0,
+     1,
+     2,
+     3
+    ]
+   },
+   {
+    "p": "6-3-1",
+    "b": [
+     7
+    ]
+   }
+  ],
+  "2": [
+   {
+    "p": "4-2-13",
+    "b": [
+     0,
+     1,
+     2,
+     4,
+     5,
+     6
+    ]
+   },
+   {
+    "p": "6-4-1",
+    "b": [
+     0
+    ]
+   }
+  ],
+  "5": [
+   {
+    "p": "6-4-1",
+    "b": [
+     3,
+     4,
+     5,
+     6
+    ]
+   }
+  ],
+  "7": [
+   {
+    "p": "6-4-1",
+    "b": [
+     6,
+     7,
+     8,
+     9,
+     10,
+     11
+    ]
+   }
+  ],
+  "8": [
+   {
+    "p": "6-4-1",
+    "b": [
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18,
+     19
+    ]
+   }
+  ],
+  "11": [
+   {
+    "p": "6-4-1",
+    "b": [
+     20,
+     21,
+     22
+    ]
+   }
+  ],
+  "13": [
+   {
+    "p": "6-4-2",
+    "b": [
+     0,
+     1
+    ]
+   },
+   {
+    "p": "6-4-3",
+    "b": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ]
+   }
+  ]
+ },
+ "IX.B": {
+  "7": [
+   {
+    "p": "5-3-3",
+    "b": [
+     0,
+     1,
+     10,
+     11
+    ]
+   },
+   {
+    "p": "6-1-2",
+    "b": [
+     0,
+     1
+    ]
+   }
+  ],
+  "8": [
+   {
+    "p": "5-4-11",
+    "b": [
+     0,
+     1,
+     6
+    ]
+   }
+  ]
+ },
+ "IX.D": {
+  "13": [
+   {
+    "p": "6-1-1",
+    "b": [
+     0,
+     1,
+     2
+    ]
+   },
+   {
+    "p": "4-4-1",
+    "b": [
+     1
+    ]
+   }
+  ]
+ },
+ "X.A": {
+  "0": [
+   {
+    "p": "5-3-3",
+    "b": [
+     0,
+     1,
+     10,
+     11
+    ]
+   }
+  ]
+ },
+ "XI.B": {
+  "0": [
+   {
+    "p": "8-1-1",
+    "b": [
+     19,
+     20,
+     21
+    ]
+   }
+  ],
+  "7": [
+   {
+    "p": "8-1-1",
+    "b": [
+     23,
+     24
+    ]
+   }
+  ],
+  "9": [
+   {
+    "p": "6-1-2",
+    "b": [
+     0,
+     1
+    ]
+   }
+  ],
+  "10": [
+   {
+    "p": "8-1-1",
+    "b": [
+     23,
+     24
+    ]
+   }
+  ]
+ },
+ "XI.C": {
+  "7": [
+   {
+    "p": "5-3-3",
+    "b": [
+     10,
+     11,
+     16
+    ]
+   },
+   {
+    "p": "8-1-1",
+    "b": [
+     23,
+     24
+    ]
+   }
+  ]
+ },
+ "_notes": {
+  "IX.A": "91.185 quoted in 6-4-1 c.*; 7600 in 6-4-2; reestablishing contact 6-4-3; card 2 uses 4-2-13 receiver/transmitter-inop (tower) + 6-4-1 a judgment.",
+  "IX.B": "card 7 -> 5-3-3 a.1(h) equipment-loss report + 6-1-2 urgency; card 8 -> 5-4-11 radar approaches incl. c.3 no-gyro.",
+  "IX.D": "card 13 -> 6-1-1 emergency authority 91.3(b) + 4-4-1 b request amended clearance.",
+  "X.A": "card 0 -> 5-3-3 a.1(h) malfunction reports (91.187).",
+  "XI.B": "IMSAFE personal checklist 8-1-1 h/i; stress 8-1-1 f; external help 6-1-2.",
+  "XI.C": "card 7 ground topics -> 5-3-3 malfunction/PIREP reports, 8-1-1 personal checklist.",
+  "FOI": "I.A-I.G teaching theory: no AIM content.",
+  "_unmapped": [
+   "IX.B[0] gyro/AHRS failure types - not in AIM",
+   "IX.B[1] recognizing failed instruments - not in AIM",
+   "IX.B[4] partial panel scan technique - not in AIM",
+   "IX.C[0] attitude instrument flying technique - not in AIM",
+   "IX.C[1] engine-out control technique - not in AIM",
+   "IX.C[4] SE straight-and-level technique - not in AIM",
+   "IX.C[5] SE level turn technique - not in AIM",
+   "IX.D[0] engine-out control on approach - not in AIM",
+   "IX.D[1] SE approach scan technique - not in AIM",
+   "IX.D[3] SE approach choice - not in AIM",
+   "IX.D[5] approach briefing mnemonics - not in AIM",
+   "IX.D[6] POH configuration profile - not in AIM",
+   "IX.D[7] POH configuration profile - not in AIM",
+   "IX.D[10] aircraft flow checklists - not in AIM",
+   "IX.D[11] SE landing technique - not in AIM",
+   "X.A[1] maintenance log practice - not in AIM",
+   "XI.A[0] energy management (AFH) - not in AIM",
+   "XI.A[1] energy system (AFH) - not in AIM",
+   "XI.A[3] throttle/elevator energy control - not in AIM",
+   "XI.A[5] power curve elevator effects - not in AIM",
+   "XI.A[6] energy control rules - not in AIM",
+   "XI.A[8] energy errors - not in AIM",
+   "XI.A[11] irreversible sink rate - not in AIM",
+   "XI.B[2] risk management principles - not in this AIM",
+   "XI.B[4] risk management process - not in this AIM",
+   "XI.B[5] risk assessment matrix - not in this AIM",
+   "XI.B[12] DECIDE model - not in this AIM",
+   "XI.B[14] flight debrief - not in AIM",
+   "XI.C[0] 61.57 currency - rule not in AIM",
+   "XI.C[3] ACS task list - not in AIM",
+   "XI.C[5] structuring the IPC - not in AIM",
+   "XI.C[6] sample IPC plan - not in AIM",
+   "XI.C[8] IPC endorsement (AC 61-65) - not in AIM",
+   "I.A[0] I.A[1] I.A[3] I.A[4] I.A[7] I.A[9] I.A[11] I.A[13] I.A[15] learning theory - no AIM content",
+   "I.B[0] I.B[2] I.B[4] I.B[5] I.B[7] I.B[8] I.B[10] human behavior/communication - no AIM content",
+   "I.C[0] I.C[2] I.C[4] teaching process - no AIM content",
+   "I.D[0] I.D[2] I.D[3] I.D[6] I.D[8] teaching methods - no AIM content",
+   "I.E[0] I.E[1] I.E[3] I.E[4] I.E[6] I.E[9] critique/evaluation - no AIM content",
+   "I.F[0] I.F[1] I.F[3] I.F[5] instructor responsibilities - no AIM content",
+   "I.G[0] I.G[1] I.G[3] I.G[5] lesson planning - no AIM content"
+  ]
+ }
+}
