@@ -39,6 +39,27 @@ svg.i { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-widt
 .prog .bar i { display: block; height: 100%; width: 0; background: var(--fb-accent); transition: width .2s; }
 .prog .sec { color: var(--fb-text); font-family: var(--fb-font); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 55%; }
 
+/* pyramid level selector */
+.levels { display: flex; gap: 8px; align-items: center; }
+.levels .fb-tabs { flex: 1; min-width: 0; display: flex; }
+.levels .fb-tab { flex: 1; padding: 7px 4px; font-size: var(--fb-fs-sm); white-space: nowrap; }
+svg.pyr { width: 30px; height: 26px; flex: none; }
+svg.pyr path { stroke: var(--fb-border); stroke-width: 1.2; fill: none; stroke-linejoin: round; }
+svg.pyr path.past { fill: var(--fb-accent); fill-opacity: .35; stroke: var(--fb-accent); }
+svg.pyr path.cur { fill: var(--fb-accent); stroke: var(--fb-accent); }
+.intro ul.topics { padding-left: 0; }
+ul.topics { list-style: none; display: flex; flex-direction: column; gap: 2px; margin-top: 4px; }
+ul.topics li { display: grid; grid-template-columns: 1fr auto; gap: 6px; align-items: start; padding: 8px 0; border-bottom: 1px solid var(--fb-rim, var(--fb-border)); }
+ul.topics li:last-child { border-bottom: none; }
+ul.topics .th { display: block; font-size: 17px; line-height: 1.3; color: var(--fb-bright); font-weight: 600; }
+ul.topics .tg { display: block; font-size: 15px; line-height: 1.4; color: var(--fb-text); margin-top: 2px; }
+.lvtag { font-family: var(--fb-mono); }
+.endbox { text-align: center; padding: 30px 6px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.endbox svg.pyr { width: 64px; height: 56px; }
+.endbox .big { font-size: 24px; color: var(--fb-bright); font-weight: 600; }
+.endbox p { font-size: 16px; line-height: 1.5; color: var(--fb-text); max-width: 420px; }
+.endbox .fb-btn { height: 52px; padding: 0 26px; font-size: 16px; }
+
 /* card */
 #card { flex: 1; min-height: 0; display: flex; flex-direction: column; touch-action: pan-y; }
 #card .inner { flex: 1; min-height: 0; overflow-y: auto; padding: 18px 18px 20px; -webkit-overflow-scrolling: touch; }
@@ -107,6 +128,7 @@ body.menu #drawer { transform: none; }
   h2.ch { font-size: 26px; }
   ul.pts li { font-size: 19px; }
   .q { font-size: 24px; }
+  ul.topics .th { font-size: 18px; }
   .a { font-size: 20px; }
 }
 </style>
@@ -130,6 +152,15 @@ body.menu #drawer { transform: none; }
     <span class="sp"></span>
     <a class="fb-home" href="./"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>Collin</a>
     <a class="fb-home" href="../index.html"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7M5 10v10h14V10"/></svg>Home</a>
+  </div>
+  <div class="levels">
+    <span id="pyrIcon" title="Pyramid layer"></span>
+    <div class="fb-tabs" id="levelTabs">
+      <button class="fb-tab" data-level="1">L1 Top</button>
+      <button class="fb-tab" data-level="2">L2</button>
+      <button class="fb-tab" data-level="3">L3</button>
+      <button class="fb-tab" data-level="4">L4 Full</button>
+    </div>
   </div>
   <div class="modes">
     <div class="fb-tabs" id="modeTabs">
@@ -182,11 +213,23 @@ SECS.forEach(s => {
   s.cards.forEach((c, i) => ALL.push(Object.assign({ key: s.id + '#' + i, sid: s.id, sec: s }, c)));
 });
 const SEC_BY_ID = Object.fromEntries(SECS.map(s => [s.id, s]));
+/* pyramid: per section its intro entry, its cards, and the L1 summary entry */
+const BYSEC = {};
+ALL.forEach(c => { if (!c.sid) return; const b = BYSEC[c.sid] || (BYSEC[c.sid] = { cards: [] }); if (c.t === 'i') b.intro = c; else b.cards.push(c); });
+SECS.forEach(s => { BYSEC[s.id].top = { key: s.id + '#l1', t: 'p1', sid: s.id, sec: s }; });
+const END = { key: 'end', t: 'end', sid: null };
+const LV = {
+  1: ['L1 Top', 'one card per lesson: the topics and a one-line gist of each'],
+  2: ['L2', 'one card per topic: the core idea and the 2-3 most important points'],
+  3: ['L3', 'the objective and every point, condensed, plus the recall cards'],
+  4: ['L4 Full', 'the full script and recall deck']
+};
 const NS = ALL.filter(c => c.t === 's').length, NR = ALL.filter(c => c.t === 'r').length;
 console.log('[cfii-oral] ' + SECS.length + ' sections, ' + NS + ' script + ' + NR + ' recall cards');
 
 /* ---------- state ---------- */
 let mode = load('mode', 'all');
+let level = [1, 2, 3, 4].includes(load('level', 4)) ? load('level', 4) : 4;
 let shuffle = load('shuffle', false);
 let extra = load('extra', true);
 let seed = load('seed', 1);
@@ -197,25 +240,49 @@ let deck = [], idx = 0, revealed = false;
 function rng(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 function shuffled(arr) { const r = rng(seed), a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
+/* cards of the current pyramid layer, in eBook order (L4 = the whole deck) */
+function levelCards() {
+  if (level === 4) return ALL;
+  const out = [ALL[0]];
+  SECS.forEach(s => {
+    const b = BYSEC[s.id];
+    if (level === 1) { out.push(b.top); return; }
+    out.push(b.intro);
+    b.cards.forEach(c => { if (level === 3 || c.t === 's') out.push(c); });
+  });
+  return out;
+}
 function buildDeck() {
   const keep = c => !c.sec || extra || !c.sec.optional;
   if (mode === 'all') {
-    deck = ALL.filter(keep);
+    deck = levelCards().filter(keep);
     if (shuffle) {   // shuffle the recall cards within each section, script cards stay in teaching order
       const out = []; let buf = [];
       const flush = () => { if (buf.length) { out.push(...shuffled(buf)); buf = []; } };
       deck.forEach(c => { if (c.t === 'r') buf.push(c); else { flush(); out.push(c); } });
       flush(); deck = out;
     }
+    if (level < 4) deck.push(END);   // "Next layer" prompt
   } else if (mode === 'recall') {
     deck = ALL.filter(c => c.t === 'r' && keep(c));
     if (shuffle) deck = shuffled(deck);
+  } else if (level === 1) {   // lessons that hold a starred card
+    deck = SECS.filter(s => BYSEC[s.id].cards.some(c => stars.has(c.key))).map(s => BYSEC[s.id].top).filter(keep);
   } else {
-    deck = ALL.filter(c => stars.has(c.key) && keep(c));
+    deck = levelCards().filter(c => (c.t === 's' || c.t === 'r') && stars.has(c.key) && keep(c));
   }
 }
 
-function posKey() { return 'pos-' + mode; }
+/* position per mode and layer (L4 keeps the original keys) */
+function posKey() { return 'pos-' + mode + (level < 4 ? '-L' + level : ''); }
+/* progress per layer: L4 uses the card key, L1-L3 a prefixed key */
+const seenKey = k => level < 4 ? 'L' + level + ':' + k : k;
+function pyrSVG(l) {
+  const hw = y => 13 * (y - 1) / 22, band = [[1, 6.5], [6.5, 12], [12, 17.5], [17.5, 23]];
+  return '<svg class="pyr" viewBox="0 0 28 24" role="img" aria-label="Layer ' + l + ' of 4"><title>Layer ' + l + ' of 4</title>' +
+    band.map(([a, b], i) => '<path class="' + (i + 1 === l ? 'cur' : i + 1 < l ? 'past' : '') + '" d="M' + (14 - hw(a)).toFixed(2) + ' ' + a + 'H' + (14 + hw(a)).toFixed(2) +
+      'L' + (14 + hw(b)).toFixed(2) + ' ' + b + 'H' + (14 - hw(b)).toFixed(2) + 'Z"/>').join('') + '</svg>';
+}
 function restorePos() {
   const k = load(posKey(), null);
   const i = k ? deck.findIndex(c => c.key === k) : -1;
@@ -241,6 +308,9 @@ function howtoHTML() {
   return '<div class="intro">' + kindRow({ key: 'howto' }, 'Start here', '') +
     '<div class="big">How to use this deck</div>' +
     '<p>Every CFII oral topic from the CFI-I eBook, in the eBook\'s order: ' + SECS.length + ' lessons, ' + NS + ' script cards, ' + NR + ' recall cards.</p>' +
+    '<h3>Pyramid layers</h3><ul>' +
+    [1, 2, 3, 4].map(l => '<li><b>' + LV[l][0] + '</b>: ' + LV[l][1] + '.</li>').join('') +
+    '<li>Start at the top and go one layer deeper each pass. Each layer remembers its own place; the end of a layer offers the next one. Keys <span class="kbd">1</span>-<span class="kbd">4</span> switch layers.</li></ul>' +
     '<h3>Card types</h3><ul>' +
     '<li><b>Script</b>: teach it out loud. Objective first, then the talking points, then the common error or scenario question.</li>' +
     '<li><b>Recall</b>: answer before you reveal. Tap the card or press Space to show the answer.</li></ul>' +
@@ -249,7 +319,7 @@ function howtoHTML() {
     '<li>Prev: <span class="kbd">←</span>, swipe right</li>' +
     '<li>Star: the star icon or <span class="kbd">S</span>. Review them in <b>Starred</b>.</li>' +
     '<li>Menu (top left): jump to any lesson, see progress, shuffle recall cards, hide the extra non-ACS lessons.</li></ul>' +
-    '<h3>Plan</h3><ul><li>Tonight: All cards, start to finish, out loud.</li><li>Tomorrow: Recall only (shuffled), star misses, then Starred.</li></ul>' +
+    '<h3>Plan</h3><ul><li>First: L1 Top through L3, one pass each.</li><li>Tonight: L4 Full, All cards, start to finish, out loud.</li><li>Tomorrow: Recall only (shuffled), star misses, then Starred.</li></ul>' +
     '<p style="margin-top:14px;color:var(--fb-dim);font-size:13px">Source: The Backseat Pilot CFI-I eBook (Jul 2026), condensed. Your position, stars and progress stay on this device.</p></div>';
 }
 
@@ -275,6 +345,45 @@ function scriptHTML(c) {
     (c.ref ? '<div class="ref">Ref: ' + fmt(c.ref) + '</div>' : '');
 }
 
+function topHTML(c) {   // L1: lesson + its topics with a gist each
+  const s = c.sec, b = BYSEC[s.id];
+  return '<div class="intro">' + kindRow(c, 'Top &middot; L1', '') +
+    '<div class="area">' + esc(s.area || '') + '</div>' +
+    '<div class="big">' + esc(s.title) + '</div>' +
+    (s.l1 ? '<p>' + fmt(s.l1) + '</p>' : '') +
+    '<h3>Topics</h3><ul class="topics">' +
+    b.cards.filter(x => x.t === 's').map(x => '<li><div><span class="th">' + fmt(x.h) + '</span>' + (x.g ? '<span class="tg">' + fmt(x.g) + '</span>' : '') + '</div>' +
+      '<button class="star tstar' + (stars.has(x.key) ? ' on' : '') + '" data-k="' + esc(x.key) + '" aria-label="Star topic">' + ICON_STAR + '</button></li>').join('') +
+    '</ul></div>';
+}
+function introBriefHTML(c) {   // L2 lesson divider
+  const s = c.sec, ns = s.cards.filter(x => x.t === 's').length;
+  return '<div class="intro">' + kindRow(c, 'Lesson', '') +
+    '<div class="area">' + esc(s.area || '') + '</div>' +
+    '<div class="big">' + esc(s.id) + ' ' + esc(s.title) + '</div>' +
+    (s.l1 ? '<p>' + fmt(s.l1) + '</p>' : '') +
+    '<p style="margin-top:14px;color:var(--fb-dim);font-size:13px">' + ns + ' topics</p></div>';
+}
+function l2HTML(c) {
+  return kindRow(c, 'Core &middot; L2', '') +
+    '<h2 class="ch">' + fmt(c.h) + '</h2>' +
+    (c.g ? '<div class="obj">' + fmt(c.g) + '</div>' : '') +
+    '<ul class="pts">' + (c.l2 || []).map(p => '<li>' + fmt(p) + '</li>').join('') + '</ul>';
+}
+function l3HTML(c) {
+  return kindRow(c, 'Condensed &middot; L3', '') +
+    '<h2 class="ch">' + fmt(c.h) + '</h2>' +
+    (c.obj ? '<div class="obj">' + fmt(c.obj) + '</div>' : '') +
+    '<ul class="pts">' + (c.l3 || c.pts || []).map(p => '<li>' + fmt(p) + '</li>').join('') + '</ul>';
+}
+function endHTML() {
+  const n = level + 1;
+  return '<div class="endbox">' + pyrSVG(level) +
+    '<div class="big">' + LV[level][0] + ' done</div>' +
+    '<p>Next layer, <b>' + LV[n][0] + '</b>: ' + LV[n][1] + '.</p>' +
+    '<button class="fb-btn" id="btnNextLayer">Next layer<svg class="i" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button></div>';
+}
+
 function recallHTML(c) {
   return kindRow(c, 'Recall', 'r') +
     '<div class="q">' + fmt(c.q) + '</div>' +
@@ -292,24 +401,28 @@ function render() {
   }
   idx = Math.max(0, Math.min(idx, deck.length - 1));
   const c = deck[idx];
-  inner.innerHTML = c.t === 'h' ? howtoHTML() : c.t === 'i' ? introHTML(c) : c.t === 's' ? scriptHTML(c) : recallHTML(c);
+  inner.innerHTML = c.t === 'h' ? howtoHTML() : c.t === 'end' ? endHTML() : c.t === 'p1' ? topHTML(c) :
+    c.t === 'i' ? (level === 2 ? introBriefHTML(c) : introHTML(c)) :
+    c.t === 's' ? (level === 2 ? l2HTML(c) : level === 3 ? l3HTML(c) : scriptHTML(c)) : recallHTML(c);
   inner.scrollTop = 0;
   $('#count').textContent = (idx + 1) + ' / ' + deck.length;
   $('#bar').style.width = ((idx + 1) / deck.length * 100) + '%';
-  $('#secName').textContent = c.sec ? c.sec.id + ' ' + c.sec.title : 'Start';
+  $('#secName').textContent = c.sec ? c.sec.id + ' ' + c.sec.title : c.t === 'end' ? LV[level][0] + ' complete' : 'Start';
   $('#btnPrev').disabled = idx === 0;
   $('#btnNext').disabled = idx === deck.length - 1;
   const mid = $('#btnMid');
   mid.disabled = false;
-  mid.textContent = c.t === 'r' ? (revealed ? 'Hide' : 'Reveal') : 'Menu';
+  mid.textContent = c.t === 'r' ? (revealed ? 'Hide' : 'Reveal') : c.t === 'end' ? 'Next layer' : 'Menu';
   const sb = $('#btnStar'); if (sb) sb.onclick = e => { e.stopPropagation(); toggleStar(); };
+  inner.querySelectorAll('.tstar').forEach(b => b.onclick = e => { e.stopPropagation(); toggleStarKey(b.dataset.k); });
+  const nl = $('#btnNextLayer'); if (nl) nl.onclick = nextLayer;
   // a card counts as seen once shown (recall: once revealed)
   if (c.t !== 'r' || revealed) markSeen(c);
   save(posKey(), c.key);
   if (window.FlightBagTheme && FlightBagTheme.place) FlightBagTheme.place();
 }
 
-function markSeen(c) { if (!seen.has(c.key)) { seen.add(c.key); save('seen', [...seen]); if (document.body.classList.contains('menu')) renderToc(); } }
+function markSeen(c) { if (c.t === 'end') return; const k = seenKey(c.key); if (!seen.has(k)) { seen.add(k); save('seen', [...seen]); if (document.body.classList.contains('menu')) renderToc(); } }
 
 /* ---------- actions ---------- */
 function go(d) {
@@ -318,14 +431,27 @@ function go(d) {
   idx = n; revealed = false; render();
 }
 function reveal(v) { const c = deck[idx]; if (!c || c.t !== 'r') return; revealed = v == null ? !revealed : v; render(); }
-function advance() { const c = deck[idx]; if (c && c.t === 'r' && !revealed) reveal(true); else go(1); }
+function advance() { const c = deck[idx]; if (c && c.t === 'r' && !revealed) reveal(true); else if (c && c.t === 'end') nextLayer(); else go(1); }
 function toggleStar() {
   const c = deck[idx]; if (!c || (c.t !== 's' && c.t !== 'r')) return;
-  if (stars.has(c.key)) stars.delete(c.key); else stars.add(c.key);
+  toggleStarKey(c.key);
+}
+/* stars always belong to the underlying script/recall card, whatever the layer */
+function toggleStarKey(k) {
+  if (stars.has(k)) stars.delete(k); else stars.add(k);
   save('stars', [...stars]);
-  if (mode === 'star') { buildDeck(); if (idx >= deck.length) idx = deck.length - 1; }
+  if (mode === 'star') { const cur = deck[idx] && deck[idx].key; buildDeck(); const i = deck.findIndex(c => c.key === cur); idx = i >= 0 ? i : Math.min(idx, deck.length - 1); }
   render();
 }
+function setLevel(l, fromStart) {
+  level = l; save('level', l);
+  document.querySelectorAll('#levelTabs .fb-tab').forEach(b => b.classList.toggle('active', +b.dataset.level === l));
+  $('#pyrIcon').innerHTML = pyrSVG(l);
+  buildDeck();
+  if (fromStart) idx = deck.length > 1 && deck[0].t === 'h' ? 1 : 0; else restorePos();
+  revealed = false; render(); if (document.body.classList.contains('menu')) renderToc();
+}
+function nextLayer() { if (level < 4) setLevel(level + 1, true); }
 function setMode(m) {
   mode = m; save('mode', m);
   document.querySelectorAll('#modeTabs .fb-tab').forEach(b => b.classList.toggle('active', b.dataset.mode === m));
@@ -349,11 +475,12 @@ function renderToc() {
     if (s.optional && !extra) return;
     if (s.area !== area) { area = s.area; html += '<div class="ar">' + esc(area) + '</div>'; }
     const keys = s.cards.map((c, i) => s.id + '#' + i);
-    const done = keys.filter(k => seen.has(k)).length;
+    const lk = level === 1 ? [s.id + '#l1'] : level === 2 ? s.cards.map((c, i) => c.t === 's' ? s.id + '#' + i : null).filter(Boolean) : keys;
+    const done = lk.filter(k => seen.has(seenKey(k))).length;
     const st = keys.filter(k => stars.has(k)).length;
     html += '<button data-sid="' + esc(s.id) + '"' + (s.id === cur ? ' class="cur"' : '') + '><span class="id">' + esc(s.id) + '</span><span>' + esc(s.title) +
-      (s.optional ? '<span class="opt">EXTRA</span>' : '') + '</span><span class="pc' + (done === keys.length ? ' done' : '') + '">' +
-      (st ? st + '★ ' : '') + done + '/' + keys.length + '</span></button>';
+      (s.optional ? '<span class="opt">EXTRA</span>' : '') + '</span><span class="pc' + (done === lk.length ? ' done' : '') + '">' +
+      (st ? st + '★ ' : '') + done + '/' + lk.length + '</span></button>';
   });
   $('#toc').innerHTML = html;
   $('#toc').querySelectorAll('button').forEach(b => b.onclick = () => jumpTo(b.dataset.sid));
@@ -365,7 +492,8 @@ $('#btnMenu').onclick = () => openMenu(true);
 $('#btnClose').onclick = $('#scrim').onclick = () => openMenu(false);
 $('#btnPrev').onclick = () => go(-1);
 $('#btnNext').onclick = () => go(1);
-$('#btnMid').onclick = () => { const c = deck[idx]; if (c && c.t === 'r') reveal(); else openMenu(true); };
+$('#btnMid').onclick = () => { const c = deck[idx]; if (c && c.t === 'r') reveal(); else if (c && c.t === 'end') nextLayer(); else openMenu(true); };
+document.querySelectorAll('#levelTabs .fb-tab').forEach(b => b.onclick = () => setLevel(+b.dataset.level));
 document.querySelectorAll('#modeTabs .fb-tab').forEach(b => b.onclick = () => setMode(b.dataset.mode));
 const optS = $('#optShuffle'), optE = $('#optExtra');
 optS.checked = shuffle; optE.checked = extra;
@@ -394,6 +522,7 @@ document.addEventListener('keydown', e => {
   else if (e.key === 'Enter') { e.preventDefault(); advance(); }
   else if (e.key === 's' || e.key === 'S') toggleStar();
   else if (e.key === 'm' || e.key === 'M') openMenu(true);
+  else if (e.key >= '1' && e.key <= '4') setLevel(+e.key);
 });
 
 /* swipe */
@@ -429,8 +558,8 @@ else {
 
 /* ---------- start ---------- */
 document.querySelectorAll('#modeTabs .fb-tab').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
-buildDeck(); restorePos(); render();
-window.__cfiiOral = { deck: () => deck, idx: () => idx, go, setMode, jumpTo, ALL, SECS };
+setLevel(level);
+window.__cfiiOral = { deck: () => deck, idx: () => idx, level: () => level, go, setMode, setLevel, nextLayer, jumpTo, ALL, SECS };
 
 /* offline: cache this page, its data and the theme */
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {

@@ -1,5 +1,5 @@
 // Offline cache for CFII Oral Prep (collin/cfii-oral.html). Network first, cache fallback.
-const CACHE = 'cfii-oral-v1';
+const CACHE = 'cfii-oral-v2';
 const FILES = ['cfii-oral.html', 'cfii-oral-data.js', '../theme/flightbag-theme.css', '../theme/flightbag-theme.js', '../icons/favicon.svg'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith('cfii-oral-') && k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
