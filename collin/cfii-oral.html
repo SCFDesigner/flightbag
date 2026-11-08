@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#191918">
+<title>CFII Oral Prep</title>
+<link rel="icon" type="image/svg+xml" href="../icons/favicon.svg">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+<link rel="stylesheet" href="../theme/flightbag-theme.css">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body.fb {
+  height: 100dvh; overflow: hidden;
+  padding: max(12px, env(safe-area-inset-top)) 16px max(12px, env(safe-area-inset-bottom));
+  display: flex; flex-direction: column; align-items: center;
+}
+#app { width: 100%; max-width: 720px; flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 10px; }
+svg.i { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+/* top bar */
+.top { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.top h1 { font-size: var(--fb-fs-sm); font-weight: 400; letter-spacing: 3px; text-transform: uppercase; color: var(--fb-bright); white-space: nowrap; }
+.top .sp { flex: 1; }
+.iconbtn { background: none; border: 1px solid var(--fb-border); color: var(--fb-text); border-radius: var(--fb-radius-sm); height: 36px; min-width: 36px; padding: 0 8px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; font: inherit; font-size: var(--fb-fs-xs); }
+.iconbtn:hover { border-color: var(--fb-accent); color: var(--fb-bright); }
+.iconbtn.on { color: var(--fb-accent); border-color: var(--fb-accent); }
+
+/* mode + progress */
+.modes { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.modes .fb-tabs { flex: 1; min-width: 0; display: flex; }
+.modes .fb-tab { flex: 1; padding: 7px 6px; font-size: var(--fb-fs-sm); white-space: nowrap; }
+.prog { display: flex; align-items: center; gap: 10px; font-family: var(--fb-mono); font-size: var(--fb-fs-xs); color: var(--fb-dim); }
+.prog .bar { flex: 1; height: 4px; border-radius: 2px; background: var(--fb-cell); overflow: hidden; }
+.prog .bar i { display: block; height: 100%; width: 0; background: var(--fb-accent); transition: width .2s; }
+.prog .sec { color: var(--fb-text); font-family: var(--fb-font); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 55%; }
+
+/* card */
+#card { flex: 1; min-height: 0; display: flex; flex-direction: column; touch-action: pan-y; }
+#card .inner { flex: 1; min-height: 0; overflow-y: auto; padding: 18px 18px 20px; -webkit-overflow-scrolling: touch; }
+.kind { display: flex; align-items: center; gap: 8px; font-size: var(--fb-fs-xs); letter-spacing: 2px; text-transform: uppercase; color: var(--fb-dim); margin-bottom: 10px; }
+.kind .tag { color: var(--fb-accent); }
+.kind .tag.r { color: var(--fb-info); }
+.kind .tag.x { color: var(--fb-warn); }
+.kind .sp { flex: 1; }
+.star { background: none; border: none; color: var(--fb-dim); cursor: pointer; padding: 4px; }
+.star.on { color: var(--fb-accent); }
+.star.on svg { fill: currentColor; }
+h2.ch { font-size: 22px; line-height: 1.25; font-weight: 600; color: var(--fb-bright); margin-bottom: 10px; }
+.obj { font-size: 16px; line-height: 1.45; color: var(--fb-text); border-left: 3px solid var(--fb-accent); padding: 2px 0 2px 10px; margin-bottom: 14px; }
+ul.pts { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+ul.pts li { font-size: 17px; line-height: 1.45; color: var(--fb-bright); padding-left: 16px; position: relative; }
+ul.pts li::before { content: ''; position: absolute; left: 2px; top: .62em; width: 6px; height: 6px; border-radius: 50%; background: var(--fb-accent); }
+ul.pts li b, .q b, .a b, .obj b { color: var(--fb-accent); font-weight: 600; }
+.ce { margin-top: 16px; font-size: 15px; line-height: 1.45; color: var(--fb-text); background: var(--fb-cell); border: 1px solid var(--fb-border); border-radius: var(--fb-radius-sm); padding: 10px 12px; }
+.ce span { color: var(--fb-warn); font-size: var(--fb-fs-xs); letter-spacing: 1.5px; text-transform: uppercase; display: block; margin-bottom: 3px; }
+.ref { margin-top: 12px; font-size: var(--fb-fs-xs); color: var(--fb-dim); }
+.q { font-size: 21px; line-height: 1.4; color: var(--fb-bright); font-weight: 500; }
+.a { margin-top: 18px; font-size: 18px; line-height: 1.5; color: var(--fb-bright); border-top: 1px solid var(--fb-border); padding-top: 14px; }
+.a.hid { color: transparent; text-shadow: none; user-select: none; }
+.a.hid * { color: transparent !important; }
+.tapnote { margin-top: 18px; font-size: var(--fb-fs-sm); color: var(--fb-dim); text-align: center; }
+.intro p { font-size: 16px; line-height: 1.5; color: var(--fb-text); margin-bottom: 12px; }
+.intro h3 { font-size: var(--fb-fs-xs); letter-spacing: 2px; text-transform: uppercase; color: var(--fb-dim); margin: 14px 0 6px; font-weight: 400; }
+.intro ul { padding-left: 18px; color: var(--fb-bright); font-size: 16px; line-height: 1.5; }
+.intro .big { font-size: 26px; color: var(--fb-bright); font-weight: 600; line-height: 1.2; margin-bottom: 8px; }
+.intro .area { color: var(--fb-accent); font-size: var(--fb-fs-xs); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+.kbd { font-family: var(--fb-mono); font-size: 13px; border: 1px solid var(--fb-border); border-radius: 4px; padding: 0 5px; color: var(--fb-bright); }
+.empty { text-align: center; color: var(--fb-dim); padding: 40px 10px; font-size: 16px; line-height: 1.5; }
+
+/* bottom nav */
+.nav { display: grid; grid-template-columns: 1fr 1.4fr 1fr; gap: 8px; }
+.nav .fb-btn { height: 52px; font-size: 16px; justify-content: center; }
+.nav .fb-btn:disabled { opacity: .35; }
+
+/* drawer */
+#scrim { position: fixed; inset: 0; background: rgba(0,0,0,.5); opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 20; }
+#drawer { position: fixed; top: 0; bottom: 0; left: 0; width: min(380px, 88vw); background: var(--fb-panel); border-right: 1px solid var(--fb-border); transform: translateX(-102%); transition: transform .22s var(--fb-ease, ease); z-index: 21; display: flex; flex-direction: column; padding: max(14px, env(safe-area-inset-top)) 0 max(14px, env(safe-area-inset-bottom)); }
+body.menu #scrim { opacity: 1; pointer-events: auto; }
+body.menu #drawer { transform: none; }
+#drawer .dh { display: flex; align-items: center; gap: 8px; padding: 0 14px 10px; border-bottom: 1px solid var(--fb-border); }
+#drawer .dh b { flex: 1; font-weight: 400; letter-spacing: 2px; text-transform: uppercase; font-size: var(--fb-fs-xs); color: var(--fb-dim); }
+#drawer .opts { padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; border-bottom: 1px solid var(--fb-border); font-size: var(--fb-fs-sm); }
+#drawer label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+#drawer .opts .row2 { display: flex; gap: 8px; flex-wrap: wrap; }
+#toc { flex: 1; overflow-y: auto; padding: 6px 0; }
+#toc .ar { padding: 12px 14px 4px; font-size: var(--fb-fs-xs); letter-spacing: 1.5px; text-transform: uppercase; color: var(--fb-accent); }
+#toc button { display: grid; grid-template-columns: 54px 1fr auto; gap: 8px; align-items: center; width: 100%; text-align: left; background: none; border: none; color: var(--fb-text); padding: 8px 14px; cursor: pointer; font: inherit; font-size: var(--fb-fs-sm); }
+#toc button:hover, #toc button.cur { background: var(--fb-cell); color: var(--fb-bright); }
+#toc .id { font-family: var(--fb-mono); color: var(--fb-dim); font-size: var(--fb-fs-xs); }
+#toc .pc { font-family: var(--fb-mono); font-size: var(--fb-fs-xs); color: var(--fb-dim); }
+#toc .pc.done { color: var(--fb-ok); }
+#toc .opt { color: var(--fb-warn); font-size: 10px; letter-spacing: 1px; margin-left: 4px; }
+
+/* gate */
+#gate { position: fixed; inset: 0; z-index: 50; background: var(--fb-bg); display: flex; align-items: center; justify-content: center; padding: 16px; }
+#gate.hidden { display: none; }
+#gate .box { width: 100%; max-width: 340px; padding: 22px; display: flex; flex-direction: column; gap: 12px; }
+#gate .err { color: var(--fb-bad); font-size: var(--fb-fs-sm); display: none; }
+#gate .err.show { display: block; }
+
+@media (min-width: 700px) {
+  h2.ch { font-size: 26px; }
+  ul.pts li { font-size: 19px; }
+  .q { font-size: 24px; }
+  .a { font-size: 20px; }
+}
+</style>
+</head>
+<body class="fb">
+
+<div id="gate">
+  <div class="box fb-panel">
+    <div class="fb-title">CFII Oral Prep</div>
+    <input id="gate-pw" class="fb-input" type="password" placeholder="Password" autocomplete="current-password">
+    <button id="gate-go" class="fb-btn">Unlock</button>
+    <div id="gate-err" class="err">Wrong password.</div>
+    <a class="fb-home" href="./"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>Back</a>
+  </div>
+</div>
+
+<div id="app">
+  <div class="top">
+    <button class="iconbtn" id="btnMenu" aria-label="Sections"><svg class="i" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    <h1>CFII Oral</h1>
+    <span class="sp"></span>
+    <a class="fb-home" href="./"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>Collin</a>
+    <a class="fb-home" href="../index.html"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7M5 10v10h14V10"/></svg>Home</a>
+  </div>
+  <div class="modes">
+    <div class="fb-tabs" id="modeTabs">
+      <button class="fb-tab" data-mode="all">All cards</button>
+      <button class="fb-tab" data-mode="recall">Recall only</button>
+      <button class="fb-tab" data-mode="star">Starred</button>
+    </div>
+  </div>
+  <div class="prog"><span class="sec" id="secName"></span><span class="bar"><i id="bar"></i></span><span id="count">0 / 0</span></div>
+  <div id="card" class="fb-panel"><div class="inner" id="inner"></div></div>
+  <div class="nav">
+    <button class="fb-btn" id="btnPrev"><svg class="i" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>Prev</button>
+    <button class="fb-btn" id="btnMid">Reveal</button>
+    <button class="fb-btn" id="btnNext">Next<svg class="i" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+  </div>
+</div>
+
+<div id="scrim"></div>
+<aside id="drawer" aria-label="Sections">
+  <div class="dh"><b>Sections</b><button class="iconbtn" id="btnClose" aria-label="Close"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="opts">
+    <label><input type="checkbox" id="optShuffle"> Shuffle recall cards</label>
+    <label><input type="checkbox" id="optExtra" checked> Include extra (non-ACS) sections</label>
+    <div class="row2">
+      <button class="iconbtn" id="btnReshuffle">Reshuffle</button>
+      <button class="iconbtn" id="btnStart">Go to start</button>
+      <button class="iconbtn" id="btnResetSeen">Reset progress</button>
+    </div>
+  </div>
+  <div id="toc"></div>
+</aside>
+
+<script src="../theme/flightbag-theme.js"></script>
+<script src="cfii-oral-data.js"></script>
+<script>
+(function () {
+'use strict';
+const $ = s => document.querySelector(s);
+const LS = 'cfii-oral:';
+const load = (k, d) => { try { const v = localStorage.getItem(LS + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } };
+const save = (k, v) => { try { localStorage.setItem(LS + k, JSON.stringify(v)); } catch (e) {} };
+const SECS = window.CFII_ORAL || [];
+const ICON_STAR = '<svg class="i" viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg>';
+
+/* ---------- all cards, flattened in eBook order ---------- */
+const ALL = [];
+ALL.push({ key: 'howto', t: 'h', sid: null });
+SECS.forEach(s => {
+  ALL.push({ key: s.id + '#intro', t: 'i', sid: s.id, sec: s });
+  s.cards.forEach((c, i) => ALL.push(Object.assign({ key: s.id + '#' + i, sid: s.id, sec: s }, c)));
+});
+const SEC_BY_ID = Object.fromEntries(SECS.map(s => [s.id, s]));
+const NS = ALL.filter(c => c.t === 's').length, NR = ALL.filter(c => c.t === 'r').length;
+console.log('[cfii-oral] ' + SECS.length + ' sections, ' + NS + ' script + ' + NR + ' recall cards');
+
+/* ---------- state ---------- */
+let mode = load('mode', 'all');
+let shuffle = load('shuffle', false);
+let extra = load('extra', true);
+let seed = load('seed', 1);
+let stars = new Set(load('stars', []));
+let seen = new Set(load('seen', []));
+let deck = [], idx = 0, revealed = false;
+
+function rng(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function shuffled(arr) { const r = rng(seed), a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+function buildDeck() {
+  const keep = c => !c.sec || extra || !c.sec.optional;
+  if (mode === 'all') {
+    deck = ALL.filter(keep);
+    if (shuffle) {   // shuffle the recall cards within each section, script cards stay in teaching order
+      const out = []; let buf = [];
+      const flush = () => { if (buf.length) { out.push(...shuffled(buf)); buf = []; } };
+      deck.forEach(c => { if (c.t === 'r') buf.push(c); else { flush(); out.push(c); } });
+      flush(); deck = out;
+    }
+  } else if (mode === 'recall') {
+    deck = ALL.filter(c => c.t === 'r' && keep(c));
+    if (shuffle) deck = shuffled(deck);
+  } else {
+    deck = ALL.filter(c => stars.has(c.key) && keep(c));
+  }
+}
+
+function posKey() { return 'pos-' + mode; }
+function restorePos() {
+  const k = load(posKey(), null);
+  const i = k ? deck.findIndex(c => c.key === k) : -1;
+  idx = i >= 0 ? i : 0;
+}
+
+/* ---------- rendering ---------- */
+const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+const fmt = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
+
+function kindRow(c, label, cls) {
+  const sec = c.sec;
+  const on = stars.has(c.key);
+  return '<div class="kind"><span class="tag ' + cls + '">' + label + '</span>' +
+    (sec ? '<span>' + esc(sec.id) + '</span>' : '') +
+    (sec && sec.optional ? '<span class="tag x">Extra</span>' : '') +
+    '<span class="sp"></span>' +
+    (c.t === 's' || c.t === 'r' ? '<button class="star' + (on ? ' on' : '') + '" id="btnStar" aria-label="Star">' + ICON_STAR + '</button>' : '') +
+    '</div>';
+}
+
+function howtoHTML() {
+  return '<div class="intro">' + kindRow({ key: 'howto' }, 'Start here', '') +
+    '<div class="big">How to use this deck</div>' +
+    '<p>Every CFII oral topic from the CFI-I eBook, in the eBook\'s order: ' + SECS.length + ' lessons, ' + NS + ' script cards, ' + NR + ' recall cards.</p>' +
+    '<h3>Card types</h3><ul>' +
+    '<li><b>Script</b>: teach it out loud. Objective first, then the talking points, then the common error or scenario question.</li>' +
+    '<li><b>Recall</b>: answer before you reveal. Tap the card or press Space to show the answer.</li></ul>' +
+    '<h3>Controls</h3><ul>' +
+    '<li>Next: <span class="kbd">→</span> or <span class="kbd">Space</span>, swipe left, or the Next button</li>' +
+    '<li>Prev: <span class="kbd">←</span>, swipe right</li>' +
+    '<li>Star: the star icon or <span class="kbd">S</span>. Review them in <b>Starred</b>.</li>' +
+    '<li>Menu (top left): jump to any lesson, see progress, shuffle recall cards, hide the extra non-ACS lessons.</li></ul>' +
+    '<h3>Plan</h3><ul><li>Tonight: All cards, start to finish, out loud.</li><li>Tomorrow: Recall only (shuffled), star misses, then Starred.</li></ul>' +
+    '<p style="margin-top:14px;color:var(--fb-dim);font-size:13px">Source: The Backseat Pilot CFI-I eBook (Jul 2026), condensed. Your position, stars and progress stay on this device.</p></div>';
+}
+
+function introHTML(c) {
+  const s = c.sec;
+  const ns = s.cards.filter(x => x.t === 's').length, nr = s.cards.length - ns;
+  return '<div class="intro">' + kindRow(c, 'Lesson', '') +
+    '<div class="area">' + esc(s.area || '') + '</div>' +
+    '<div class="big">' + esc(s.id) + ' ' + esc(s.title) + '</div>' +
+    (s.optional ? '<p style="color:var(--fb-warn)">Extra: the eBook marks this as additional info, not required by the PTS/ACS.</p>' : '') +
+    (s.intro ? '<p>' + fmt(s.intro) + '</p>' : '') +
+    (s.key && s.key.length ? '<h3>Key points</h3><ul>' + s.key.map(k => '<li>' + fmt(k) + '</li>').join('') + '</ul>' : '') +
+    (s.refs && s.refs.length ? '<h3>References</h3><ul>' + s.refs.map(k => '<li>' + fmt(k) + '</li>').join('') + '</ul>' : '') +
+    '<p style="margin-top:14px;color:var(--fb-dim);font-size:13px">' + ns + ' script · ' + nr + ' recall</p></div>';
+}
+
+function scriptHTML(c) {
+  return kindRow(c, 'Script', '') +
+    '<h2 class="ch">' + fmt(c.h) + '</h2>' +
+    (c.obj ? '<div class="obj">' + fmt(c.obj) + '</div>' : '') +
+    '<ul class="pts">' + (c.pts || []).map(p => '<li>' + fmt(p) + '</li>').join('') + '</ul>' +
+    (c.ce ? '<div class="ce"><span>Common error / ask the learner</span>' + fmt(c.ce) + '</div>' : '') +
+    (c.ref ? '<div class="ref">Ref: ' + fmt(c.ref) + '</div>' : '');
+}
+
+function recallHTML(c) {
+  return kindRow(c, 'Recall', 'r') +
+    '<div class="q">' + fmt(c.q) + '</div>' +
+    '<div class="a' + (revealed ? '' : ' hid') + '" id="ans">' + fmt(c.a) + '</div>' +
+    (revealed ? '' : '<div class="tapnote">Tap or press Space to reveal</div>');
+}
+
+function render() {
+  const inner = $('#inner');
+  if (!deck.length) {
+    inner.innerHTML = '<div class="empty">' + (mode === 'star' ? 'No starred cards yet.<br>Tap the star on any card to add it here.' : 'No cards.') + '</div>';
+    $('#count').textContent = '0 / 0'; $('#bar').style.width = '0'; $('#secName').textContent = '';
+    $('#btnPrev').disabled = $('#btnNext').disabled = true; $('#btnMid').disabled = true;
+    return;
+  }
+  idx = Math.max(0, Math.min(idx, deck.length - 1));
+  const c = deck[idx];
+  inner.innerHTML = c.t === 'h' ? howtoHTML() : c.t === 'i' ? introHTML(c) : c.t === 's' ? scriptHTML(c) : recallHTML(c);
+  inner.scrollTop = 0;
+  $('#count').textContent = (idx + 1) + ' / ' + deck.length;
+  $('#bar').style.width = ((idx + 1) / deck.length * 100) + '%';
+  $('#secName').textContent = c.sec ? c.sec.id + ' ' + c.sec.title : 'Start';
+  $('#btnPrev').disabled = idx === 0;
+  $('#btnNext').disabled = idx === deck.length - 1;
+  const mid = $('#btnMid');
+  mid.disabled = false;
+  mid.textContent = c.t === 'r' ? (revealed ? 'Hide' : 'Reveal') : 'Menu';
+  const sb = $('#btnStar'); if (sb) sb.onclick = e => { e.stopPropagation(); toggleStar(); };
+  // a card counts as seen once shown (recall: once revealed)
+  if (c.t !== 'r' || revealed) markSeen(c);
+  save(posKey(), c.key);
+  if (window.FlightBagTheme && FlightBagTheme.place) FlightBagTheme.place();
+}
+
+function markSeen(c) { if (!seen.has(c.key)) { seen.add(c.key); save('seen', [...seen]); if (document.body.classList.contains('menu')) renderToc(); } }
+
+/* ---------- actions ---------- */
+function go(d) {
+  const n = idx + d;
+  if (n < 0 || n >= deck.length) return;
+  idx = n; revealed = false; render();
+}
+function reveal(v) { const c = deck[idx]; if (!c || c.t !== 'r') return; revealed = v == null ? !revealed : v; render(); }
+function advance() { const c = deck[idx]; if (c && c.t === 'r' && !revealed) reveal(true); else go(1); }
+function toggleStar() {
+  const c = deck[idx]; if (!c || (c.t !== 's' && c.t !== 'r')) return;
+  if (stars.has(c.key)) stars.delete(c.key); else stars.add(c.key);
+  save('stars', [...stars]);
+  if (mode === 'star') { buildDeck(); if (idx >= deck.length) idx = deck.length - 1; }
+  render();
+}
+function setMode(m) {
+  mode = m; save('mode', m);
+  document.querySelectorAll('#modeTabs .fb-tab').forEach(b => b.classList.toggle('active', b.dataset.mode === m));
+  buildDeck(); restorePos(); revealed = false; render(); if (document.body.classList.contains('menu')) renderToc();
+}
+function jumpTo(sid) {
+  let i = deck.findIndex(c => c.sid === sid);
+  if (i < 0) {   // section has nothing in this deck (e.g. starred): fall back to All cards
+    mode = 'all'; save('mode', 'all');
+    document.querySelectorAll('#modeTabs .fb-tab').forEach(b => b.classList.toggle('active', b.dataset.mode === 'all'));
+    buildDeck(); i = deck.findIndex(c => c.sid === sid);
+  }
+  idx = Math.max(0, i); revealed = false; openMenu(false); render();
+}
+
+/* ---------- menu ---------- */
+function renderToc() {
+  const cur = deck[idx] && deck[idx].sid;
+  let html = '', area = '';
+  SECS.forEach(s => {
+    if (s.optional && !extra) return;
+    if (s.area !== area) { area = s.area; html += '<div class="ar">' + esc(area) + '</div>'; }
+    const keys = s.cards.map((c, i) => s.id + '#' + i);
+    const done = keys.filter(k => seen.has(k)).length;
+    const st = keys.filter(k => stars.has(k)).length;
+    html += '<button data-sid="' + esc(s.id) + '"' + (s.id === cur ? ' class="cur"' : '') + '><span class="id">' + esc(s.id) + '</span><span>' + esc(s.title) +
+      (s.optional ? '<span class="opt">EXTRA</span>' : '') + '</span><span class="pc' + (done === keys.length ? ' done' : '') + '">' +
+      (st ? st + '★ ' : '') + done + '/' + keys.length + '</span></button>';
+  });
+  $('#toc').innerHTML = html;
+  $('#toc').querySelectorAll('button').forEach(b => b.onclick = () => jumpTo(b.dataset.sid));
+  const c = $('#toc .cur'); if (c) c.scrollIntoView({ block: 'center' });
+}
+function openMenu(v) { document.body.classList.toggle('menu', v); if (v) renderToc(); }
+
+$('#btnMenu').onclick = () => openMenu(true);
+$('#btnClose').onclick = $('#scrim').onclick = () => openMenu(false);
+$('#btnPrev').onclick = () => go(-1);
+$('#btnNext').onclick = () => go(1);
+$('#btnMid').onclick = () => { const c = deck[idx]; if (c && c.t === 'r') reveal(); else openMenu(true); };
+document.querySelectorAll('#modeTabs .fb-tab').forEach(b => b.onclick = () => setMode(b.dataset.mode));
+const optS = $('#optShuffle'), optE = $('#optExtra');
+optS.checked = shuffle; optE.checked = extra;
+function rebuildKeep() { const k = deck[idx] && deck[idx].key; buildDeck(); const i = deck.findIndex(c => c.key === k); idx = i >= 0 ? i : 0; revealed = false; render(); renderToc(); }
+optS.onchange = () => { shuffle = optS.checked; save('shuffle', shuffle); rebuildKeep(); };
+optE.onchange = () => { extra = optE.checked; save('extra', extra); rebuildKeep(); };
+$('#btnReshuffle').onclick = () => { seed = (seed * 9301 + 49297) % 233280 || 7; save('seed', seed); if (!shuffle) { shuffle = true; optS.checked = true; save('shuffle', true); } buildDeck(); idx = 0; revealed = false; render(); renderToc(); };
+$('#btnStart').onclick = () => { idx = 0; revealed = false; openMenu(false); render(); };
+$('#btnResetSeen').onclick = () => { if (confirm('Reset seen-card progress? Stars are kept.')) { seen = new Set(); save('seen', []); renderToc(); } };
+
+/* tap card to reveal */
+$('#card').addEventListener('click', e => {
+  if (e.target.closest('button, a')) return;
+  const c = deck[idx]; if (c && c.t === 'r' && !revealed) reveal(true);
+});
+
+/* keyboard */
+document.addEventListener('keydown', e => {
+  if (!$('#gate').classList.contains('hidden')) return;
+  if (e.target.matches('input, textarea')) return;
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.key === 'Escape') { openMenu(false); return; }
+  if (document.body.classList.contains('menu')) return;
+  if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); e.key === ' ' ? advance() : go(1); }
+  else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(-1); }
+  else if (e.key === 'Enter') { e.preventDefault(); advance(); }
+  else if (e.key === 's' || e.key === 'S') toggleStar();
+  else if (e.key === 'm' || e.key === 'M') openMenu(true);
+});
+
+/* swipe */
+let sx = 0, sy = 0, st = 0;
+const card = $('#card');
+card.addEventListener('touchstart', e => { const t = e.touches[0]; sx = t.clientX; sy = t.clientY; st = Date.now(); }, { passive: true });
+card.addEventListener('touchend', e => {
+  const t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy;
+  if (Date.now() - st < 700 && Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) go(dx < 0 ? 1 : -1);
+}, { passive: true });
+
+/* ---------- password gate (same gate and device unlock as the CFI Binder, cfi/index.html) ----------
+   Gates the interface, not the files; noindex keeps it out of search results. */
+const PW_HASH = 'bb6aaa1408ba3d7cbc2c3365af590db79904ea29004f7117ebfed98dec4b6651';
+async function sha256(s) {
+  if (!(window.crypto && crypto.subtle)) return null;
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+function unlock() { $('#gate').classList.add('hidden'); if (window.FlightBagTheme && FlightBagTheme.place) FlightBagTheme.place(); }
+let unlocked = false; try { unlocked = localStorage.getItem('cfi-unlocked') === '1'; } catch (e) {}
+if (unlocked) unlock();
+else {
+  const tryGo = async () => {
+    const h = await sha256($('#gate-pw').value);
+    if (h === PW_HASH) { try { localStorage.setItem('cfi-unlocked', '1'); } catch (e) {} unlock(); }
+    else { $('#gate-err').classList.add('show'); $('#gate-pw').select(); }
+  };
+  $('#gate-go').onclick = tryGo;
+  $('#gate-pw').addEventListener('keydown', e => { if (e.key === 'Enter') tryGo(); });
+  setTimeout(() => $('#gate-pw').focus(), 100);
+}
+
+/* ---------- start ---------- */
+document.querySelectorAll('#modeTabs .fb-tab').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+buildDeck(); restorePos(); render();
+window.__cfiiOral = { deck: () => deck, idx: () => idx, go, setMode, jumpTo, ALL, SECS };
+
+/* offline: cache this page, its data and the theme */
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  navigator.serviceWorker.register('cfii-oral-sw.js').catch(err => console.warn('[cfii-oral] sw', err));
+}
+})();
+</script>
+</body>
+</html>
