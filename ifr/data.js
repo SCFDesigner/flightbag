@@ -4,24 +4,24 @@
    Node fields: c=cluster, t=title, k=key idea, b=bullets, mn=mnemonic, vis=visual, up=updates, ln=[[id,why]], q=[question,answer], ref */
 
 const CLUSTERS = {
+  /* laid out as a route in tour order (story.js): row 1 left→right, row 2 right→left, row 3 left→right */
   legal:     {name:"Am I Legal?",            x:400,  y:380,  hue:"navy"},
-  aircraft:  {name:"Is the Airplane Legal?", x:1250, y:380,  hue:"slate"},
-  human:     {name:"Pilot & Physiology",     x:2100, y:380,  hue:"rose"},
-  planning:  {name:"Preflight Planning",     x:2950, y:380,  hue:"blue"},
-  weather:   {name:"Weather",                x:3800, y:380,  hue:"cyan"},
-  departure: {name:"Clearance & Departure",  x:800,  y:1250, hue:"blue"},
-  enroute:   {name:"Enroute",                x:1700, y:1250, hue:"navy"},
-  arrival:   {name:"Arrival & Holding",      x:2600, y:1250, hue:"teal"},
-  approach:  {name:"Approaches",             x:3500, y:1250, hue:"green"},
-  instruments:{name:"Flight Instruments",    x:400,  y:2150, hue:"brown"},
-  nav:       {name:"Navigation Systems",     x:1250, y:2150, hue:"green"},
-  airspace:  {name:"Airspace",               x:2100, y:2150, hue:"magenta"},
-  charts:    {name:"Chart Symbology",        x:2950, y:2150, hue:"brown"},
+  human:     {name:"Pilot & Physiology",     x:1250, y:380,  hue:"rose"},
+  aircraft:  {name:"Is the Airplane Legal?", x:2100, y:380,  hue:"slate"},
+  weather:   {name:"Weather",                x:2950, y:380,  hue:"cyan"},
+  planning:  {name:"Preflight Planning",     x:3800, y:380,  hue:"blue"},
+  airspace:  {name:"Airspace",               x:3500, y:1250, hue:"magenta"},
+  charts:    {name:"Chart Symbology",        x:2600, y:1250, hue:"brown"},
+  nav:       {name:"Navigation Systems",     x:1700, y:1250, hue:"green"},
+  instruments:{name:"Flight Instruments",    x:800,  y:1250, hue:"brown"},
+  departure: {name:"Clearance & Departure",  x:400,  y:2150, hue:"blue"},
+  enroute:   {name:"Enroute",                x:1250, y:2150, hue:"navy"},
+  arrival:   {name:"Arrival & Holding",      x:2100, y:2150, hue:"teal"},
+  approach:  {name:"Approaches",             x:2950, y:2150, hue:"green"},
   math:      {name:"Rules of Thumb",         x:3800, y:2150, hue:"slate"}
 };
-
-/* Order of chapters in the guided tour */
-const TOUR_CHAPTERS = ["legal","aircraft","human","planning","weather","departure","enroute","arrival","approach","instruments","nav","airspace","charts","math"];
+/* Order of chapters in the guided tour — one flight, start to finish. Keep in step with STORY.acts in story.js */
+const TOUR_CHAPTERS = ["legal","human","aircraft","weather","planning","airspace","charts","nav","instruments","departure","enroute","arrival","approach","math"];
 
 const NODES = [
 /* ───────────────────────── AM I LEGAL ───────────────────────── */

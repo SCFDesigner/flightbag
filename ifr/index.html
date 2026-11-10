@@ -323,7 +323,7 @@ nav.tabs button.fb-tab:hover{color:var(--fb-bright)}
 .node text{font:500 15px var(--fb-font);fill:var(--fb-bright)}
 .node .upd{fill:var(--fb-warn)}
 .flow-label{font:500 15px var(--fb-font);letter-spacing:.35em}
-svg.focus .link.hot{stroke:var(--fb-accent)}
+svg.focus .link.hot{stroke:var(--fb-bright);stroke-width:1.6;opacity:.6}
 .node.sel rect{stroke:var(--fb-accent)}
 .mapctl .fb-btn{width:38px;height:38px;padding:0;font-size:17px;--glass-radius:10px}
 .tourbar{gap:10px;padding:6px 8px;border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
@@ -381,8 +381,49 @@ aside.panel{border-radius:0;border:0;border-left:1px solid var(--fb-rim)}
 .urow .src{font-family:var(--fb-mono)}
 .lb{background:rgba(8,8,7,.9)}
 .lb-svg{background:var(--fb-panel)}
+/* ── the story: route on the map, scene cards, narration ── */
+.route-base{fill:none;stroke:var(--fb-border);stroke-linecap:round}
+.route-done{fill:none;stroke:var(--fb-accent);stroke-linecap:round;opacity:.9;transition:stroke-dasharray .7s ease}
+.act-lab text{font:600 15px var(--fb-font);letter-spacing:.28em;fill:var(--fb-dim)}
+.act-lab .a-n{fill:var(--fb-accent)}
+.thread{fill:none;stroke-width:2;stroke-dasharray:1 8;stroke-linecap:round;opacity:0;transition:opacity .3s;pointer-events:none}
+.thread.on{opacity:.8}
+svg.focus .node.inch:not(.nb):not(.sel){opacity:.62}
+svg.focus .cl-hub.here{opacity:1}
+.cl-hub .badge circle{fill:var(--fb-bg);stroke:currentColor;stroke-width:2}
+.cl-hub .badge text{font:600 13px var(--fb-mono);letter-spacing:0;fill:currentColor}
+.cl-hub.done .badge circle{fill:currentColor}
+.cl-hub.done .badge text{fill:var(--fb-bg)}
+.plane path{fill:var(--fb-accent);stroke:var(--fb-bg);stroke-width:.8;paint-order:stroke}
+.tourbar .where{gap:5px;min-width:170px}
+#where-t{font:600 11.5px var(--fb-font);letter-spacing:1.4px;text-transform:uppercase;color:var(--fb-bright);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:240px}
+.route{display:flex;gap:6px;align-items:center}
+.rt-act{display:flex;gap:2px}
+.route button{position:relative;width:13px;height:6px;border-radius:3px;border:0;padding:0;background:var(--fb-border);cursor:pointer}
+.route button::after{content:"";position:absolute;inset:-9px -1px}
+.route button.part{background:color-mix(in srgb,currentColor 45%,var(--fb-border))}
+.route button.done{background:currentColor}
+.route button.on{outline:2px solid var(--fb-accent);outline-offset:2px}
+p.st-line{margin:0;font-size:15.5px;line-height:1.5;font-style:italic;color:var(--fb-bright);border-left:2px solid var(--fb-accent);padding:2px 0 2px 14px}
+.st-q{margin:0;font:600 19px/1.3 var(--fb-font);color:var(--fb-accent);text-wrap:balance}
+.st-dots{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin-top:-8px}
+.st-dots button{width:18px;height:6px;border-radius:3px;border:0;padding:0;background:var(--fb-border);cursor:pointer}
+.st-dots button.done{background:color-mix(in srgb,currentColor 55%,var(--fb-border))}
+.st-dots button.on{background:var(--fb-accent)}
+.st-dots span{margin-left:auto;font:500 11px var(--fb-mono);color:var(--fb-dim)}
+.st-next{display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:center;width:100%;text-align:left;border:1px solid color-mix(in srgb,var(--fb-accent) 45%,transparent);background:var(--fb-cell);border-radius:10px;padding:12px 14px;cursor:pointer;color:var(--fb-text);font:inherit}
+.st-next:hover{border-color:var(--fb-accent)}
+.st-next small{font:500 10px var(--fb-font);letter-spacing:2.5px;text-transform:uppercase;color:var(--fb-accent)}
+.st-next b{grid-column:1;font-weight:600;font-size:16px;color:var(--fb-bright)}
+.st-next .ico{grid-column:2;grid-row:1 / span 2;width:18px;height:18px;color:var(--fb-accent)}
+.st-out{display:grid;gap:12px}
+.act{display:grid;gap:8px}
+.act .sect-h{color:var(--fb-accent)}
+.intro .act p,.scene .act p{margin:0;color:var(--fb-dim);font-size:13.5px}
 .fb-home{flex:none}
-@media (max-width: 900px){ .fb-home{display:none} header .qr-link{order:1;margin-left:auto} }
+@media (max-width: 900px){ .fb-home{display:none} header .qr-link{order:1;margin-left:auto}
+  .tourbar{gap:6px;max-width:calc(100% - 12px)} .tourbar .where{min-width:0} .route{gap:4px} .rt-act{gap:1.5px} .route button{width:9px}
+  #where-t{max-width:150px;font-size:10.5px;letter-spacing:1px} .tourbar .num{font-size:10px;white-space:nowrap} }
 </style>
 </head>
 <body class="fb">
@@ -390,7 +431,7 @@ aside.panel{border-radius:0;border:0;border-left:1px solid var(--fb-rim)}
 <div class="app">
 <header>
   <a class="fb-home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Flight Bag</a>
-  <div class="brand">IFR Atlas <small>v2026.10</small></div>
+  <div class="brand">IFR Atlas <small>v2026.11</small></div>
   <nav class="tabs fb-tabs" role="tablist" aria-label="Views">
     <button class="fb-tab" role="tab" data-view="map" aria-selected="true">Map &amp; Tour</button>
     <button class="fb-tab" role="tab" data-view="symbols">Chart Symbols</button>
@@ -409,15 +450,16 @@ aside.panel{border-radius:0;border:0;border-left:1px solid var(--fb-rim)}
     <div class="mapwrap">
       <svg id="map" aria-label="Concept map of IFR topics"><g id="world"></g></svg>
       <div class="legend-map fb-panel" aria-hidden="true">
+        <div><i><svg width="18" height="8"><line x1="0" y1="4" x2="18" y2="4" stroke="var(--fb-accent)" stroke-width="3" stroke-linecap="round"/></svg></i>the flight so far</div>
         <div><i><svg width="18" height="8"><line x1="0" y1="4" x2="18" y2="4" stroke="currentColor" stroke-dasharray="4 3"/></svg></i>connection between topics</div>
         <div><i><svg width="18" height="10"><circle cx="9" cy="5" r="4" fill="var(--amber)"/></svg></i>has updated info</div>
         <div><i><svg width="18" height="10"><circle cx="9" cy="5" r="4" fill="currentColor"/></svg></i>visited</div>
       </div>
       <div class="mapctl"><button type="button" class="fb-btn" id="zin" aria-label="Zoom in">+</button><button type="button" class="fb-btn" id="zout" aria-label="Zoom out">−</button><button type="button" class="fb-btn" id="zfit" aria-label="Show whole map"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button></div>
       <div class="tourbar fb-panel">
-        <button class="step fb-btn" type="button" id="prev" aria-label="Previous topic"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Prev</button>
-        <div class="where"><select id="chapter" aria-label="Chapter"></select><span class="num" id="stepnum"></span></div>
-        <button class="step next fb-btn primary" type="button" id="next" aria-label="Next topic">Next<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+        <button class="step fb-btn" type="button" id="prev" aria-label="Previous step"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Prev</button>
+        <div class="where"><span id="where-t"></span><div class="route" id="route" role="group" aria-label="Chapters of the flight"></div><span class="num" id="stepnum"></span></div>
+        <button class="step next fb-btn primary" type="button" id="next" aria-label="Next step"><span id="next-t">Next</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
       </div>
     </div>
     <aside class="panel fb-panel" id="panel" aria-live="polite"></aside>
@@ -434,6 +476,7 @@ aside.panel{border-radius:0;border:0;border-left:1px solid var(--fb-rim)}
 <div id="tip" hidden></div>
 
 <script src="data.js"></script>
+<script src="story.js"></script>
 <script src="visuals.js"></script>
 <script src="symtest.js"></script>
 <script>
@@ -457,8 +500,15 @@ NODES.forEach(n => (n.ln || []).forEach(([to, why]) => {
   const k = [n.id, to].sort().join("|"); if (!ekey.has(k)) { ekey.add(k); edges.push([n.id, to]); }
 }));
 
-/* tour order */
-const TOUR = TOUR_CHAPTERS.flatMap(c => NODES.filter(n => n.c === c).map(n => n.id));
+/* tour order — the story (story.js): acts → chapters → topics */
+const CH_ORDER = STORY.acts.flatMap(a => a.ch);
+const actOf = Object.fromEntries(STORY.acts.flatMap(a => a.ch.map(c => [c, a])));
+const CH = Object.fromEntries(CH_ORDER.map(c => { const o = STORY.order[c] || [], l = NODES.filter(n => n.c === c);
+  return [c, [...o.map(id => byId[id]).filter(n => n && n.c === c), ...l.filter(n => !o.includes(n.id))]]; }));
+const TOUR = CH_ORDER.flatMap(c => CH[c].map(n => n.id));
+/* every stop of the tour: the opening, a scene card per chapter, each topic, the ending */
+const STEPS = [{ t: "intro" }, ...CH_ORDER.flatMap(c => [{ t: "ch", c }, ...CH[c].map(n => ({ t: "n", id: n.id, c }))]), { t: "end" }];
+const chDone = c => CH[c].every(n => seen.has(n.id));
 
 /* ───── layout ───── */
 const SX = 1.3, SY = 1.3;
@@ -466,7 +516,7 @@ const pillW = t => Math.round(t.length * 8.2 + 44);
 const hubPos = {};
 for (const [k, c] of Object.entries(CLUSTERS)) hubPos[k] = { x: c.x * SX, y: c.y * SY };
 for (const [k] of Object.entries(CLUSTERS)) {
-  const list = NODES.filter(n => n.c === k), N = list.length;
+  const list = CH[k], N = list.length; /* ring order = story order */
   const inner = N <= 9 ? N : Math.min(8, Math.ceil(N * 0.42));
   list.forEach((n, i) => {
     const ring = i < inner ? 0 : 1, idx = ring ? i - inner : i, cnt = ring ? N - inner : inner;
@@ -494,6 +544,20 @@ for (const [k] of Object.entries(CLUSTERS)) {
   }
 })();
 const bounds = (() => { let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9; NODES.forEach(n => { x0 = Math.min(x0, n.x - n.w / 2); x1 = Math.max(x1, n.x + n.w / 2); y0 = Math.min(y0, n.y - 30); y1 = Math.max(y1, n.y + 30); }); return { x0: x0 - 60, y0: y0 - 80, x1: x1 + 60, y1: y1 + 60 }; })();
+/* the route: one line through the chapter hubs in tour order, turning round at the end of each row */
+const routePts = CH_ORDER.map(c => hubPos[c]), BULGE = 760;
+const rowDir = i => { const p = routePts[i], q = routePts[i - 1], r = routePts[i + 1];
+  if (q && Math.abs(q.y - p.y) < 1) return Math.sign(p.x - q.x) || 1; if (r && Math.abs(r.y - p.y) < 1) return Math.sign(r.x - p.x) || 1; return 1; };
+let routeD = `M${routePts[0].x} ${routePts[0].y}`; const routeLen = [0];
+routePts.slice(1).forEach((b, j) => { const a = routePts[j]; let L;
+  if (Math.abs(a.y - b.y) < 1) { routeD += ` L${b.x} ${b.y}`; L = Math.abs(b.x - a.x); }
+  else { const d = rowDir(j) * BULGE, c1 = { x: a.x + d, y: a.y }, c2 = { x: b.x + d, y: b.y }; routeD += ` C${c1.x} ${c1.y} ${c2.x} ${c2.y} ${b.x} ${b.y}`;
+    L = 0; let px = a.x, py = a.y; for (let t = 1; t <= 60; t++) { const u = t / 60, v = 1 - u;
+      const x = v * v * v * a.x + 3 * v * v * u * c1.x + 3 * v * u * u * c2.x + u * u * u * b.x, y = v * v * v * a.y + 3 * v * v * u * c1.y + 3 * v * u * u * c2.y + u * u * u * b.y;
+      L += Math.hypot(x - px, y - py); px = x; py = y; } }
+  routeLen.push(routeLen[j] + L); });
+const routeTotal = routeLen[routeLen.length - 1];
+{ const xs = routePts.map(p => p.x); bounds.x0 = Math.min(bounds.x0, Math.min(...xs) - BULGE * .8); bounds.x1 = Math.max(bounds.x1, Math.max(...xs) + BULGE * .8); bounds.y0 -= 90; }
 
 /* ───── draw ───── */
 const svg = $("#map"), world = $("#world"), NS = "http://www.w3.org/2000/svg";
@@ -503,21 +567,26 @@ function draw() {
   const g0 = el("g", { class: "graticule" }, world);
   for (let x = Math.floor(bounds.x0 / 400) * 400; x < bounds.x1; x += 400) { el("line", { x1: x, y1: bounds.y0, x2: x, y2: bounds.y1 }, g0); }
   for (let y = Math.floor(bounds.y0 / 400) * 400; y < bounds.y1; y += 400) { el("line", { x1: bounds.x0, y1: y, x2: bounds.x1, y2: y }, g0); }
-  /* phase-of-flight arrow through the middle row */
-  const fy = hubPos.departure.y - 470;
-  el("path", { class: "flow-arrow", d: `M${hubPos.departure.x - 300} ${fy} H${hubPos.approach.x + 300} m-18 -12 l18 12 l-18 12` }, world);
-  const ft = el("text", { class: "flow-label", x: (hubPos.departure.x + hubPos.approach.x) / 2, y: fy - 14, "text-anchor": "middle" }, world);
-  ft.textContent = "PHASE OF FLIGHT  →  DEPART · ENROUTE · ARRIVE · APPROACH";
+  const top = {};
   for (const [k, p] of Object.entries(hubPos)) {
     const ns = NODES.filter(n => n.c === k); let r = 0; ns.forEach(n => r = Math.max(r, Math.hypot(n.x - p.x, n.y - p.y) + n.w / 3));
     el("ellipse", { class: "cl-bg h-" + hueOf(k), cx: p.x, cy: p.y, rx: r + 40, ry: r * 0.8 + 30, fill: "currentColor", stroke: "currentColor" }, world);
+    top[k] = p.y - (r * 0.8 + 30);
   }
+  /* the route (dotted = ahead, solid = flown) and an act label where each act begins */
+  el("path", { class: "route-base", d: routeD }, world);
+  el("path", { class: "route-done", d: routeD, pathLength: routeTotal, "stroke-dasharray": `0 ${routeTotal + 10}` }, world);
+  STORY.acts.forEach(a => { const k = a.ch[0], p = hubPos[k];
+    const g = el("g", { class: "act-lab", "data-x": p.x, "data-y": top[k] - 22, transform: `translate(${p.x},${top[k] - 22})` }, world);
+    const t = el("text", { "text-anchor": "middle" }, g); const n = el("tspan", { class: "a-n" }, t); n.textContent = a.n.toUpperCase(); const r = el("tspan", {}, t); r.textContent = "  ·  " + a.t.toUpperCase(); });
   const gl = el("g", {}, world);
   NODES.forEach(n => { const p = hubPos[n.c]; el("path", { class: "spoke h-" + hueOf(n.c), "data-a": n.id, d: `M${p.x} ${p.y} L${n.x} ${n.y}`, stroke: "currentColor" }, gl); });
   edges.forEach(([a, b]) => {
     const A = byId[a], B = byId[b], mx = (A.x + B.x) / 2, my = (A.y + B.y) / 2, dx = B.x - A.x, dy = B.y - A.y, L = Math.hypot(dx, dy) || 1, off = Math.min(160, L * .18);
     el("path", { class: "link", "data-a": a, "data-b": b, d: `M${A.x} ${A.y} Q${mx - dy / L * off} ${my + dx / L * off} ${B.x} ${B.y}` }, gl);
   });
+  /* the thread: the order the story takes through a chapter's topics (shown for the chapter you are in) */
+  CH_ORDER.forEach(k => el("path", { class: "thread h-" + hueOf(k), "data-cl": k, stroke: "currentColor", d: CH[k].map((n, i) => (i ? "L" : "M") + n.x + " " + n.y).join(" ") }, gl));
   NODES.forEach(n => {
     const g = el("g", { class: "node h-" + hueOf(n.c) + (seen.has(n.id) ? " seen" : ""), "data-id": n.id, transform: `translate(${n.x},${n.y})`, tabindex: 0, role: "button", "aria-label": n.t }, world);
     el("rect", { x: -n.w / 2, y: -19, width: n.w, height: 38, rx: 19 }, g);
@@ -531,12 +600,17 @@ function draw() {
     el("rect", { x: -w / 2, y: -26, width: w, height: 52, rx: 4, stroke: "currentColor" }, g);
     el("rect", { x: -w / 2 + 5, y: -21, width: w - 10, height: 42, rx: 2, stroke: "currentColor", "stroke-width": 1, style: "fill:none" }, g);
     const t = el("text", { "text-anchor": "middle", y: 8, fill: "currentColor" }, g); t.textContent = CLUSTERS[k].name;
+    const b = el("g", { class: "badge", transform: `translate(${-w / 2},-26)` }, g); el("circle", { r: 13 }, b);
+    const bt = el("text", { "text-anchor": "middle", y: 4.5 }, b); bt.textContent = CH_ORDER.indexOf(k) + 1;
   }
 }
+/* the airplane sits on the hub of the chapter you are in, pointing along the route */
+const plane = el("g", { class: "plane" }); el("path", { d: "M21 15l-8-4V5a1.5 1.5 0 0 0-3 0v6l-8 4v2l8-2v4l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-4l8 2z" }, plane);
 draw();
 function sizeHubs() { /* fit chapter boxes to the rendered label width */
-  $$(".cl-hub", world).forEach(g => { const t = g.querySelector("text"), L = t.getComputedTextLength(); if (!L) return; const [o, i] = g.querySelectorAll("rect");
-    o.setAttribute("x", -L / 2 - 26); o.setAttribute("width", L + 52); i.setAttribute("x", -L / 2 - 21); i.setAttribute("width", L + 42); });
+  $$(".cl-hub", world).forEach(g => { const t = g.querySelector(":scope > text"), L = t.getComputedTextLength(); if (!L) return; const [o, i] = g.querySelectorAll("rect");
+    o.setAttribute("x", -L / 2 - 26); o.setAttribute("width", L + 52); i.setAttribute("x", -L / 2 - 21); i.setAttribute("width", L + 42);
+    g.querySelector(".badge").setAttribute("transform", `translate(${-L / 2 - 26},-26)`); });
 }
 sizeHubs(); document.fonts && document.fonts.ready.then(sizeHubs);
 
@@ -544,7 +618,10 @@ sizeHubs(); document.fonts && document.fonts.ready.then(sizeHubs);
 const cam = { x: 0, y: 0, k: .3 };
 const apply = () => { world.setAttribute("transform", `translate(${cam.x},${cam.y}) scale(${cam.k})`);
   const s = Math.min(3.4, Math.max(1, .5 / cam.k)); /* keep chapter labels legible when zoomed out */
-  $$(".cl-hub", world).forEach(g => { const p = hubPos[g.dataset.cl]; g.setAttribute("transform", `translate(${p.x},${p.y}) scale(${s})`); }); };
+  $$(".cl-hub", world).forEach(g => { const p = hubPos[g.dataset.cl]; g.setAttribute("transform", `translate(${p.x},${p.y}) scale(${s})`); });
+  const s2 = Math.min(5, Math.max(1, .62 / cam.k)); $$(".act-lab", world).forEach(g => g.setAttribute("transform", `translate(${g.dataset.x},${g.dataset.y}) scale(${s2})`));
+  const rw = Math.min(26, Math.max(4, 3.2 / cam.k)), rb = $(".route-base", world), rd = $(".route-done", world);
+  if (rb) { rb.setAttribute("stroke-width", rw * .7); rb.setAttribute("stroke-dasharray", `.1 ${rw * 2.6}`); rd.setAttribute("stroke-width", rw); } };
 const size = () => { const r = svg.getBoundingClientRect(); return { w: r.width, h: r.height }; };
 let anim;
 function tween(to, ms = 520) {
@@ -577,7 +654,7 @@ svg.addEventListener("click", e => { if (dragMoved) return; const n = e.target.c
   if (n) select(n.dataset.id); else if (h) selectCluster(h.dataset.cl); else clearFocus(); });
 svg.addEventListener("keydown", e => { if (e.key !== "Enter" && e.key !== " ") return; const n = e.target.closest(".node"), h = e.target.closest(".cl-hub");
   if (n) { e.preventDefault(); select(n.dataset.id); } else if (h) { e.preventDefault(); selectCluster(h.dataset.cl); } });
-$("#zin").onclick = () => zoomAt(1.3); $("#zout").onclick = () => zoomAt(1 / 1.3); $("#zfit").onclick = () => { clearFocus(); fit(); };
+$("#zin").onclick = () => zoomAt(1.3); $("#zout").onclick = () => zoomAt(1 / 1.3); $("#zfit").onclick = () => { svg.classList.remove("focus"); fit(); }; /* look at the whole route without losing your place */
 
 /* ───── focus highlighting ───── */
 function highlight(id) {
@@ -591,24 +668,27 @@ function highlight(id) {
   $$(".spoke", world).forEach(p => { if (p.dataset.a === id) p.classList.add("hot"); });
   const hub = $(`.cl-hub[data-cl="${byId[id].c}"]`, world); hub && hub.classList.add("nb");
 }
-function clearFocus() { svg.classList.remove("focus"); $$(".node,.cl-hub", world).forEach(g => g.classList.remove("nb", "sel")); current = null; renderIntro(); syncTour(); }
+function clearFocus() { svg.classList.remove("focus"); $$(".node,.cl-hub", world).forEach(g => g.classList.remove("nb", "sel")); current = null; viewCh = null; ended = false; renderIntro(); syncTour(); }
 
 /* ───── panel ───── */
-const panel = $("#panel"); let current = null;
+const panel = $("#panel"); let current = null, viewCh = null, ended = false; /* a topic, a chapter scene card, or the ending */
 const swatch = c => `<span class="sw h-${hueOf(c)}"></span>`;
 function mnHTML(mn, c) { return `<section class="mn h-${hueOf(c)}"><div class="sect-h">Mnemonic</div><div class="mn-word">${esc(mn.word)}</div>
   <div class="mn-rows">${mn.rows.map(([l, t]) => `<div class="mn-row"><b>${esc(l)}</b><span>${esc(t)}</span></div>`).join("")}</div></section>`; }
 function updHTML(up) { return `<section class="upd"><div class="sect-h"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 21h20L12 3z"/><path d="M12 10v5M12 18h.01"/></svg> Updated / reconciled</div>${up.map(u => `<div class="upd-item"><span class="old">${esc(u.old)}</span><span>${esc(u.now)}</span><span class="src">${esc(u.src)}</span></div>`).join("")}</section>`; }
 function select(id, opts = {}) {
-  const n = byId[id]; if (!n) return; current = id;
-  seen.add(id); store.set("seen", [...seen]);
+  const n = byId[id]; if (!n) return; current = id; viewCh = null; ended = false;
+  seen.add(id); store.set("seen", [...seen]); store.set("last", id);
+  const act = actOf[n.c], list = CH[n.c], ni = list.indexOf(n);
   const g = $(`.node[data-id="${id}"]`, world); g && g.classList.add("seen");
   highlight(id); if (!opts.noPan) focusOn(n.x, n.y);
   const conns = (adj[id] || []).map(x => { const m = byId[x.id]; const why = x.why || (byId[x.id].ln || []).find(l => l[0] === id)?.[1] || "";
     return `<button type="button" data-go="${m.id}" class="h-${hueOf(m.c)}"><span class="sw"></span><b>${esc(m.t)}</b><small>${esc(why)}</small></button>`; }).join("");
   const symGroup = n.sym ? SYMBOL_GROUPS.find(s => s.id === n.sym) : null;
   panel.innerHTML = `<div class="pin">
-    <div class="eyebrow h-${hueOf(n.c)}"><span class="sw"></span>${esc(CLUSTERS[n.c].name)}<span class="ref">${esc(n.ref || "")}</span></div>
+    <div class="eyebrow h-${hueOf(n.c)}"><span class="sw"></span>${esc(act.n)} · ${esc(CLUSTERS[n.c].name)}<span class="ref">${esc(n.ref || "")}</span></div>
+    <div class="st-dots h-${hueOf(n.c)}">${list.map((m, i) => `<button type="button" data-go="${m.id}" class="${i === ni ? "on" : seen.has(m.id) ? "done" : ""}" title="${esc(m.t)}" aria-label="${i + 1}. ${esc(m.t)}"${i === ni ? ' aria-current="step"' : ""}></button>`).join("")}<span>${ni + 1} / ${list.length}</span></div>
+    ${STORY.lines[id] ? `<p class="st-line">${esc(STORY.lines[id])}</p>` : ""}
     <h2>${esc(n.t)}</h2>
     <p class="key">${esc(n.k)}</p>
     ${n.mn ? mnHTML(n.mn, n.c) : ""}
@@ -619,38 +699,67 @@ function select(id, opts = {}) {
     ${n.up ? updHTML(n.up) : ""}
     ${n.q ? `<section class="quiz"><div class="sect-h">Check yourself</div><p>${esc(n.q[0])}</p><button type="button" class="reveal fb-btn small">Show answer</button><p class="ans" hidden>${esc(n.q[1])}</p></section>` : ""}
     ${conns ? `<section><div class="sect-h">Connects to (${(adj[id] || []).length})</div><div class="conn">${conns}</div></section>` : ""}
+    ${nextUp(id)}
   </div>`;
   panel.scrollTop = 0; acronymize(panel); syncTour();
   if (!opts.keepHash) setHash("n-" + id);
 }
+const CHEV = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+const chBtn = k => { const l = CH[k], d = l.filter(n => seen.has(n.id)).length;
+  return `<button type="button" data-cl="${k}" class="h-${hueOf(k)}"><span class="sw"></span><b>${CH_ORDER.indexOf(k) + 1}. ${esc(CLUSTERS[k].name)}</b><small>${d}/${l.length}</small></button>`; };
+/* bottom of a topic: what comes next, and the hand-off line when the chapter ends */
+function nextUp(id) {
+  const nx = STEPS[STEPS.findIndex(s => s.id === id) + 1], c = byId[id].c;
+  if (nx.t === "n") return `<button type="button" class="st-next" data-step="1"><small>Next</small><b>${esc(byId[nx.id].t)}</b>${CHEV}</button>`;
+  return `<section class="st-out"><div class="sect-h">End of chapter ${CH_ORDER.indexOf(c) + 1}</div><p class="st-line">${esc(STORY.chapters[c].out)}</p>
+    <button type="button" class="st-next" data-step="1"><small>${nx.t === "ch" ? "Next chapter" : "Last stop"}</small><b>${nx.t === "ch" ? `${CH_ORDER.indexOf(nx.c) + 1} · ${esc(CLUSTERS[nx.c].name)}` : "Shutdown"}</b>${CHEV}</button></section>`;
+}
+/* chapter scene card: where you are in the flight and the question this chapter answers */
 function selectCluster(k) {
-  current = null; const p = hubPos[k], list = NODES.filter(n => n.c === k);
+  current = null; viewCh = k; ended = false; const p = hubPos[k], list = CH[k], act = actOf[k], ch = STORY.chapters[k];
   svg.classList.add("focus"); $$(".node,.cl-hub", world).forEach(g => g.classList.remove("nb", "sel"));
   $$(".node", world).forEach(g => { if (byId[g.dataset.id].c === k) g.classList.add("nb"); }); $(`.cl-hub[data-cl="${k}"]`, world).classList.add("nb");
   $$(".link,.spoke", world).forEach(x => x.classList.remove("hot")); $$(".spoke", world).forEach(x => { if (byId[x.dataset.a].c === k) x.classList.add("hot"); });
   focusOn(p.x, p.y, Math.min(size().w / 1300, size().h / 900, 1));
-  panel.innerHTML = `<div class="pin"><div class="eyebrow h-${hueOf(k)}"><span class="sw"></span>Chapter ${TOUR_CHAPTERS.indexOf(k) + 1} of ${TOUR_CHAPTERS.length}</div>
-    <h2>${esc(CLUSTERS[k].name)}</h2><p class="key">${list.length} topics. Start the chapter or jump to one.</p>
-    <button type="button" class="go-sym fb-btn primary" data-go="${list[0].id}">Start chapter →</button>
-    <div class="cl-list">${list.map(n => `<button type="button" data-go="${n.id}" class="h-${hueOf(k)}"><span class="sw"></span><b>${esc(n.t)}</b>${n.up ? '<small style="color:var(--amber)">updated</small>' : seen.has(n.id) ? "<small>seen</small>" : ""}</button>`).join("")}</div></div>`;
-  panel.scrollTop = 0; $("#chapter").value = k; $("#stepnum").textContent = "chapter overview";
+  const started = list.some(n => seen.has(n.id)), todo = list.find(n => !seen.has(n.id)), go = started && todo ? todo : list[0];
+  panel.innerHTML = `<div class="pin scene"><div class="eyebrow h-${hueOf(k)}"><span class="sw"></span>${esc(act.n)} · ${esc(act.t)}<span class="ref">chapter ${CH_ORDER.indexOf(k) + 1} of ${CH_ORDER.length}</span></div>
+    <h2>${esc(CLUSTERS[k].name)}</h2>
+    <p class="st-q">${esc(ch.q)}</p>
+    <p class="st-line">${esc(ch.scene)}</p>
+    <button type="button" class="go-sym fb-btn primary" data-go="${go.id}">${started && todo ? "Continue chapter" : started ? "Fly it again" : "Begin chapter"} →</button>
+    <div><div class="sect-h">In this chapter</div><div class="cl-list">${list.map((n, i) => `<button type="button" data-go="${n.id}" class="h-${hueOf(k)}"><span class="sw"></span><b>${i + 1}. ${esc(n.t)}</b>${n.up ? '<small style="color:var(--amber)">updated</small>' : seen.has(n.id) ? "<small>seen</small>" : ""}</button>`).join("")}</div></div></div>`;
+  panel.scrollTop = 0; acronymize(panel); syncTour(); setHash("ch-" + k);
 }
+const actsHTML = () => STORY.acts.map(a => `<section class="act"><div class="sect-h">${esc(a.n)} · ${esc(a.t)}</div><p>${esc(a.line)}</p><div class="cl-list">${a.ch.map(chBtn).join("")}</div></section>`).join("");
 function renderIntro() {
-  const total = NODES.length, done = NODES.filter(n => seen.has(n.id)).length;
+  const total = NODES.length, done = NODES.filter(n => seen.has(n.id)).length, last = store.get("last", null), ln = last && byId[last];
   panel.innerHTML = `<div class="pin intro">
-    <div class="eyebrow h-blue"><span class="sw"></span>Instrument rating study map<span class="ref">${done}/${total} visited</span></div>
-    <h2>Everything for the IFR checkride, on one chart.</h2>
-    <p>Four study guides and the FAA Chart Users' Guide, merged into ${total} linked topics. Outdated items from the older guides are corrected and flagged.</p>
-    <ol><li><b>Next</b> walks the topics in flight order, one idea at a time. The map pans to each one and lights up what it connects to.</li>
-      <li>Click any bubble or chapter box to jump. Drag to pan, scroll or pinch to zoom.</li>
-      <li>Dotted acronyms show their meaning on hover or tap.</li>
-      <li><b>Chart Symbols</b> has the enroute and approach-plate legends with a clickable plate. <b>Symbol Test</b> is a rapid multiple-choice drill on 85 single symbols; <b>Flashcards</b> is a spaced-repetition daily mix of symbols, mnemonics and questions.</li></ol>
-    <button type="button" class="go-sym fb-btn primary" data-go="${TOUR[0]}">Start the tour →</button>
-    <div><div class="sect-h">Chapters</div><div class="cl-list">${TOUR_CHAPTERS.map((k, i) => { const l = NODES.filter(n => n.c === k); const d = l.filter(n => seen.has(n.id)).length;
-      return `<button type="button" data-cl="${k}" class="h-${hueOf(k)}"><span class="sw"></span><b>${i + 1}. ${esc(CLUSTERS[k].name)}</b><small>${d}/${l.length}</small></button>`; }).join("")}</div></div>
+    <div class="eyebrow h-blue"><span class="sw"></span>IFR Atlas · the tour<span class="ref">${done}/${total} visited</span></div>
+    <h2>One IFR flight, from the night before to shutdown.</h2>
+    <p class="st-line">${esc(STORY.premise)}</p>
+    <div class="tools">${ln ? `<button type="button" class="go-sym fb-btn primary" data-go="${last}">Continue: ${esc(ln.t)} →</button><button type="button" class="go-sym fb-btn" data-cl="${CH_ORDER[0]}">From the beginning</button>`
+      : `<button type="button" class="go-sym fb-btn primary" data-cl="${CH_ORDER[0]}">Begin the flight →</button>`}</div>
+    ${actsHTML()}
+    <section><div class="sect-h">How it works</div><ul class="bul">
+      <li><b>Next</b> (or the → key) moves one step along the flight. The map follows your route and lights up what each topic connects to.</li>
+      <li>Click any topic or chapter on the map to jump there. Drag to pan, scroll or pinch to zoom.</li>
+      <li>Dotted acronyms show their meaning on hover or tap.</li></ul></section>
   </div>`;
+  acronymize(panel);
+}
+function renderEnd() {
+  current = null; viewCh = null; ended = true; svg.classList.remove("focus"); $$(".node,.cl-hub", world).forEach(g => g.classList.remove("nb", "sel")); fit();
+  const total = NODES.length, left = NODES.filter(n => !seen.has(n.id)).length;
+  panel.innerHTML = `<div class="pin scene"><div class="eyebrow h-blue"><span class="sw"></span>Shutdown<span class="ref">${total - left}/${total} visited</span></div>
+    <h2>Engine off. That was the whole flight.</h2>
+    <p class="st-line">From your logbook the night before to the lights at minimums, every topic came up at the point you'd need it.${left ? ` ${left} ${left === 1 ? "topic is" : "topics are"} still unvisited; the chapters below show where.` : ""} Now find out what stuck, without the map in front of you.</p>
+    <div class="tools"><button type="button" class="go-sym fb-btn primary" data-view="cards">Flashcards →</button><button type="button" class="go-sym fb-btn" data-view="symtest">Symbol Test</button><button type="button" class="go-sym fb-btn" data-cl="${CH_ORDER[0]}">Fly it again</button></div>
+    ${actsHTML()}</div>`;
+  panel.scrollTop = 0; syncTour(); setHash("map");
 }
 panel.addEventListener("click", e => {
+  const st = e.target.closest("[data-step]"); if (st) return step(+st.dataset.step);
+  const vw = e.target.closest("[data-view]"); if (vw) return showView(vw.dataset.view);
   const go = e.target.closest("[data-go]"); if (go) return select(go.dataset.go);
   const cl = e.target.closest("[data-cl]"); if (cl) return selectCluster(cl.dataset.cl);
   const sy = e.target.closest("[data-sym]"); if (sy) { showView("symbols"); requestAnimationFrame(() => $("#sg-" + sy.dataset.sym)?.scrollIntoView({ behavior: reduce ? "auto" : "smooth" })); return; }
@@ -664,19 +773,31 @@ document.addEventListener("click", e => {
 });
 
 /* ───── tour ───── */
-const chapSel = $("#chapter");
-chapSel.innerHTML = TOUR_CHAPTERS.map((k, i) => `<option value="${k}">${i + 1}. ${esc(CLUSTERS[k].name)}</option>`).join("");
-chapSel.onchange = () => selectCluster(chapSel.value);
+const routeEl = $("#route");
+routeEl.innerHTML = STORY.acts.map(a => `<span class="rt-act" title="${esc(a.n)} · ${esc(a.t)}">${a.ch.map(c => `<button type="button" data-cl="${c}" class="h-${hueOf(c)}" title="${CH_ORDER.indexOf(c) + 1} · ${esc(CLUSTERS[c].name)}" aria-label="Chapter ${CH_ORDER.indexOf(c) + 1}: ${esc(CLUSTERS[c].name)}"></button>`).join("")}</span>`).join("");
+routeEl.addEventListener("click", e => { const b = e.target.closest("[data-cl]"); if (b) selectCluster(b.dataset.cl); });
+function pos() { if (current) return STEPS.findIndex(s => s.id === current); if (viewCh) return STEPS.findIndex(s => s.t === "ch" && s.c === viewCh); return ended ? STEPS.length - 1 : 0; }
 function syncTour() {
-  const i = current ? TOUR.indexOf(current) : -1;
-  $("#stepnum").textContent = i >= 0 ? `topic ${i + 1} of ${TOUR.length}` : `${TOUR.length} topics`;
-  if (current) chapSel.value = byId[current].c;
-  $("#prev").disabled = i <= 0 && !!current;
+  const p = pos(), s = STEPS[p], c = s.c || null, last = store.get("last", null);
+  /* where the airplane is: this chapter; before the start, the chapter you left off in */
+  const ci = c ? CH_ORDER.indexOf(c) : s.t === "end" ? CH_ORDER.length - 1 : last && byId[last] ? CH_ORDER.indexOf(byId[last].c) : 0;
+  $$("button", routeEl).forEach((b, i) => { const k = CH_ORDER[i], d = chDone(k); b.classList.toggle("on", !!c && i === ci); b.classList.toggle("done", d); b.classList.toggle("part", !d && CH[k].some(n => seen.has(n.id))); });
+  $("#where-t").textContent = s.t === "intro" ? STORY.title : s.t === "end" ? "Shutdown" : `${ci + 1} · ${CLUSTERS[c].name}`;
+  $("#stepnum").textContent = s.t === "n" ? `${actOf[c].n} · topic ${CH[c].findIndex(n => n.id === s.id) + 1} of ${CH[c].length}` : s.t === "ch" ? `${actOf[c].n} · ${actOf[c].t}`
+    : s.t === "end" ? `${NODES.filter(n => seen.has(n.id)).length}/${TOUR.length} visited` : `${CH_ORDER.length} chapters · ${TOUR.length} topics`;
+  $("#prev").disabled = p === 0; $("#next").disabled = p === STEPS.length - 1; $("#next-t").textContent = s.t === "intro" ? "Begin" : "Next";
+  /* map: flown part of the route, the airplane, the chapter's thread */
+  $(".route-done", world).setAttribute("stroke-dasharray", `${routeLen[ci]} ${routeTotal + 10}`);
+  $$(".cl-hub", world).forEach(g => { const i = CH_ORDER.indexOf(g.dataset.cl); g.classList.toggle("here", i === ci); g.classList.toggle("done", chDone(g.dataset.cl)); });
+  const hub = $(`.cl-hub[data-cl="${CH_ORDER[ci]}"]`, world); hub.appendChild(plane); plane.setAttribute("transform", `translate(0,-58) rotate(${rowDir(ci) * 90}) scale(1.9) translate(-11.5,-12.75)`);
+  $$(".thread", world).forEach(t => t.classList.toggle("on", t.dataset.cl === c));
+  $$(".node", world).forEach(g => g.classList.toggle("inch", byId[g.dataset.id].c === c));
 }
-function step(d) { const i = current ? TOUR.indexOf(current) : -1; const j = Math.max(0, Math.min(TOUR.length - 1, i + d)); select(TOUR[j]); }
+function step(d) { const s = STEPS[Math.max(0, Math.min(STEPS.length - 1, pos() + d))];
+  if (s.t === "n") select(s.id); else if (s.t === "ch") selectCluster(s.c); else if (s.t === "end") renderEnd(); else { clearFocus(); fit(); setHash("map"); } }
 $("#next").onclick = () => step(1); $("#prev").onclick = () => step(-1);
 document.addEventListener("keydown", e => {
-  if (e.target.matches("input,select,textarea")) return;
+  if (e.target.matches?.("input,select,textarea")) return;
   if (activeView === "map" && (e.key === "ArrowRight" || e.key === "ArrowLeft")) { e.preventDefault(); step(e.key === "ArrowRight" ? 1 : -1); }
   if (activeView === "cards" && (e.key === " " || e.key === "Enter")) { e.preventDefault(); $("#fc-flip")?.click(); }
   if (activeView === "cards" && flipped && (e.key === "1" || e.key === "2")) { e.preventDefault(); grade(e.key === "2"); }
@@ -890,6 +1011,7 @@ function boot() {
   if (["symbols", "symtest", "cards", "terms", "mnemonics", "updates"].includes(h)) { showView(h, true); fit(0); renderIntro(); syncTour(); return; }
   fit(0); renderIntro(); syncTour();
   if (h.startsWith("n-") && byId[h.slice(2)]) select(h.slice(2), { keepHash: true });
+  else if (h.startsWith("ch-") && CH[h.slice(3)]) selectCluster(h.slice(3));
 }
 addEventListener("hashchange", () => { const h = location.hash.slice(1); if (h.startsWith("n-") && byId[h.slice(2)] && h.slice(2) !== current) { showView("map", true); requestAnimationFrame(() => select(h.slice(2), { keepHash: true })); } else if (["symbols", "symtest", "cards", "terms", "mnemonics", "updates", "map"].includes(h) && h !== activeView) showView(h, true); });
 new ResizeObserver(() => { if (!current && activeView === "map" && !svg.classList.contains("focus")) fit(0); }).observe(svg);
