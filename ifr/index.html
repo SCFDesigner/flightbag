@@ -382,6 +382,23 @@ aside.panel{border-radius:0;border:0;border-left:1px solid var(--fb-rim)}
 .lb{background:rgba(8,8,7,.9)}
 .lb-svg{background:var(--fb-panel)}
 /* ── the story: route on the map, scene cards, narration ── */
+/* mnemonics: fill-in quiz */
+.mnq{max-width:640px;padding:18px;display:grid;gap:12px}
+.mnq-top{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:var(--fb-dim)}
+.mnq-n{font-family:var(--fb-mono)}
+.mnq-hint{margin:0;color:var(--fb-dim);font-size:14px}
+.mnq-rows{display:grid;gap:6px}
+.mnq-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;min-height:40px}
+.mnq-row b{font:600 15px/1.2 var(--fb-mono);min-width:36px;text-align:center;padding:6px;border-radius:6px;background:color-mix(in srgb,currentColor 12%,transparent)}
+.mnq-row input{width:100%;min-width:0;font-size:16px}
+.mnq-row.bad input{border-color:var(--fb-bad);animation:mnq-shake .25s}
+.mnq-ans{color:var(--fb-bright);line-height:1.35}
+.mnq-row.shown .mnq-ans{color:var(--fb-warn)}
+.mnq-row .ico{width:16px;height:16px;color:var(--fb-ok)}
+.mnq-row.shown .ico{color:var(--fb-warn)}
+.mnq-foot{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.mnq-msg{flex:1 1 160px;font-size:13.5px;color:var(--fb-dim)}
+@keyframes mnq-shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
 .route-base{fill:none;stroke:var(--fb-border);stroke-linecap:round}
 .route-done{fill:none;stroke:var(--fb-accent);stroke-linecap:round;opacity:.9;transition:stroke-dasharray .7s ease}
 .act-lab text{font:600 15px var(--fb-font);letter-spacing:.28em;fill:var(--fb-dim)}
@@ -976,11 +993,97 @@ function buildCards() {
 }
 
 /* mnemonics */
-function buildMnemonics() {
-  const list = NODES.filter(n => n.mn);
-  $("#mn-in").innerHTML = `<div><h1>Mnemonics</h1><p class="lede">All ${list.length} memory aids in one place, in tour order. Tap one to open its topic on the map.</p></div>
-    <div class="mgrid">${TOUR.map(id => byId[id]).filter(n => n.mn).map(n => `<button type="button" class="mcard fb-panel mn h-${hueOf(n.c)}" data-open="${n.id}"><span class="t">${esc(n.t)}</span><div class="mn-word">${esc(n.mn.word)}</div><div class="mn-rows">${n.mn.rows.map(([l, t]) => `<div class="mn-row"><b>${esc(l)}</b><span>${esc(t)}</span></div>`).join("")}</div></button>`).join("")}</div>`;
-  $("#mn-in").onclick = e => { const b = e.target.closest("[data-open]"); if (b) goTopic(b.dataset.open); };
+/* Browse grid + "Fill in" quiz: type what each letter stands for; one key word is enough */
+const MN_SKIP = new Set(["holding"]); /* a speed table, not a word to fill in */
+const mnAll = () => TOUR.map(id => byId[id]).filter(n => n.mn);
+const mnQuizList = () => { const w = new Set(); return mnAll().filter(n => !MN_SKIP.has(n.id) && !w.has(n.mn.word) && w.add(n.mn.word)); }; /* PIMPLE once */
+const MN_STOP = new Set("a an the of or and to for if in on at by is are from with vs see each some than more least when you were that its it be as into not no only per up".split(" "));
+const MN_SYN = { wx: "weather", xpdr: "transponder", hr: "hour", hrs: "hours" };
+const GL = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) => [k.toLowerCase(), v]));
+const mnTok = s => String(s).toLowerCase().replace(/[’']/g, "").replace(/(\d),(?=\d{3})/g, "$1").replace(/([a-z])(?=\d)|(\d)(?=[a-z])/g, "$1$2 ")
+  .split(/[^a-z0-9]+/).filter(Boolean).map(t => MN_SYN[t] || t);
+const mnKey = k => !MN_STOP.has(k) && (k.length > 1 || /\d/.test(k));
+function mnLev(a, b) { const d = [...Array(b.length + 1).keys()];
+  for (let i = 1; i <= a.length; i++) { let p = d[0]; d[0] = i; for (let j = 1; j <= b.length; j++) { const t = d[j]; d[j] = Math.min(d[j] + 1, d[j - 1] + 1, p + (a[i - 1] !== b[j - 1])); p = t; } }
+  return d[b.length]; }
+/* typed word vs key word: same, a clear prefix either way, or a small typo; numbers must be exact */
+const mnHit = (t, k) => { if (t === k) return true; if (/\d/.test(t) || /\d/.test(k)) return false; const m = Math.min(t.length, k.length);
+  let cp = 0; while (cp < m && t[cp] === k[cp]) cp++; /* limits ~ limitations, intercept ~ intercepting */
+  const u = t.length > 4 && t.endsWith("s") ? t.slice(0, -1) : t; /* holds ~ holding */
+  return (u.length >= 4 && k.startsWith(u)) || (k.length >= 4 && t.startsWith(k)) || (cp >= 5 && cp >= m * .7) || (m >= 5 && mnLev(t, k) <= (m >= 8 ? 2 : 1)); };
+function mnRows(n) {
+  const rows = n.mn.rows.map(([l, t]) => { const head = t.split(" — ")[0], lab = String(l).toLowerCase().replace(/[^a-z0-9]/g, "");
+    const kw = mnTok(t).filter(k => mnKey(k) && k !== lab);
+    mnTok(head).forEach(k => { if (GL[k]) kw.push(...mnTok(GL[k]).filter(x => mnKey(x) && x.length > 2)); }); /* ELT → emergency locator transmitter */
+    const parts = [head.replace(/\(.*?\)/g, " "), ...(head.match(/\(([^)]*)\)/g) || [])];
+    const initials = parts.map(x => mnTok(x).filter(w => /[a-z]/.test(w[0])).map(w => w[0]).join("")).filter(x => x.length >= 2); /* DG, HI */
+    return { l, t, kw: [...new Set(kw)], initials }; });
+  /* a word shared by many rows (indicator, gauge, route) does not identify one of them */
+  rows.forEach(r => { const st = r.kw.filter(k => { const c = rows.filter(o => o.kw.includes(k)).length; return !(c >= 3 || (rows.length >= 4 && c * 2 >= rows.length)); }); r.strong = new Set(st.length ? st : r.kw); });
+  return rows;
+}
+function mnMatch(input, row) {
+  const toks = mnTok(input).filter(mnKey), joined = input.toLowerCase().replace(/[^a-z0-9]/g, ""); if (!joined) return false;
+  if (row.initials.includes(joined)) return true;
+  let strong = 0, any = 0; row.kw.forEach(k => { if (joined === k || toks.some(t => mnHit(t, k))) { any++; if (row.strong.has(k)) strong++; } });
+  return strong >= 1 || any >= 2;
+}
+const mq = { list: [], i: 0, total: 0, first: 0, skipped: 0, again: {}, rows: [], used: new Set(), clean: true, finished: false, timer: 0 };
+const MN_OK = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>', MN_EYE = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+function mnStart() {
+  clearTimeout(mq.timer); let l = mnQuizList();
+  if (store.get("mnShuffle", false)) { l = [...l]; for (let i = l.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [l[i], l[j]] = [l[j], l[i]]; } }
+  Object.assign(mq, { list: l, i: 0, total: l.length, first: 0, skipped: 0, again: {} }); mnCard(true);
+}
+function mnCard(focus) {
+  const box = $("#mnq"); if (!box) return; clearTimeout(mq.timer); const n = mq.list[mq.i];
+  if (!n) { box.innerHTML = `<div class="mnq fb-panel"><div class="mn-word">Done</div><p class="mnq-hint">${mq.first} of ${mq.total} right the first time${mq.skipped ? `, ${mq.skipped} skipped` : ""}.</p>
+    <div class="mnq-foot"><button type="button" class="fb-btn primary" id="mn-again">Go again</button></div></div>`; window.FlightBagTheme?.place?.(); return; }
+  Object.assign(mq, { rows: mnRows(n), used: new Set(), clean: true, finished: false });
+  box.innerHTML = `<div class="mnq fb-panel h-${hueOf(n.c)}">
+    <div class="mnq-top"><span>${esc(n.t)}</span><span class="mnq-n">${mq.i + 1} / ${mq.list.length}</span></div>
+    <div class="mn-word">${esc(n.mn.word)}</div>
+    <div class="mnq-rows">${mq.rows.map((r, i) => `<div class="mnq-row" data-i="${i}"><b>${esc(r.l)}</b><input class="fb-input" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="${esc(r.l)} stands for"><button type="button" class="fb-btn small" data-show="${i}">Show</button></div>`).join("")}</div>
+    <div class="mnq-foot"><span class="mnq-msg" id="mnq-msg" aria-live="polite">A key word is enough. Enter checks it.</span><button type="button" class="fb-btn small" data-open="${n.id}">Open topic</button><button type="button" class="fb-btn small" id="mnq-skip">Skip</button></div></div>`;
+  window.FlightBagTheme?.place?.();
+  if (focus) box.querySelector("input")?.focus();
+}
+function mnCheck(i, show) {
+  const rowEl = $(`#mnq .mnq-row[data-i="${i}"]`), inp = rowEl && rowEl.querySelector("input"); if (!inp) return;
+  /* repeated letters (the two R's of ARROW) can be answered in either order */
+  const lab = mq.rows[i].l, pool = mq.rows.map((r, j) => j).filter(j => mq.rows[j].l === lab && !mq.used.has(j)), order = [...pool.filter(j => j === i), ...pool.filter(j => j !== i)];
+  let hit;
+  if (show) { hit = order[0]; mq.clean = false; }
+  else { const v = inp.value.trim(); if (!v) return; hit = order.find(j => mnMatch(v, mq.rows[j]));
+    if (hit == null) { mq.clean = false; rowEl.classList.remove("bad"); void rowEl.offsetWidth; rowEl.classList.add("bad"); $("#mnq-msg").textContent = "Not that one. Try another word, or Show."; inp.select(); return; } }
+  mq.used.add(hit); rowEl.className = "mnq-row " + (show ? "shown" : "ok");
+  rowEl.innerHTML = `<b>${esc(lab)}</b><span class="mnq-ans">${esc(mq.rows[hit].t)}</span>${show ? MN_EYE : MN_OK}`;
+  const left = $$("#mnq .mnq-row input"), next = left.find(x => +x.closest(".mnq-row").dataset.i > i) || left[0];
+  if (next) { $("#mnq-msg").textContent = `${mq.used.size} of ${mq.rows.length}`; next.focus(); return; }
+  /* bottom reached: score it, bring a missed one back once at the end, and move on */
+  const n = mq.list[mq.i]; mq.finished = true;
+  if (mq.clean) { if (!(n.id in mq.again)) mq.first++; } else if (!mq.again[n.id]) { mq.again[n.id] = 1; mq.list.push(n); } else mq.again[n.id]++;
+  $("#mnq-msg").textContent = mq.clean ? "All correct. Next one coming up…" : mq.again[n.id] === 1 ? "Done. This one comes back at the end." : "Done.";
+  const sk = $("#mnq-skip"); sk.textContent = "Next"; sk.classList.add("primary"); sk.focus();
+  mq.timer = setTimeout(mnNext, mq.clean ? 900 : 2400);
+}
+function mnNext() { clearTimeout(mq.timer); mq.i++; mnCard(activeView === "mnemonics"); }
+function buildMnemonics(focus) {
+  const all = mnAll(), quiz = store.get("mnMode", "browse") === "quiz", root = $("#mn-in");
+  root.innerHTML = `<div><h1>Mnemonics</h1><p class="lede">${quiz ? "Type what each letter stands for. One key word is enough: for the G of GRABCARD, “generator” counts. Fill the last one and the next mnemonic comes up."
+      : `All ${all.length} memory aids in one place, in tour order. Tap one to open its topic on the map.`}</p></div>
+    <div class="filter"><button type="button" data-mn="browse" aria-pressed="${!quiz}">Browse</button><button type="button" data-mn="quiz" aria-pressed="${quiz}">Fill in</button>${quiz ? `<button type="button" id="mn-shuf" aria-pressed="${!!store.get("mnShuffle", false)}">Shuffle</button><button type="button" id="mn-again" aria-pressed="false">Restart</button>` : ""}</div>
+    ${quiz ? `<div id="mnq"></div>` : `<div class="mgrid">${all.map(n => `<button type="button" class="mcard fb-panel mn h-${hueOf(n.c)}" data-open="${n.id}"><span class="t">${esc(n.t)}</span><div class="mn-word">${esc(n.mn.word)}</div><div class="mn-rows">${n.mn.rows.map(([l, t]) => `<div class="mn-row"><b>${esc(l)}</b><span>${esc(t)}</span></div>`).join("")}</div></button>`).join("")}</div>`}`;
+  if (quiz) { if (!mq.list.length || mq.i >= mq.list.length) mnStart(); else mnCard(!!focus); }
+  root.onclick = e => {
+    const m = e.target.closest("[data-mn]"); if (m) { store.set("mnMode", m.dataset.mn); return buildMnemonics(true); }
+    const sf = e.target.closest("#mn-shuf"); if (sf) { const on = !store.get("mnShuffle", false); store.set("mnShuffle", on); sf.setAttribute("aria-pressed", on); return mnStart(); }
+    if (e.target.closest("#mn-again")) return mnStart();
+    const sh = e.target.closest("[data-show]"); if (sh) return mnCheck(+sh.dataset.show, true);
+    if (e.target.closest("#mnq-skip")) { if (!mq.finished) mq.skipped++; return mnNext(); }
+    const b = e.target.closest("[data-open]"); if (b) goTopic(b.dataset.open);
+  };
+  root.onkeydown = e => { if (e.key !== "Enter" || !e.target.matches?.(".mnq-row input")) return; e.preventDefault(); mnCheck(+e.target.closest(".mnq-row").dataset.i); };
 }
 
 /* terms & definitions */
