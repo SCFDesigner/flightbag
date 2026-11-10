@@ -547,6 +547,16 @@ body.cfii #pane-switch, body.cfii #tgl-edit { display:none !important; }
 #wk-body { padding-bottom:50vh; }
 #wk-inner { max-width:var(--measure); }
 #wk-tabs .tab { cursor:pointer; }
+.ms2-figs { display:flex; flex-wrap:wrap; gap:10px; align-items:flex-start; margin:10px 0 4px; }
+.ms2-figs img { max-width:100%; height:auto; border-radius:8px; border:1px solid var(--bdr); background:#fff; cursor:zoom-in; }
+.wk-node > .ms2-figs { margin-left:26px; }
+#req-only { display:none; width:100%; margin-top:6px; padding:6px 0; background:transparent; color:var(--text3); border:1px solid var(--fb-line, var(--bdr));
+            border-radius:var(--fb-radius-sm, 6px); font:600 10.5px inherit; font-family:inherit; letter-spacing:1.5px; text-transform:uppercase; cursor:pointer; }
+body.cfii #req-only { display:block; }
+#req-only[aria-pressed="true"] { background:var(--chrome); color:var(--blue); border-color:color-mix(in srgb, var(--blue) 60%, transparent); }
+@media (pointer: coarse) { #req-only { min-height:32px; } }
+.req-dot { display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--blue); margin-left:7px; vertical-align:middle; }
+.req-tag { margin-left:10px; padding:1px 7px; border-radius:999px; border:1px solid color-mix(in srgb, var(--blue) 60%, transparent); color:var(--blue); font-size:.9em; letter-spacing:.08em; }
 .ms2-pts { border:1px solid var(--bdr); border-radius:10px; padding:10px 14px; margin:0 0 20px; font-size:.92em; color:var(--text2); }
 .ms2-pts p { margin:0 0 6px; } .ms2-pts ol { margin:4px 0 0; padding-left:22px; } .ms2-pts ul { margin:2px 0; padding-left:18px; } .ms2-pts li { margin:2px 0; line-height:1.4; }
 .ms2-note { color:var(--note); font-style:italic; }
@@ -634,6 +644,7 @@ body.cfii #pane-switch, body.cfii #tgl-edit { display:none !important; }
         <button data-mode="cfi" class="on">CFI</button>
         <button data-mode="cfii">CFII</button>
       </div>
+      <button id="req-only" type="button" aria-pressed="false" title="Show only the tasks the PTS names as required">Required tasks only</button>
       <input id="search" type="text" placeholder="Filter lessons…">
     </div>
     <div id="nav-scroll">
@@ -879,7 +890,8 @@ function renderNav(filter) {
   list.innerHTML = '';
   const f = (filter || '').toLowerCase();
   DATA().aoes.forEach(aoe => {
-    const lessons = aoe.lessons.filter(l => !f || l.title.toLowerCase().includes(f) || aoe.name.toLowerCase().includes(f));
+    const reqOnly = mode === 'cfii' && store.prefs.reqOnly, RS = window.CFII_SCRIPTS || {};
+    const lessons = aoe.lessons.filter(l => (!f || l.title.toLowerCase().includes(f) || aoe.name.toLowerCase().includes(f)) && (!reqOnly || (RS[l.id] && RS[l.id].req)));
     if (!lessons.length) return;
     const hdr = document.createElement('div');
     hdr.className = 'aoe-hdr';
@@ -895,7 +907,8 @@ function renderNav(filter) {
       // lesson has a script now, so a "scripted" marker would just be noise
       const n = selCount(l.id);
       const hereOpen = cur && cur.lesson === l && tocOpen;
-      it.innerHTML = `<span>${l.title.replace(/^[IVXLC]+\.[A-Z](-[A-Z])?\.\s*/, m => m)}</span><span class="cnt${n ? '' : ' zero'}">${n}</span><span class="toc-tri">${hereOpen ? '▾' : '▸'}</span>`;
+      const isReq = mode === 'cfii' && (window.CFII_SCRIPTS || {})[l.id] && window.CFII_SCRIPTS[l.id].req;
+      it.innerHTML = `<span>${l.title.replace(/^[IVXLC]+\.[A-Z](-[A-Z])?\.\s*/, m => m)}${isReq ? '<i class="req-dot" title="Required PTS task"></i>' : ''}</span><span class="cnt${n ? '' : ' zero'}">${n}</span><span class="toc-tri">${hereOpen ? '▾' : '▸'}</span>`;
       // name = navigate only (fast cycling); the arrow owns expand/collapse
       it.onclick = () => {
         if (cur && cur.lesson === l) return;
@@ -3395,6 +3408,16 @@ function wkRow(num, text, acs, ref) {
 function wkTab() { return store.prefs.wkTab === 'bsp' ? 'bsp' : 'mine'; }
 function setWkTab(t) { store.prefs.wkTab = t; savePrefs(); renderWorksheet(); $('#wk-body').scrollTop = 0; }
 function mdB(s) { return escapeHtml(String(s || '')).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>'); }
+/* eBook figures (cfi/assets/cfii, placed by tools/cfii-scripts): tap one to open it in the lightbox */
+function cfiiFigsHtml(figs) {
+  if (!figs || !figs.length) return '';
+  return '<div class="ms2-figs">' + figs.map(f => '<img loading="lazy" src="assets/cfii/' + f.f + '" width="' + (f.w || 400) + '" alt="' + escapeHtml(f.cap || 'Figure').replace(/"/g, '&quot;') + '">').join('') + '</div>';
+}
+function wkFigs(path) {
+  const sc = cur && (window.CFII_SCRIPTS || {})[cur.lesson.id], figs = sc && sc.ofigs && sc.ofigs[path];
+  if (!figs || !figs.length) return null;
+  const d = document.createElement('div'); d.innerHTML = cfiiFigsHtml(figs); return d.firstChild;
+}
 function renderCfiiScript() {
   const body = $('#wk-body'), l = cur.lesson, sc = (window.CFII_SCRIPTS || {})[l.id];
   body.innerHTML = '';
@@ -3405,14 +3428,14 @@ function renderCfiiScript() {
   let h = '';
   if (sc.pts) {
     const p = sc.pts;
-    h += '<div class="wk-head">PTS task ' + escapeHtml(p.task) + ' — what the examiner checks</div><div class="ms2-pts">'
+    h += '<div class="wk-head">PTS task ' + escapeHtml(p.task) + ' — what the examiner checks' + (sc.req ? '<span class="req-tag">Required</span>' : '') + '</div><div class="ms2-pts">'
       + (p.area ? '<p class="ms2-note">' + escapeHtml(p.area) + '</p>' : '') + (p.note ? '<p class="ms2-note">' + escapeHtml(p.note) + '</p>' : '')
       + '<p>' + escapeHtml(p.obj) + '</p><ol>' + p.items.map(i => '<li>' + escapeHtml(i.t) + (i.sub.length ? '<ul>' + i.sub.map(x => '<li>' + escapeHtml(x) + '</li>').join('') + '</ul>' : '') + '</li>').join('') + '</ol></div>';
   } else h += '<div class="wk-head">PTS</div><div class="ms2-pts"><p class="ms2-note">Not a PTS task of its own: supporting material from the eBook.</p></div>';
   h += '<div class="wk-head">My Script</div>' + (sc.intro ? '<p class="ms2-intro">' + mdB(sc.intro) + '</p>' : '');
   sc.cards.forEach((c, i) => {
     h += '<section class="ms2-card"><h3><span>' + (i + 1) + '</span>' + mdB(c.h) + '</h3>' + (c.obj ? '<p class="ms2-obj">' + mdB(c.obj) + '</p>' : '')
-      + '<ul>' + c.pts.map(x => '<li>' + mdB(x) + '</li>').join('') + '</ul>' + (c.ce ? '<p class="ms2-ce">' + mdB(c.ce) + '</p>' : '') + '</section>';
+      + '<ul>' + c.pts.map(x => '<li>' + mdB(x) + '</li>').join('') + '</ul>' + (c.ce ? '<p class="ms2-ce">' + mdB(c.ce) + '</p>' : '') + cfiiFigsHtml(c.figs) + '</section>';
   });
   if (sc.recall.length) h += '<div class="wk-head">Check questions (tap for the answer)</div><div class="ms2-q">' + sc.recall.map(r => '<details><summary>' + mdB(r[0]) + '</summary><p>' + mdB(r[1]) + '</p></details>').join('') + '</div>';
   inner.insertAdjacentHTML('beforeend', h);
@@ -3456,6 +3479,7 @@ function renderWorksheet() {
       n1.className = 'wk-node wk-1';
       n1.dataset.path = p1;
       n1.appendChild(wkRow(p1 + '.', e.t, e.acs, hrefs[i]));
+      { const fg = wkFigs(p1); if (fg) n1.appendChild(fg); }
       if (e.mp) { const mp = document.createElement('div'); mp.className = 'wk-mp'; mp.textContent = e.mp; n1.appendChild(mp); }
       n1.appendChild(wkFill(p1));
       (e.k || []).forEach((sub, j) => {
@@ -3464,6 +3488,7 @@ function renderWorksheet() {
         n2.className = 'wk-node wk-2';
         n2.dataset.path = p2;
         n2.appendChild(wkRow((j + 1) + '.', sub.t, sub.acs));
+        { const fg = wkFigs(p2); if (fg) n2.appendChild(fg); }
         n2.appendChild(wkFill(p2));
         (sub.k || []).forEach((leaf, k) => {
           const p3 = p2 + '-' + (k + 1);
@@ -3471,6 +3496,7 @@ function renderWorksheet() {
           n3.className = 'wk-node wk-3';
           n3.dataset.path = p3;
           n3.appendChild(wkRow((k + 1) + '.', leaf.t, leaf.acs));
+          { const fg = wkFigs(p3); if (fg) n3.appendChild(fg); }
           n3.appendChild(wkFill(p3));
           n2.appendChild(n3);
         });
@@ -3867,6 +3893,9 @@ initSync();
 
 /* ---------- init ---------- */
 $('#wk-tabs').onclick = e => { const t = e.target.closest('[data-wk]'); if (t) setWkTab(t.dataset.wk); };
+$('#wk-body').addEventListener('click', e => { const im = e.target.closest('.ms2-figs img'); if (im) openLightbox(im.getAttribute('src'), im.alt); });
+$('#req-only').setAttribute('aria-pressed', !!store.prefs.reqOnly);
+$('#req-only').onclick = () => { store.prefs.reqOnly = !store.prefs.reqOnly; savePrefs(); $('#req-only').setAttribute('aria-pressed', !!store.prefs.reqOnly); renderNav($('#search').value); };
 $('#rate').value = store.prefs.rate; $('#rate-val').textContent = store.prefs.rate.toFixed(1) + 'x';
 applyLook();
 applyModes();
