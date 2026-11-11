@@ -250,6 +250,8 @@ body.fb #pop.fb-panel{background-color:var(--fb-cell)}
 .pk{background:var(--fb-well);border-color:var(--fb-well-rim);box-shadow:inset 0 2px 4px rgba(0,0,0,.5)}
 .sect-h{font:500 10px var(--fb-font);letter-spacing:2.5px;color:var(--fb-dim);display:flex;align-items:center;gap:6px}
 .mn-word{font:600 20px/1 var(--fb-mono);letter-spacing:.18em}
+.mn-reg{font-size:12.5px;line-height:1.4;color:var(--fb-text);margin:4px 0}
+.mn-reg b{font:500 10px var(--fb-font);letter-spacing:1.5px;text-transform:uppercase;color:var(--fb-dim);margin-right:8px}
 .mn-row b{font:600 14px/1.2 var(--fb-mono)}
 .upd .sect-h{color:var(--fb-warn)}
 .quiz{border-color:var(--fb-border)}
@@ -400,7 +402,7 @@ addEventListener("scroll", () => { tip.hidden = true; }, { passive: true });
 const pop = $("#pop"); let popFor = null, pinned = false, hideT, showT;
 const touchMode = () => matchMedia("(hover: none)").matches || innerWidth < 720;
 function detailHTML(n) {
-  const mn = n.mn ? `<section class="h-${hue(n.c)}"><div class="sect-h">Mnemonic</div><div class="mn-word">${esc(n.mn.word)}</div><div class="mn-rows">${n.mn.rows.map(([l, t]) => `<div class="mn-row"><b>${esc(l)}</b><span>${esc(t)}</span></div>`).join("")}</div></section>` : "";
+  const mn = n.mn ? `<section class="h-${hue(n.c)}"><div class="sect-h">Mnemonic</div><div class="mn-word">${esc(n.mn.word)}</div>${n.mn.reg ? `<div class="mn-reg"><b>Regulation</b>${esc(n.mn.reg)}</div>` : ""}<div class="mn-rows">${n.mn.rows.map(([l, t]) => `<div class="mn-row"><b>${esc(l)}</b><span>${esc(t)}</span></div>`).join("")}</div></section>` : "";
   const links = (adj[n.id] || []).map(x => { const m = byId[x.id]; return `<button type="button" class="h-${hue(m.c)}" data-jump="${m.id}" title="${esc(x.why || (m.ln || []).find(l => l[0] === n.id)?.[1] || "")}"><span class="sw"></span><span>${esc(m.t)}</span></button>`; }).join("");
   return `<div class="pop-top h-${hue(n.c)}"><span class="sw"></span>${esc(CLUSTERS[n.c].name)}<button type="button" class="fb-btn small" data-close>${pinned ? "Close" : "Pin"}</button></div>
     <h4>${esc(n.t)}</h4><p class="pk">${esc(n.k)}</p>${mn}

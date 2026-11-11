@@ -382,6 +382,19 @@ aside.panel{border-radius:0;border:0;border-left:1px solid var(--fb-rim)}
 .lb{background:rgba(8,8,7,.9)}
 .lb-svg{background:var(--fb-panel)}
 /* ── the story: route on the map, scene cards, narration ── */
+/* PTS blurb + mnemonic regulation line */
+.pts{border:1px solid var(--fb-rim);border-radius:10px;padding:12px 14px;display:grid;gap:10px;background:var(--fb-cell)}
+.pts .sect-h .ref{margin-left:auto;font:500 10.5px var(--fb-mono);letter-spacing:0;text-transform:none;color:var(--fb-dim)}
+.pts-t{font-size:13.5px;line-height:1.4;color:var(--fb-bright)}
+.pts-t b{font-family:var(--fb-mono);color:var(--fb-accent);margin-right:7px}
+.pts-req{margin-left:8px;padding:1px 7px;border-radius:999px;border:1px solid color-mix(in srgb,var(--fb-accent) 55%,transparent);color:var(--fb-accent);font:500 10px var(--fb-font);letter-spacing:1.5px;text-transform:uppercase;white-space:nowrap}
+.pts ul{margin:4px 0 0;padding:0;list-style:none;display:grid;gap:3px}
+.pts li{display:grid;grid-template-columns:30px 1fr;font-size:13px;line-height:1.4;color:var(--fb-text)}
+.pts li span{font-family:var(--fb-mono);color:var(--fb-dim)}
+.pts p{margin:4px 0 0;font-size:13px;color:var(--fb-dim)}
+.node .ptsm{fill:var(--fb-accent)}
+.mn-reg{font-size:12.5px;line-height:1.4;color:var(--fb-text)}
+.mn-reg b{font:500 10px var(--fb-font);letter-spacing:1.5px;text-transform:uppercase;color:var(--fb-dim);margin-right:8px}
 /* mnemonics: fill-in quiz */
 .mnq{max-width:640px;padding:18px;display:grid;gap:12px}
 .mnq-top{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:var(--fb-dim)}
@@ -470,6 +483,7 @@ p.st-line{margin:0;font-size:15.5px;line-height:1.5;font-style:italic;color:var(
         <div><i><svg width="18" height="8"><line x1="0" y1="4" x2="18" y2="4" stroke="var(--fb-accent)" stroke-width="3" stroke-linecap="round"/></svg></i>the flight so far</div>
         <div><i><svg width="18" height="8"><line x1="0" y1="4" x2="18" y2="4" stroke="currentColor" stroke-dasharray="4 3"/></svg></i>connection between topics</div>
         <div><i><svg width="18" height="10"><circle cx="9" cy="5" r="4" fill="var(--amber)"/></svg></i>has updated info</div>
+        <div><i><svg width="18" height="10"><rect x="6" y="2" width="6" height="6" transform="rotate(45 9 5)" fill="var(--fb-accent)"/></svg></i>covers a required PTS task</div>
         <div><i><svg width="18" height="10"><circle cx="9" cy="5" r="4" fill="currentColor"/></svg></i>visited</div>
       </div>
       <div class="mapctl"><button type="button" class="fb-btn" id="zin" aria-label="Zoom in">+</button><button type="button" class="fb-btn" id="zout" aria-label="Zoom out">−</button><button type="button" class="fb-btn" id="zfit" aria-label="Show whole map"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button></div>
@@ -494,6 +508,7 @@ p.st-line{margin:0;font-size:15.5px;line-height:1.5;font-style:italic;color:var(
 
 <script src="data.js"></script>
 <script src="story.js"></script>
+<script src="pts.js"></script>
 <script src="visuals.js"></script>
 <script src="symtest.js"></script>
 <script>
@@ -508,6 +523,9 @@ const onSite = location.hostname === "scfdesigner.github.io";
 const toolLinks = id => (typeof FB_TOOLS !== "undefined" && FB_TOOLS[id] || []).map(([t, u]) => `<a class="fb-btn go-tool" href="${u}"${onSite ? "" : ' target="_blank" rel="noopener"'}><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Practice: ${esc(t)}</a>`).join("");
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const hueOf = c => CLUSTERS[c].hue;
+/* PTS lookups (pts.js) — defined up here because the map is drawn before the panel code runs */
+const ptsRefs = id => (typeof PTS !== "undefined" && PTS.map[id]) || null;
+const ptsReq = id => (ptsRefs(id) || []).some(r => PTS.tasks[r[0]].req);
 
 /* links: undirected, keep a reason for each direction */
 const adj = {}; const edges = []; const ekey = new Set();
@@ -610,6 +628,7 @@ function draw() {
     el("circle", { class: "dot", cx: -n.w / 2 + 16, cy: 0, r: 5.5, stroke: "currentColor" }, g);
     const t = el("text", { x: -n.w / 2 + 31, y: 5.5 }, g); t.textContent = n.t;
     if (n.up) el("circle", { class: "upd", cx: n.w / 2 - 6, cy: -12, r: 5 }, g);
+    if (ptsReq(n.id)) el("rect", { class: "ptsm", x: n.w / 2 - 10, y: 8, width: 7.5, height: 7.5, transform: `rotate(45 ${n.w / 2 - 6.25} 11.75)` }, g);
   });
   for (const [k, p] of Object.entries(hubPos)) {
     const g = el("g", { class: "cl-hub h-" + hueOf(k), "data-cl": k, transform: `translate(${p.x},${p.y})`, tabindex: 0, role: "button", "aria-label": CLUSTERS[k].name }, world);
@@ -690,9 +709,17 @@ function clearFocus() { svg.classList.remove("focus"); $$(".node,.cl-hub", world
 /* ───── panel ───── */
 const panel = $("#panel"); let current = null, viewCh = null, ended = false; /* a topic, a chapter scene card, or the ending */
 const swatch = c => `<span class="sw h-${hueOf(c)}"></span>`;
-function mnHTML(mn, c) { return `<section class="mn h-${hueOf(c)}"><div class="sect-h">Mnemonic</div><div class="mn-word">${esc(mn.word)}</div>
+const mnReg = mn => mn.reg ? `<div class="mn-reg"><b>Regulation</b>${esc(mn.reg)}</div>` : "";
+function mnHTML(mn, c) { return `<section class="mn h-${hueOf(c)}"><div class="sect-h">Mnemonic</div><div class="mn-word">${esc(mn.word)}</div>${mnReg(mn)}
   <div class="mn-rows">${mn.rows.map(([l, t]) => `<div class="mn-row"><b>${esc(l)}</b><span>${esc(t)}</span></div>`).join("")}</div></section>`; }
 function updHTML(up) { return `<section class="upd"><div class="sect-h"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 21h20L12 3z"/><path d="M12 10v5M12 18h.01"/></svg> Updated / reconciled</div>${up.map(u => `<div class="upd-item"><span class="old">${esc(u.old)}</span><span>${esc(u.now)}</span><span class="src">${esc(u.src)}</span></div>`).join("")}</section>`; }
+/* which elements of the Flight Instructor Instrument PTS this topic covers (pts.js, generated from the PTS text) */
+function ptsHTML(id) {
+  const refs = ptsRefs(id); if (!refs) return "";
+  const by = {}; refs.forEach(([t, n, x]) => (by[t] ||= []).push([n, x]));
+  return `<section class="pts"><div class="sect-h">CFII PTS · what this topic covers<span class="ref">${esc(PTS.src)}</span></div>${Object.entries(by).map(([t, els]) => { const T = PTS.tasks[t], l = els.filter(e => e[0]);
+    return `<div class="pts-task"><div class="pts-t"><b>${t}</b>${esc(T.n)}${T.req ? '<span class="pts-req">Required task</span>' : ""}</div>${l.length ? `<ul>${l.map(([n, x]) => `<li><span>${n}</span><div>${esc(x)}</div></li>`).join("")}</ul>` : `<p>Covers the task as a whole.</p>`}</div>`; }).join("")}</section>`;
+}
 function select(id, opts = {}) {
   const n = byId[id]; if (!n) return; current = id; viewCh = null; ended = false;
   seen.add(id); store.set("seen", [...seen]); store.set("last", id);
@@ -713,6 +740,7 @@ function select(id, opts = {}) {
     ${renderVis(n.vis)}
     ${symGroup ? `<button type="button" class="go-sym fb-btn primary" data-sym="${symGroup.id}">Open ${esc(symGroup.t)} symbols →</button>` : ""}
     ${toolLinks(id) ? `<div class="tools">${toolLinks(id)}</div>` : ""}
+    ${ptsHTML(id)}
     ${n.up ? updHTML(n.up) : ""}
     ${n.q ? `<section class="quiz"><div class="sect-h">Check yourself</div><p>${esc(n.q[0])}</p><button type="button" class="reveal fb-btn small">Show answer</button><p class="ans" hidden>${esc(n.q[1])}</p></section>` : ""}
     ${conns ? `<section><div class="sect-h">Connects to (${(adj[id] || []).length})</div><div class="conn">${conns}</div></section>` : ""}
@@ -1042,7 +1070,7 @@ function mnCard(focus) {
   Object.assign(mq, { rows: mnRows(n), used: new Set(), clean: true, finished: false });
   box.innerHTML = `<div class="mnq fb-panel h-${hueOf(n.c)}">
     <div class="mnq-top"><span>${esc(n.t)}</span><span class="mnq-n">${mq.i + 1} / ${mq.list.length}</span></div>
-    <div class="mn-word">${esc(n.mn.word)}</div>
+    <div class="mn-word">${esc(n.mn.word)}</div>${mnReg(n.mn)}
     <div class="mnq-rows">${mq.rows.map((r, i) => `<div class="mnq-row" data-i="${i}"><b>${esc(r.l)}</b><input class="fb-input" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="${esc(r.l)} stands for"><button type="button" class="fb-btn small" data-show="${i}">Show</button></div>`).join("")}</div>
     <div class="mnq-foot"><span class="mnq-msg" id="mnq-msg" aria-live="polite">A key word is enough. Enter checks it.</span><button type="button" class="fb-btn small" data-open="${n.id}">Open topic</button><button type="button" class="fb-btn small" id="mnq-skip">Skip</button></div></div>`;
   window.FlightBagTheme?.place?.();
@@ -1073,7 +1101,7 @@ function buildMnemonics(focus) {
   root.innerHTML = `<div><h1>Mnemonics</h1><p class="lede">${quiz ? "Type what each letter stands for. One key word is enough: for the G of GRABCARD, “generator” counts. Fill the last one and the next mnemonic comes up."
       : `All ${all.length} memory aids in one place, in tour order. Tap one to open its topic on the map.`}</p></div>
     <div class="filter"><button type="button" data-mn="browse" aria-pressed="${!quiz}">Browse</button><button type="button" data-mn="quiz" aria-pressed="${quiz}">Fill in</button>${quiz ? `<button type="button" id="mn-shuf" aria-pressed="${!!store.get("mnShuffle", false)}">Shuffle</button><button type="button" id="mn-again" aria-pressed="false">Restart</button>` : ""}</div>
-    ${quiz ? `<div id="mnq"></div>` : `<div class="mgrid">${all.map(n => `<button type="button" class="mcard fb-panel mn h-${hueOf(n.c)}" data-open="${n.id}"><span class="t">${esc(n.t)}</span><div class="mn-word">${esc(n.mn.word)}</div><div class="mn-rows">${n.mn.rows.map(([l, t]) => `<div class="mn-row"><b>${esc(l)}</b><span>${esc(t)}</span></div>`).join("")}</div></button>`).join("")}</div>`}`;
+    ${quiz ? `<div id="mnq"></div>` : `<div class="mgrid">${all.map(n => `<button type="button" class="mcard fb-panel mn h-${hueOf(n.c)}" data-open="${n.id}"><span class="t">${esc(n.t)}</span><div class="mn-word">${esc(n.mn.word)}</div>${mnReg(n.mn)}<div class="mn-rows">${n.mn.rows.map(([l, t]) => `<div class="mn-row"><b>${esc(l)}</b><span>${esc(t)}</span></div>`).join("")}</div></button>`).join("")}</div>`}`;
   if (quiz) { if (!mq.list.length || mq.i >= mq.list.length) mnStart(); else mnCard(!!focus); }
   root.onclick = e => {
     const m = e.target.closest("[data-mn]"); if (m) { store.set("mnMode", m.dataset.mn); return buildMnemonics(true); }
