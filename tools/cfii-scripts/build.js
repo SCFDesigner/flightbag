@@ -50,6 +50,37 @@ function placeFigs(l, cards, figs) {
   for (let f = n - 1; f >= 0; f--) { const card = cards[c], g = figs[f]; card.figs = card.figs || []; if (!card.figs.some(x => x.f === g.file)) card.figs.unshift({ f: g.file, w: g.wh[0], h: g.wh[1], cap: g.head }); c = from[f][c]; }
 }
 const FAA = JSON.parse(fs.readFileSync(path.join(__dirname, "faa-figs.json"), "utf8")); let faaCount = 0;
+/* ---- Figures tab: every figure of a lesson by section. eBook figures come from cfi/cfii-full.js (full.py) grouped
+   under their top heading and second-level title; FAA chart sets (faa-figs.json _gallery) follow. ---- */
+const FULL = (() => { const f = path.join(root, "cfi/cfii-full.js"); if (!fs.existsSync(f)) return {}; const w = {}; new Function("window", fs.readFileSync(f, "utf8"))(w); return w.CFII_FULL || {}; })();
+const GROUPS = (() => { const s = fs.readFileSync(path.join(root, "ifr/data.js"), "utf8"), a = s.indexOf("const SYMBOL_GROUPS = ["), b = s.indexOf("\n];", a);
+  if (a < 0 || b < 0) throw new Error("SYMBOL_GROUPS not found in ifr/data.js"); const g = new Function(s.slice(a, b + 3) + "; return SYMBOL_GROUPS;")().concat(FAA._gallery_extra || []); return Object.fromEntries(g.map(x => [x.id, x])); })();
+const plain = t => String(t || "").replace(/\*\*/g, "").trim();
+const clip = (t, n) => { t = plain(t); return t.length > n ? t.slice(0, n - 1).trim() + "…" : t; };
+function gallery(l) {
+  const secs = []; let sec = null, sub = null, h1 = "", h2 = "", last = "";
+  (FULL[l.id] || []).forEach(n => {
+    if (n[1] === 1) { h1 = plain(n[2]); h2 = ""; last = ""; sec = null; sub = null; return; }
+    if (n[1] === 5) {
+      n[2].forEach(([f, w]) => {
+        if (w && w < 60) return;                                     // inline chart symbols, not figures
+        if (!sec) secs.push(sec = { t: h1 || "Introduction", sub: [] });
+        if (!sub || sub.t !== h2) sec.sub.push(sub = { t: h2, figs: [] });
+        if (!sub.figs.some(x => x.f === f)) { const cap = last && last !== h2 ? clip(last, 110) : ""; sub.figs.push(cap ? { f, w, cap } : { f, w }); }
+      });
+      return;
+    }
+    if (typeof n[2] !== "string") return;
+    if (n[0] === 2 && n[1] === 0) { h2 = clip(n[2], 80); sub = null; }
+    if (n[1] !== 3) last = n[2];                                     // a note ("see lesson ...") is not a caption
+  });
+  (FAA._gallery[l.id] || []).forEach(id => {
+    const g = GROUPS[id]; if (!g) throw new Error(`faa-figs _gallery: no group "${id}" (${l.id})`);
+    const figs = g.cards.filter(c => c.img).map(c => { if (!fs.existsSync(path.join(root, "ifr/img", c.img + ".png"))) throw new Error("missing ifr/img/" + c.img + ".png"); return { src: "../ifr/img/" + c.img + ".png", w: 520, cap: c.t, d: c.d }; });
+    secs.push({ t: g.chart + ": " + g.t, faa: 1, sub: [{ t: "", figs }] });
+  });
+  return secs;
+}
 const NUM = { I: 1, II: 2, III: 3, IV: 4, V: 5, VI: 6, VII: 7, VIII: 8, IX: 9, X: 10 };
 /* required TASKs: the letters the area NOTE names ("shall select TASKS A and D and ..."); an area with one task is required too */
 function requiredLetters(A) { const m = (A.note || "").match(/shall select (?:at least )?TASKS? ((?:[A-H](?:, and |, | and )?)+)/); const named = m ? m[1].match(/[A-H]/g) : []; const all = Object.keys(A.tasks); return all.length === 1 ? all : named; }
@@ -73,6 +104,7 @@ lessons.forEach((l, i) => {
     recall: d.cards.filter(c => c.t === "r").map(c => [arr(c.q), arr(c.a)])
   };
   placeFigs(l, out[l.id].cards, myFigs);
+  out[l.id].gal = gallery(l);
   /* FAA Chart Users' Guide figures (faa-figs.json): fixed to a card by its heading, after the eBook's own */
   Object.entries(FAA[l.id] || {}).forEach(([h, list]) => {
     const card = out[l.id].cards.find(c => c.h === h); if (!card) throw new Error(`faa-figs: no card "${h}" in ${l.id}`);
@@ -88,5 +120,6 @@ console.log("areas:", Object.entries(pts).map(([k, a]) => k + ":" + Object.keys(
 console.log("required:", lessons.filter(l => out[l.id].req).map(l => l.title.split(" ")[0]).join(" "));
 console.log("figures placed on cards:", Object.values(out).reduce((n, o) => n + o.cards.reduce((k, c) => k + (c.figs || []).length, 0), 0), "| under outline headings:", Object.values(out).reduce((n, o) => n + Object.values(o.ofigs).reduce((k, a) => k + a.length, 0), 0));
 console.log("FAA chart figures:", faaCount);
+{ const g = Object.values(out).map(o => o.gal.reduce((n, x) => n + x.sub.reduce((k, y) => k + y.figs.length, 0), 0)); console.log("Figures tab:", g.reduce((a, b) => a + b, 0), "figures |", g.filter(n => n).length, "lessons with figures"); }
 const iia = out["cfii-ii-a-instruments-nav-equipment"]; console.log(iia.cards.map(c => c.h.slice(0, 26) + ":" + (c.figs || []).map(f => f.cap.slice(0, 14)).join("/")).join("\n"));
 console.log("empty item lists:", withPts.filter(o => !o.pts.items.length).map(o => o.pts.task));

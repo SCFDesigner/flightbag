@@ -1,33 +1,260 @@
 {
   "_": "FAA Chart Users' Guide figures (public domain; crops already in ifr/img for the IFR Atlas) added to CFII script cards. lesson id -> card heading -> [[image name in ifr/img, caption]]. Read by build.js.",
   "cfii-viii-a-non-precision-approach": {
-    "What is a non-precision approach?": [["t-prec-np", "Chart Users' Guide: precision vs non-precision profile, VDP"]],
-    "MDA vs DA/DH": [["t-mins", "Chart Users' Guide: landing minimums format (DA, MDA, HAT, HAA, RVR)"]],
-    "Approach charts": [["t-anatomy", "Chart Users' Guide: sections of an approach plate"], ["t-brief-top", "Chart Users' Guide: briefing strips"], ["t-brief-mid", "Chart Users' Guide: middle briefing strip (notes, lighting, missed approach text)"], ["t-segments", "Chart Users' Guide: approach segments on the planview"], ["t-profile", "Chart Users' Guide: profile view"]],
-    "Visual Descent Point (VDP)": [["t-34", "Chart Users' Guide: 34:1 surface clear symbol"]],
-    "Descent rate and glidepath checks": [["t-vda", "Chart Users' Guide: vertical descent angle, TCH, visual flight path"]],
-    "Non-precision missed approach": [["t-missed", "Chart Users' Guide: missed approach information and icons"]]
+    "What is a non-precision approach?": [
+      [
+        "t-prec-np",
+        "Chart Users' Guide: precision vs non-precision profile, VDP"
+      ]
+    ],
+    "MDA vs DA/DH": [
+      [
+        "t-mins",
+        "Chart Users' Guide: landing minimums format (DA, MDA, HAT, HAA, RVR)"
+      ]
+    ],
+    "Approach charts": [
+      [
+        "t-anatomy",
+        "Chart Users' Guide: sections of an approach plate"
+      ],
+      [
+        "t-brief-top",
+        "Chart Users' Guide: briefing strips"
+      ],
+      [
+        "t-brief-mid",
+        "Chart Users' Guide: middle briefing strip (notes, lighting, missed approach text)"
+      ],
+      [
+        "t-segments",
+        "Chart Users' Guide: approach segments on the planview"
+      ],
+      [
+        "t-profile",
+        "Chart Users' Guide: profile view"
+      ]
+    ],
+    "Visual Descent Point (VDP)": [
+      [
+        "t-34",
+        "Chart Users' Guide: 34:1 surface clear symbol"
+      ]
+    ],
+    "Descent rate and glidepath checks": [
+      [
+        "t-vda",
+        "Chart Users' Guide: vertical descent angle, TCH, visual flight path"
+      ]
+    ],
+    "Non-precision missed approach": [
+      [
+        "t-missed",
+        "Chart Users' Guide: missed approach information and icons"
+      ]
+    ]
   },
   "cfii-viii-b-precision-approach": {
-    "What is a precision approach?": [["t-prec-np", "Chart Users' Guide: precision vs non-precision profile"]],
-    "DA and DH": [["t-mins", "Chart Users' Guide: landing minimums format (DA, HAT, RVR)"]],
-    "Flying the ILS": [["t-profile", "Chart Users' Guide: profile view, glideslope intercept"], ["t-loc-alts", "Chart Users' Guide: localizer symbol, speed and altitude restrictions"]],
-    "Precision missed approach": [["t-missed", "Chart Users' Guide: missed approach information and icons"]]
+    "What is a precision approach?": [
+      [
+        "t-prec-np",
+        "Chart Users' Guide: precision vs non-precision profile"
+      ]
+    ],
+    "DA and DH": [
+      [
+        "t-mins",
+        "Chart Users' Guide: landing minimums format (DA, HAT, RVR)"
+      ]
+    ],
+    "Flying the ILS": [
+      [
+        "t-profile",
+        "Chart Users' Guide: profile view, glideslope intercept"
+      ],
+      [
+        "t-loc-alts",
+        "Chart Users' Guide: localizer symbol, speed and altitude restrictions"
+      ]
+    ],
+    "Precision missed approach": [
+      [
+        "t-missed",
+        "Chart Users' Guide: missed approach information and icons"
+      ]
+    ]
   },
   "cfii-viii-c-missed-approach": {
-    "Missed approach on the chart": [["t-missed", "Chart Users' Guide: missed approach information and icons"], ["t-brief-mid", "Chart Users' Guide: missed approach text box in the briefing strip"]]
+    "Missed approach on the chart": [
+      [
+        "t-missed",
+        "Chart Users' Guide: missed approach information and icons"
+      ],
+      [
+        "t-brief-mid",
+        "Chart Users' Guide: missed approach text box in the briefing strip"
+      ]
+    ]
   },
   "cfii-viii-d-circling-approach": {
-    "When to circle and chart info": [["t-mins", "Chart Users' Guide: landing minimums, circling line"]]
+    "When to circle and chart info": [
+      [
+        "t-mins",
+        "Chart Users' Guide: landing minimums, circling line"
+      ]
+    ]
   },
   "cfii-viii-e-landing-from-an-approach": {
-    "Required visibility": [["t-mins", "Chart Users' Guide: minimums and the RVR / visibility table"]],
-    "Transitioning to visual flight": [["t-leg-als1", "TPP legend: approach lighting systems"], ["t-sketch", "Chart Users' Guide: airport sketch"]]
+    "Required visibility": [
+      [
+        "t-mins",
+        "Chart Users' Guide: minimums and the RVR / visibility table"
+      ]
+    ],
+    "Transitioning to visual flight": [
+      [
+        "t-leg-als1",
+        "TPP legend: approach lighting systems"
+      ],
+      [
+        "t-sketch",
+        "Chart Users' Guide: airport sketch"
+      ]
+    ]
   },
   "cfii-viii-x-procedure-turns": {
-    "Hold-in-lieu and teardrop": [["t-holds-pt", "Chart Users' Guide: holding patterns and procedure turns"]]
+    "Hold-in-lieu and teardrop": [
+      [
+        "t-holds-pt",
+        "Chart Users' Guide: holding patterns and procedure turns"
+      ]
+    ]
   },
   "cfii-vii-b-holding": {
-    "Holding Instructions": [["t-holds-pt", "Chart Users' Guide: holding patterns on charts"]]
+    "Holding Instructions": [
+      [
+        "t-holds-pt",
+        "Chart Users' Guide: holding patterns on charts"
+      ]
+    ]
+  },
+  "_gallery_note": "Figures tab: FAA chart sets per lesson. Values are SYMBOL_GROUPS ids from ifr/data.js (Chart Users' Guide crops) or ids of _gallery_extra groups; shown after the eBook's own figures.",
+  "_gallery_extra": [
+    {
+      "id": "tpp-whole",
+      "chart": "Approach Plate",
+      "t": "Whole plate",
+      "cards": [
+        {
+          "img": "t-anatomy",
+          "t": "Sections of an approach plate",
+          "d": "Briefing strip, planview, profile, landing minima, airport sketch."
+        }
+      ]
+    }
+  ],
+  "_gallery": {
+    "cfii-ii-a-instruments-nav-equipment": [
+      "enroute-navaids"
+    ],
+    "cfii-ii-c-ifr-regs-pubs": [
+      "enroute-examples",
+      "enroute-routes",
+      "enroute-fixes",
+      "tpp-whole",
+      "tpp-brief",
+      "tpp-profile",
+      "tpp-dpstar"
+    ],
+    "cfii-iii-b-xc-flight-planning": [
+      "enroute-examples",
+      "enroute-airports",
+      "enroute-navaids",
+      "enroute-routes",
+      "enroute-fixes",
+      "enroute-airspace",
+      "tpp-dpstar"
+    ],
+    "cfii-iii-c-instrument-check": [
+      "tpp-airport"
+    ],
+    "cfii-v-a-atc-clearances": [
+      "tpp-dpstar"
+    ],
+    "cfii-v-b-procedures-clearances": [
+      "tpp-dpstar",
+      "enroute-examples",
+      "enroute-routes",
+      "enroute-fixes",
+      "enroute-navaids",
+      "enroute-airspace"
+    ],
+    "cfii-v-xx-low-visibility-taxi": [
+      "tpp-airport"
+    ],
+    "cfii-vii-a-intercepting-tracking": [
+      "enroute-navaids",
+      "enroute-fixes",
+      "tpp-plan"
+    ],
+    "cfii-vii-b-holding": [
+      "tpp-plan",
+      "enroute-fixes"
+    ],
+    "cfii-viii-a-non-precision-approach": [
+      "tpp-whole",
+      "tpp-brief",
+      "tpp-plan",
+      "tpp-profile",
+      "tpp-airport",
+      "tpp-lights"
+    ],
+    "cfii-viii-b-precision-approach": [
+      "tpp-whole",
+      "tpp-brief",
+      "tpp-plan",
+      "tpp-profile",
+      "tpp-airport",
+      "tpp-lights"
+    ],
+    "cfii-viii-c-missed-approach": [
+      "tpp-whole",
+      "tpp-brief",
+      "tpp-profile",
+      "tpp-plan"
+    ],
+    "cfii-viii-d-circling-approach": [
+      "tpp-whole",
+      "tpp-profile",
+      "tpp-airport",
+      "tpp-plan"
+    ],
+    "cfii-viii-e-landing-from-an-approach": [
+      "tpp-profile",
+      "tpp-airport",
+      "tpp-lights"
+    ],
+    "cfii-viii-x-procedure-turns": [
+      "tpp-whole",
+      "tpp-plan",
+      "tpp-profile"
+    ],
+    "cfii-ix-a-lost-comms": [
+      "enroute-fixes",
+      "enroute-examples"
+    ],
+    "cfii-ix-b-loss-of-gyros": [
+      "tpp-whole",
+      "tpp-profile"
+    ],
+    "cfii-ix-d-single-engine-approach": [
+      "tpp-whole",
+      "tpp-profile",
+      "tpp-airport"
+    ],
+    "cfii-xi-c-ipc": [
+      "tpp-whole",
+      "tpp-profile"
+    ]
   }
 }
