@@ -1,6 +1,7 @@
 // CFII oral-exam prep deck. Source: The Backseat Pilot CFI-I eBook (Jul 2026), condensed; every fact from the eBook, in its order.
 // Section: {id,title,area,intro,key[],refs[],optional,cards[]}; card {t:"s",h,obj,pts[],ce?,ref?} script or {t:"r",q,a} recall.
 // Pyramid layers (condensed from each card's own text, no new facts): section l1 = plain summary; script card g = gist (<=12 words), l2[] = 2-3 key points, l3[] = one condensed line per pts[] item (all numbers kept).
+// Review 2026-11-13: outdated items corrected and PTS gaps filled from FAA sources (AIM Chg 2 1/22/26, 14 CFR, AC 61-65K), each with its cite; new cards sit at the end of their section so card indexes do not move.
 window.CFII_ORAL = [
 {
 "id": "I.A",
@@ -302,7 +303,8 @@ window.CFII_ORAL = [
 "**Physiological**: food, rest, protection from the elements. **Security**: protection against danger, threats, deprivation.",
 "**Belonging**: associate, give and receive friendship. **Esteem**: internal (confidence, competence) and external (status, recognition).",
 "**Cognitive & Aesthetic** (added later): need to know and understand; emotional needs.",
-"**Self-actualization**: realizing one's potential, attained only when all other needs are satisfied."
+"**Self-actualization**: realizing one's potential, attained only when all other needs are satisfied.",
+"**Control of human behavior** (PTS 1a): McGregor. Theory X assumes people dislike work and must be directed; **Theory Y** assumes work is natural and people seek responsibility: the instructor builds a climate where learners direct themselves toward the goal"
 ],
 "l2": [
 "A learner can't focus on learning until a need is satisfied.",
@@ -313,7 +315,8 @@ window.CFII_ORAL = [
 "**Physiological**: food, rest, shelter. **Security**: protection from danger.",
 "**Belonging**: friendship. **Esteem**: internal (confidence) and external (status).",
 "**Cognitive & Aesthetic** (added later): know/understand; emotional needs.",
-"**Self-actualization**: realizing potential once all other needs are met."
+"**Self-actualization**: realizing potential once all other needs are met.",
+"**Control of human behavior** (PTS 1a): McGregor. Theory X assumes people dislike work and must be directed; **Theory Y** assumes work is natural and people seek responsibility: the instructor builds a climate where learners direct themselves toward the goal"
 ]
 },
 {
@@ -845,7 +848,8 @@ window.CFII_ORAL = [
 "**Reliability**: consistent results with repeated measurement.",
 "**Validity**: measures what it's supposed to; the most important consideration.",
 "**Usability** (functional), **Objectivity** (grader bias not reflected), **Comprehensiveness** (samples all objectives).",
-"**Discrimination**: wide score range, all difficulty levels, separates high and low achievers."
+"**Discrimination**: wide score range, all difficulty levels, separates high and low achievers.",
+"**Developing a test** (PTS 2c): 1) set level-of-learning objectives, 2) list indicators of the desired behavior, 3) write criterion objectives, 4) write criterion-referenced items. **Supply** items (essay, fill-in) vs **selection** items (multiple choice, true/false, matching)"
 ],
 "l2": [
 "**Validity** (measures what it should) is the most important consideration.",
@@ -855,7 +859,8 @@ window.CFII_ORAL = [
 "**Reliability**: consistent repeated results.",
 "**Validity**: measures what it should; most important.",
 "**Usability**, **Objectivity** (no grader bias), **Comprehensiveness** (all objectives).",
-"**Discrimination**: wide range, separates high and low achievers."
+"**Discrimination**: wide range, separates high and low achievers.",
+"**Developing a test** (PTS 2c): 1) set level-of-learning objectives, 2) list indicators of the desired behavior, 3) write criterion objectives, 4) write criterion-referenced items. **Supply** items (essay, fill-in) vs **selection** items (multiple choice, true/false, matching)"
 ]
 },
 {
@@ -970,7 +975,8 @@ window.CFII_ORAL = [
 "Often let learners make and fix a mistake (safety permitting).",
 "**Pilot supervision** of solo ops is the most important responsibility.",
 "Practical test recommendation: never less than the complete PTS procedure; instructor is accountable.",
-"Endorsements per **AC 61-65**; keep a record of all endorsements."
+"Endorsements per **AC 61-65**; keep a record of all endorsements.",
+"Instructor certificates issued since Dec 1, 2024 have no expiration date: keep **recent experience** every 24 calendar months (61.197) and sign endorsements with the RE date"
 ],
 "l2": [
 "**Pilot supervision** of solo ops is the most important responsibility.",
@@ -981,7 +987,8 @@ window.CFII_ORAL = [
 "Let learners make and fix mistakes (safety permitting).",
 "**Pilot supervision** of solo ops is most important.",
 "Recommendation: never less than complete PTS; instructor accountable.",
-"Endorsements per **AC 61-65**; record all."
+"Endorsements per **AC 61-65**; record all.",
+"Instructor certificates issued since Dec 1, 2024 have no expiration date: keep **recent experience** every 24 calendar months (61.197) and sign endorsements with the RE date"
 ]
 },
 {
@@ -996,7 +1003,7 @@ window.CFII_ORAL = [
 "obj": "Conduct flight reviews, IPCs, and checkouts.",
 "pts": [
 "**Flight review**: an instructional service, not a test/checkride; agree on objectives and standards first.",
-"**IPC**: use the Instrument PTS as primary reference for maneuvers and tolerances.",
+"**IPC**: use the IPC task table in the Instrument Rating Airplane ACS (FAA-S-ACS-8) as the standard for tasks and tolerances (AC 61-98).",
 "**Checkouts**: to PTS/ACS standards; never in an airplane you aren't current in; log the exact extent."
 ],
 "ref": "AC 61-98",
@@ -1013,7 +1020,7 @@ window.CFII_ORAL = [
 {
 "t": "r",
 "q": "What is the primary reference for an IPC?",
-"a": "The Instrument PTS (maneuvers and tolerances)"
+"a": "The Instrument Rating Airplane ACS (FAA-S-ACS-8): its IPC task table and tolerances"
 },
 {
 "t": "s",
@@ -1748,7 +1755,8 @@ window.CFII_ORAL = [
 "Four digits 0-7 = **4,096** codes.",
 "VFR **1200**, hijack **7500**, lost comm **7600**, emergency **7700**.",
 "Mode A: code/position. Mode C: + altitude. Mode S: ICAO address, heading, speed, more; integral to TCAS and ADS-B.",
-"Ident makes the target flash on the controller's screen."
+"Ident makes the target flash on the controller's screen.",
+"Mode C required in Class A, B (and inside the 30 NM veil), C, and above 10,000 MSL (91.215); **ADS-B Out** in the same airspace (91.225); transponder check every 24 calendar months (91.413)"
 ],
 "l2": [
 "VFR **1200**, hijack **7500**, lost comm **7600**, emergency **7700**.",
@@ -1759,7 +1767,8 @@ window.CFII_ORAL = [
 "Digits 0-7 = **4,096** codes.",
 "VFR **1200**, hijack **7500**, lost comm **7600**, emergency **7700**.",
 "A: code/position. C: + altitude. S: ICAO address, more; TCAS/ADS-B.",
-"Ident flashes the target."
+"Ident flashes the target.",
+"Mode C required in Class A, B (and inside the 30 NM veil), C, and above 10,000 MSL (91.215); **ADS-B Out** in the same airspace (91.225); transponder check every 24 calendar months (91.413)"
 ]
 },
 {
@@ -1821,13 +1830,14 @@ window.CFII_ORAL = [
 {
 "t": "s",
 "h": "GPS substitution",
-"g": "IFR-certified GPS may substitute for ADF and DME.",
-"obj": "List where IFR GPS may substitute for ADF and DME.",
+"g": "IFR GPS may substitute for most ground navaids, with limits.",
+"obj": "List where IFR GPS may substitute for ground navaids, and where it may not.",
 "pts": [
-"IFR en route/terminal-certified GPS may substitute for ADF and DME to:",
+"A suitable RNAV system (IFR en route/terminal GPS) may substitute for a VOR, DME, TACAN, NDB or compass locator (AIM 1-2-3) to:",
 "Determine position over a DME fix; fly a DME arc.",
 "Navigate TO/FROM an NDB/compass locator; determine position over one.",
-"Fix defined by an NDB bearing crossing a VOR/LOC course; hold over an NDB/compass locator."
+"Fix defined by an NDB bearing crossing a VOR/LOC course; hold over an NDB/compass locator.",
+"**Limits**: never for localizer-based courses without raw LOC data; on the final segment of a VOR, TACAN or NDB approach only while the navaid is operational and monitored; not when the procedure is NOTAMed NA"
 ],
 "ref": "AIM 1-2-3c",
 "l2": [
@@ -1835,10 +1845,11 @@ window.CFII_ORAL = [
 "Substitutes for ADF: navigate to/from or hold over an NDB."
 ],
 "l3": [
-"IFR en route/terminal GPS may substitute for ADF and DME to:",
+"Suitable RNAV (IFR GPS) may substitute for VOR, DME, TACAN, NDB, compass locator to:",
 "Find position over a DME fix; fly a DME arc.",
 "Navigate TO/FROM or find position over an NDB/compass locator.",
-"NDB bearing / VOR-LOC crossing fix; hold over an NDB/compass locator."
+"NDB bearing / VOR-LOC crossing fix; hold over an NDB/compass locator.",
+"**Limits**: never for localizer-based courses without raw LOC data; on the final segment of a VOR, TACAN or NDB approach only while the navaid is operational and monitored; not when the procedure is NOTAMed NA"
 ]
 },
 {
@@ -1879,7 +1890,7 @@ window.CFII_ORAL = [
 {
 "t": "r",
 "q": "Name the GPS substitutions for ADF/DME allowed by AIM 1-2-3c.",
-"a": "Position over a DME fix; fly a DME arc.\nTO/FROM an NDB/compass locator; position over one.\nNDB bearing x VOR/LOC fix; hold over an NDB/compass locator."
+"a": "Position over a DME fix; fly a DME arc.\nTO/FROM an NDB/compass locator; position over one.\nNDB bearing x VOR/LOC fix; hold over an NDB/compass locator.\nAlso VOR and TACAN: navigate to/from, hold, fly an arc. Not for localizer courses; VOR/NDB final only while monitoring the navaid."
 },
 {
 "t": "s",
@@ -1986,6 +1997,36 @@ window.CFII_ORAL = [
 "t": "r",
 "q": "What do PFD trend vectors show?",
 "a": "Where airspeed and/or altitude will be in 6 seconds."
+},
+{
+"t": "s",
+"h": "Electrical system, engine display & glass failures",
+"g": "Know what powers each instrument and what each failure looks like.",
+"obj": "Teach the electrical system, the electronic engine display and glass failure modes (PTS 1f, 1h, 1i).",
+"pts": [
+"**Electrical**: engine-driven alternator(s) feed the bus and charge the battery; ammeter/loadmeter and voltmeter show its health; a LOW VOLTS / ALT annunciation means the alternator is off line",
+"**Alternator failure**: battery only (often about 30 min: check the POH). Reset per the checklist, shed load (non-essential avionics and lights), tell ATC, land as soon as practical; electric gyros, the turn coordinator and every screen die with the battery",
+"**Glass cockpits** need electrical power: an essential bus and a standby battery keep the PFD and standby instruments alive. Know what each bus feeds in the test aircraft",
+"**Electronic engine display**: engine and system gauges on the MFD (RPM/manifold pressure, fuel flow and quantity, oil pressure and temperature, CHT/EGT, volts/amps) with color bands and red/amber alerts; it moves to the PFD in reversionary mode",
+"**Sensor failures**: AHRS = red X on attitude and heading; ADC = red X on airspeed, altitude, VSI; magnetometer = heading only; display failure = reversionary mode. Fly the standby attitude, airspeed, altimeter and compass"
+],
+"ref": "IFH Ch. 5; POH Section 7",
+"l2": [
+"Alternator failure: battery only, shed load, tell ATC, land as soon as practical.",
+"AHRS = attitude/heading red X; ADC = airspeed/altitude/VSI red X; use standbys."
+],
+"l3": [
+"**Electrical**: engine-driven alternator(s) feed the bus and charge the battery; ammeter/loadmeter and voltmeter show its health; a LOW VOLTS / ALT annunciation means the alternator is off line",
+"**Alternator failure**: battery only (often about 30 min: check the POH). Reset per the checklist, shed load (non-essential avionics and lights), tell ATC, land as soon as practical; electric gyros, the turn coordinator and every screen die with the battery",
+"**Glass cockpits** need electrical power: an essential bus and a standby battery keep the PFD and standby instruments alive. Know what each bus feeds in the test aircraft",
+"**Electronic engine display**: engine and system gauges on the MFD (RPM/manifold pressure, fuel flow and quantity, oil pressure and temperature, CHT/EGT, volts/amps) with color bands and red/amber alerts; it moves to the PFD in reversionary mode",
+"**Sensor failures**: AHRS = red X on attitude and heading; ADC = red X on airspeed, altitude, VSI; magnetometer = heading only; display failure = reversionary mode. Fly the standby attitude, airspeed, altimeter and compass"
+]
+},
+{
+"t": "r",
+"q": "On a G1000, what do you lose with an AHRS failure versus an ADC failure?",
+"a": "AHRS: attitude and heading (red X)\nADC: airspeed, altitude and vertical speed (red X)\nFly the standby instruments; tell ATC (91.187)"
 }
 ]
 },
@@ -2471,10 +2512,12 @@ window.CFII_ORAL = [
 "g": "IFR currency: 6 approaches, holding, intercepting/tracking within 6 months",
 "obj": "State what keeps a pilot instrument-current as PIC.",
 "pts": [
-"Within the last **6 months**, actual or simulated conditions, performed and logged:",
+"Within the preceding **6 calendar months**, actual or simulated conditions, performed and logged:",
 "At least **6 instrument approaches**",
 "**Holding** procedures",
-"**Intercepting and tracking** courses using navigation systems"
+"**Intercepting and tracking** courses using navigation systems",
+"Lapsed? A second **6 calendar months** to get current again with a safety pilot (91.109(c)), an instructor, or an approved sim/ATD: no IFR as PIC meanwhile. After that an **IPC** is required (61.57(d)), from a CFII, examiner or approved check pilot",
+"**61.195(c)**: instrument training for a certificate or rating must come from a flight instructor with an instrument rating on the instructor certificate for that category and class"
 ],
 "ref": "14 CFR 61.57(c)",
 "l2": [
@@ -2485,13 +2528,15 @@ window.CFII_ORAL = [
 "Within last **6 months**, actual or simulated, performed and logged:",
 "At least **6 instrument approaches**",
 "**Holding** procedures",
-"**Intercepting and tracking** courses with nav systems"
+"**Intercepting and tracking** courses with nav systems",
+"Lapsed? A second **6 calendar months** to get current again with a safety pilot (91.109(c)), an instructor, or an approved sim/ATD: no IFR as PIC meanwhile. After that an **IPC** is required (61.57(d)), from a CFII, examiner or approved check pilot",
+"**61.195(c)**: instrument training for a certificate or rating must come from a flight instructor with an instrument rating on the instructor certificate for that category and class"
 ]
 },
 {
 "t": "r",
 "q": "What are the 61.57(c) instrument recency requirements?",
-"a": "Within the preceding 6 months:\n6 instrument approaches\nHolding procedures\nIntercepting and tracking courses with nav systems"
+"a": "Within the preceding 6 calendar months:\n6 instrument approaches\nHolding procedures\nIntercepting and tracking courses with nav systems"
 },
 {
 "t": "s",
@@ -2835,7 +2880,7 @@ window.CFII_ORAL = [
 "**IFH**: for instrument instructors and pilots preparing for the rating; all IMC knowledge/skills; revised occasionally by the FAA",
 "**AIM**: basic flight info and ATC procedures; **Chapters 4, 5 and 6** carry most IFR operations info",
 "AIM Ch 1 nav aids/PBN/RNAV; 3 airspace; 4 ATC; 5 ATC procedures; 6 emergencies (lost comm); 7 meteorology, altimeter errors, wake; 9 charts",
-"PTS still used for Sport, Recreational and Flight Instructor; ACS for Private, Instrument, Commercial, ATP/type rating"
+"PTS still used for Flight Instructor Instrument (FAA-S-8081-9E) and a few others such as Sport and Recreational; ACS for Private, Instrument, Commercial, ATP/type rating and Flight Instructor Airplane (FAA-S-ACS-25)"
 ],
 "ref": "IFH; AIM",
 "l2": [
@@ -2857,7 +2902,7 @@ window.CFII_ORAL = [
 "obj": "Know what these contain and how often they change.",
 "pts": [
 "**Chart Supplement**: directory of public airports, seaplane bases, heliports, comm data, navaids, procedures, special notices",
-"Published every **8 weeks** by NACO; **7 districts**: NW, SW, NC, SC, EC, NE, SE",
+"Published every **8 weeks** by the FAA (Aeronautical Information Services); **7 districts**: NW, SW, NC, SC, EC, NE, SE",
 "**En route low**: IFR navigation below 18,000 MSL; IFR equivalent of the sectional",
 "Charted altitudes: **MEA, MOCA, MRA, MCA, MAA**; navaids, airways, intersections, RCOs",
 "Revised every **56 days**"
@@ -2870,7 +2915,7 @@ window.CFII_ORAL = [
 ],
 "l3": [
 "**Chart Supplement**: airports, comm, navaids, procedures, notices",
-"Every **8 weeks** by NACO; **7 districts**: NW, SW, NC, SC, EC, NE, SE",
+"Every **8 weeks** by the FAA (Aeronautical Information Services); **7 districts**: NW, SW, NC, SC, EC, NE, SE",
 "**En route low**: IFR below 18,000 MSL; IFR sectional",
 "Altitudes **MEA, MOCA, MRA, MCA, MAA**; navaids, airways, RCOs",
 "Revised every **56 days**"
@@ -2887,7 +2932,7 @@ window.CFII_ORAL = [
 "g": "TPP holds approaches, DPs, STARs, diagrams and nonstandard minimums",
 "obj": "Find nonstandard minimums, DPs, STARs and IAPs in the TPP.",
 "pts": [
-"Published by NACO: approaches, arrivals, DPs, airport diagrams by region",
+"Published by the FAA (Aeronautical Information Services): approaches, arrivals, DPs, airport diagrams by region",
 "**Trouble T** (black triangle with T): nonstandard takeoff mins, plus ODPs and diverse vector areas",
 "**Black triangle with A**: nonstandard alternate minimums",
 "Radar minimums: PAR and ASR approaches; controller gives course/altitude guidance; used in emergency or distress"
@@ -2897,7 +2942,7 @@ window.CFII_ORAL = [
 "**Black triangle with A**: nonstandard alternate minimums."
 ],
 "l3": [
-"NACO: approaches, arrivals, DPs, diagrams by region",
+"FAA: approaches, arrivals, DPs, diagrams by region",
 "**Trouble T**: nonstandard takeoff mins, ODPs, diverse vector areas",
 "**Black triangle with A**: nonstandard alternate mins",
 "Radar mins: PAR and ASR; controller guidance; emergencies"
@@ -2909,10 +2954,10 @@ window.CFII_ORAL = [
 "g": "DPs protect from obstacles on departure; STARs transition to terminal",
 "obj": "Explain the purpose and assumptions of departure and arrival procedures.",
 "pts": [
-"DPs: preplanned IFR departure/obstacle avoidance, textual (TPP section C) or graphic (after the airport's IAPs)",
+"DPs: preplanned IFR departure/obstacle avoidance, textual (TPP Takeoff Minimums and ODP section) or graphic (after the airport's IAPs)",
 "Purpose: obstacle protection while reducing communications and departure delays",
 "Protection assumes crossing the runway end at **35 ft AGL**, climbing to **400 ft** above airport before turning, and **200 ft/NM** (unless higher gradient published)",
-"STARs: transition from en route structure to a terminal fix where an approach can be made (TPP section P)",
+"STARs: transition from en route structure to a terminal fix where an approach can be made",
 "Both revised every **56 days**"
 ],
 "l2": [
@@ -2921,7 +2966,7 @@ window.CFII_ORAL = [
 "STARs: en route to terminal fix; revised every **56 days**."
 ],
 "l3": [
-"DPs: preplanned obstacle avoidance, textual (TPP C) or graphic",
+"DPs: preplanned obstacle avoidance, textual (TPP takeoff minimums section) or graphic",
 "Obstacle protection, less comm and delay",
 "Assumes runway end at **35 ft AGL**, **400 ft** before turning, **200 ft/NM** unless higher",
 "STARs: en route to terminal fix for approach (TPP P)",
@@ -3021,10 +3066,10 @@ window.CFII_ORAL = [
 "g": "Logbooks must record currency details, flight data and endorsed training",
 "obj": "List what must be recorded for currency and training.",
 "pts": [
-"Currency (61.57(c)): location and type of each approach; safety pilot name, if required",
+"Currency logging (61.51(g)(3), to meet 61.57(c)): location and type of each approach; safety pilot name, if required",
 "61.51(b): date, total flight/lesson time, departure and arrival (sim: lesson location), type and ID of aircraft/sim/FTD, type of experience/training, conditions of flight",
 "Ground training on the 61.65(b) knowledge areas must be received and logged",
-"61.51(h) training time: legibly endorsed; description of training, lesson length, instructor signature, certificate number and expiration date"
+"61.51(h) training time: legibly endorsed; description of training, lesson length, instructor signature, certificate number, and the certificate's expiration date or recent experience end date (certificates issued since Dec 2024 do not expire: sign 'RE mm-dd-yyyy', AC 61-65K)"
 ],
 "ref": "14 CFR 61.51, 61.57(c)",
 "l2": [
@@ -3033,7 +3078,7 @@ window.CFII_ORAL = [
 "61.51(h): training endorsed with instructor signature, certificate data."
 ],
 "l3": [
-"61.57(c): approach location and type; safety pilot name if required",
+"61.51(g)(3): approach location and type; safety pilot name if required",
 "61.51(b): date, time, departure/arrival, aircraft/sim ID, training type, conditions",
 "61.65(b) ground training received and logged",
 "61.51(h): legible endorsement; training, length, signature, certificate number, expiration"
@@ -3042,12 +3087,12 @@ window.CFII_ORAL = [
 {
 "t": "r",
 "q": "What must an instructor include when endorsing logged training time (61.51(h))?",
-"a": "Description of the training given\nLength of the lesson\nInstructor's signature, certificate number and expiration date"
+"a": "Description of the training given\nLength of the lesson\nInstructor's signature, certificate number, and expiration date or recent experience end date ('RE mm-dd-yyyy')"
 },
 {
 "t": "r",
 "q": "What extra items must be logged for instrument currency under 61.57(c)?",
-"a": "Location and type of each instrument approach, and the name of the safety pilot if required."
+"a": "Location and type of each instrument approach, and the name of the safety pilot if required. The logging rule is 61.51(g)(3)."
 },
 {
 "t": "s",
@@ -3059,7 +3104,9 @@ window.CFII_ORAL = [
 "Ground training or home study on 61.65(b); knowledge test endorsement and pass",
 "Training on 61.65(c) areas of operation; practical test endorsement",
 "AC 61-65 endorsements: **A.42** knowledge test, **A.43** flight proficiency/practical test, **A.44** prerequisites for instrument practical test",
-"IPC: **AC 61-65 A.71** certifies completion of the IPC of 14 CFR 61.57(d) in a make/model on a date"
+"IPC: **AC 61-65 A.71** certifies completion of the IPC of 14 CFR 61.57(d) in a make/model on a date",
+"**61.39**: training within the **2 calendar months** before the test, found prepared, knowledge-test deficiencies reviewed (AC 61-65 A.1, A.2); then the instructor recommendation in IACRA / Form 8710-1",
+"**IPC not passed**: no unsatisfactory endorsement is made; log it as dual instruction given and train to standard (AC 61-98, AC 61-65 A.71)"
 ],
 "ref": "AC 61-65",
 "l2": [
@@ -3072,7 +3119,9 @@ window.CFII_ORAL = [
 "61.65(b) ground/home study; knowledge test endorsement and pass",
 "61.65(c) training; practical test endorsement",
 "AC 61-65: **A.42** knowledge, **A.43** practical, **A.44** prerequisites",
-"IPC: **AC 61-65 A.71**, 14 CFR 61.57(d), make/model, date"
+"IPC: **AC 61-65 A.71**, 14 CFR 61.57(d), make/model, date",
+"**61.39**: training within the **2 calendar months** before the test, found prepared, knowledge-test deficiencies reviewed (AC 61-65 A.1, A.2); then the instructor recommendation in IACRA / Form 8710-1",
+"**IPC not passed**: no unsatisfactory endorsement is made; log it as dual instruction given and train to standard (AC 61-98, AC 61-65 A.71)"
 ]
 },
 {
@@ -3311,11 +3360,13 @@ window.CFII_ORAL = [
 "g": "Radar summary shows precipitation only; use with other reports",
 "obj": "Know what radar summary shows and doesn't.",
 "pts": [
+"**Retired product**, like the weather depiction chart (both still named in the PTS): today use radar mosaics and the GFA ceiling/visibility layers. Teach these two as what they showed",
 "Collection of radar reports: precipitation areas and characteristics; NA = not reported, NE = no echoes",
 "Intensity: 6 levels shown by 3 contours; tops in hundreds of feet **MSL**; cell movement arrow with knots (LM = little movement)",
 "Echoes as areas, cells or lines; weather watches = heavy dashed boxes",
 "Limits: precipitation only; no clouds/fog without precip; no cloud tops/bases",
-"Use with METARs and forecasts; published hourly at **35 past**"
+"Use with METARs and forecasts; published hourly at **35 past**",
+"**Weather depiction chart** (PTS 2c): plotted METARs showing areas of IFR (ceiling < 1,000 ft or vis < 3 SM), MVFR (1,000-3,000 ft or 3-5 SM) and VFR at a glance"
 ],
 "l2": [
 "Intensity: 6 levels by 3 contours; tops **MSL**.",
@@ -3323,11 +3374,13 @@ window.CFII_ORAL = [
 "Published hourly at **35 past**."
 ],
 "l3": [
+"**Retired** (with the weather depiction chart); use radar mosaics and the GFA",
 "Radar reports: precip areas; NA not reported, NE no echoes",
 "6 levels, 3 contours; tops hundreds ft **MSL**; movement knots (LM)",
 "Areas, cells, lines; watches = dashed boxes",
 "Precip only; no clouds/fog, tops/bases",
-"Use with METARs/forecasts; hourly at **35 past**"
+"Use with METARs/forecasts; hourly at **35 past**",
+"**Weather depiction chart** (PTS 2c): plotted METARs showing areas of IFR (ceiling < 1,000 ft or vis < 3 SM), MVFR (1,000-3,000 ft or 3-5 SM) and VFR at a glance"
 ]
 },
 {
@@ -3433,7 +3486,7 @@ window.CFII_ORAL = [
 "g": "AIRMETs, SIGMETs, convective SIGMETs and PIREPs warn of hazards",
 "obj": "Distinguish AIRMET, SIGMET, convective SIGMET and PIREPs.",
 "pts": [
-"**AIRMET (WA)**: hazards mainly to light aircraft; every **6 hr**. Sierra = IFR/mountain obscuration; Tango = turbulence, strong surface winds, LLWS; Zulu = icing/freezing levels",
+"**AIRMET**: hazards mainly to light aircraft. Over the lower 48 it is now the graphical **G-AIRMET** (issued every **6 hr**, 3-hr snapshots out to 12 hr; text AIRMETs remain only for Alaska and Hawaii). Sierra = IFR/mountain obscuration; Tango = turbulence, strong surface winds, LLWS; Zulu = icing/freezing levels",
 "**SIGMET (WS)**: non-convective, all aircraft: severe icing, extreme turbulence/CAT not from TS, dust/sand <3 mi vis, volcanic ash; valid **4 hr** (hurricane 6)",
 "**Convective SIGMET (WST)**: severe TS with surface winds >50 kt, hail >=3/4 in, tornadoes; embedded TS; line of TS",
 "Also TS with heavy precip covering >=40% of a 3,000 sq mi or larger area",
@@ -3455,7 +3508,7 @@ window.CFII_ORAL = [
 {
 "t": "r",
 "q": "Name the three AIRMETs and what each covers.",
-"a": "Sierra: IFR and mountain obscuration\nTango: turbulence, strong surface winds, LLWS\nZulu: icing and freezing levels"
+"a": "Sierra: IFR and mountain obscuration\nTango: turbulence, strong surface winds, LLWS\nZulu: icing and freezing levels\nLower 48: issued as G-AIRMET graphics (every 6 hr, snapshots out to 12 hr)"
 },
 {
 "t": "r",
@@ -4472,6 +4525,35 @@ window.CFII_ORAL = [
 "t": "r",
 "q": "Picking up ice - what do you do?",
 "a": "Use deice/anti-ice equipment\nExit the precipitation or climb/descend to above-freezing air\nIf unable, land at the nearest suitable airport"
+},
+{
+"t": "s",
+"h": "Icing by phase of flight & GPS planning",
+"g": "Ice changes every phase; GPS approaches need RAIM or WAAS planning.",
+"obj": "Teach icing recognition and effects in each phase, the POH icing data, and GPS/RAIM planning (PTS 6-9).",
+"pts": [
+"**Pretakeoff**: clean aircraft: all frost, ice and snow off the wings, tail, props and pitot/static ports; pitot heat checked; not certified for known icing = no flight into known or forecast icing",
+"**Takeoff and climb**: contamination raises stall speed and cuts climb rate; climb through icing layers without lingering",
+"**Cruise**: act at the first trace: change altitude (about 3,000 ft), turn back or exit the cloud; pitot heat on, alternate air ready, tell ATC",
+"**Approach and landing**: fly it faster per the POH, limit flaps with suspected tail ice, expect a longer roll. **Tailplane stall** (pitch-down or lightened yoke as flaps extend): retract flaps to the previous setting, pull back on the yoke, add power only as needed (the opposite of a wing-stall recovery)",
+"**Recognizing wing contamination** (PTS 7): buildup on leading edges, struts, wipers or the OAT probe; unexplained airspeed loss or more power for the same speed; vibration; at night use a flashlight",
+"**Manufacturer information** (PTS 9): know the test aircraft's POH: icing limitations, pitot heat, alternate air/alternate static, defrost, and any inadvertent-icing checklist",
+"**GPS planning** (PTS 6): non-WAAS (TSO-C129/196): RAIM prediction for the ETA, and a GPS approach may be planned at the destination **or** the alternate, not both. WAAS (TSO-C145/146): no RAIM check; plan the alternate to LNAV or circling minimums"
+],
+"ref": "AC 91-74; AIM 1-1-17, 1-1-18; POH",
+"l2": [
+"Ice: clean before takeoff, exit at the first trace, faster approach, careful with flaps (tailplane stall).",
+"Non-WAAS GPS: RAIM check, GPS approach at destination or alternate, not both."
+],
+"l3": [
+"**Pretakeoff**: clean aircraft: all frost, ice and snow off the wings, tail, props and pitot/static ports; pitot heat checked; not certified for known icing = no flight into known or forecast icing",
+"**Takeoff and climb**: contamination raises stall speed and cuts climb rate; climb through icing layers without lingering",
+"**Cruise**: act at the first trace: change altitude (about 3,000 ft), turn back or exit the cloud; pitot heat on, alternate air ready, tell ATC",
+"**Approach and landing**: fly it faster per the POH, limit flaps with suspected tail ice, expect a longer roll. **Tailplane stall** (pitch-down or lightened yoke as flaps extend): retract flaps to the previous setting, pull back on the yoke, add power only as needed (the opposite of a wing-stall recovery)",
+"**Recognizing wing contamination** (PTS 7): buildup on leading edges, struts, wipers or the OAT probe; unexplained airspeed loss or more power for the same speed; vibration; at night use a flashlight",
+"**Manufacturer information** (PTS 9): know the test aircraft's POH: icing limitations, pitot heat, alternate air/alternate static, defrost, and any inadvertent-icing checklist",
+"**GPS planning** (PTS 6): non-WAAS (TSO-C129/196): RAIM prediction for the ETA, and a GPS approach may be planned at the destination **or** the alternate, not both. WAAS (TSO-C145/146): no RAIM check; plan the alternate to LNAV or circling minimums"
+]
 }
 ]
 },
@@ -4601,7 +4683,8 @@ window.CFII_ORAL = [
 "**EFIS**: on power-up, instruments displayed properly, cautions/warnings normal; failures are obvious (red X).",
 "**Traffic & terrain**: verify per manufacturer on power-up.",
 "**FMS**: operation per manufacturer; adequate satellite coverage, check RAIM if needed.",
-"**Autopilot**: check per manufacturer, including that it can be disconnected."
+"**Autopilot**: check per manufacturer, including that it can be disconnected.",
+"**Go / no-go**: an instrument required by 91.205(d) (generator, radios, sensitive altimeter, ball, clock, attitude, rate of turn, DG) inoperative = no IFR. Not required (VSI, OAT): 91.213(d): deactivate, placard, PIC decides. Expired GPS database: no GPS approaches; en route/terminal only as the AFM supplement allows, verifying each waypoint"
 ],
 "l2": [
 "EFIS: proper display; failures show as a red X.",
@@ -4611,7 +4694,8 @@ window.CFII_ORAL = [
 "**EFIS**: proper display, normal cautions; failures obvious (red X).",
 "**Traffic & terrain**: verify per manufacturer.",
 "**FMS**: per manufacturer; satellite coverage, RAIM if needed.",
-"**Autopilot**: per manufacturer, including disconnect."
+"**Autopilot**: per manufacturer, including disconnect.",
+"**Go / no-go**: an instrument required by 91.205(d) (generator, radios, sensitive altimeter, ball, clock, attitude, rate of turn, DG) inoperative = no IFR. Not required (VSI, OAT): 91.213(d): deactivate, placard, PIC decides. Expired GPS database: no GPS approaches; en route/terminal only as the AFM supplement allows, verifying each waypoint"
 ]
 },
 {
@@ -4775,7 +4859,8 @@ window.CFII_ORAL = [
 "Interpret using CRAFT, the Pilot/Controller Glossary, en route fix locations, and DPs",
 "Once accepted, you must comply with the clearance",
 "You may request a different clearance",
-"Always request clarification/amendment if not fully understood or unsafe"
+"Always request clarification/amendment if not fully understood or unsafe",
+"**Always read back**: altitude assignments and restrictions, headings/vectors, runway assignments and hold-short instructions (AIM 4-4-7)"
 ],
 "l2": [
 "Once accepted, you must comply with the clearance.",
@@ -4785,7 +4870,8 @@ window.CFII_ORAL = [
 "Interpret with CRAFT, P/CG, fix locations, DPs.",
 "Accepted = must comply.",
 "May request a different clearance.",
-"Request clarification if unclear or unsafe."
+"Request clarification if unclear or unsafe.",
+"**Always read back**: altitude assignments and restrictions, headings/vectors, runway assignments and hold-short instructions (AIM 4-4-7)"
 ]
 },
 {
@@ -4813,25 +4899,27 @@ window.CFII_ORAL = [
 {
 "t": "s",
 "h": "Clearance void time",
-"g": "Depart before the void time or the clearance cancels.",
+"g": "Depart before the void time or wait for a new release.",
 "obj": "Explain void time and what happens if you miss it.",
 "pts": [
 "Issued at uncontrolled fields: time by which you must depart; reserves your space in the system",
-"Clearance auto-cancels if not airborne by void time; contact ATC with intentions (new clearance or cancel)",
+"Not airborne by the void time: the clearance is NOT cancelled, but your authority to depart IFR is withdrawn until ATC issues a new release (AIM 5-2-7); contact ATC with intentions",
 "No contact within **30 min** after void time = search and rescue; other IFR traffic suspended until then",
 "Departing at/after void time: no IFR separation, possible 91.173 violation",
-"Clearances available 30 min before to 2 hr after filed departure time; can ask ATC to hold longer"
+"Clearances available 30 min before to 2 hr after filed departure time; can ask ATC to hold longer",
+"**Hold for release**: do not depart IFR until ATC gives a release time. Leaving VFR instead? Do not use the IFR squawk (AIM 5-2-7)"
 ],
 "l2": [
-"Not airborne by void time: clearance cancels; contact ATC.",
+"Not airborne by void time: no authority to depart IFR until a new release; contact ATC.",
 "No contact within 30 min after void time = search and rescue."
 ],
 "l3": [
 "Uncontrolled fields: must depart by this time; reserves your space.",
-"Auto-cancels if not airborne; contact ATC with intentions.",
+"Void time passed: no IFR departure until re-released; contact ATC.",
 "No contact within **30 min** = search and rescue; other IFR held.",
 "Departing at/after void: no separation, possible 91.173 violation.",
-"Available 30 min before to 2 hr after filed time; can ask for longer."
+"Available 30 min before to 2 hr after filed time; can ask for longer.",
+"**Hold for release**: do not depart IFR until ATC gives a release time. Leaving VFR instead? Do not use the IFR squawk (AIM 5-2-7)"
 ]
 },
 {
@@ -4941,7 +5029,7 @@ window.CFII_ORAL = [
 "Bug initial heading and altitude; enter/check route in GPS and activate",
 "Tune/check first station; set OBS to initial course",
 "Secondary NAV: approach facility (e.g., ILS) for an emergency return in IMC",
-"Transponder on assigned code, standby until takeoff, then ALT"
+"Transponder on the assigned code with altitude reporting (ALT) and ADS-B Out ON any time you are on the movement area (AIM 4-1-20)"
 ],
 "l2": [
 "Com 1: Tower active, Departure standby; Com 2: arrival.",
@@ -4952,7 +5040,7 @@ window.CFII_ORAL = [
 "Bug heading/altitude; load and activate GPS route.",
 "Tune first station; OBS to initial course.",
 "Secondary NAV: approach facility (e.g., ILS) for IMC return.",
-"Transponder code, standby until takeoff, then ALT."
+"Transponder code set; ALT and ADS-B Out on whenever on the movement area."
 ]
 }
 ]
@@ -5490,7 +5578,8 @@ window.CFII_ORAL = [
 "**Always**: vacating an assigned altitude; VFR-on-top altitude change; unable 500 fpm; missed approach",
 "**Always**: TAS change 5%/10 kt; reaching/leaving a holding fix; loss of nav equipment (ID, equipment, impairment, help needed)",
 "**Always**: any safety-of-flight info",
-"**Non-radar**: leaving FAF/OM inbound; estimate error more than 2 minutes; unforecast/hazardous weather"
+"**Non-radar only**: leaving the FAF/OM inbound; a corrected estimate when the earlier one is off by more than 2 minutes",
+"**Always, radar contact or not**: weather that was not forecast, or forecast hazardous weather you encounter (AIM 5-3-3b, 91.183)"
 ],
 "ref": "AIM 5-3-3",
 "l2": [
@@ -5502,13 +5591,14 @@ window.CFII_ORAL = [
 "**Always**: vacating assigned altitude; VFR-on-top altitude change; unable 500 fpm; missed approach",
 "**Always**: TAS change 5%/10 kt; reaching/leaving holding fix; nav equipment loss (ID, equipment, impairment, help)",
 "**Always**: any safety-of-flight info",
-"**Non-radar**: leaving FAF/OM inbound; estimate error over 2 minutes; unforecast/hazardous weather"
+"**Non-radar only**: leaving FAF/OM inbound; corrected estimate when off by over 2 minutes",
+"**Always, radar contact or not**: weather that was not forecast, or forecast hazardous weather you encounter (AIM 5-3-3b, 91.183)"
 ]
 },
 {
 "t": "r",
 "q": "What reports are required only when NOT in radar contact?",
-"a": "Leaving the FAF or outer marker inbound\nPrevious time estimate in error by more than 2 minutes\nUnforecast and/or hazardous weather\n(plus compulsory position reports)"
+"a": "Leaving the FAF or outer marker inbound\nA corrected estimate when the previous one is in error by more than 2 minutes\n(plus compulsory position reports)\nNot on this list: unforecast or hazardous weather is reported always, radar or not"
 },
 {
 "t": "r",
@@ -5601,6 +5691,60 @@ window.CFII_ORAL = [
 "t": "r",
 "q": "FIS-B vs TIS-B?",
 "a": "FIS-B: weather/flight info, 978 MHz UAT only.\nTIS-B: traffic on transponder aircraft, available to 1090ES and UAT users."
+},
+{
+"t": "s",
+"h": "Two-way communications failure (91.185)",
+"g": "VFR: land. IFR: route AVEF, altitude MEA, squawk 7600.",
+"obj": "Teach the lost-comm rules that apply on departure, en route and arrival (PTS 8).",
+"pts": [
+"**VFR conditions** (at the failure or met later): stay VFR and land as soon as practicable",
+"**IFR route: AVEF**: Assigned; Vectored (direct to the fix, route or airway in the vector clearance); Expected; Filed",
+"**IFR altitude: MEA**: the highest of the Minimum IFR altitude, the altitude told to Expect, or the last Assigned, for each route segment",
+"Squawk **7600**; try the last frequency, FSS and 121.5; listen on VOR/ILS voice",
+"**Clearance limit**: if it is a fix where an approach begins, start the descent and approach at the EFC, or at the ETA if there is no EFC. If not, leave it at the EFC (or on arrival with no EFC), go to an approach fix and start down at the ETA",
+"A DP or STAR with its own lost-comm procedure (some radar SIDs): fly that first. Full lesson: IX.A"
+],
+"ref": "14 CFR 91.185; AIM 6-4-1",
+"l2": [
+"VFR conditions: stay VFR, land as soon as practicable.",
+"IFR: route AVEF, altitude highest of MEA / Expected / Assigned; squawk 7600."
+],
+"l3": [
+"**VFR conditions** (at the failure or met later): stay VFR and land as soon as practicable",
+"**IFR route: AVEF**: Assigned; Vectored (direct to the fix, route or airway in the vector clearance); Expected; Filed",
+"**IFR altitude: MEA**: the highest of the Minimum IFR altitude, the altitude told to Expect, or the last Assigned, for each route segment",
+"Squawk **7600**; try the last frequency, FSS and 121.5; listen on VOR/ILS voice",
+"**Clearance limit**: if it is a fix where an approach begins, start the descent and approach at the EFC, or at the ETA if there is no EFC. If not, leave it at the EFC (or on arrival with no EFC), go to an approach fix and start down at the ETA",
+"A DP or STAR with its own lost-comm procedure (some radar SIDs): fly that first. Full lesson: IX.A"
+]
+},
+{
+"t": "s",
+"h": "Checklists, intercepts & IFR altitudes",
+"g": "Checklists at each phase; intercept every cleared course; know the altitudes.",
+"obj": "Teach checklist use, course interception and the en route altitudes (PTS 5, 6, 7).",
+"pts": [
+"**Checklists** (PTS 5): before takeoff, climb, cruise, descent, approach and before landing: run them at low-workload points, never during an intercept or a level-off",
+"**Intercepts** (PTS 7): the pilot intercepts and tracks every course, radial or bearing in the clearance without being told: tune and identify, set the course, choose an intercept angle, lead the turn, fly the centerline (91.181)",
+"**MEA**: obstacle clearance and navaid reception. **MOCA**: obstacle clearance; reception only within 22 NM of the VOR. **MCA**: cross the fix at or above it. **MRA**: lowest altitude an intersection can be identified. **OROCA**: off-route clearance (1,000 ft, 2,000 ft mountainous), no reception or radar guarantee",
+"No published minimum: 1,000 ft above the highest obstacle within 4 NM of course, 2,000 ft in mountainous areas (91.177)",
+"**Climb gradient to fpm**: ft/NM x groundspeed / 60 (200 ft/NM at 90 kt = 300 fpm)",
+"Part 91 has no takeoff minimums; the standard for commercial operators is 1 SM (1-2 engines) or 1/2 SM (3 or more) (91.175(f))"
+],
+"ref": "14 CFR 91.175(f), 91.177, 91.181; AIM 5-2-9",
+"l2": [
+"Intercept and track every cleared course; checklists at low-workload points.",
+"MEA, MOCA (22 NM), MCA, MRA, OROCA; gradient fpm = ft/NM x GS / 60."
+],
+"l3": [
+"**Checklists** (PTS 5): before takeoff, climb, cruise, descent, approach and before landing: run them at low-workload points, never during an intercept or a level-off",
+"**Intercepts** (PTS 7): the pilot intercepts and tracks every course, radial or bearing in the clearance without being told: tune and identify, set the course, choose an intercept angle, lead the turn, fly the centerline (91.181)",
+"**MEA**: obstacle clearance and navaid reception. **MOCA**: obstacle clearance; reception only within 22 NM of the VOR. **MCA**: cross the fix at or above it. **MRA**: lowest altitude an intersection can be identified. **OROCA**: off-route clearance (1,000 ft, 2,000 ft mountainous), no reception or radar guarantee",
+"No published minimum: 1,000 ft above the highest obstacle within 4 NM of course, 2,000 ft in mountainous areas (91.177)",
+"**Climb gradient to fpm**: ft/NM x groundspeed / 60 (200 ft/NM at 90 kt = 300 fpm)",
+"Part 91 has no takeoff minimums; the standard for commercial operators is 1 SM (1-2 engines) or 1/2 SM (3 or more) (91.175(f))"
+]
 }
 ]
 },
@@ -5747,19 +5891,19 @@ window.CFII_ORAL = [
 "g": "LVO/SMGCS lights and markings guide and stop taxiing aircraft.",
 "obj": "Identify low-visibility lights and markings.",
 "pts": [
-"AC 120-57: plan for ops below 1,200' RVR; two levels: 1,200-600' and below 600' RVR",
+"AC 120-57: plan for ops below 1,200' RVR; two levels: 1,200-500' and below 500' RVR (AIM 4-3-19)",
 "Taxiway edge: steady blue; centerline: steady green; clearance bar: 3 steady yellow in-pavement",
 "Runway guard lights: flashing yellow (elevated pair or in-pavement row) at runway hold position",
 "**Stop bar**: steady red row; turned off with lead-on lights on after ATC clearance",
 "Geographic position marking: pink circle with number/letter, white inner and black outer ring"
 ],
 "l2": [
-"AC 120-57: two levels, 1,200-600' and below 600' RVR",
+"AC 120-57: two levels, 1,200-500' and below 500' RVR (AIM 4-3-19)",
 "Edge steady blue; centerline steady green; guard lights flashing yellow",
 "**Stop bar**: steady red; off with lead-on lights after ATC clearance"
 ],
 "l3": [
-"AC 120-57: ops below 1,200' RVR; two levels: 1,200-600' and below 600' RVR",
+"AC 120-57: ops below 1,200' RVR; two levels: 1,200-500' and below 500' RVR (AIM 4-3-19)",
 "Edge: steady blue; centerline: steady green; clearance bar: 3 steady yellow in-pavement",
 "Runway guard lights: flashing yellow (elevated pair or in-pavement row) at hold position",
 "**Stop bar**: steady red; off, lead-on lights on after ATC clearance",
@@ -5774,23 +5918,23 @@ window.CFII_ORAL = [
 {
 "t": "s",
 "h": "Airport requirements by RVR",
-"g": "Below 600' RVR adds centerline lights, stop bars, clearance bars.",
-"obj": "Contrast below-1,200' and below-600' RVR requirements.",
+"g": "Below 500' RVR adds centerline lights, stop bars, clearance bars.",
+"obj": "Contrast below-1,200' and below-500' RVR requirements.",
 "pts": [
 "<1,200': taxiway edge or centerline lights; runway guard lights; painted hold markings; guidance signs",
-"<600': centerline lights (edge on curves); stop bars + green lead-on lights; clearance bar lights at holds",
-"<600' non-movement area: centerline lights or a \"follow me\" vehicle plan",
+"<500': centerline lights (edge on curves); stop bars + green lead-on lights; clearance bar lights at holds",
+"<500' non-movement area: centerline lights or a \"follow me\" vehicle plan",
 "Elevated guard lights: no centerline lights and width <=150'; in-pavement: centerline lights, >150', or ILS stop bar"
 ],
 "l2": [
 "<1,200': edge or centerline lights, guard lights, hold markings, signs",
-"<600': centerline lights, stop bars + green lead-on lights, clearance bars",
+"<500': centerline lights, stop bars + green lead-on lights, clearance bars",
 "Elevated guard lights: no centerline lights and width <=150'"
 ],
 "l3": [
 "<1,200': edge or centerline lights; guard lights; painted hold markings; signs",
-"<600': centerline lights (edge on curves); stop bars + green lead-on; clearance bars at holds",
-"<600' non-movement area: centerline lights or \"follow me\" vehicle plan",
+"<500': centerline lights (edge on curves); stop bars + green lead-on; clearance bars at holds",
+"<500' non-movement area: centerline lights or \"follow me\" vehicle plan",
 "Elevated guard: no centerline lights, width <=150'; in-pavement: centerline lights, >150', or ILS stop bar"
 ]
 },
@@ -7130,6 +7274,33 @@ window.CFII_ORAL = [
 "t": "r",
 "q": "On a DME arc the distance is decreasing. What do you do?",
 "a": "Reduce or eliminate the turn (e.g., rotate the OBS 10° but don't turn). If increasing, turn more (e.g., 15°)."
+},
+{
+"t": "s",
+"h": "RMI, passage, failures, localizer from an arc & MFD",
+"g": "Read the RMI, recognise passage and failures, lead the turn off the arc.",
+"obj": "Cover RMI bearings, station/waypoint passage, failure recognition and the MFD (PTS 1b, 1f, 1g, 1h, 5).",
+"pts": [
+"**RMI**: the head of the needle is the magnetic bearing TO the station; the tail is the radial you are on. Nothing to set: read it straight off the card",
+"**VOR CDI**: full scale is 10 degrees each side (2 degrees per dot); 1 degree = 1 NM at 60 NM. **GPS CDI**: 2 NM en route, 1 NM terminal (within 30 NM), 0.3 NM approach",
+"**Station passage**: VOR = the first complete TO/FROM reversal (in the cone of confusion hold heading, do not chase the needle). **GPS waypoint**: fly-by waypoints sequence with turn anticipation; a fly-over waypoint must be crossed; sequencing stops in OBS/SUSP",
+"**Localizer from an arc**: start the turn at the charted lead radial (LR). The localizer is about 4 times as sensitive as a VOR, the OBS has no effect: set the inbound course as a reminder",
+"**Failures**: VOR/LOC = NAV flag, lost or wrong ident, erratic needle (always identify). GPS = loss of integrity (LOI / RAIM not available), dead-reckoning mode, approach downgrade. Tell ATC and change nav source (91.187)",
+"**MFD / moving map** (PTS 5): shows position, track against the desired course, wind and the arc at a glance; it supports the CDI/HSI, it is not primary guidance"
+],
+"ref": "IFH Ch. 9; AIM 1-1-3, 1-1-9, 1-1-17",
+"l2": [
+"RMI head = bearing TO; tail = radial. VOR full scale 10 degrees.",
+"Lead radial for the turn off an arc; flag or lost ident = failure, tell ATC."
+],
+"l3": [
+"**RMI**: the head of the needle is the magnetic bearing TO the station; the tail is the radial you are on. Nothing to set: read it straight off the card",
+"**VOR CDI**: full scale is 10 degrees each side (2 degrees per dot); 1 degree = 1 NM at 60 NM. **GPS CDI**: 2 NM en route, 1 NM terminal (within 30 NM), 0.3 NM approach",
+"**Station passage**: VOR = the first complete TO/FROM reversal (in the cone of confusion hold heading, do not chase the needle). **GPS waypoint**: fly-by waypoints sequence with turn anticipation; a fly-over waypoint must be crossed; sequencing stops in OBS/SUSP",
+"**Localizer from an arc**: start the turn at the charted lead radial (LR). The localizer is about 4 times as sensitive as a VOR, the OBS has no effect: set the inbound course as a reminder",
+"**Failures**: VOR/LOC = NAV flag, lost or wrong ident, erratic needle (always identify). GPS = loss of integrity (LOI / RAIM not available), dead-reckoning mode, approach downgrade. Tell ATC and change nav source (91.187)",
+"**MFD / moving map** (PTS 5): shows position, track against the desired course, wind and the arc at a glance; it supports the CDI/HSI, it is not primary guidance"
+]
 }
 ]
 },
@@ -7303,6 +7474,38 @@ window.CFII_ORAL = [
 "t": "r",
 "q": "Lost comms, clearance limit is not an approach fix, no EFC. When do you leave?",
 "a": "Proceed to a fix where an approach begins and start descent and approach as close as possible to the ETA (filed or amended). (91.185)"
+},
+{
+"t": "s",
+"h": "Entry sectors, timing fixes, reports & MFD",
+"g": "Entries by the 70-degree line; fix the outbound leg; report in and out.",
+"obj": "Teach the entry sectors, timing corrections, ATC reports and MFD use in a hold (PTS 1c, 1d, 1g, 5).",
+"pts": [
+"**Entry sectors** from the 70-degree line through the fix: **direct** from the 180-degree side, **parallel** from the 110-degree sector, **teardrop** from the 70-degree sector; headings within 5 degrees are close enough",
+"**Parallel**: fly outbound on the non-holding side for 1 minute, turn toward the holding side through more than 180 degrees, return to the fix or intercept inbound. **Teardrop**: cross the fix, fly 30 degrees off the outbound course on the holding side for 1 minute, turn in the direction of the hold to intercept inbound",
+"**Timing fix**: the inbound leg should be 1 minute (1 1/2 above 14,000 MSL). Inbound came out 15 seconds short: add about 15 seconds to the next outbound; long: shorten it",
+"**Reports** (PTS 1g, AIM 5-3-3): time and altitude **reaching** the holding fix or clearance limit, and **leaving** it. No EFC with the holding clearance: ask for one",
+"**DME or GPS legs**: distance replaces timing: start the inbound turn at the cleared leg length",
+"**MFD / moving map** (PTS 5): load or build the hold, check the drawn racetrack against the clearance (fix, course, turn direction), and watch track and the wind vector for drift; confirm the inbound course on the CDI"
+],
+"ref": "AIM 5-3-8, 5-3-3",
+"l2": [
+"Direct 180, parallel 110, teardrop 70 degrees from the 70-degree line.",
+"Report reaching and leaving the fix; adjust outbound for a 1-minute inbound."
+],
+"l3": [
+"**Entry sectors** from the 70-degree line through the fix: **direct** from the 180-degree side, **parallel** from the 110-degree sector, **teardrop** from the 70-degree sector; headings within 5 degrees are close enough",
+"**Parallel**: fly outbound on the non-holding side for 1 minute, turn toward the holding side through more than 180 degrees, return to the fix or intercept inbound. **Teardrop**: cross the fix, fly 30 degrees off the outbound course on the holding side for 1 minute, turn in the direction of the hold to intercept inbound",
+"**Timing fix**: the inbound leg should be 1 minute (1 1/2 above 14,000 MSL). Inbound came out 15 seconds short: add about 15 seconds to the next outbound; long: shorten it",
+"**Reports** (PTS 1g, AIM 5-3-3): time and altitude **reaching** the holding fix or clearance limit, and **leaving** it. No EFC with the holding clearance: ask for one",
+"**DME or GPS legs**: distance replaces timing: start the inbound turn at the cleared leg length",
+"**MFD / moving map** (PTS 5): load or build the hold, check the drawn racetrack against the clearance (fix, course, turn direction), and watch track and the wind vector for drift; confirm the inbound course on the CDI"
+]
+},
+{
+"t": "r",
+"q": "Which holding entry goes with each sector?",
+"a": "From the 70-degree line through the fix:\nDirect: the 180-degree side\nParallel: the 110-degree sector\nTeardrop: the 70-degree sector"
 }
 ]
 },
@@ -7378,22 +7581,22 @@ window.CFII_ORAL = [
 {
 "t": "s",
 "h": "Approach charts",
-"g": "NACO and Jeppesen charts share top bar, briefing, plan, profile, minimums.",
-"obj": "Walk through the sections of NACO and Jeppesen approach charts.",
+"g": "FAA and Jeppesen charts share top bar, briefing, plan, profile, minimums.",
+"obj": "Walk through the sections of FAA and Jeppesen approach charts.",
 "pts": [
-"**NACO** (Chart User's Guide): Top bar, Briefing info (freqs, course, runway distances, notes, missed approach, lighting)",
-"NACO cont.: Plan view (IAF through missed, MSA diagram), Profile view, Minimums/Airport diagram (time to MAP), Bottom bar (amendments, lat/long)",
+"**FAA** (Chart User's Guide): Top bar, Briefing info (freqs, course, runway distances, notes, missed approach, lighting)",
+"FAA cont.: Plan view (IAF through missed, MSA diagram), Profile view, Minimums/Airport diagram (time to MAP), Bottom bar (amendments, lat/long)",
 "**Jeppesen** (Chart Legend): Top bar, Briefing strip (freqs, course, FAF alt, MDA, elevations, missed, notes, MSA)",
 "Jepp cont.: Plan view, Profile view, Minimums (time to MAP, approach lighting, visual missed approach steps)"
 ],
 "l2": [
-"**NACO**: top bar, briefing info, plan view, profile, minimums, bottom bar.",
+"**FAA**: top bar, briefing info, plan view, profile, minimums, bottom bar.",
 "**Jeppesen**: top bar, briefing strip, plan view, profile, minimums.",
 "Both give time to MAP in the minimums section."
 ],
 "l3": [
-"**NACO**: Top bar, Briefing info (freqs, course, distances, notes, missed, lighting)",
-"NACO: Plan view (IAF to missed, MSA), Profile, Minimums/Airport diagram (time to MAP), Bottom bar",
+"**FAA**: Top bar, Briefing info (freqs, course, distances, notes, missed, lighting)",
+"FAA: Plan view (IAF to missed, MSA), Profile, Minimums/Airport diagram (time to MAP), Bottom bar",
 "**Jeppesen**: Top bar, Briefing strip (freqs, course, FAF alt, MDA, elevations, missed, notes, MSA)",
 "Jepp: Plan, Profile, Minimums (time to MAP, lighting, visual missed steps)"
 ]
@@ -7620,19 +7823,19 @@ window.CFII_ORAL = [
 "obj": "Apply cold temperature corrections correctly.",
 "pts": [
 "Colder than standard: true altitude is **less** than indicated; colder = bigger error, obstacle clearance risk",
-"**CTA** (AIM 7-3-4): high-risk airports, icon and temp limit on the IAP. Correct At, At-or-Above, At-or-Below altitudes when reported temp is below published (AIM 7-3-5)",
+"**CTA** (AIM 7-3-4): high-risk airports, icon and temp limit on the IAP. Correct At, At-or-Above, At-or-Below altitudes when the reported temp is at or below the published CTA temp (AIM 7-3-5)",
 "Advise ATC of corrections (not required if final segment only). Don't correct SID/ODP/STAR or ATC-assigned altitudes",
 "**ICAO Cold Temperature Error Table** (TPP B1): enter at temp, column = chart altitude minus airport elevation; add the value, interpolate; use 5,000 ft column above 5,000",
 "**All Segments** (snowflake/CTA limit): IAF to MA holding altitude, no CTA list. **Individual Segments**: only those marked in the CTA list"
 ],
 "l2": [
 "Colder than standard: true altitude is **less** than indicated.",
-"**CTA** airports (AIM 7-3-4): correct altitudes when temp is below published.",
+"**CTA** airports (AIM 7-3-4): correct altitudes when temp is at or below published.",
 "Use the **ICAO Cold Temperature Error Table** (TPP B1); advise ATC."
 ],
 "l3": [
 "Colder: true altitude **less** than indicated; bigger error, obstacle risk",
-"**CTA** (AIM 7-3-4): icon and temp limit on IAP. Correct At/At-or-Above/At-or-Below below published temp (AIM 7-3-5)",
+"**CTA** (AIM 7-3-4): icon and temp limit on IAP. Correct At/At-or-Above/At-or-Below at or below the published temp (AIM 7-3-5)",
 "Advise ATC (not if final segment only). Don't correct SID/ODP/STAR or ATC altitudes",
 "**ICAO Cold Temperature Error Table** (TPP B1): enter at temp, chart alt minus elevation; add, interpolate; 5,000 ft column above 5,000",
 "**All Segments**: IAF to MA holding altitude. **Individual Segments**: only those in CTA list"
@@ -7665,6 +7868,31 @@ window.CFII_ORAL = [
 "Required NAVAIDs and performance, correct category; check Notes",
 "Lost SA: go missed or request vectors; ask for help",
 "Current charts, NOTAMs. Same SOPs and briefing; plan radio calls"
+]
+},
+{
+"t": "s",
+"h": "Standards, RNAV lines of minima & MFD",
+"g": "Three-quarter scale, MDA +100/-0, and fly the minima the box annunciates.",
+"obj": "State the test standards, the RNAV (GPS) lines of minima and how to use the MFD (PTS 5).",
+"pts": [
+"**Standards**: no more than **3/4-scale** CDI deflection on final; at the MDA **+100/-0 ft**; before final altitude within 100 ft, heading within 10 degrees, airspeed within 10 kt",
+"**RNAV (GPS) lines of minima**: **LPV** (WAAS, flown to a DA like an ILS), **LNAV/VNAV** (DA; WAAS or approved baro-VNAV), **LP** (WAAS lateral only, MDA), **LNAV** (MDA). LNAV+V and LP+V show an advisory glidepath only: the MDA still applies",
+"Before the FAF check the **annunciation** (LPV, L/VNAV, LP, LNAV) and brief the matching minimums. Downgrade before the FAF: use the lower line of minima or go missed. Loss of integrity after the FAF: missed approach",
+"**On the test**: two different nonprecision approaches: one with a course reversal, one from an IAF hand-flown without vectors, one on partial panel",
+"**MFD / moving map** (PTS 5): monitor position along the procedure, track against the course, wind drift and distance to the next fix and the MAP; cross-check the raw CDI and the plate, never navigate from the map alone"
+],
+"ref": "FAA-S-8081-9E; FAA-S-ACS-8; AIM 1-1-18, 5-4-5",
+"l2": [
+"3/4-scale CDI; MDA +100/-0 ft.",
+"Fly the line of minima the GPS annunciates: LPV, LNAV/VNAV, LP or LNAV."
+],
+"l3": [
+"**Standards**: no more than **3/4-scale** CDI deflection on final; at the MDA **+100/-0 ft**; before final altitude within 100 ft, heading within 10 degrees, airspeed within 10 kt",
+"**RNAV (GPS) lines of minima**: **LPV** (WAAS, flown to a DA like an ILS), **LNAV/VNAV** (DA; WAAS or approved baro-VNAV), **LP** (WAAS lateral only, MDA), **LNAV** (MDA). LNAV+V and LP+V show an advisory glidepath only: the MDA still applies",
+"Before the FAF check the **annunciation** (LPV, L/VNAV, LP, LNAV) and brief the matching minimums. Downgrade before the FAF: use the lower line of minima or go missed. Loss of integrity after the FAF: missed approach",
+"**On the test**: two different nonprecision approaches: one with a course reversal, one from an IAF hand-flown without vectors, one on partial panel",
+"**MFD / moving map** (PTS 5): monitor position along the procedure, track against the course, wind drift and distance to the next fix and the MAP; cross-check the raw CDI and the plate, never navigate from the map alone"
 ]
 }
 ]
@@ -7846,6 +8074,35 @@ window.CFII_ORAL = [
 "Personal minimums, capability, notes, SA, current charts/NOTAMs",
 "SOPs, consistent briefings = efficiency"
 ]
+},
+{
+"t": "s",
+"h": "ILS components, standards, common errors & MFD",
+"g": "Know the ILS parts, the 3/4-scale limit and the decision at DA.",
+"obj": "Teach the ILS components and failures, the standards, the PTS common errors and MFD use (PTS 2, 5).",
+"pts": [
+"**Components**: localizer (700 ft wide at the threshold, 3-6 degrees), glideslope (about 3 degrees, 1.4 degrees thick), range information (marker, DME or GPS fix), approach lights",
+"**Glideslope inoperative** = fly the localizer approach to the LOC MDA. **Outer marker substitutes** (91.175(k)): compass locator, PAR/ASR, DME, VOR or NDB fix, or suitable RNAV",
+"**False glideslopes** sit above the real one (about 9 and 12 degrees): intercept from below at the charted altitude and cross-check the glideslope altitude at the FAF",
+"**Standards**: no more than **3/4-scale** on the localizer or glideslope, airspeed within 10 kt; decide AT the DA: land with the 91.175(c) references in sight, or go missed. No leveling off",
+"**Typical CAT I minimums**: 200 ft above touchdown and 1/2 SM (RVR 2400; RVR 1800 with touchdown zone and centerline lights)",
+"**Common errors** (PTS 2): not knowing the chart; poor comms or ATC noncompliance; **skipped checklists** (before-landing checks done before glideslope intercept); chasing the needles instead of small heading and pitch corrections; **misusing the DA** (leveling off like an MDA, or continuing below it without the references)",
+"**MFD / moving map** (PTS 5): position relative to the localizer and fixes, wind and track; the raw localizer and glideslope needles stay primary"
+],
+"ref": "AIM 1-1-9; 14 CFR 91.175; FAA-S-8081-9E",
+"l2": [
+"3/4-scale limit on LOC and GS; decide at the DA.",
+"GS out = LOC minimums; false glideslopes above: intercept from below."
+],
+"l3": [
+"**Components**: localizer (700 ft wide at the threshold, 3-6 degrees), glideslope (about 3 degrees, 1.4 degrees thick), range information (marker, DME or GPS fix), approach lights",
+"**Glideslope inoperative** = fly the localizer approach to the LOC MDA. **Outer marker substitutes** (91.175(k)): compass locator, PAR/ASR, DME, VOR or NDB fix, or suitable RNAV",
+"**False glideslopes** sit above the real one (about 9 and 12 degrees): intercept from below at the charted altitude and cross-check the glideslope altitude at the FAF",
+"**Standards**: no more than **3/4-scale** on the localizer or glideslope, airspeed within 10 kt; decide AT the DA: land with the 91.175(c) references in sight, or go missed. No leveling off",
+"**Typical CAT I minimums**: 200 ft above touchdown and 1/2 SM (RVR 2400; RVR 1800 with touchdown zone and centerline lights)",
+"**Common errors** (PTS 2): not knowing the chart; poor comms or ATC noncompliance; **skipped checklists** (before-landing checks done before glideslope intercept); chasing the needles instead of small heading and pitch corrections; **misusing the DA** (leveling off like an MDA, or continuing below it without the references)",
+"**MFD / moving map** (PTS 5): position relative to the localizer and fixes, wind and track; the raw localizer and glideslope needles stay primary"
+]
 }
 ]
 },
@@ -7900,7 +8157,7 @@ window.CFII_ORAL = [
 "obj": "Find the procedure and the MAP on the chart.",
 "pts": [
 "Text in the Missed Approach box of the briefing strip, plus graphics",
-"NACO: dashed line, usually to a hold. Jepp: dashed line on plan view plus step-by-step icons below the profile",
+"FAA: dashed line, usually to a hold. Jepp: dashed line on plan view plus step-by-step icons below the profile",
 "MAP: end of the solid course, start of the dashed; drawn for the lowest published minima",
 "Precision: reaching DA/DH on the glideslope. Non-precision: crossing an on-airport navaid, a fix (radial/DME, RNAV waypoint), or time/distance from FAF table (use groundspeed, interpolate)"
 ],
@@ -7911,7 +8168,7 @@ window.CFII_ORAL = [
 ],
 "l3": [
 "Missed Approach box text plus graphics",
-"NACO: dashed line, usually to a hold. Jepp: dashed line plus step icons",
+"FAA: dashed line, usually to a hold. Jepp: dashed line plus step icons",
 "MAP: end of solid, start of dashed; drawn for lowest minima",
 "Precision: DA/DH on GS. Non-precision: on-airport navaid, fix, or FAF time/distance table"
 ]
@@ -8038,6 +8295,31 @@ window.CFII_ORAL = [
 "t": "r",
 "q": "What reports are required on a missed approach?",
 "a": "That you're flying the missed (with reason when time permits, unless ATC-initiated)\nTime and altitude entering the hold\nCold temperature altitude corrections\nInability to comply with a clearance, gradient, or restriction"
+},
+{
+"t": "s",
+"h": "Common errors, GPS at the MAP, climb gradient & MFD",
+"g": "Know the errors, un-suspend the GPS, and check you can make the gradient.",
+"obj": "Name the PTS common errors and teach GPS handling, climb gradient and MFD use in the missed (PTS 2, 5).",
+"pts": [
+"**Common errors** (PTS 2): not knowing the missed approach on the chart; not recognising when a missed is required; starting it late; no report to ATC; not flying the published or assigned procedure; weak basic instrument flying; going below the MDA before the MAP",
+"**GPS at the MAP**: waypoint sequencing suspends (SUSP). After the initial climb, press the SUSP/OBS key (or the go-around button) to sequence to the missed approach; the CDI goes back to terminal sensitivity",
+"**Climb gradient**: the standard is 200 ft/NM, more if charted. fpm = ft/NM x groundspeed / 60 (200 ft/NM at 90 kt = 300 fpm). If you cannot meet it, tell ATC before starting the approach",
+"**Missed before the MAP**: climb at once but fly to the MAP before any turn",
+"**MFD / moving map** (PTS 5): shows the missed approach track and the hold; use it to confirm the turn direction and the holding entry, with the CDI primary"
+],
+"ref": "AIM 5-4-21, 5-5-5; FAA-S-8081-9E",
+"l2": [
+"GPS suspends at the MAP: un-suspend after the initial climb.",
+"Standard 200 ft/NM; fpm = ft/NM x GS / 60."
+],
+"l3": [
+"**Common errors** (PTS 2): not knowing the missed approach on the chart; not recognising when a missed is required; starting it late; no report to ATC; not flying the published or assigned procedure; weak basic instrument flying; going below the MDA before the MAP",
+"**GPS at the MAP**: waypoint sequencing suspends (SUSP). After the initial climb, press the SUSP/OBS key (or the go-around button) to sequence to the missed approach; the CDI goes back to terminal sensitivity",
+"**Climb gradient**: the standard is 200 ft/NM, more if charted. fpm = ft/NM x groundspeed / 60 (200 ft/NM at 90 kt = 300 fpm). If you cannot meet it, tell ATC before starting the approach",
+"**Missed before the MAP**: climb at once but fly to the MAP before any turn",
+"**MFD / moving map** (PTS 5): shows the missed approach track and the hold; use it to confirm the turn direction and the holding entry, with the CDI primary"
+]
 }
 ]
 },
@@ -8096,7 +8378,7 @@ window.CFII_ORAL = [
 "obj": "Recognize circling situations and read circling minimums.",
 "pts": [
 "Circle when: required by procedure, terrain, weather (approach doesn't serve the wind runway), construction (approach to closed runway)",
-"NACO: circling minimums in Landing Minimums, below straight-in, can differ by category",
+"FAA: circling minimums in Landing Minimums, below straight-in, can differ by category",
 "Jepp: in Minimums, to the right of straight-in",
 "Check Notes, e.g., circling to certain runways NA at night, or circling south NA",
 "Cleared for approach to one runway and circle to another: use the chart you were cleared on, with **circling** minimums"
@@ -8107,7 +8389,7 @@ window.CFII_ORAL = [
 ],
 "l3": [
 "Circle when: procedure, terrain, weather (approach doesn't serve wind runway), construction (closed runway)",
-"NACO: circling minimums below straight-in in Landing Minimums; may differ by category",
+"FAA: circling minimums below straight-in in Landing Minimums; may differ by category",
 "Jepp: in Minimums, right of straight-in",
 "Check Notes, e.g., circling to some runways NA at night, or circling south NA",
 "Cleared to one runway, circling to another: use the cleared chart with **circling** minimums"
@@ -8126,8 +8408,9 @@ window.CFII_ORAL = [
 "pts": [
 "Stay within your category's protected area; circling minimums give at least **300 ft** obstacle clearance there",
 "Radius table on **TPP page B2**: by category and circling MDA altitude (accounts for higher TAS at altitude)",
-"Ex: MDA 1,000 ft or less: A 1.3, B 1.7, C 2.7, D 3.6, E 4.5 NM",
-"OEA: lines equal to the radius drawn from each authorized runway threshold, arcs joined; MDA based on OEA and final segment (FAA Order 8260.3)"
+"**Expanded** areas (negative 'C' symbol on the circling minimums line), ex. MDA 1,000 ft MSL or less: A 1.3, B 1.7, C 2.7, D 3.6, E 4.5 NM (larger at higher MSL altitudes)",
+"OEA: lines equal to the radius drawn from each authorized runway threshold, arcs joined; MDA based on OEA and final segment (FAA Order 8260.3)",
+"**No 'C' symbol** = older standard radii from the runway ends: A 1.3, B 1.5, C 1.7, D 2.3, E 4.5 NM. 300 ft of obstacle clearance exists only inside the area"
 ],
 "l2": [
 "Circling minimums give at least **300 ft** clearance in your category's protected area",
@@ -8136,8 +8419,9 @@ window.CFII_ORAL = [
 "l3": [
 "Stay in your category's protected area; at least **300 ft** obstacle clearance",
 "Radius table, **TPP page B2**: by category and circling MDA altitude (higher TAS at altitude)",
-"Ex: MDA 1,000 ft or less: A 1.3, B 1.7, C 2.7, D 3.6, E 4.5 NM",
-"OEA: radius arcs from each authorized threshold, joined; MDA from OEA and final segment (FAA Order 8260.3)"
+"**Expanded** areas (negative 'C' symbol on the circling minimums line), ex. MDA 1,000 ft MSL or less: A 1.3, B 1.7, C 2.7, D 3.6, E 4.5 NM (larger at higher MSL altitudes)",
+"OEA: radius arcs from each authorized threshold, joined; MDA from OEA and final segment (FAA Order 8260.3)",
+"**No 'C' symbol** = older standard radii from the runway ends: A 1.3, B 1.5, C 1.7, D 2.3, E 4.5 NM. 300 ft of obstacle clearance exists only inside the area"
 ]
 },
 {
@@ -8155,7 +8439,10 @@ window.CFII_ORAL = [
 "Passing the FAF, descend to circling minimums: higher rate than normal, but never over **1,000 fpm**. Visual early? Consider leveling higher",
 "Once visual, tell tower and circle as instructed; no tower: broadcast intentions",
 "Stay in the circling area, keep the runway in sight; no lower than circling MDA until normal descent and maneuvers allow landing",
-"AIM 5-4-20: shortest path to base or downwind, weather permitting; passing over the airport or other runways is OK; consider traffic and standard left turns"
+"AIM 5-4-20f: obey charted circling restrictions (they can differ by category and day/night); towered: follow the controller (a clearance never cancels a published restriction); non-towered: left turns per 91.126(b) unless a restriction says otherwise; stay inside the protected radius while maneuvering to downwind or base",
+"**91.175(e)(2)**: go missed any time an identifiable part of the airport is not distinctly visible, unless that is only because of a normal bank while circling",
+"**Transition to landing** (PTS common error): hold the circling MDA (+100/-0 ft) until continuously in position for a normal descent with the 91.175(c) references in sight; configure early, keep category speed, 30 degrees of bank at most, no early dive, roll out on final stabilized",
+"**Common errors**: not knowing the circling minimums and restrictions on the chart; busting the MDA or the visibility / protected area; poor technique from the circle to the landing (overshooting final, descending early, slow and steep)"
 ],
 "ce": "CE: Failure to adhere to the published MDA and visibility during the circle.",
 "l2": [
@@ -8167,7 +8454,10 @@ window.CFII_ORAL = [
 "After FAF, descend to circling minimums faster than normal, never over **1,000 fpm**; visual early: consider leveling higher",
 "Once visual, tell tower, circle as instructed; no tower: broadcast intentions",
 "Stay in the area, runway in sight; not below MDA until normal descent allows landing",
-"AIM 5-4-20: shortest path to base or downwind; crossing airport/runways OK; consider traffic, left turns"
+"AIM 5-4-20f: obey charted restrictions; tower: follow ATC; non-towered: 91.126(b) left turns; stay inside the radius",
+"**91.175(e)(2)**: go missed any time an identifiable part of the airport is not distinctly visible, unless that is only because of a normal bank while circling",
+"**Transition to landing** (PTS common error): hold the circling MDA (+100/-0 ft) until continuously in position for a normal descent with the 91.175(c) references in sight; configure early, keep category speed, 30 degrees of bank at most, no early dive, roll out on final stabilized",
+"**Common errors**: not knowing the circling minimums and restrictions on the chart; busting the MDA or the visibility / protected area; poor technique from the circle to the landing (overshooting final, descending early, slow and steep)"
 ]
 },
 {
@@ -8230,7 +8520,8 @@ window.CFII_ORAL = [
 "**Prevailing**: greatest visibility equaled or exceeded around at least half the horizon; miles",
 "**RVV**: transmissometer visibility for a runway; miles; used in lieu of prevailing for that runway",
 "**RVR**: distance seen down the runway from a moving aircraft; hundreds of feet; touchdown/mid/rollout/far end; mostly Part 121/135",
-"Only the pilot determines flight visibility; below minimums = go missed regardless of report. Landing with RVR below required is hard to defend"
+"Only the pilot determines flight visibility; below minimums = go missed regardless of report. Landing with RVR below required is hard to defend",
+"**RVR to visibility** (91.175(h)): 1600 = 1/4, 2400 = 1/2, 3200 = 5/8, 4000 = 3/4, 4500 = 7/8, 5000 = 1, 6000 = 1 1/4 SM"
 ],
 "l2": [
 "**91.175**: no landing if flight visibility is below the approach requirement",
@@ -8242,7 +8533,8 @@ window.CFII_ORAL = [
 "**Prevailing**: greatest visibility over at least half the horizon; miles",
 "**RVV**: transmissometer runway visibility; miles; replaces prevailing for that runway",
 "**RVR**: distance seen down runway from moving aircraft; hundreds of feet; touchdown/mid/rollout/far end; mostly Part 121/135",
-"Only the pilot determines flight visibility; below minimums = missed regardless of report; landing below required RVR hard to defend"
+"Only the pilot determines flight visibility; below minimums = missed regardless of report; landing below required RVR hard to defend",
+"**RVR to visibility** (91.175(h)): 1600 = 1/4, 2400 = 1/2, 3200 = 5/8, 4000 = 3/4, 4500 = 7/8, 5000 = 1, 6000 = 1 1/4 SM"
 ]
 },
 {
@@ -8335,7 +8627,8 @@ window.CFII_ORAL = [
 "Once visual, verify before landing checklist: Reds, Blues, Greens, Whites, Power (fixed gear); gear down and locked if retractable",
 "Maintain normal approach speed; don't assume checklists are done; go around if distracted or behind",
 "Heed advisories: NOTAMs, wind shear, wake turbulence, runway surface, braking",
-"Need more time to assess an advisory? Go around and fly the missed"
+"Need more time to assess an advisory? Go around and fly the missed",
+"**Technique** (PTS 1c, 2d): wind shear reported: add speed per the POH, expect airspeed swings, go around early if unstable. Wake: stay at or above the heavier aircraft's path and land beyond its touchdown point. Crosswind: crab on instruments, wing-low once visual"
 ],
 "ce": "CE: Failure to plan the turn to final; improper wind shear, wake, crosswind technique; loss of positive control.",
 "l2": [
@@ -8346,7 +8639,8 @@ window.CFII_ORAL = [
 "Once visual, before landing checklist: Reds, Blues, Greens, Whites, Power; retractable: gear down and locked",
 "Normal approach speed; don't assume checklists done; go around if distracted or behind",
 "Heed NOTAMs, wind shear, wake turbulence, runway surface, braking",
-"Need time to assess an advisory? Go around, fly the missed"
+"Need time to assess an advisory? Go around, fly the missed",
+"**Technique** (PTS 1c, 2d): wind shear reported: add speed per the POH, expect airspeed swings, go around early if unstable. Wake: stay at or above the heavier aircraft's path and land beyond its touchdown point. Crosswind: crab on instruments, wing-low once visual"
 ]
 }
 ]
@@ -8616,7 +8910,8 @@ window.CFII_ORAL = [
 "Primary objective: prevent extended IFR operation without radio communication",
 "Radio fails on an IFR clearance in **VFR conditions**: continue VFR if possible and **land as soon as practicable**",
 "No requirement to land as soon as *possible*",
-"If **IFR conditions** prevail, comply with 91.185 - this ensures aircraft separation"
+"If **IFR conditions** prevail, comply with 91.185 - this ensures aircraft separation",
+"VFR conditions **encountered after** the failure count too: stay VFR and land as soon as practicable (91.185(b)). 91.185 cannot cover every case: use 91.3(b) emergency authority when needed (AIM 6-4-1)"
 ],
 "l2": [
 "**VFR conditions**: continue VFR if possible, **land as soon as practicable**",
@@ -8626,7 +8921,8 @@ window.CFII_ORAL = [
 "Goal: prevent extended IFR flight without radio",
 "Fails on IFR clearance in **VFR conditions**: continue VFR, **land as soon as practicable**",
 "Not required to land as soon as *possible*",
-"**IFR conditions**: comply with 91.185 for separation"
+"**IFR conditions**: comply with 91.185 for separation",
+"VFR conditions **encountered after** the failure count too: stay VFR and land as soon as practicable (91.185(b)). 91.185 cannot cover every case: use 91.3(b) emergency authority when needed (AIM 6-4-1)"
 ]
 },
 {
@@ -8777,7 +9073,8 @@ window.CFII_ORAL = [
 "Turn coordinators traditionally use a different power source (ex. vacuum for AI/HI, electric for TC) - if AI/HI fail the TC still works, and vice versa",
 "**AHRS failure**: lose AI, HI and TC; generally a red X; not standardized between aircraft; go to backup AI, compass, moving map",
 "**Analog**: warning flag or disagreement between instruments",
-"**Pneumatic (vacuum)**: gyros slow and wander; many small aircraft have no warning - monitor the vacuum gauge"
+"**Pneumatic (vacuum)**: gyros slow and wander; many small aircraft have no warning - monitor the vacuum gauge",
+"**Glass**: AHRS failure = red X on attitude and heading; **ADC** failure = red X on airspeed, altitude and VSI; display failure = reversionary mode on the other screen; fly the standby instruments"
 ],
 "l2": [
 "TC usually on a different power source than AI/HI, so one survives",
@@ -8789,7 +9086,8 @@ window.CFII_ORAL = [
 "TC traditionally on a different power source (ex. vacuum AI/HI, electric TC); one works if the other fails",
 "**AHRS failure**: lose AI, HI, TC; usually red X; not standardized; use backup AI, compass, moving map",
 "**Analog**: warning flag or instrument disagreement",
-"**Pneumatic (vacuum)**: gyros slow, wander; often no warning - watch vacuum gauge"
+"**Pneumatic (vacuum)**: gyros slow, wander; often no warning - watch vacuum gauge",
+"**Glass**: AHRS failure = red X on attitude and heading; **ADC** failure = red X on airspeed, altitude and VSI; display failure = reversionary mode on the other screen; fly the standby instruments"
 ]
 },
 {
@@ -8868,7 +9166,8 @@ window.CFII_ORAL = [
 "When conditions permit, tell ATC the problem and your ability to continue in IMC",
 "Continue in VFR conditions if possible - request vectors, use weather reports",
 "No VMC: choose the best available approach, with ATC vectors if available",
-"Troubleshoot only if time permits: run checklists (power source, reset, alternate system)"
+"Troubleshoot only if time permits: run checklists (power source, reset, alternate system)",
+"**91.187 malfunction report** (IFR in controlled airspace): aircraft ID, equipment affected, how far your IFR capability is impaired, and the help you want (no-gyro vectors, nearest VMC, an ASR approach)"
 ],
 "l2": [
 "Tell ATC the problem and your ability to continue in IMC",
@@ -8879,7 +9178,8 @@ window.CFII_ORAL = [
 "When able, tell ATC the problem and ability to continue in IMC",
 "Continue in VFR if possible - request vectors, use weather reports",
 "No VMC: best available approach, ATC vectors if available",
-"Troubleshoot if time permits: checklists (power source, reset, alternate system)"
+"Troubleshoot if time permits: checklists (power source, reset, alternate system)",
+"**91.187 malfunction report** (IFR in controlled airspace): aircraft ID, equipment affected, how far your IFR capability is impaired, and the help you want (no-gyro vectors, nearest VMC, an ASR approach)"
 ]
 },
 {
@@ -8970,7 +9270,8 @@ window.CFII_ORAL = [
 "Recognize: unexpected **yaw and roll toward the failed engine**; abnormal indications, sounds, feel",
 "Rudder and aileron for directional control; establish **zero sideslip: 1-3° bank and ½ ball toward the operating engine** (varies by aircraft)",
 "Same steps as VMC: **Full Power, Reduce Drag, Identify, Verify, Fix or Feather**; restart if time permits",
-"Between every step check performance: zero sideslip, airspeed, heading, altitude, engine indications"
+"Between every step check performance: zero sideslip, airspeed, heading, altitude, engine indications",
+"**Performance check** (PTS 1c): at blue line (Vyse), will it hold altitude? Compare your altitude with the single-engine ceiling for the weight and temperature. Above it, accept a drift-down at Vyse (minimum sink), tell ATC, and pick the nearest suitable airport with a route that clears the MEAs"
 ],
 "l2": [
 "Recognize: unexpected **yaw and roll toward the failed engine**",
@@ -8981,7 +9282,8 @@ window.CFII_ORAL = [
 "Recognize: **yaw and roll toward the failed engine**; abnormal indications, sounds, feel",
 "Rudder and aileron for direction; zero sideslip: **1-3° bank and ½ ball toward the operating engine** (varies)",
 "As in VMC: **Full Power, Reduce Drag, Identify, Verify, Fix or Feather**; restart if time permits",
-"Check performance between steps: sideslip, airspeed, heading, altitude, engine indications"
+"Check performance between steps: sideslip, airspeed, heading, altitude, engine indications",
+"**Performance check** (PTS 1c): at blue line (Vyse), will it hold altitude? Compare your altitude with the single-engine ceiling for the weight and temperature. Above it, accept a drift-down at Vyse (minimum sink), tell ATC, and pick the nearest suitable airport with a route that clears the MEAs"
 ]
 },
 {
@@ -9353,7 +9655,10 @@ window.CFII_ORAL = [
 "Document all malfunctions in a **maintenance log** - one history anyone can access",
 "Methods vary by school or owner",
 "Alerts other pilots before flight; shows trends and what has or hasn't been fixed",
-"Critical where many pilots share aircraft (flight schools); unreported issues pass to the next pilot"
+"Critical where many pilots share aircraft (flight schools); unreported issues pass to the next pilot",
+"**Calibration** (PTS 2): write down errors found in flight (altimeter vs field elevation, VOR check error, heading indicator precession, compass deviation) so they are corrected or allowed for before the next IFR flight",
+"**Inoperative equipment**: 91.213(d): if not required by 91.205(d), the equipment list/KOEL or an AD, deactivate, placard INOPERATIVE and log it; if required for IFR, no IFR until fixed (91.7: airworthiness is the PIC's call)",
+"**Records that gate the next IFR flight**: VOR check within 30 days (date, place, bearing error, signature: 91.171); altimeter/static 24 months (91.411); transponder 24 months (91.413)"
 ],
 "l2": [
 "Document all malfunctions in a **maintenance log**",
@@ -9364,7 +9669,10 @@ window.CFII_ORAL = [
 "All malfunctions go in a **maintenance log** - one accessible history",
 "Methods vary by school or owner",
 "Alerts pilots before flight; shows trends and what's fixed or not",
-"Critical in shared aircraft (flight schools); unreported issues pass on"
+"Critical in shared aircraft (flight schools); unreported issues pass on",
+"**Calibration** (PTS 2): write down errors found in flight (altimeter vs field elevation, VOR check error, heading indicator precession, compass deviation) so they are corrected or allowed for before the next IFR flight",
+"**Inoperative equipment**: 91.213(d): if not required by 91.205(d), the equipment list/KOEL or an AD, deactivate, placard INOPERATIVE and log it; if required for IFR, no IFR until fixed (91.7: airworthiness is the PIC's call)",
+"**Records that gate the next IFR flight**: VOR check within 30 days (date, place, bearing error, signature: 91.171); altimeter/static 24 months (91.411); transponder 24 months (91.413)"
 ]
 },
 {

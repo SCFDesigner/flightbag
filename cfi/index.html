@@ -3436,10 +3436,10 @@ function setWkTab(t) {
   box.scrollTop = (cur && fullJump == null && wkScroll[curKey + '|' + t]) || 0;
 }
 function mdB(s) { return escapeHtml(String(s || '')).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>'); }
-/* eBook figures (cfi/assets/cfii, placed by tools/cfii-scripts): tap one to open it in the lightbox */
+/* eBook figures (cfi/assets/cfii, placed by tools/cfii-scripts) and FAA chart figures (f.src, ifr/img): tap one to open it in the lightbox */
 function cfiiFigsHtml(figs) {
   if (!figs || !figs.length) return '';
-  return '<div class="ms2-figs">' + figs.map(f => '<img loading="lazy" src="assets/cfii/' + f.f + '" width="' + (f.w || 400) + '" alt="' + escapeHtml(f.cap || 'Figure').replace(/"/g, '&quot;') + '">').join('') + '</div>';
+  return '<div class="ms2-figs">' + figs.map(f => '<img loading="lazy" src="' + (f.src || 'assets/cfii/' + f.f) + '" width="' + (f.w || 400) + '" alt="' + escapeHtml(f.cap || 'Figure').replace(/"/g, '&quot;') + '">').join('') + '</div>';
 }
 function wkFigs(path) {
   const sc = cur && (window.CFII_SCRIPTS || {})[cur.lesson.id], figs = sc && sc.ofigs && sc.ofigs[path];
@@ -3765,6 +3765,12 @@ function everyAssetUrl() {
       (src.nodes || []).forEach(n => (n.img || []).forEach(p => urls.add(p)));
     });
   }));
+  /* CFII mode: its data files and every figure of the scripts (eBook + FAA chart figures) */
+  ['./cfii.js', './cfii-scripts.js', './cfii-full.js'].forEach(u => urls.add(u));
+  Object.values(window.CFII_SCRIPTS || {}).forEach(sc => {
+    const fig = f => urls.add(f.src || 'assets/cfii/' + f.f);
+    sc.cards.forEach(c => (c.figs || []).forEach(fig)); Object.values(sc.ofigs || {}).forEach(a => a.forEach(fig));
+  });
   return [...urls];
 }
 function setOfflineState(txt, cls) {

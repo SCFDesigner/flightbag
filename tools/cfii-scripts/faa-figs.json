@@ -1,0 +1,33 @@
+{
+  "_": "FAA Chart Users' Guide figures (public domain; crops already in ifr/img for the IFR Atlas) added to CFII script cards. lesson id -> card heading -> [[image name in ifr/img, caption]]. Read by build.js.",
+  "cfii-viii-a-non-precision-approach": {
+    "What is a non-precision approach?": [["t-prec-np", "Chart Users' Guide: precision vs non-precision profile, VDP"]],
+    "MDA vs DA/DH": [["t-mins", "Chart Users' Guide: landing minimums format (DA, MDA, HAT, HAA, RVR)"]],
+    "Approach charts": [["t-anatomy", "Chart Users' Guide: sections of an approach plate"], ["t-brief-top", "Chart Users' Guide: briefing strips"], ["t-brief-mid", "Chart Users' Guide: middle briefing strip (notes, lighting, missed approach text)"], ["t-segments", "Chart Users' Guide: approach segments on the planview"], ["t-profile", "Chart Users' Guide: profile view"]],
+    "Visual Descent Point (VDP)": [["t-34", "Chart Users' Guide: 34:1 surface clear symbol"]],
+    "Descent rate and glidepath checks": [["t-vda", "Chart Users' Guide: vertical descent angle, TCH, visual flight path"]],
+    "Non-precision missed approach": [["t-missed", "Chart Users' Guide: missed approach information and icons"]]
+  },
+  "cfii-viii-b-precision-approach": {
+    "What is a precision approach?": [["t-prec-np", "Chart Users' Guide: precision vs non-precision profile"]],
+    "DA and DH": [["t-mins", "Chart Users' Guide: landing minimums format (DA, HAT, RVR)"]],
+    "Flying the ILS": [["t-profile", "Chart Users' Guide: profile view, glideslope intercept"], ["t-loc-alts", "Chart Users' Guide: localizer symbol, speed and altitude restrictions"]],
+    "Precision missed approach": [["t-missed", "Chart Users' Guide: missed approach information and icons"]]
+  },
+  "cfii-viii-c-missed-approach": {
+    "Missed approach on the chart": [["t-missed", "Chart Users' Guide: missed approach information and icons"], ["t-brief-mid", "Chart Users' Guide: missed approach text box in the briefing strip"]]
+  },
+  "cfii-viii-d-circling-approach": {
+    "When to circle and chart info": [["t-mins", "Chart Users' Guide: landing minimums, circling line"]]
+  },
+  "cfii-viii-e-landing-from-an-approach": {
+    "Required visibility": [["t-mins", "Chart Users' Guide: minimums and the RVR / visibility table"]],
+    "Transitioning to visual flight": [["t-leg-als1", "TPP legend: approach lighting systems"], ["t-sketch", "Chart Users' Guide: airport sketch"]]
+  },
+  "cfii-viii-x-procedure-turns": {
+    "Hold-in-lieu and teardrop": [["t-holds-pt", "Chart Users' Guide: holding patterns and procedure turns"]]
+  },
+  "cfii-vii-b-holding": {
+    "Holding Instructions": [["t-holds-pt", "Chart Users' Guide: holding patterns on charts"]]
+  }
+}
